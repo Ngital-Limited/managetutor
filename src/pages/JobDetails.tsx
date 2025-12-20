@@ -35,9 +35,8 @@ interface Job {
   total_applications: number;
   created_at: string;
   parent_id: string;
-  districts: { name_en: string; name_bn: string };
+  districts: { name_en: string; name_bn: string } | null;
   subjects: { name_en: string; name_bn: string } | null;
-  profiles: { full_name: string; phone: string; avatar_url: string };
 }
 
 interface Application {
@@ -83,16 +82,17 @@ export default function JobDetails() {
   }, [id, user]);
 
   const fetchJob = async () => {
-    const { data: jobData } = await supabase
+    const { data: jobData, error } = await supabase
       .from('jobs')
       .select(`
         *,
         districts (name_en, name_bn),
-        subjects (name_en, name_bn),
-        profiles!jobs_parent_id_fkey (full_name, phone, avatar_url)
+        subjects (name_en, name_bn)
       `)
       .eq('id', id)
       .single();
+    
+    console.log('Job fetch result:', { jobData, error, id });
 
     if (jobData) {
       setJob(jobData as unknown as Job);
@@ -521,12 +521,11 @@ export default function JobDetails() {
                 <CardContent>
                   <div className="flex items-center gap-3">
                     <Avatar>
-                      <AvatarImage src={job.profiles?.avatar_url} />
-                      <AvatarFallback>{job.profiles?.full_name?.charAt(0) || 'P'}</AvatarFallback>
+                      <AvatarFallback>P</AvatarFallback>
                     </Avatar>
                     <div>
-                      <div className="font-medium">{job.profiles?.full_name}</div>
-                      <div className="text-sm text-muted-foreground">Parent</div>
+                      <div className="font-medium">Parent</div>
+                      <div className="text-sm text-muted-foreground">Job Poster</div>
                     </div>
                   </div>
                 </CardContent>
