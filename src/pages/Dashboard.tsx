@@ -395,15 +395,17 @@ export default function Dashboard() {
                 </Card>
               </Link>
 
-              <Card className="hover-lift cursor-pointer h-40">
-                <CardContent className="p-6 flex flex-col items-center justify-center text-center h-full">
-                  <div className="w-12 h-12 rounded-xl bg-tutor/10 flex items-center justify-center mb-3">
-                    <User className="h-6 w-6 text-tutor" />
-                  </div>
-                  <h3 className="font-bold">My Profile</h3>
-                  <p className="text-sm text-muted-foreground">Update your profile</p>
-                </CardContent>
-              </Card>
+              <Link to="/tutor/profile">
+                <Card className="hover-lift cursor-pointer h-40">
+                  <CardContent className="p-6 flex flex-col items-center justify-center text-center h-full">
+                    <div className="w-12 h-12 rounded-xl bg-tutor/10 flex items-center justify-center mb-3">
+                      <User className="h-6 w-6 text-tutor" />
+                    </div>
+                    <h3 className="font-bold">My Profile</h3>
+                    <p className="text-sm text-muted-foreground">Update your profile</p>
+                  </CardContent>
+                </Card>
+              </Link>
 
               <Card className="hover-lift cursor-pointer h-40">
                 <CardContent className="p-6 flex flex-col items-center justify-center text-center h-full">

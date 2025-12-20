@@ -184,6 +184,27 @@ export type Database = {
           },
         ]
       }
+      blocked_users: {
+        Row: {
+          blocked_id: string
+          blocker_id: string
+          created_at: string | null
+          id: string
+        }
+        Insert: {
+          blocked_id: string
+          blocker_id: string
+          created_at?: string | null
+          id?: string
+        }
+        Update: {
+          blocked_id?: string
+          blocker_id?: string
+          created_at?: string | null
+          id?: string
+        }
+        Relationships: []
+      }
       districts: {
         Row: {
           created_at: string | null
@@ -210,6 +231,60 @@ export type Database = {
           name_en?: string
         }
         Relationships: []
+      }
+      featured_listings: {
+        Row: {
+          amount_paid: number | null
+          created_at: string | null
+          end_date: string
+          id: string
+          is_active: boolean | null
+          job_id: string | null
+          listing_type: string
+          start_date: string
+          stripe_payment_id: string | null
+          tutor_id: string | null
+        }
+        Insert: {
+          amount_paid?: number | null
+          created_at?: string | null
+          end_date: string
+          id?: string
+          is_active?: boolean | null
+          job_id?: string | null
+          listing_type: string
+          start_date: string
+          stripe_payment_id?: string | null
+          tutor_id?: string | null
+        }
+        Update: {
+          amount_paid?: number | null
+          created_at?: string | null
+          end_date?: string
+          id?: string
+          is_active?: boolean | null
+          job_id?: string | null
+          listing_type?: string
+          start_date?: string
+          stripe_payment_id?: string | null
+          tutor_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "featured_listings_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "featured_listings_tutor_id_fkey"
+            columns: ["tutor_id"]
+            isOneToOne: false
+            referencedRelation: "tutor_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       jobs: {
         Row: {
@@ -346,43 +421,82 @@ export type Database = {
           },
         ]
       }
+      platform_settings: {
+        Row: {
+          description: string | null
+          id: string
+          key: string
+          updated_at: string | null
+          value: string
+        }
+        Insert: {
+          description?: string | null
+          id?: string
+          key: string
+          updated_at?: string | null
+          value: string
+        }
+        Update: {
+          description?: string | null
+          id?: string
+          key?: string
+          updated_at?: string | null
+          value?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           area_id: string | null
           avatar_url: string | null
+          banned_at: string | null
+          banned_reason: string | null
           created_at: string | null
           district_id: string | null
           email: string
+          email_verified: boolean | null
           full_name: string
           full_name_bn: string | null
           id: string
+          is_banned: boolean | null
           phone: string | null
+          phone_verified: boolean | null
           preferred_language: string | null
           updated_at: string | null
         }
         Insert: {
           area_id?: string | null
           avatar_url?: string | null
+          banned_at?: string | null
+          banned_reason?: string | null
           created_at?: string | null
           district_id?: string | null
           email: string
+          email_verified?: boolean | null
           full_name: string
           full_name_bn?: string | null
           id: string
+          is_banned?: boolean | null
           phone?: string | null
+          phone_verified?: boolean | null
           preferred_language?: string | null
           updated_at?: string | null
         }
         Update: {
           area_id?: string | null
           avatar_url?: string | null
+          banned_at?: string | null
+          banned_reason?: string | null
           created_at?: string | null
           district_id?: string | null
           email?: string
+          email_verified?: boolean | null
           full_name?: string
           full_name_bn?: string | null
           id?: string
+          is_banned?: boolean | null
           phone?: string | null
+          phone_verified?: boolean | null
           preferred_language?: string | null
           updated_at?: string | null
         }
@@ -402,6 +516,45 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      reports: {
+        Row: {
+          admin_notes: string | null
+          created_at: string | null
+          description: string | null
+          id: string
+          report_type: string
+          reported_user_id: string
+          reporter_id: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          report_type: string
+          reported_user_id: string
+          reporter_id: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          report_type?: string
+          reported_user_id?: string
+          reporter_id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string | null
+        }
+        Relationships: []
       }
       reviews: {
         Row: {
@@ -475,6 +628,51 @@ export type Database = {
           id?: string
           name_bn?: string
           name_en?: string
+        }
+        Relationships: []
+      }
+      subscription_plans: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          featured_profile: boolean | null
+          id: string
+          is_active: boolean | null
+          max_applications_per_month: number | null
+          name: string
+          name_bn: string | null
+          price_monthly: number
+          price_quarterly: number | null
+          price_yearly: number | null
+          priority_support: boolean | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          featured_profile?: boolean | null
+          id?: string
+          is_active?: boolean | null
+          max_applications_per_month?: number | null
+          name: string
+          name_bn?: string | null
+          price_monthly: number
+          price_quarterly?: number | null
+          price_yearly?: number | null
+          priority_support?: boolean | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          featured_profile?: boolean | null
+          id?: string
+          is_active?: boolean | null
+          max_applications_per_month?: number | null
+          name?: string
+          name_bn?: string | null
+          price_monthly?: number
+          price_quarterly?: number | null
+          price_yearly?: number | null
+          priority_support?: boolean | null
         }
         Relationships: []
       }
@@ -606,6 +804,56 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      user_subscriptions: {
+        Row: {
+          applications_used: number | null
+          created_at: string | null
+          current_period_end: string | null
+          current_period_start: string | null
+          id: string
+          plan_id: string
+          status: string | null
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          applications_used?: number | null
+          created_at?: string | null
+          current_period_end?: string | null
+          current_period_start?: string | null
+          id?: string
+          plan_id: string
+          status?: string | null
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          applications_used?: number | null
+          created_at?: string | null
+          current_period_end?: string | null
+          current_period_start?: string | null
+          id?: string
+          plan_id?: string
+          status?: string | null
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_subscriptions_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "subscription_plans"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       verification_documents: {
         Row: {
