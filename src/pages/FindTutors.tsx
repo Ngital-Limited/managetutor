@@ -133,7 +133,7 @@ export default function FindTutors() {
     }
 
     if (selectedMode && selectedMode !== 'any') {
-      query = query.eq('teaching_mode', selectedMode);
+      query = query.eq('teaching_mode', selectedMode as 'online' | 'in_person' | 'hybrid');
     }
 
     if (priceRange[0] > 0) {
