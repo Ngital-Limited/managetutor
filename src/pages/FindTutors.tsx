@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -8,10 +8,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { Slider } from '@/components/ui/slider';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 import { 
   GraduationCap, Search, MapPin, Star, Filter, Globe, 
-  User, Clock, BookOpen, CheckCircle2, X, ChevronDown
+  User, Clock, BookOpen, CheckCircle2, X, ChevronDown, Heart, Award, ArrowRight
 } from 'lucide-react';
 
 interface District {
@@ -39,6 +41,7 @@ interface TutorProfile {
   teaching_mode: string;
   gender: string;
   is_available: boolean;
+  is_featured: boolean;
   verification_status: string;
   average_rating: number;
   total_reviews: number;
@@ -52,20 +55,28 @@ interface TutorProfile {
 }
 
 export default function FindTutors() {
+  const [searchParams] = useSearchParams();
   const { t, language, setLanguage } = useLanguage();
+  const { user, role } = useAuth();
+  const { toast } = useToast();
+  
   const [districts, setDistricts] = useState<District[]>([]);
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [tutors, setTutors] = useState<TutorProfile[]>([]);
+  const [featuredTutors, setFeaturedTutors] = useState<TutorProfile[]>([]);
+  const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [showFilters, setShowFilters] = useState(false);
 
-  // Filters
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedDistrict, setSelectedDistrict] = useState<string>('');
-  const [selectedSubject, setSelectedSubject] = useState<string>('');
-  const [selectedGender, setSelectedGender] = useState<string>('');
+  // Filters from URL or state
+  const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '');
+  const [selectedDistrict, setSelectedDistrict] = useState<string>(searchParams.get('district') || '');
+  const [selectedSubject, setSelectedSubject] = useState<string>(searchParams.get('subject') || '');
+  const [selectedGender, setSelectedGender] = useState<string>(searchParams.get('gender') || '');
+  const [selectedMode, setSelectedMode] = useState<string>(searchParams.get('mode') || '');
   const [priceRange, setPriceRange] = useState<number[]>([0, 10000]);
-  const [minRating, setMinRating] = useState<string>('');
+  const [minRating, setMinRating] = useState<string>(searchParams.get('rating') || '');
+  const [sortBy, setSortBy] = useState<string>('rating');
 
   useEffect(() => {
     fetchData();
@@ -73,7 +84,13 @@ export default function FindTutors() {
 
   useEffect(() => {
     fetchTutors();
-  }, [selectedDistrict, selectedSubject, selectedGender, priceRange, minRating]);
+  }, [selectedDistrict, selectedSubject, selectedGender, selectedMode, priceRange, minRating, sortBy]);
+
+  useEffect(() => {
+    if (user && role === 'parent') {
+      fetchFavorites();
+    }
+  }, [user, role]);
 
   const fetchData = async () => {
     const [districtsRes, subjectsRes] = await Promise.all([
@@ -85,6 +102,18 @@ export default function FindTutors() {
     if (subjectsRes.data) setSubjects(subjectsRes.data);
     
     await fetchTutors();
+  };
+
+  const fetchFavorites = async () => {
+    if (!user) return;
+    const { data } = await supabase
+      .from('favorites')
+      .select('tutor_id')
+      .eq('parent_id', user.id);
+    
+    if (data) {
+      setFavorites(new Set(data.map(f => f.tutor_id)));
+    }
   };
 
   const fetchTutors = async () => {
@@ -103,6 +132,10 @@ export default function FindTutors() {
       query = query.eq('gender', selectedGender as 'male' | 'female');
     }
 
+    if (selectedMode && selectedMode !== 'any') {
+      query = query.eq('teaching_mode', selectedMode);
+    }
+
     if (priceRange[0] > 0) {
       query = query.gte('hourly_rate_min', priceRange[0]);
     }
@@ -114,7 +147,18 @@ export default function FindTutors() {
       query = query.gte('average_rating', parseFloat(minRating));
     }
 
-    const { data, error } = await query.limit(20);
+    // Sorting
+    if (sortBy === 'rating') {
+      query = query.order('average_rating', { ascending: false });
+    } else if (sortBy === 'experience') {
+      query = query.order('experience_years', { ascending: false });
+    } else if (sortBy === 'price_low') {
+      query = query.order('hourly_rate_min', { ascending: true });
+    } else if (sortBy === 'price_high') {
+      query = query.order('hourly_rate_max', { ascending: false });
+    }
+
+    const { data } = await query.limit(50);
     
     if (data) {
       let filtered = data as unknown as TutorProfile[];
@@ -137,26 +181,157 @@ export default function FindTutors() {
         filtered = filtered.filter(t => 
           t.profiles?.full_name?.toLowerCase().includes(q) ||
           t.bio?.toLowerCase().includes(q) ||
-          t.education?.toLowerCase().includes(q)
+          t.education?.toLowerCase().includes(q) ||
+          t.tutor_subjects?.some(ts => ts.subjects?.name_en?.toLowerCase().includes(q))
         );
       }
       
-      setTutors(filtered);
+      // Separate featured tutors
+      const featured = filtered.filter(t => t.is_featured);
+      const regular = filtered.filter(t => !t.is_featured);
+      
+      setFeaturedTutors(featured);
+      setTutors(regular);
     }
     
     setLoading(false);
+  };
+
+  const toggleFavorite = async (tutorId: string, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (!user) {
+      toast({ title: 'Login Required', description: 'Please login to save tutors', variant: 'destructive' });
+      return;
+    }
+
+    const isFav = favorites.has(tutorId);
+    
+    if (isFav) {
+      await supabase.from('favorites').delete().eq('parent_id', user.id).eq('tutor_id', tutorId);
+      setFavorites(prev => {
+        const next = new Set(prev);
+        next.delete(tutorId);
+        return next;
+      });
+      toast({ title: 'Removed', description: 'Tutor removed from favorites' });
+    } else {
+      await supabase.from('favorites').insert({ parent_id: user.id, tutor_id: tutorId });
+      setFavorites(prev => new Set(prev).add(tutorId));
+      toast({ title: 'Saved!', description: 'Tutor added to favorites' });
+    }
   };
 
   const clearFilters = () => {
     setSelectedDistrict('');
     setSelectedSubject('');
     setSelectedGender('');
+    setSelectedMode('');
     setPriceRange([0, 10000]);
     setMinRating('');
     setSearchQuery('');
   };
 
-  const hasActiveFilters = selectedDistrict || selectedSubject || selectedGender || minRating || priceRange[0] > 0 || priceRange[1] < 10000;
+  const hasActiveFilters = selectedDistrict || selectedSubject || selectedGender || selectedMode || minRating || priceRange[0] > 0 || priceRange[1] < 10000;
+
+  const TutorCard = ({ tutor, featured = false }: { tutor: TutorProfile; featured?: boolean }) => (
+    <Link to={`/tutor/${tutor.id}`}>
+      <Card className={`hover-lift overflow-hidden group h-full ${featured ? 'border-2 border-accent shadow-lg shadow-accent/10' : ''}`}>
+        <CardContent className="p-6">
+          {featured && (
+            <Badge className="bg-accent text-accent-foreground mb-3">
+              <Award className="h-3 w-3 mr-1" />
+              Featured
+            </Badge>
+          )}
+          
+          <div className="flex gap-4 mb-4">
+            <div className="w-16 h-16 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0 overflow-hidden ring-2 ring-primary/20">
+              {tutor.profiles?.avatar_url ? (
+                <img src={tutor.profiles.avatar_url} alt="" className="w-full h-full object-cover" />
+              ) : (
+                <User className="h-8 w-8 text-primary" />
+              )}
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-start justify-between">
+                <div>
+                  <h3 className="font-bold text-foreground truncate group-hover:text-primary transition-colors">
+                    {tutor.profiles?.full_name || 'Tutor'}
+                  </h3>
+                  {tutor.profiles?.districts && (
+                    <p className="text-sm text-muted-foreground flex items-center gap-1">
+                      <MapPin className="h-3 w-3" />
+                      {language === 'en' ? tutor.profiles.districts.name_en : tutor.profiles.districts.name_bn}
+                    </p>
+                  )}
+                </div>
+                <div className="flex items-center gap-1">
+                  {tutor.verification_status === 'approved' && (
+                    <Badge className="bg-success/10 text-success border-0">
+                      <CheckCircle2 className="h-3 w-3" />
+                    </Badge>
+                  )}
+                  {role === 'parent' && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8"
+                      onClick={(e) => toggleFavorite(tutor.id, e)}
+                    >
+                      <Heart className={`h-4 w-4 ${favorites.has(tutor.id) ? 'fill-destructive text-destructive' : ''}`} />
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <p className="text-sm text-muted-foreground line-clamp-2 mb-4">
+            {tutor.bio || tutor.education || 'Experienced tutor ready to help you learn.'}
+          </p>
+
+          {tutor.tutor_subjects && tutor.tutor_subjects.length > 0 && (
+            <div className="flex flex-wrap gap-1.5 mb-4">
+              {tutor.tutor_subjects.slice(0, 3).map((ts, i) => (
+                <Badge key={i} variant="secondary" className="text-xs">
+                  {language === 'en' ? ts.subjects?.name_en : ts.subjects?.name_bn}
+                </Badge>
+              ))}
+              {tutor.tutor_subjects.length > 3 && (
+                <Badge variant="outline" className="text-xs">+{tutor.tutor_subjects.length - 3}</Badge>
+              )}
+            </div>
+          )}
+
+          <div className="flex items-center justify-between pt-4 border-t border-border">
+            <div className="flex items-center gap-4 text-sm">
+              <span className="flex items-center gap-1 text-accent">
+                <Star className="h-4 w-4 fill-current" />
+                {tutor.average_rating?.toFixed(1) || '0.0'}
+                <span className="text-muted-foreground text-xs">({tutor.total_reviews})</span>
+              </span>
+              <span className="flex items-center gap-1 text-muted-foreground">
+                <Clock className="h-4 w-4" />
+                {tutor.experience_years || 0}y
+              </span>
+            </div>
+            <div className="text-right">
+              <span className="font-bold text-primary">
+                ৳{tutor.hourly_rate_min || 500}-{tutor.hourly_rate_max || 1500}
+              </span>
+              <span className="text-xs text-muted-foreground">/hr</span>
+            </div>
+          </div>
+
+          <div className="mt-4 flex items-center justify-center text-sm text-primary font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+            View Profile <ArrowRight className="h-4 w-4 ml-1" />
+          </div>
+        </CardContent>
+      </Card>
+    </Link>
+  );
 
   return (
     <div className="min-h-screen bg-background">
@@ -180,9 +355,15 @@ export default function FindTutors() {
               <Globe className="h-4 w-4 mr-1" />
               {language === 'en' ? 'বাংলা' : 'EN'}
             </Button>
-            <Link to="/auth">
-              <Button>{t('nav.login')}</Button>
-            </Link>
+            {user ? (
+              <Link to="/dashboard">
+                <Button>{t('nav.dashboard')}</Button>
+              </Link>
+            ) : (
+              <Link to="/auth">
+                <Button>{t('nav.login')}</Button>
+              </Link>
+            )}
           </div>
         </div>
       </nav>
@@ -244,6 +425,7 @@ export default function FindTutors() {
             >
               <Filter className="h-4 w-4 mr-2" />
               Filters
+              {hasActiveFilters && <Badge className="ml-2 h-5 w-5 p-0 flex items-center justify-center">!</Badge>}
               <ChevronDown className={`h-4 w-4 ml-2 transition-transform ${showFilters ? 'rotate-180' : ''}`} />
             </Button>
             <Button className="h-12 rounded-xl px-8" onClick={fetchTutors}>
@@ -254,9 +436,9 @@ export default function FindTutors() {
 
           {/* Extended Filters */}
           {showFilters && (
-            <div className="mt-4 pt-4 border-t border-border grid md:grid-cols-4 gap-4">
+            <div className="mt-4 pt-4 border-t border-border grid sm:grid-cols-2 md:grid-cols-5 gap-4">
               <div>
-                <Label className="text-sm font-medium mb-2 block">Gender Preference</Label>
+                <Label className="text-sm font-medium mb-2 block">Gender</Label>
                 <Select value={selectedGender} onValueChange={setSelectedGender}>
                   <SelectTrigger className="rounded-xl">
                     <SelectValue placeholder="Any" />
@@ -269,21 +451,50 @@ export default function FindTutors() {
                 </Select>
               </div>
               <div>
-                <Label className="text-sm font-medium mb-2 block">Minimum Rating</Label>
+                <Label className="text-sm font-medium mb-2 block">Teaching Mode</Label>
+                <Select value={selectedMode} onValueChange={setSelectedMode}>
+                  <SelectTrigger className="rounded-xl">
+                    <SelectValue placeholder="Any" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="any">Any</SelectItem>
+                    <SelectItem value="in_person">In-Person</SelectItem>
+                    <SelectItem value="online">Online</SelectItem>
+                    <SelectItem value="hybrid">Hybrid</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label className="text-sm font-medium mb-2 block">Min Rating</Label>
                 <Select value={minRating} onValueChange={setMinRating}>
                   <SelectTrigger className="rounded-xl">
                     <SelectValue placeholder="Any" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="">Any Rating</SelectItem>
+                    <SelectItem value="3">3+ Stars</SelectItem>
                     <SelectItem value="4">4+ Stars</SelectItem>
                     <SelectItem value="4.5">4.5+ Stars</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
-              <div className="md:col-span-2">
+              <div>
+                <Label className="text-sm font-medium mb-2 block">Sort By</Label>
+                <Select value={sortBy} onValueChange={setSortBy}>
+                  <SelectTrigger className="rounded-xl">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="rating">Highest Rated</SelectItem>
+                    <SelectItem value="experience">Most Experienced</SelectItem>
+                    <SelectItem value="price_low">Price: Low to High</SelectItem>
+                    <SelectItem value="price_high">Price: High to Low</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
                 <Label className="text-sm font-medium mb-2 block">
-                  Price Range: ৳{priceRange[0]} - ৳{priceRange[1]}/hr
+                  Price: ৳{priceRange[0]} - ৳{priceRange[1]}/hr
                 </Label>
                 <Slider
                   value={priceRange}
@@ -308,9 +519,24 @@ export default function FindTutors() {
           )}
         </div>
 
+        {/* Featured Tutors */}
+        {featuredTutors.length > 0 && (
+          <div className="mb-8">
+            <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+              <Award className="h-5 w-5 text-accent" />
+              Featured Tutors
+            </h2>
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {featuredTutors.map(tutor => (
+                <TutorCard key={tutor.id} tutor={tutor} featured />
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Results */}
-        <div className="mb-6">
-          <p className="text-muted-foreground">{tutors.length} tutors found</p>
+        <div className="mb-6 flex items-center justify-between">
+          <p className="text-muted-foreground">{tutors.length + featuredTutors.length} tutors found</p>
         </div>
 
         {loading ? (
@@ -331,82 +557,11 @@ export default function FindTutors() {
           </div>
         ) : tutors.length > 0 ? (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {tutors.map((tutor) => (
-              <Card key={tutor.id} className="hover-lift overflow-hidden group">
-                <CardContent className="p-6">
-                  <div className="flex gap-4 mb-4">
-                    <div className="w-16 h-16 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0 overflow-hidden">
-                      {tutor.profiles?.avatar_url ? (
-                        <img src={tutor.profiles.avatar_url} alt="" className="w-full h-full object-cover" />
-                      ) : (
-                        <User className="h-8 w-8 text-primary" />
-                      )}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <h3 className="font-bold text-foreground truncate">{tutor.profiles?.full_name || 'Tutor'}</h3>
-                          {tutor.profiles?.districts && (
-                            <p className="text-sm text-muted-foreground flex items-center gap-1">
-                              <MapPin className="h-3 w-3" />
-                              {language === 'en' ? tutor.profiles.districts.name_en : tutor.profiles.districts.name_bn}
-                            </p>
-                          )}
-                        </div>
-                        {tutor.verification_status === 'approved' && (
-                          <Badge className="bg-success/10 text-success border-0">
-                            <CheckCircle2 className="h-3 w-3 mr-1" />
-                            Verified
-                          </Badge>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-
-                  <p className="text-sm text-muted-foreground line-clamp-2 mb-4">
-                    {tutor.bio || tutor.education || 'Experienced tutor ready to help you learn.'}
-                  </p>
-
-                  {tutor.tutor_subjects && tutor.tutor_subjects.length > 0 && (
-                    <div className="flex flex-wrap gap-1.5 mb-4">
-                      {tutor.tutor_subjects.slice(0, 3).map((ts, i) => (
-                        <Badge key={i} variant="secondary" className="text-xs">
-                          {language === 'en' ? ts.subjects?.name_en : ts.subjects?.name_bn}
-                        </Badge>
-                      ))}
-                      {tutor.tutor_subjects.length > 3 && (
-                        <Badge variant="outline" className="text-xs">+{tutor.tutor_subjects.length - 3}</Badge>
-                      )}
-                    </div>
-                  )}
-
-                  <div className="flex items-center justify-between pt-4 border-t border-border">
-                    <div className="flex items-center gap-4 text-sm">
-                      <span className="flex items-center gap-1 text-warning">
-                        <Star className="h-4 w-4 fill-current" />
-                        {tutor.average_rating?.toFixed(1) || '0.0'}
-                      </span>
-                      <span className="flex items-center gap-1 text-muted-foreground">
-                        <Clock className="h-4 w-4" />
-                        {tutor.experience_years || 0}y exp
-                      </span>
-                    </div>
-                    <div className="text-right">
-                      <span className="font-bold text-primary">
-                        ৳{tutor.hourly_rate_min || 500}-{tutor.hourly_rate_max || 1500}
-                      </span>
-                      <span className="text-xs text-muted-foreground">/hr</span>
-                    </div>
-                  </div>
-
-                  <Button className="w-full mt-4 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity">
-                    View Profile
-                  </Button>
-                </CardContent>
-              </Card>
+            {tutors.map(tutor => (
+              <TutorCard key={tutor.id} tutor={tutor} />
             ))}
           </div>
-        ) : (
+        ) : featuredTutors.length === 0 ? (
           <div className="text-center py-16">
             <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
               <Search className="h-10 w-10 text-muted-foreground" />
@@ -415,7 +570,7 @@ export default function FindTutors() {
             <p className="text-muted-foreground mb-6">Try adjusting your filters or search criteria</p>
             <Button variant="outline" onClick={clearFilters}>Clear Filters</Button>
           </div>
-        )}
+        ) : null}
       </div>
     </div>
   );
