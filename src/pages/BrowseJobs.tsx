@@ -55,8 +55,8 @@ export default function BrowseJobs() {
 
   // Filters
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedDistrict, setSelectedDistrict] = useState<string>('');
-  const [selectedSubject, setSelectedSubject] = useState<string>('');
+  const [selectedDistrict, setSelectedDistrict] = useState<string>('all');
+  const [selectedSubject, setSelectedSubject] = useState<string>('all');
 
   useEffect(() => {
     fetchData();
@@ -92,11 +92,11 @@ export default function BrowseJobs() {
       .eq('status', 'open')
       .order('created_at', { ascending: false });
 
-    if (selectedDistrict) {
+    if (selectedDistrict && selectedDistrict !== 'all') {
       query = query.eq('district_id', selectedDistrict);
     }
 
-    if (selectedSubject) {
+    if (selectedSubject && selectedSubject !== 'all') {
       query = query.eq('subject_id', selectedSubject);
     }
 
@@ -199,7 +199,7 @@ export default function BrowseJobs() {
                 <SelectValue placeholder="Location" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Locations</SelectItem>
+                <SelectItem value="all">All Locations</SelectItem>
                 {districts.map(d => (
                   <SelectItem key={d.id} value={d.id}>
                     {language === 'en' ? d.name_en : d.name_bn}
@@ -213,7 +213,7 @@ export default function BrowseJobs() {
                 <SelectValue placeholder="Subject" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Subjects</SelectItem>
+                <SelectItem value="all">All Subjects</SelectItem>
                 {subjects.map(s => (
                   <SelectItem key={s.id} value={s.id}>
                     {language === 'en' ? s.name_en : s.name_bn}
