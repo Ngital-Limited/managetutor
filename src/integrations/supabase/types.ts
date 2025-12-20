@@ -232,6 +232,35 @@ export type Database = {
         }
         Relationships: []
       }
+      favorites: {
+        Row: {
+          created_at: string
+          id: string
+          parent_id: string
+          tutor_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          parent_id: string
+          tutor_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          parent_id?: string
+          tutor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "favorites_tutor_id_fkey"
+            columns: ["tutor_id"]
+            isOneToOne: false
+            referencedRelation: "tutor_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       featured_listings: {
         Row: {
           amount_paid: number | null
@@ -690,6 +719,7 @@ export type Database = {
           hourly_rate_min: number | null
           id: string
           is_available: boolean | null
+          is_featured: boolean | null
           teaching_mode: Database["public"]["Enums"]["teaching_mode"] | null
           total_reviews: number | null
           total_students: number | null
@@ -713,6 +743,7 @@ export type Database = {
           hourly_rate_min?: number | null
           id?: string
           is_available?: boolean | null
+          is_featured?: boolean | null
           teaching_mode?: Database["public"]["Enums"]["teaching_mode"] | null
           total_reviews?: number | null
           total_students?: number | null
@@ -736,6 +767,7 @@ export type Database = {
           hourly_rate_min?: number | null
           id?: string
           is_available?: boolean | null
+          is_featured?: boolean | null
           teaching_mode?: Database["public"]["Enums"]["teaching_mode"] | null
           total_reviews?: number | null
           total_students?: number | null
