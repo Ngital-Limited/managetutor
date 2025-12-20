@@ -5,12 +5,16 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 import { 
-  GraduationCap, Search, MapPin, Globe, Briefcase, Clock, 
-  BookOpen, Users, Calendar, DollarSign, ArrowRight
+  GraduationCap, Search, MapPin, Globe, Briefcase, 
+  BookOpen, Users, Calendar, ArrowRight, ChevronLeft, ChevronRight, Send, Loader2
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 
@@ -40,23 +44,35 @@ interface Job {
   status: string;
   total_applications: number;
   created_at: string;
-  districts: { name_en: string; name_bn: string };
+  districts: { name_en: string; name_bn: string } | null;
   subjects: { name_en: string; name_bn: string } | null;
-  profiles: { full_name: string };
 }
+
+const JOBS_PER_PAGE = 10;
 
 export default function BrowseJobs() {
   const { t, language, setLanguage } = useLanguage();
   const { user, role } = useAuth();
+  const { toast } = useToast();
   const [districts, setDistricts] = useState<District[]>([]);
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
+  const [totalCount, setTotalCount] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
 
   // Filters
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedDistrict, setSelectedDistrict] = useState<string>('all');
   const [selectedSubject, setSelectedSubject] = useState<string>('all');
+
+  // Application modal
+  const [selectedJob, setSelectedJob] = useState<Job | null>(null);
+  const [showApplyModal, setShowApplyModal] = useState(false);
+  const [coverMessage, setCoverMessage] = useState('');
+  const [proposedRate, setProposedRate] = useState('');
+  const [applying, setApplying] = useState(false);
+  const [tutorProfileId, setTutorProfileId] = useState<string | null>(null);
 
   useEffect(() => {
     fetchData();
@@ -64,7 +80,23 @@ export default function BrowseJobs() {
 
   useEffect(() => {
     fetchJobs();
-  }, [selectedDistrict, selectedSubject]);
+  }, [selectedDistrict, selectedSubject, currentPage]);
+
+  useEffect(() => {
+    if (user && role === 'tutor') {
+      fetchTutorProfile();
+    }
+  }, [user, role]);
+
+  const fetchTutorProfile = async () => {
+    if (!user) return;
+    const { data } = await supabase
+      .from('tutor_profiles')
+      .select('id')
+      .eq('user_id', user.id)
+      .single();
+    if (data) setTutorProfileId(data.id);
+  };
 
   const fetchData = async () => {
     const [districtsRes, subjectsRes] = await Promise.all([
@@ -81,16 +113,36 @@ export default function BrowseJobs() {
   const fetchJobs = async () => {
     setLoading(true);
     
+    // Build count query
+    let countQuery = supabase
+      .from('jobs')
+      .select('*', { count: 'exact', head: true })
+      .eq('status', 'open');
+
+    if (selectedDistrict && selectedDistrict !== 'all') {
+      countQuery = countQuery.eq('district_id', selectedDistrict);
+    }
+    if (selectedSubject && selectedSubject !== 'all') {
+      countQuery = countQuery.eq('subject_id', selectedSubject);
+    }
+
+    const { count } = await countQuery;
+    setTotalCount(count || 0);
+
+    // Build data query
+    const from = (currentPage - 1) * JOBS_PER_PAGE;
+    const to = from + JOBS_PER_PAGE - 1;
+
     let query = supabase
       .from('jobs')
       .select(`
         *,
         districts (name_en, name_bn),
-        subjects (name_en, name_bn),
-        profiles!jobs_parent_id_fkey (full_name)
+        subjects (name_en, name_bn)
       `)
       .eq('status', 'open')
-      .order('created_at', { ascending: false });
+      .order('created_at', { ascending: false })
+      .range(from, to);
 
     if (selectedDistrict && selectedDistrict !== 'all') {
       query = query.eq('district_id', selectedDistrict);
@@ -100,7 +152,7 @@ export default function BrowseJobs() {
       query = query.eq('subject_id', selectedSubject);
     }
 
-    const { data, error } = await query.limit(20);
+    const { data, error } = await query;
     
     if (data) {
       let filtered = data as unknown as Job[];
@@ -119,6 +171,69 @@ export default function BrowseJobs() {
     setLoading(false);
   };
 
+  const handleApply = (job: Job) => {
+    if (!user) {
+      toast({
+        title: "Login Required",
+        description: "Please login as a tutor to apply for jobs",
+        variant: "destructive"
+      });
+      return;
+    }
+    setSelectedJob(job);
+    setCoverMessage('');
+    setProposedRate(job.budget_min?.toString() || '');
+    setShowApplyModal(true);
+  };
+
+  const submitApplication = async () => {
+    if (!selectedJob || !tutorProfileId) {
+      toast({
+        title: "Error",
+        description: "Unable to submit application. Please complete your tutor profile first.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setApplying(true);
+    
+    const { error } = await supabase.from('applications').insert({
+      job_id: selectedJob.id,
+      tutor_id: tutorProfileId,
+      cover_message: coverMessage,
+      proposed_rate: parseInt(proposedRate) || null,
+      status: 'pending'
+    });
+
+    setApplying(false);
+
+    if (error) {
+      if (error.code === '23505') {
+        toast({
+          title: "Already Applied",
+          description: "You have already applied for this job",
+          variant: "destructive"
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to submit application. Please try again.",
+          variant: "destructive"
+        });
+      }
+      return;
+    }
+
+    toast({
+      title: "Application Submitted!",
+      description: "Your application has been sent to the parent. Good luck!",
+    });
+    
+    setShowApplyModal(false);
+    fetchJobs(); // Refresh to update application count
+  };
+
   const getTeachingModeLabel = (mode: string) => {
     switch (mode) {
       case 'online': return 'Online';
@@ -134,6 +249,13 @@ export default function BrowseJobs() {
       case 'female': return 'Female Tutor';
       default: return 'Any Gender';
     }
+  };
+
+  const totalPages = Math.ceil(totalCount / JOBS_PER_PAGE);
+
+  const handleSearch = () => {
+    setCurrentPage(1);
+    fetchJobs();
   };
 
   return (
@@ -189,11 +311,11 @@ export default function BrowseJobs() {
                 placeholder="Search jobs by title or description..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && fetchJobs()}
+                onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                 className="pl-10 h-12 rounded-xl"
               />
             </div>
-            <Select value={selectedDistrict} onValueChange={setSelectedDistrict}>
+            <Select value={selectedDistrict} onValueChange={(v) => { setSelectedDistrict(v); setCurrentPage(1); }}>
               <SelectTrigger className="w-full md:w-48 h-12 rounded-xl">
                 <MapPin className="h-4 w-4 mr-2 text-muted-foreground" />
                 <SelectValue placeholder="Location" />
@@ -207,7 +329,7 @@ export default function BrowseJobs() {
                 ))}
               </SelectContent>
             </Select>
-            <Select value={selectedSubject} onValueChange={setSelectedSubject}>
+            <Select value={selectedSubject} onValueChange={(v) => { setSelectedSubject(v); setCurrentPage(1); }}>
               <SelectTrigger className="w-full md:w-48 h-12 rounded-xl">
                 <BookOpen className="h-4 w-4 mr-2 text-muted-foreground" />
                 <SelectValue placeholder="Subject" />
@@ -221,7 +343,7 @@ export default function BrowseJobs() {
                 ))}
               </SelectContent>
             </Select>
-            <Button className="h-12 rounded-xl px-8" onClick={fetchJobs}>
+            <Button className="h-12 rounded-xl px-8" onClick={handleSearch}>
               <Search className="h-4 w-4 mr-2" />
               Search
             </Button>
@@ -230,7 +352,10 @@ export default function BrowseJobs() {
 
         {/* Results */}
         <div className="mb-6 flex items-center justify-between">
-          <p className="text-muted-foreground">{jobs.length} jobs available</p>
+          <p className="text-muted-foreground">
+            {totalCount} jobs available
+            {totalPages > 1 && ` • Page ${currentPage} of ${totalPages}`}
+          </p>
           {role === 'parent' && (
             <Link to="/dashboard">
               <Button>
@@ -257,88 +382,143 @@ export default function BrowseJobs() {
             ))}
           </div>
         ) : jobs.length > 0 ? (
-          <div className="space-y-4">
-            {jobs.map((job) => (
-              <Card key={job.id} className="hover-lift group">
-                <CardContent className="p-6">
-                  <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
-                    <div className="flex-1">
-                      <div className="flex items-start gap-3 mb-3">
-                        <div className="w-12 h-12 rounded-xl bg-tutor/10 flex items-center justify-center flex-shrink-0">
-                          <Briefcase className="h-6 w-6 text-tutor" />
+          <>
+            <div className="space-y-4">
+              {jobs.map((job) => (
+                <Card key={job.id} className="hover-lift group">
+                  <CardContent className="p-6">
+                    <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
+                      <div className="flex-1">
+                        <div className="flex items-start gap-3 mb-3">
+                          <div className="w-12 h-12 rounded-xl bg-tutor/10 flex items-center justify-center flex-shrink-0">
+                            <Briefcase className="h-6 w-6 text-tutor" />
+                          </div>
+                          <div>
+                            <h3 className="font-bold text-lg text-foreground group-hover:text-primary transition-colors">
+                              {job.title}
+                            </h3>
+                            <p className="text-sm text-muted-foreground flex items-center gap-2">
+                              <MapPin className="h-3 w-3" />
+                              {job.districts ? (language === 'en' ? job.districts.name_en : job.districts.name_bn) : 'Location N/A'}
+                              <span className="text-border">•</span>
+                              Posted {formatDistanceToNow(new Date(job.created_at), { addSuffix: true })}
+                            </p>
+                          </div>
                         </div>
-                        <div>
-                          <h3 className="font-bold text-lg text-foreground group-hover:text-primary transition-colors">
-                            {job.title}
-                          </h3>
-                          <p className="text-sm text-muted-foreground flex items-center gap-2">
-                            <MapPin className="h-3 w-3" />
-                            {language === 'en' ? job.districts?.name_en : job.districts?.name_bn}
-                            <span className="text-border">•</span>
-                            Posted {formatDistanceToNow(new Date(job.created_at), { addSuffix: true })}
-                          </p>
-                        </div>
-                      </div>
 
-                      <p className="text-muted-foreground text-sm line-clamp-2 mb-4 ml-15">
-                        {job.description}
-                      </p>
+                        <p className="text-muted-foreground text-sm line-clamp-2 mb-4 ml-15">
+                          {job.description}
+                        </p>
 
-                      <div className="flex flex-wrap gap-2 ml-15">
-                        {job.subjects && (
-                          <Badge variant="secondary">
-                            <BookOpen className="h-3 w-3 mr-1" />
-                            {language === 'en' ? job.subjects.name_en : job.subjects.name_bn}
-                          </Badge>
-                        )}
-                        {job.class_level && (
-                          <Badge variant="outline">{job.class_level}</Badge>
-                        )}
-                        <Badge variant="outline">
-                          {getTeachingModeLabel(job.teaching_mode)}
-                        </Badge>
-                        <Badge variant="outline">
-                          <Users className="h-3 w-3 mr-1" />
-                          {getGenderLabel(job.preferred_tutor_gender)}
-                        </Badge>
-                        {job.days_per_week && (
+                        <div className="flex flex-wrap gap-2 ml-15">
+                          {job.subjects && (
+                            <Badge variant="secondary">
+                              <BookOpen className="h-3 w-3 mr-1" />
+                              {language === 'en' ? job.subjects.name_en : job.subjects.name_bn}
+                            </Badge>
+                          )}
+                          {job.class_level && (
+                            <Badge variant="outline">{job.class_level}</Badge>
+                          )}
                           <Badge variant="outline">
-                            <Calendar className="h-3 w-3 mr-1" />
-                            {job.days_per_week} days/week
+                            {getTeachingModeLabel(job.teaching_mode)}
                           </Badge>
+                          <Badge variant="outline">
+                            <Users className="h-3 w-3 mr-1" />
+                            {getGenderLabel(job.preferred_tutor_gender)}
+                          </Badge>
+                          {job.days_per_week && (
+                            <Badge variant="outline">
+                              <Calendar className="h-3 w-3 mr-1" />
+                              {job.days_per_week} days/week
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="flex flex-col items-end gap-3">
+                        <div className="text-right">
+                          <div className="text-2xl font-bold text-primary">
+                            ৳{job.budget_min || 0}-{job.budget_max || 0}
+                          </div>
+                          <p className="text-xs text-muted-foreground">per month</p>
+                        </div>
+                        
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <Users className="h-4 w-4" />
+                          {job.total_applications} applications
+                        </div>
+
+                        {role === 'tutor' ? (
+                          <Button className="rounded-xl" onClick={() => handleApply(job)}>
+                            Apply Now
+                            <ArrowRight className="h-4 w-4 ml-2" />
+                          </Button>
+                        ) : (
+                          <Link to={`/jobs/${job.id}`}>
+                            <Button variant="outline" className="rounded-xl">
+                              View Details
+                            </Button>
+                          </Link>
                         )}
                       </div>
                     </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
 
-                    <div className="flex flex-col items-end gap-3">
-                      <div className="text-right">
-                        <div className="text-2xl font-bold text-primary">
-                          ৳{job.budget_min || 0}-{job.budget_max || 0}
-                        </div>
-                        <p className="text-xs text-muted-foreground">per month</p>
-                      </div>
-                      
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Users className="h-4 w-4" />
-                        {job.total_applications} applications
-                      </div>
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="flex items-center justify-center gap-2 mt-8">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                  Previous
+                </Button>
+                
+                <div className="flex items-center gap-1">
+                  {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                    let pageNum;
+                    if (totalPages <= 5) {
+                      pageNum = i + 1;
+                    } else if (currentPage <= 3) {
+                      pageNum = i + 1;
+                    } else if (currentPage >= totalPages - 2) {
+                      pageNum = totalPages - 4 + i;
+                    } else {
+                      pageNum = currentPage - 2 + i;
+                    }
+                    return (
+                      <Button
+                        key={pageNum}
+                        variant={currentPage === pageNum ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => setCurrentPage(pageNum)}
+                        className="w-10"
+                      >
+                        {pageNum}
+                      </Button>
+                    );
+                  })}
+                </div>
 
-                      {role === 'tutor' ? (
-                        <Button className="rounded-xl">
-                          Apply Now
-                          <ArrowRight className="h-4 w-4 ml-2" />
-                        </Button>
-                      ) : (
-                        <Button variant="outline" className="rounded-xl">
-                          View Details
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                  disabled={currentPage === totalPages}
+                >
+                  Next
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
+            )}
+          </>
         ) : (
           <div className="text-center py-16">
             <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
@@ -354,6 +534,66 @@ export default function BrowseJobs() {
           </div>
         )}
       </div>
+
+      {/* Application Modal */}
+      <Dialog open={showApplyModal} onOpenChange={setShowApplyModal}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Apply for Tuition Job</DialogTitle>
+            <DialogDescription>
+              {selectedJob?.title}
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="coverMessage">Cover Message</Label>
+              <Textarea
+                id="coverMessage"
+                placeholder="Introduce yourself and explain why you're a great fit for this job..."
+                value={coverMessage}
+                onChange={(e) => setCoverMessage(e.target.value)}
+                rows={4}
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="proposedRate">Proposed Monthly Rate (৳)</Label>
+              <Input
+                id="proposedRate"
+                type="number"
+                placeholder="Enter your proposed rate"
+                value={proposedRate}
+                onChange={(e) => setProposedRate(e.target.value)}
+              />
+              {selectedJob && (
+                <p className="text-xs text-muted-foreground">
+                  Parent's budget: ৳{selectedJob.budget_min} - ৳{selectedJob.budget_max}
+                </p>
+              )}
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowApplyModal(false)}>
+              Cancel
+            </Button>
+            <Button onClick={submitApplication} disabled={applying}>
+              {applying ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Submitting...
+                </>
+              ) : (
+                <>
+                  <Send className="h-4 w-4 mr-2" />
+                  Submit Application
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
