@@ -1,0 +1,540 @@
+import { useState, useEffect } from 'react';
+import { useParams, useNavigate, Link } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+import { formatDistanceToNow } from 'date-fns';
+import {
+  GraduationCap, ArrowLeft, Globe, MapPin, BookOpen, Calendar, Users,
+  DollarSign, Clock, CheckCircle2, XCircle, Send, Star, MessageSquare,
+  Briefcase, UserCheck, Phone, Mail
+} from 'lucide-react';
+
+interface Job {
+  id: string;
+  title: string;
+  description: string;
+  class_level: string;
+  days_per_week: number;
+  budget_min: number;
+  budget_max: number;
+  teaching_mode: string;
+  preferred_tutor_gender: string;
+  student_gender: string;
+  status: string;
+  total_applications: number;
+  created_at: string;
+  parent_id: string;
+  districts: { name_en: string; name_bn: string };
+  subjects: { name_en: string; name_bn: string } | null;
+  profiles: { full_name: string; phone: string; avatar_url: string };
+}
+
+interface Application {
+  id: string;
+  cover_message: string;
+  proposed_rate: number;
+  status: string;
+  created_at: string;
+  tutor_profiles: {
+    id: string;
+    user_id: string;
+    bio: string;
+    education: string;
+    experience_years: number;
+    average_rating: number;
+    total_reviews: number;
+    verification_status: string;
+    profiles: { full_name: string; avatar_url: string; phone: string };
+  };
+}
+
+export default function JobDetails() {
+  const { id } = useParams();
+  const { user, role } = useAuth();
+  const { t, language, setLanguage } = useLanguage();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  const [job, setJob] = useState<Job | null>(null);
+  const [applications, setApplications] = useState<Application[]>([]);
+  const [myApplication, setMyApplication] = useState<Application | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [applying, setApplying] = useState(false);
+  const [showApply, setShowApply] = useState(false);
+
+  const [applicationForm, setApplicationForm] = useState({
+    cover_message: '',
+    proposed_rate: 0,
+  });
+
+  useEffect(() => {
+    if (id) fetchJob();
+  }, [id, user]);
+
+  const fetchJob = async () => {
+    const { data: jobData } = await supabase
+      .from('jobs')
+      .select(`
+        *,
+        districts (name_en, name_bn),
+        subjects (name_en, name_bn),
+        profiles!jobs_parent_id_fkey (full_name, phone, avatar_url)
+      `)
+      .eq('id', id)
+      .single();
+
+    if (jobData) {
+      setJob(jobData as unknown as Job);
+      setApplicationForm(prev => ({
+        ...prev,
+        proposed_rate: jobData.budget_min || 0
+      }));
+
+      // Fetch applications if parent owns this job
+      if (user?.id === jobData.parent_id) {
+        const { data: apps } = await supabase
+          .from('applications')
+          .select(`
+            *,
+            tutor_profiles (
+              id, user_id, bio, education, experience_years, average_rating, total_reviews, verification_status,
+              profiles:user_id (full_name, avatar_url, phone)
+            )
+          `)
+          .eq('job_id', id)
+          .order('created_at', { ascending: false });
+
+        if (apps) setApplications(apps as unknown as Application[]);
+      }
+
+      // Check if tutor already applied
+      if (role === 'tutor' && user) {
+        const { data: tutorProfile } = await supabase
+          .from('tutor_profiles')
+          .select('id')
+          .eq('user_id', user.id)
+          .single();
+
+        if (tutorProfile) {
+          const { data: app } = await supabase
+            .from('applications')
+            .select('*')
+            .eq('job_id', id)
+            .eq('tutor_id', tutorProfile.id)
+            .single();
+
+          if (app) setMyApplication(app as unknown as Application);
+        }
+      }
+    }
+
+    setLoading(false);
+  };
+
+  const handleApply = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user || !job) return;
+
+    setApplying(true);
+
+    const { data: tutorProfile } = await supabase
+      .from('tutor_profiles')
+      .select('id')
+      .eq('user_id', user.id)
+      .single();
+
+    if (!tutorProfile) {
+      toast({ title: 'Complete Profile', description: 'Please complete your tutor profile first.', variant: 'destructive' });
+      navigate('/tutor/profile');
+      return;
+    }
+
+    const { error } = await supabase.from('applications').insert({
+      job_id: job.id,
+      tutor_id: tutorProfile.id,
+      cover_message: applicationForm.cover_message,
+      proposed_rate: applicationForm.proposed_rate,
+    });
+
+    if (error) {
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+    } else {
+      toast({ title: 'Application Sent!', description: 'The parent will review your application.' });
+      setShowApply(false);
+      fetchJob();
+    }
+
+    setApplying(false);
+  };
+
+  const handleApplicationAction = async (appId: string, status: 'accepted' | 'rejected') => {
+    const { error } = await supabase
+      .from('applications')
+      .update({ status })
+      .eq('id', appId);
+
+    if (error) {
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+    } else {
+      toast({ title: 'Updated', description: `Application ${status}.` });
+      
+      // If accepted, update job status
+      if (status === 'accepted' && job) {
+        await supabase.from('jobs').update({ status: 'in_progress' }).eq('id', job.id);
+      }
+      
+      fetchJob();
+    }
+  };
+
+  const startChat = (tutorUserId: string) => {
+    navigate(`/messages?with=${tutorUserId}&job=${id}`);
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  if (!job) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold mb-2">Job Not Found</h2>
+          <Link to="/jobs"><Button>Browse Jobs</Button></Link>
+        </div>
+      </div>
+    );
+  }
+
+  const isOwner = user?.id === job.parent_id;
+
+  return (
+    <div className="min-h-screen bg-background">
+      {/* Navigation */}
+      <nav className="sticky top-0 z-50 bg-card/80 backdrop-blur-xl border-b border-border">
+        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+          <Link to="/" className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
+              <GraduationCap className="h-6 w-6 text-primary-foreground" />
+            </div>
+            <span className="font-bold text-xl">Manage Tutor</span>
+          </Link>
+          <div className="flex items-center gap-3">
+            <Button variant="ghost" size="sm" onClick={() => setLanguage(language === 'en' ? 'bn' : 'en')}>
+              <Globe className="h-4 w-4 mr-1" />
+              {language === 'en' ? 'বাংলা' : 'EN'}
+            </Button>
+            <Button variant="outline" onClick={() => navigate(-1)}>
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back
+            </Button>
+          </div>
+        </div>
+      </nav>
+
+      <main className="container mx-auto px-4 py-8 max-w-5xl">
+        <div className="grid lg:grid-cols-3 gap-8">
+          {/* Main Content */}
+          <div className="lg:col-span-2 space-y-6">
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-start gap-4 mb-6">
+                  <div className="w-16 h-16 rounded-xl bg-tutor/10 flex items-center justify-center flex-shrink-0">
+                    <Briefcase className="h-8 w-8 text-tutor" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-2">
+                      <h1 className="text-2xl font-bold">{job.title}</h1>
+                      <Badge variant={job.status === 'open' ? 'default' : 'secondary'}>
+                        {job.status}
+                      </Badge>
+                    </div>
+                    <p className="text-muted-foreground flex items-center gap-2">
+                      <MapPin className="h-4 w-4" />
+                      {language === 'en' ? job.districts?.name_en : job.districts?.name_bn}
+                      <span className="text-border">•</span>
+                      Posted {formatDistanceToNow(new Date(job.created_at), { addSuffix: true })}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="prose prose-sm max-w-none mb-6">
+                  <h3 className="text-lg font-semibold mb-2">Description</h3>
+                  <p className="text-muted-foreground whitespace-pre-wrap">{job.description}</p>
+                </div>
+
+                <div className="grid sm:grid-cols-2 gap-4">
+                  {job.subjects && (
+                    <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
+                      <BookOpen className="h-5 w-5 text-primary" />
+                      <div>
+                        <div className="text-xs text-muted-foreground">Subject</div>
+                        <div className="font-medium">{language === 'en' ? job.subjects.name_en : job.subjects.name_bn}</div>
+                      </div>
+                    </div>
+                  )}
+                  {job.class_level && (
+                    <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
+                      <GraduationCap className="h-5 w-5 text-primary" />
+                      <div>
+                        <div className="text-xs text-muted-foreground">Class Level</div>
+                        <div className="font-medium">{job.class_level}</div>
+                      </div>
+                    </div>
+                  )}
+                  <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
+                    <Calendar className="h-5 w-5 text-primary" />
+                    <div>
+                      <div className="text-xs text-muted-foreground">Schedule</div>
+                      <div className="font-medium">{job.days_per_week} days/week</div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
+                    <Users className="h-5 w-5 text-primary" />
+                    <div>
+                      <div className="text-xs text-muted-foreground">Preferred Tutor</div>
+                      <div className="font-medium capitalize">{job.preferred_tutor_gender || 'Any'} Gender</div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Applications - for parent */}
+            {isOwner && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Users className="h-5 w-5" />
+                    Applications ({applications.length})
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {applications.length > 0 ? (
+                    <Tabs defaultValue="pending">
+                      <TabsList className="mb-4">
+                        <TabsTrigger value="pending">Pending</TabsTrigger>
+                        <TabsTrigger value="accepted">Accepted</TabsTrigger>
+                        <TabsTrigger value="rejected">Rejected</TabsTrigger>
+                      </TabsList>
+                      {['pending', 'accepted', 'rejected'].map(status => (
+                        <TabsContent key={status} value={status} className="space-y-4">
+                          {applications.filter(a => a.status === status).map(app => (
+                            <div key={app.id} className="p-4 border rounded-xl">
+                              <div className="flex items-start gap-4">
+                                <Avatar className="h-12 w-12">
+                                  <AvatarImage src={app.tutor_profiles?.profiles?.avatar_url} />
+                                  <AvatarFallback>
+                                    {app.tutor_profiles?.profiles?.full_name?.charAt(0) || 'T'}
+                                  </AvatarFallback>
+                                </Avatar>
+                                <div className="flex-1">
+                                  <div className="flex items-center gap-2 mb-1">
+                                    <h4 className="font-bold">{app.tutor_profiles?.profiles?.full_name}</h4>
+                                    {app.tutor_profiles?.verification_status === 'approved' && (
+                                      <Badge className="bg-success"><CheckCircle2 className="h-3 w-3 mr-1" />Verified</Badge>
+                                    )}
+                                  </div>
+                                  <p className="text-sm text-muted-foreground mb-2">
+                                    {app.tutor_profiles?.experience_years} yrs experience • 
+                                    <Star className="h-3 w-3 inline ml-1 text-accent" /> {app.tutor_profiles?.average_rating || 0}
+                                  </p>
+                                  <p className="text-sm mb-2">{app.cover_message}</p>
+                                  <div className="flex items-center gap-2 text-sm">
+                                    <Badge variant="outline">Proposed: ৳{app.proposed_rate}/month</Badge>
+                                    <span className="text-muted-foreground">
+                                      Applied {formatDistanceToNow(new Date(app.created_at), { addSuffix: true })}
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+
+                              {app.status === 'pending' && (
+                                <div className="flex items-center gap-2 mt-4 pt-4 border-t">
+                                  <Button size="sm" onClick={() => handleApplicationAction(app.id, 'accepted')}>
+                                    <CheckCircle2 className="h-4 w-4 mr-1" />
+                                    Accept
+                                  </Button>
+                                  <Button size="sm" variant="outline" onClick={() => handleApplicationAction(app.id, 'rejected')}>
+                                    <XCircle className="h-4 w-4 mr-1" />
+                                    Reject
+                                  </Button>
+                                  <Button size="sm" variant="ghost" onClick={() => startChat(app.tutor_profiles?.user_id)}>
+                                    <MessageSquare className="h-4 w-4 mr-1" />
+                                    Chat
+                                  </Button>
+                                </div>
+                              )}
+
+                              {app.status === 'accepted' && (
+                                <div className="mt-4 pt-4 border-t">
+                                  <div className="flex items-center gap-4 text-sm">
+                                    <span className="flex items-center gap-1">
+                                      <Phone className="h-4 w-4" />
+                                      {app.tutor_profiles?.profiles?.phone || 'Not provided'}
+                                    </span>
+                                    <Button size="sm" variant="outline" onClick={() => startChat(app.tutor_profiles?.user_id)}>
+                                      <MessageSquare className="h-4 w-4 mr-1" />
+                                      Message
+                                    </Button>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                          {applications.filter(a => a.status === status).length === 0 && (
+                            <p className="text-center text-muted-foreground py-8">No {status} applications</p>
+                          )}
+                        </TabsContent>
+                      ))}
+                    </Tabs>
+                  ) : (
+                    <div className="text-center py-8">
+                      <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                      <h3 className="font-bold mb-2">No applications yet</h3>
+                      <p className="text-muted-foreground">Tutors will start applying soon!</p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+          </div>
+
+          {/* Sidebar */}
+          <div className="space-y-6">
+            {/* Budget Card */}
+            <Card>
+              <CardContent className="p-6 text-center">
+                <div className="text-3xl font-bold text-primary mb-1">
+                  ৳{job.budget_min || 0} - {job.budget_max || 0}
+                </div>
+                <p className="text-muted-foreground text-sm mb-4">per month</p>
+
+                {role === 'tutor' && job.status === 'open' && !myApplication && (
+                  <Dialog open={showApply} onOpenChange={setShowApply}>
+                    <DialogTrigger asChild>
+                      <Button className="w-full" size="lg">
+                        <Send className="h-4 w-4 mr-2" />
+                        Apply Now
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Apply for this job</DialogTitle>
+                      </DialogHeader>
+                      <form onSubmit={handleApply} className="space-y-4 mt-4">
+                        <div>
+                          <Label>Cover Message</Label>
+                          <Textarea
+                            placeholder="Introduce yourself and explain why you're a good fit..."
+                            value={applicationForm.cover_message}
+                            onChange={(e) => setApplicationForm({ ...applicationForm, cover_message: e.target.value })}
+                            rows={4}
+                            required
+                          />
+                        </div>
+                        <div>
+                          <Label>Your Proposed Rate (৳/month)</Label>
+                          <Input
+                            type="number"
+                            value={applicationForm.proposed_rate}
+                            onChange={(e) => setApplicationForm({ ...applicationForm, proposed_rate: Number(e.target.value) })}
+                            required
+                          />
+                        </div>
+                        <Button type="submit" className="w-full" disabled={applying}>
+                          {applying ? 'Sending...' : 'Submit Application'}
+                        </Button>
+                      </form>
+                    </DialogContent>
+                  </Dialog>
+                )}
+
+                {myApplication && (
+                  <div className="p-4 rounded-lg bg-muted">
+                    <Badge className={
+                      myApplication.status === 'accepted' ? 'bg-success' :
+                      myApplication.status === 'rejected' ? 'bg-destructive' : ''
+                    }>
+                      {myApplication.status === 'pending' && <Clock className="h-3 w-3 mr-1" />}
+                      {myApplication.status === 'accepted' && <CheckCircle2 className="h-3 w-3 mr-1" />}
+                      {myApplication.status === 'rejected' && <XCircle className="h-3 w-3 mr-1" />}
+                      {myApplication.status.charAt(0).toUpperCase() + myApplication.status.slice(1)}
+                    </Badge>
+                    <p className="text-sm text-muted-foreground mt-2">
+                      You applied for ৳{myApplication.proposed_rate}/month
+                    </p>
+                  </div>
+                )}
+
+                {!user && (
+                  <Link to="/auth">
+                    <Button className="w-full" size="lg">
+                      Login to Apply
+                    </Button>
+                  </Link>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Stats */}
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <span className="text-muted-foreground">Total Applications</span>
+                  <span className="font-bold text-lg">{job.total_applications}</span>
+                </div>
+                <div className="flex items-center justify-between mb-4">
+                  <span className="text-muted-foreground">Teaching Mode</span>
+                  <Badge variant="outline" className="capitalize">{job.teaching_mode?.replace('_', ' ')}</Badge>
+                </div>
+                {job.student_gender && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">Student Gender</span>
+                    <Badge variant="outline" className="capitalize">{job.student_gender}</Badge>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Posted By - only show to tutors */}
+            {role === 'tutor' && (
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm">Posted By</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center gap-3">
+                    <Avatar>
+                      <AvatarImage src={job.profiles?.avatar_url} />
+                      <AvatarFallback>{job.profiles?.full_name?.charAt(0) || 'P'}</AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <div className="font-medium">{job.profiles?.full_name}</div>
+                      <div className="text-sm text-muted-foreground">Parent</div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+}
