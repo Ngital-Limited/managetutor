@@ -14,7 +14,7 @@ import { formatDistanceToNow } from 'date-fns';
 import {
   GraduationCap, LogOut, Globe, Briefcase, MessageSquare, Star, User,
   CheckCircle2, Clock, XCircle, DollarSign, TrendingUp, Calendar, MapPin,
-  BookOpen, Settings, Eye, ArrowRight, AlertCircle
+  BookOpen, Settings, Eye, ArrowRight, AlertCircle, Phone, Mail
 } from 'lucide-react';
 
 interface Application {
@@ -29,8 +29,10 @@ interface Application {
     status: string;
     budget_min: number;
     budget_max: number;
+    parent_id: string;
     districts: { name_en: string };
     subjects: { name_en: string } | null;
+    profiles: { full_name: string; phone: string; email: string } | null;
   };
 }
 
@@ -102,9 +104,10 @@ export default function TutorDashboard() {
         .select(`
           *,
           jobs (
-            id, title, status, budget_min, budget_max,
+            id, title, status, budget_min, budget_max, parent_id,
             districts (name_en),
-            subjects (name_en)
+            subjects (name_en),
+            profiles:parent_id (full_name, phone, email)
           )
         `)
         .eq('tutor_id', tutorData.id)
@@ -385,6 +388,34 @@ export default function TutorDashboard() {
                                   Applied {formatDistanceToNow(new Date(app.created_at), { addSuffix: true })}
                                 </span>
                               </div>
+                              
+                              {/* Show parent contact when accepted */}
+                              {app.status === 'accepted' && app.jobs?.profiles && (
+                                <div className="mt-3 p-3 bg-success/10 rounded-lg border border-success/20">
+                                  <p className="text-sm font-medium text-success mb-2">
+                                    <CheckCircle2 className="h-4 w-4 inline mr-1" />
+                                    Contact Parent
+                                  </p>
+                                  <div className="flex flex-wrap gap-4 text-sm">
+                                    <span className="flex items-center gap-1">
+                                      <User className="h-3 w-3" />
+                                      {app.jobs.profiles.full_name || 'Parent'}
+                                    </span>
+                                    {app.jobs.profiles.phone && (
+                                      <a href={`tel:${app.jobs.profiles.phone}`} className="flex items-center gap-1 text-primary hover:underline">
+                                        <Phone className="h-3 w-3" />
+                                        {app.jobs.profiles.phone}
+                                      </a>
+                                    )}
+                                    {app.jobs.profiles.email && (
+                                      <a href={`mailto:${app.jobs.profiles.email}`} className="flex items-center gap-1 text-primary hover:underline">
+                                        <Mail className="h-3 w-3" />
+                                        {app.jobs.profiles.email}
+                                      </a>
+                                    )}
+                                  </div>
+                                </div>
+                              )}
                             </div>
                             <div className="flex items-center gap-2">
                               <Badge className={

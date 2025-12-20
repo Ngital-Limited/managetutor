@@ -805,6 +805,8 @@ export type Database = {
           bio: string | null
           bio_bn: string | null
           created_at: string | null
+          display_name: string | null
+          district_id: string | null
           education: string | null
           education_bn: string | null
           experience_years: number | null
@@ -829,6 +831,8 @@ export type Database = {
           bio?: string | null
           bio_bn?: string | null
           created_at?: string | null
+          display_name?: string | null
+          district_id?: string | null
           education?: string | null
           education_bn?: string | null
           experience_years?: number | null
@@ -853,6 +857,8 @@ export type Database = {
           bio?: string | null
           bio_bn?: string | null
           created_at?: string | null
+          display_name?: string | null
+          district_id?: string | null
           education?: string | null
           education_bn?: string | null
           experience_years?: number | null
@@ -872,7 +878,15 @@ export type Database = {
             | null
           verified_at?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "tutor_profiles_district_id_fkey"
+            columns: ["district_id"]
+            isOneToOne: false
+            referencedRelation: "districts"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       tutor_subjects: {
         Row: {

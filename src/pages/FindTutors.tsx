@@ -45,12 +45,15 @@ interface TutorProfile {
   verification_status: string;
   average_rating: number;
   total_reviews: number;
+  display_name: string | null;
+  district_id: string | null;
+  districts: { name_en: string; name_bn: string } | null;
   profiles: {
     full_name: string;
     avatar_url: string;
     district_id: string;
     districts?: { name_en: string; name_bn: string };
-  };
+  } | null;
   tutor_subjects: { subjects: Subject }[];
 }
 
@@ -123,7 +126,8 @@ export default function FindTutors() {
       .from('tutor_profiles')
       .select(`
         *,
-        profiles!inner (full_name, avatar_url, district_id, districts (name_en, name_bn)),
+        districts (name_en, name_bn),
+        profiles (full_name, avatar_url, district_id, districts (name_en, name_bn)),
         tutor_subjects (subjects (*))
       `)
       .eq('is_available', true);
@@ -165,7 +169,7 @@ export default function FindTutors() {
       
       // Filter by district (client-side due to nested relation)
       if (selectedDistrict && selectedDistrict !== 'all') {
-        filtered = filtered.filter(t => t.profiles?.district_id === selectedDistrict);
+        filtered = filtered.filter(t => t.district_id === selectedDistrict || t.profiles?.district_id === selectedDistrict);
       }
       
       // Filter by subject
@@ -258,12 +262,14 @@ export default function FindTutors() {
               <div className="flex items-start justify-between">
                 <div>
                   <h3 className="font-bold text-foreground truncate group-hover:text-primary transition-colors">
-                    {tutor.profiles?.full_name || 'Tutor'}
+                    {tutor.display_name || tutor.profiles?.full_name || 'Tutor'}
                   </h3>
-                  {tutor.profiles?.districts && (
+                  {(tutor.districts || tutor.profiles?.districts) && (
                     <p className="text-sm text-muted-foreground flex items-center gap-1">
                       <MapPin className="h-3 w-3" />
-                      {language === 'en' ? tutor.profiles.districts.name_en : tutor.profiles.districts.name_bn}
+                      {language === 'en' 
+                        ? (tutor.districts?.name_en || tutor.profiles?.districts?.name_en)
+                        : (tutor.districts?.name_bn || tutor.profiles?.districts?.name_bn)}
                     </p>
                   )}
                 </div>
