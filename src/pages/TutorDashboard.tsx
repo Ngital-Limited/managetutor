@@ -438,6 +438,14 @@ export default function TutorDashboard() {
                                   Withdraw
                                 </Button>
                               )}
+                              {app.status === 'accepted' && app.jobs?.parent_id && (
+                                <Link to={`/messages?with=${app.jobs.parent_id}&job=${app.jobs.id}`}>
+                                  <Button size="sm" variant="outline">
+                                    <MessageSquare className="h-4 w-4 mr-1" />
+                                    Message
+                                  </Button>
+                                </Link>
+                              )}
                               <Link to={`/jobs/${app.jobs?.id}`}>
                                 <Button size="sm" variant="ghost">
                                   <Eye className="h-4 w-4" />

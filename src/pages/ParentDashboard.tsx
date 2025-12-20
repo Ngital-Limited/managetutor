@@ -638,6 +638,23 @@ export default function ParentDashboard() {
                           </Link>
                         </div>
                       )}
+
+                      {app.status === 'accepted' && (
+                        <div className="flex items-center gap-2 mt-4 pt-4 border-t">
+                          <Link to={`/messages?with=${app.tutor_profiles?.user_id}&job=${selectedJob.id}`}>
+                            <Button size="sm">
+                              <MessageSquare className="h-4 w-4 mr-1" />
+                              Message Tutor
+                            </Button>
+                          </Link>
+                          <Link to={`/tutor/${app.tutor_profiles?.id}`}>
+                            <Button size="sm" variant="outline">
+                              <Eye className="h-4 w-4 mr-1" />
+                              View Profile
+                            </Button>
+                          </Link>
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>

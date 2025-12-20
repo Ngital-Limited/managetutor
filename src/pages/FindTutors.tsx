@@ -13,7 +13,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { 
   GraduationCap, Search, MapPin, Star, Filter, Globe, 
-  User, Clock, BookOpen, CheckCircle2, X, ChevronDown, Heart, Award, ArrowRight
+  User, Clock, BookOpen, CheckCircle2, X, ChevronDown, Heart, Award, ArrowRight, ChevronLeft, ChevronRight
 } from 'lucide-react';
 
 interface District {
@@ -69,7 +69,11 @@ export default function FindTutors() {
   const [featuredTutors, setFeaturedTutors] = useState<TutorProfile[]>([]);
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
+  const [totalCount, setTotalCount] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
   const [showFilters, setShowFilters] = useState(false);
+
+  const TUTORS_PER_PAGE = 12;
 
   // Filters from URL or state
   const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '');
@@ -87,7 +91,7 @@ export default function FindTutors() {
 
   useEffect(() => {
     fetchTutors();
-  }, [selectedDistrict, selectedSubject, selectedGender, selectedMode, priceRange, minRating, sortBy]);
+  }, [selectedDistrict, selectedSubject, selectedGender, selectedMode, priceRange, minRating, sortBy, currentPage]);
 
   useEffect(() => {
     if (user && role === 'parent') {
@@ -121,6 +125,35 @@ export default function FindTutors() {
 
   const fetchTutors = async () => {
     setLoading(true);
+    
+    // Count query
+    let countQuery = supabase
+      .from('tutor_profiles')
+      .select('*', { count: 'exact', head: true })
+      .eq('is_available', true);
+
+    if (selectedGender && selectedGender !== 'any') {
+      countQuery = countQuery.eq('gender', selectedGender as 'male' | 'female');
+    }
+    if (selectedMode && selectedMode !== 'any') {
+      countQuery = countQuery.eq('teaching_mode', selectedMode as 'online' | 'in_person' | 'hybrid');
+    }
+    if (priceRange[0] > 0) {
+      countQuery = countQuery.gte('hourly_rate_min', priceRange[0]);
+    }
+    if (priceRange[1] < 10000) {
+      countQuery = countQuery.lte('hourly_rate_max', priceRange[1]);
+    }
+    if (minRating && minRating !== 'all') {
+      countQuery = countQuery.gte('average_rating', parseFloat(minRating));
+    }
+
+    const { count } = await countQuery;
+    setTotalCount(count || 0);
+
+    // Data query with pagination
+    const from = (currentPage - 1) * TUTORS_PER_PAGE;
+    const to = from + TUTORS_PER_PAGE - 1;
     
     let query = supabase
       .from('tutor_profiles')
@@ -162,7 +195,7 @@ export default function FindTutors() {
       query = query.order('hourly_rate_max', { ascending: false });
     }
 
-    const { data } = await query.limit(50);
+    const { data } = await query.range(from, to);
     
     if (data) {
       let filtered = data as unknown as TutorProfile[];
@@ -235,7 +268,10 @@ export default function FindTutors() {
     setPriceRange([0, 10000]);
     setMinRating('all');
     setSearchQuery('');
+    setCurrentPage(1);
   };
+
+  const totalPages = Math.ceil(totalCount / TUTORS_PER_PAGE);
 
   const hasActiveFilters = (selectedDistrict && selectedDistrict !== 'all') || (selectedSubject && selectedSubject !== 'all') || (selectedGender && selectedGender !== 'any') || (selectedMode && selectedMode !== 'any') || (minRating && minRating !== 'all') || priceRange[0] > 0 || priceRange[1] < 10000;
 
@@ -542,7 +578,10 @@ export default function FindTutors() {
 
         {/* Results */}
         <div className="mb-6 flex items-center justify-between">
-          <p className="text-muted-foreground">{tutors.length + featuredTutors.length} tutors found</p>
+          <p className="text-muted-foreground">
+            {totalCount} tutors found
+            {totalPages > 1 && ` • Page ${currentPage} of ${totalPages}`}
+          </p>
         </div>
 
         {loading ? (
@@ -562,11 +601,64 @@ export default function FindTutors() {
             ))}
           </div>
         ) : tutors.length > 0 ? (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {tutors.map(tutor => (
-              <TutorCard key={tutor.id} tutor={tutor} />
-            ))}
-          </div>
+          <>
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {tutors.map(tutor => (
+                <TutorCard key={tutor.id} tutor={tutor} />
+              ))}
+            </div>
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="flex items-center justify-center gap-2 mt-8">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                  Previous
+                </Button>
+                
+                <div className="flex items-center gap-1">
+                  {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                    let pageNum;
+                    if (totalPages <= 5) {
+                      pageNum = i + 1;
+                    } else if (currentPage <= 3) {
+                      pageNum = i + 1;
+                    } else if (currentPage >= totalPages - 2) {
+                      pageNum = totalPages - 4 + i;
+                    } else {
+                      pageNum = currentPage - 2 + i;
+                    }
+                    return (
+                      <Button
+                        key={pageNum}
+                        variant={currentPage === pageNum ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => setCurrentPage(pageNum)}
+                        className="w-10"
+                      >
+                        {pageNum}
+                      </Button>
+                    );
+                  })}
+                </div>
+
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                  disabled={currentPage === totalPages}
+                >
+                  Next
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
+            )}
+          </>
         ) : featuredTutors.length === 0 ? (
           <div className="text-center py-16">
             <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
