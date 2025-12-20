@@ -14,7 +14,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { 
   GraduationCap, Search, MapPin, Globe, Briefcase, 
-  BookOpen, Users, Calendar, ArrowRight, ChevronLeft, ChevronRight, Send, Loader2
+  BookOpen, Users, Calendar, ArrowRight, ChevronLeft, ChevronRight, Send, Loader2, Monitor
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 
@@ -65,6 +65,7 @@ export default function BrowseJobs() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedDistrict, setSelectedDistrict] = useState<string>('all');
   const [selectedSubject, setSelectedSubject] = useState<string>('all');
+  const [selectedMode, setSelectedMode] = useState<string>('all');
 
   // Application modal
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
@@ -80,7 +81,7 @@ export default function BrowseJobs() {
 
   useEffect(() => {
     fetchJobs();
-  }, [selectedDistrict, selectedSubject, currentPage]);
+  }, [selectedDistrict, selectedSubject, selectedMode, currentPage]);
 
   useEffect(() => {
     if (user && role === 'tutor') {
@@ -125,6 +126,9 @@ export default function BrowseJobs() {
     if (selectedSubject && selectedSubject !== 'all') {
       countQuery = countQuery.eq('subject_id', selectedSubject);
     }
+    if (selectedMode && selectedMode !== 'all') {
+      countQuery = countQuery.eq('teaching_mode', selectedMode as 'online' | 'in_person' | 'hybrid');
+    }
 
     const { count } = await countQuery;
     setTotalCount(count || 0);
@@ -150,6 +154,10 @@ export default function BrowseJobs() {
 
     if (selectedSubject && selectedSubject !== 'all') {
       query = query.eq('subject_id', selectedSubject);
+    }
+
+    if (selectedMode && selectedMode !== 'all') {
+      query = query.eq('teaching_mode', selectedMode as 'online' | 'in_person' | 'hybrid');
     }
 
     const { data, error } = await query;
@@ -341,6 +349,18 @@ export default function BrowseJobs() {
                     {language === 'en' ? s.name_en : s.name_bn}
                   </SelectItem>
                 ))}
+              </SelectContent>
+            </Select>
+            <Select value={selectedMode} onValueChange={(v) => { setSelectedMode(v); setCurrentPage(1); }}>
+              <SelectTrigger className="w-full md:w-40 h-12 rounded-xl">
+                <Monitor className="h-4 w-4 mr-2 text-muted-foreground" />
+                <SelectValue placeholder="Mode" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Modes</SelectItem>
+                <SelectItem value="online">Online</SelectItem>
+                <SelectItem value="in_person">In-Person</SelectItem>
+                <SelectItem value="hybrid">Hybrid</SelectItem>
               </SelectContent>
             </Select>
             <Button className="h-12 rounded-xl px-8" onClick={handleSearch}>
