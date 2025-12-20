@@ -10,6 +10,8 @@ import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import FindTutors from "./pages/FindTutors";
 import BrowseJobs from "./pages/BrowseJobs";
+import AdminDashboard from "./pages/AdminDashboard";
+import TutorProfile from "./pages/TutorProfile";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -28,6 +30,8 @@ const App = () => (
               <Route path="/jobs" element={<BrowseJobs />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/admin" element={<AdminDashboard />} />
+              <Route path="/tutor/profile" element={<TutorProfile />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
