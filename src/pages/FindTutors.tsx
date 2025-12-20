@@ -143,7 +143,7 @@ export default function FindTutors() {
       query = query.lte('hourly_rate_max', priceRange[1]);
     }
 
-    if (minRating) {
+    if (minRating && minRating !== 'all') {
       query = query.gte('average_rating', parseFloat(minRating));
     }
 
@@ -164,12 +164,12 @@ export default function FindTutors() {
       let filtered = data as unknown as TutorProfile[];
       
       // Filter by district (client-side due to nested relation)
-      if (selectedDistrict) {
+      if (selectedDistrict && selectedDistrict !== 'all') {
         filtered = filtered.filter(t => t.profiles?.district_id === selectedDistrict);
       }
       
       // Filter by subject
-      if (selectedSubject) {
+      if (selectedSubject && selectedSubject !== 'all') {
         filtered = filtered.filter(t => 
           t.tutor_subjects?.some(ts => ts.subjects?.id === selectedSubject)
         );
@@ -224,16 +224,16 @@ export default function FindTutors() {
   };
 
   const clearFilters = () => {
-    setSelectedDistrict('');
-    setSelectedSubject('');
-    setSelectedGender('');
-    setSelectedMode('');
+    setSelectedDistrict('all');
+    setSelectedSubject('all');
+    setSelectedGender('any');
+    setSelectedMode('any');
     setPriceRange([0, 10000]);
-    setMinRating('');
+    setMinRating('all');
     setSearchQuery('');
   };
 
-  const hasActiveFilters = selectedDistrict || selectedSubject || selectedGender || selectedMode || minRating || priceRange[0] > 0 || priceRange[1] < 10000;
+  const hasActiveFilters = (selectedDistrict && selectedDistrict !== 'all') || (selectedSubject && selectedSubject !== 'all') || (selectedGender && selectedGender !== 'any') || (selectedMode && selectedMode !== 'any') || (minRating && minRating !== 'all') || priceRange[0] > 0 || priceRange[1] < 10000;
 
   const TutorCard = ({ tutor, featured = false }: { tutor: TutorProfile; featured?: boolean }) => (
     <Link to={`/tutor/${tutor.id}`}>
@@ -396,7 +396,7 @@ export default function FindTutors() {
                 <SelectValue placeholder="Location" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Locations</SelectItem>
+                <SelectItem value="all">All Locations</SelectItem>
                 {districts.map(d => (
                   <SelectItem key={d.id} value={d.id}>
                     {language === 'en' ? d.name_en : d.name_bn}
@@ -410,7 +410,7 @@ export default function FindTutors() {
                 <SelectValue placeholder="Subject" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Subjects</SelectItem>
+                <SelectItem value="all">All Subjects</SelectItem>
                 {subjects.map(s => (
                   <SelectItem key={s.id} value={s.id}>
                     {language === 'en' ? s.name_en : s.name_bn}
@@ -471,7 +471,7 @@ export default function FindTutors() {
                     <SelectValue placeholder="Any" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Any Rating</SelectItem>
+                    <SelectItem value="all">Any Rating</SelectItem>
                     <SelectItem value="3">3+ Stars</SelectItem>
                     <SelectItem value="4">4+ Stars</SelectItem>
                     <SelectItem value="4.5">4.5+ Stars</SelectItem>
