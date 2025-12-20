@@ -205,6 +205,47 @@ export type Database = {
         }
         Relationships: []
       }
+      demo_profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string | null
+          district_id: string | null
+          email: string | null
+          full_name: string
+          full_name_bn: string | null
+          id: string
+          phone: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string | null
+          district_id?: string | null
+          email?: string | null
+          full_name: string
+          full_name_bn?: string | null
+          id?: string
+          phone?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string | null
+          district_id?: string | null
+          email?: string | null
+          full_name?: string
+          full_name_bn?: string | null
+          id?: string
+          phone?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "demo_profiles_district_id_fkey"
+            columns: ["district_id"]
+            isOneToOne: false
+            referencedRelation: "districts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       districts: {
         Row: {
           created_at: string | null
