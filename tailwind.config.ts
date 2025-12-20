@@ -14,9 +14,9 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ['Nunito', 'Hind Siliguri', 'sans-serif'],
-        bangla: ['Hind Siliguri', 'sans-serif'],
-        english: ['Nunito', 'sans-serif'],
+        sans: ['Plus Jakarta Sans', 'Noto Sans Bengali', 'sans-serif'],
+        bangla: ['Noto Sans Bengali', 'sans-serif'],
+        display: ['Plus Jakarta Sans', 'sans-serif'],
       },
       colors: {
         border: "hsl(var(--border))",
