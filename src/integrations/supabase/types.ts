@@ -450,6 +450,59 @@ export type Database = {
           },
         ]
       }
+      payment_transactions: {
+        Row: {
+          amount: number
+          completed_at: string | null
+          created_at: string
+          currency: string
+          gateway_response: Json | null
+          id: string
+          listing_type: string | null
+          plan_id: string | null
+          status: string
+          transaction_id: string
+          user_id: string
+          validation_id: string | null
+        }
+        Insert: {
+          amount: number
+          completed_at?: string | null
+          created_at?: string
+          currency?: string
+          gateway_response?: Json | null
+          id?: string
+          listing_type?: string | null
+          plan_id?: string | null
+          status?: string
+          transaction_id: string
+          user_id: string
+          validation_id?: string | null
+        }
+        Update: {
+          amount?: number
+          completed_at?: string | null
+          created_at?: string
+          currency?: string
+          gateway_response?: Json | null
+          id?: string
+          listing_type?: string | null
+          plan_id?: string | null
+          status?: string
+          transaction_id?: string
+          user_id?: string
+          validation_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_transactions_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "subscription_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       platform_settings: {
         Row: {
           description: string | null

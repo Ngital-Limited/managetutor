@@ -17,6 +17,11 @@ import TutorDashboard from "./pages/TutorDashboard";
 import ParentDashboard from "./pages/ParentDashboard";
 import Messages from "./pages/Messages";
 import WriteReview from "./pages/WriteReview";
+import TutorPublicProfile from "./pages/TutorPublicProfile";
+import LocationTutors from "./pages/LocationTutors";
+import Favorites from "./pages/Favorites";
+import Pricing from "./pages/Pricing";
+import { PaymentSuccess, PaymentFailed, PaymentCancelled } from "./pages/PaymentResult";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -32,6 +37,8 @@ const App = () => (
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/tutors" element={<FindTutors />} />
+              <Route path="/tutor/:id" element={<TutorPublicProfile />} />
+              <Route path="/tutors/:location" element={<LocationTutors />} />
               <Route path="/jobs" element={<BrowseJobs />} />
               <Route path="/jobs/:id" element={<JobDetails />} />
               <Route path="/auth" element={<Auth />} />
@@ -41,6 +48,11 @@ const App = () => (
               <Route path="/tutor/profile" element={<TutorProfile />} />
               <Route path="/messages" element={<Messages />} />
               <Route path="/review/:tutorId" element={<WriteReview />} />
+              <Route path="/favorites" element={<Favorites />} />
+              <Route path="/pricing" element={<Pricing />} />
+              <Route path="/payment/success" element={<PaymentSuccess />} />
+              <Route path="/payment/failed" element={<PaymentFailed />} />
+              <Route path="/payment/cancelled" element={<PaymentCancelled />} />
               <Route path="/admin" element={<AdminDashboard />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
