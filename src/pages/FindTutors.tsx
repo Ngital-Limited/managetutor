@@ -83,6 +83,7 @@ export default function FindTutors() {
   const [selectedMode, setSelectedMode] = useState<string>(searchParams.get('mode') || '');
   const [priceRange, setPriceRange] = useState<number[]>([0, 10000]);
   const [minRating, setMinRating] = useState<string>(searchParams.get('rating') || '');
+  const [verifiedOnly, setVerifiedOnly] = useState<boolean>(searchParams.get('verified') === 'true');
   const [sortBy, setSortBy] = useState<string>('rating');
 
   useEffect(() => {
@@ -91,7 +92,7 @@ export default function FindTutors() {
 
   useEffect(() => {
     fetchTutors();
-  }, [selectedDistrict, selectedSubject, selectedGender, selectedMode, priceRange, minRating, sortBy, currentPage]);
+  }, [selectedDistrict, selectedSubject, selectedGender, selectedMode, priceRange, minRating, verifiedOnly, sortBy, currentPage]);
 
   useEffect(() => {
     if (user && role === 'parent') {
@@ -147,6 +148,9 @@ export default function FindTutors() {
     if (minRating && minRating !== 'all') {
       countQuery = countQuery.gte('average_rating', parseFloat(minRating));
     }
+    if (verifiedOnly) {
+      countQuery = countQuery.eq('verification_status', 'approved');
+    }
 
     const { count } = await countQuery;
     setTotalCount(count || 0);
@@ -182,6 +186,9 @@ export default function FindTutors() {
 
     if (minRating && minRating !== 'all') {
       query = query.gte('average_rating', parseFloat(minRating));
+    }
+    if (verifiedOnly) {
+      query = query.eq('verification_status', 'approved');
     }
 
     // Sorting
@@ -267,13 +274,14 @@ export default function FindTutors() {
     setSelectedMode('any');
     setPriceRange([0, 10000]);
     setMinRating('all');
+    setVerifiedOnly(false);
     setSearchQuery('');
     setCurrentPage(1);
   };
 
   const totalPages = Math.ceil(totalCount / TUTORS_PER_PAGE);
 
-  const hasActiveFilters = (selectedDistrict && selectedDistrict !== 'all') || (selectedSubject && selectedSubject !== 'all') || (selectedGender && selectedGender !== 'any') || (selectedMode && selectedMode !== 'any') || (minRating && minRating !== 'all') || priceRange[0] > 0 || priceRange[1] < 10000;
+  const hasActiveFilters = (selectedDistrict && selectedDistrict !== 'all') || (selectedSubject && selectedSubject !== 'all') || (selectedGender && selectedGender !== 'any') || (selectedMode && selectedMode !== 'any') || (minRating && minRating !== 'all') || verifiedOnly || priceRange[0] > 0 || priceRange[1] < 10000;
 
   const TutorCard = ({ tutor, featured = false }: { tutor: TutorProfile; featured?: boolean }) => (
     <Link to={`/tutor/${tutor.id}`}>
