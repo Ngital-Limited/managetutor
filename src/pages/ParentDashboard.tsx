@@ -73,6 +73,7 @@ export default function ParentDashboard() {
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const [applications, setApplications] = useState<Application[]>([]);
   const [loading, setLoading] = useState(true);
+  const [demoBookings, setDemoBookings] = useState<any[]>([]);
   const [showPostJob, setShowPostJob] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
@@ -119,6 +120,15 @@ export default function ParentDashboard() {
     if (subjectsRes.data) setSubjects(subjectsRes.data);
     if (profileRes.data) setUserProfile(profileRes.data);
     if (jobsRes.data) setJobs(jobsRes.data as unknown as Job[]);
+
+    // Fetch demo bookings
+    const { data: bookingsData } = await supabase
+      .from('demo_bookings')
+      .select('*, subjects(name_en, name_bn), tutor_profiles:tutor_id(id, profiles:user_id(full_name, avatar_url))')
+      .eq('parent_id', user.id)
+      .order('created_at', { ascending: false });
+
+    if (bookingsData) setDemoBookings(bookingsData);
 
     setLoading(false);
   };
