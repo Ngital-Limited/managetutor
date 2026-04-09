@@ -212,6 +212,20 @@ export default function TutorDashboard() {
     }
   };
 
+  const updateBookingStatus = async (bookingId: string, status: string) => {
+    const { error } = await supabase
+      .from('demo_bookings')
+      .update({ status })
+      .eq('id', bookingId);
+
+    if (error) {
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+    } else {
+      toast({ title: 'Updated', description: `Booking ${status} successfully.` });
+      fetchData();
+    }
+  };
+
   const withdrawApplication = async (appId: string) => {
     const { error } = await supabase
       .from('applications')
