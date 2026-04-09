@@ -59,6 +59,21 @@ interface TutorProfile {
   tutor_subjects: { subjects: Subject }[];
 }
 
+interface Job {
+  id: string;
+  title: string;
+  description: string;
+  class_level: string | null;
+  budget_min: number | null;
+  budget_max: number | null;
+  teaching_mode: string | null;
+  days_per_week: number | null;
+  total_applications: number | null;
+  created_at: string;
+  districts: { name_en: string; name_bn: string } | null;
+  subjects: { name_en: string; name_bn: string } | null;
+}
+
 export default function FindTutors() {
   const [searchParams] = useSearchParams();
   const { t, language, setLanguage } = useLanguage();
@@ -69,6 +84,7 @@ export default function FindTutors() {
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [tutors, setTutors] = useState<TutorProfile[]>([]);
   const [featuredTutors, setFeaturedTutors] = useState<TutorProfile[]>([]);
+  const [recentJobs, setRecentJobs] = useState<Job[]>([]);
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [totalCount, setTotalCount] = useState(0);
