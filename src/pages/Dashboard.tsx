@@ -326,12 +326,21 @@ export default function Dashboard() {
                       </div>
                       <div>
                         <Label>Special Requirements (Optional)</Label>
-                        <Textarea
-                          placeholder="E.g. Preferred university, subject expertise, experience level, personality traits, etc."
-                          value={jobForm.special_requirements}
-                          onChange={(e) => setJobForm({ ...jobForm, special_requirements: e.target.value })}
-                          rows={2}
-                        />
+                        <Select value={jobForm.special_requirements} onValueChange={(v) => setJobForm({ ...jobForm, special_requirements: v })}>
+                          <SelectTrigger><SelectValue placeholder="Select requirement" /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="University graduate preferred">University Graduate Preferred</SelectItem>
+                            <SelectItem value="Experienced tutor needed">Experienced Tutor Needed</SelectItem>
+                            <SelectItem value="Gentle and patient personality">Gentle & Patient Personality</SelectItem>
+                            <SelectItem value="Good communication skills">Good Communication Skills</SelectItem>
+                            <SelectItem value="Subject matter expert">Subject Matter Expert</SelectItem>
+                            <SelectItem value="Female tutor preferred">Female Tutor Preferred</SelectItem>
+                            <SelectItem value="Male tutor preferred">Male Tutor Preferred</SelectItem>
+                            <SelectItem value="Religious and disciplined">Religious & Disciplined</SelectItem>
+                            <SelectItem value="Good moral character">Good Moral Character</SelectItem>
+                            <SelectItem value="Punctual and regular">Punctual & Regular</SelectItem>
+                          </SelectContent>
+                        </Select>
                       </div>
                     </div>
                     <Button type="submit" className="w-full" disabled={submitting}>
