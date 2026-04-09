@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
@@ -53,6 +53,7 @@ const JOBS_PER_PAGE = 10;
 export default function BrowseJobs() {
   const { t, language, setLanguage } = useLanguage();
   const { user, role } = useAuth();
+  const navigate = useNavigate();
   const { toast } = useToast();
   const [districts, setDistricts] = useState<District[]>([]);
   const [subjects, setSubjects] = useState<Subject[]>([]);
@@ -181,11 +182,25 @@ export default function BrowseJobs() {
 
   const handleApply = (job: Job) => {
     if (!user) {
+      navigate('/auth');
+      return;
+    }
+    if (role !== 'tutor') {
       toast({
-        title: "Login Required",
-        description: "Please login as a tutor to apply for jobs",
+        title: "Tutor Account Required",
+        description: "You need to register as a tutor to apply for jobs. Please create a tutor account first.",
         variant: "destructive"
       });
+      navigate('/auth');
+      return;
+    }
+    if (!tutorProfileId) {
+      toast({
+        title: "Complete Your Profile",
+        description: "Please complete your tutor profile before applying.",
+        variant: "destructive"
+      });
+      navigate('/tutor-dashboard');
       return;
     }
     setSelectedJob(job);
@@ -469,18 +484,15 @@ export default function BrowseJobs() {
                           {job.total_applications} applications
                         </div>
 
-                        {role === 'tutor' ? (
-                          <Button className="rounded-xl" onClick={() => handleApply(job)}>
-                            Apply Now
-                            <ArrowRight className="h-4 w-4 ml-2" />
+                        <Button className="rounded-xl" onClick={() => handleApply(job)}>
+                          Apply Now
+                          <ArrowRight className="h-4 w-4 ml-2" />
+                        </Button>
+                        <Link to={`/jobs/${job.id}`}>
+                          <Button variant="outline" className="rounded-xl">
+                            View Details
                           </Button>
-                        ) : (
-                          <Link to={`/jobs/${job.id}`}>
-                            <Button variant="outline" className="rounded-xl">
-                              View Details
-                            </Button>
-                          </Link>
-                        )}
+                        </Link>
                       </div>
                     </div>
                   </CardContent>

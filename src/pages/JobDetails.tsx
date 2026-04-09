@@ -466,44 +466,67 @@ export default function JobDetails() {
                 </div>
                 <p className="text-muted-foreground text-sm mb-4">per month</p>
 
-                {role === 'tutor' && job.status === 'open' && !myApplication && (
-                  <Dialog open={showApply} onOpenChange={setShowApply}>
-                    <DialogTrigger asChild>
-                      <Button className="w-full" size="lg">
+                {job.status === 'open' && !myApplication && (
+                  <>
+                    {role === 'tutor' ? (
+                      <Dialog open={showApply} onOpenChange={setShowApply}>
+                        <DialogTrigger asChild>
+                          <Button className="w-full" size="lg">
+                            <Send className="h-4 w-4 mr-2" />
+                            Apply Now
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                          <DialogHeader>
+                            <DialogTitle>Apply for this job</DialogTitle>
+                          </DialogHeader>
+                          <form onSubmit={handleApply} className="space-y-4 mt-4">
+                            <div>
+                              <Label>Cover Message</Label>
+                              <Textarea
+                                placeholder="Introduce yourself and explain why you're a good fit..."
+                                value={applicationForm.cover_message}
+                                onChange={(e) => setApplicationForm({ ...applicationForm, cover_message: e.target.value })}
+                                rows={4}
+                                required
+                              />
+                            </div>
+                            <div>
+                              <Label>Your Proposed Rate (৳/month)</Label>
+                              <Input
+                                type="number"
+                                value={applicationForm.proposed_rate}
+                                onChange={(e) => setApplicationForm({ ...applicationForm, proposed_rate: Number(e.target.value) })}
+                                required
+                              />
+                            </div>
+                            <Button type="submit" className="w-full" disabled={applying}>
+                              {applying ? 'Sending...' : 'Submit Application'}
+                            </Button>
+                          </form>
+                        </DialogContent>
+                      </Dialog>
+                    ) : user ? (
+                      <Button className="w-full" size="lg" onClick={() => {
+                        toast({
+                          title: "Tutor Account Required",
+                          description: "You need to register as a tutor to apply for jobs.",
+                          variant: "destructive"
+                        });
+                        navigate('/auth');
+                      }}>
                         <Send className="h-4 w-4 mr-2" />
                         Apply Now
                       </Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                      <DialogHeader>
-                        <DialogTitle>Apply for this job</DialogTitle>
-                      </DialogHeader>
-                      <form onSubmit={handleApply} className="space-y-4 mt-4">
-                        <div>
-                          <Label>Cover Message</Label>
-                          <Textarea
-                            placeholder="Introduce yourself and explain why you're a good fit..."
-                            value={applicationForm.cover_message}
-                            onChange={(e) => setApplicationForm({ ...applicationForm, cover_message: e.target.value })}
-                            rows={4}
-                            required
-                          />
-                        </div>
-                        <div>
-                          <Label>Your Proposed Rate (৳/month)</Label>
-                          <Input
-                            type="number"
-                            value={applicationForm.proposed_rate}
-                            onChange={(e) => setApplicationForm({ ...applicationForm, proposed_rate: Number(e.target.value) })}
-                            required
-                          />
-                        </div>
-                        <Button type="submit" className="w-full" disabled={applying}>
-                          {applying ? 'Sending...' : 'Submit Application'}
+                    ) : (
+                      <Link to="/auth">
+                        <Button className="w-full" size="lg">
+                          <Send className="h-4 w-4 mr-2" />
+                          Login to Apply
                         </Button>
-                      </form>
-                    </DialogContent>
-                  </Dialog>
+                      </Link>
+                    )}
+                  </>
                 )}
 
                 {myApplication && (
@@ -521,14 +544,6 @@ export default function JobDetails() {
                       You applied for ৳{myApplication.proposed_rate}/month
                     </p>
                   </div>
-                )}
-
-                {!user && (
-                  <Link to="/auth">
-                    <Button className="w-full" size="lg">
-                      Login to Apply
-                    </Button>
-                  </Link>
                 )}
               </CardContent>
             </Card>
