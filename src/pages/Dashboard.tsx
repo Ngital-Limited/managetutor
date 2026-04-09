@@ -104,7 +104,7 @@ export default function Dashboard() {
       budget_max: jobForm.budget_max,
       teaching_mode: jobForm.teaching_mode as 'online' | 'in_person' | 'hybrid',
       preferred_tutor_gender: jobForm.preferred_tutor_gender as 'male' | 'female' | 'any',
-      special_requirements: jobForm.special_requirements || null,
+      special_requirements: jobForm.special_requirements.length > 0 ? jobForm.special_requirements.join(', ') : null,
       preferred_time: jobForm.preferred_time || null,
     });
 
@@ -116,7 +116,7 @@ export default function Dashboard() {
       setJobForm({
         title: '', description: '', subject_id: '', district_id: '', class_level: '',
         days_per_week: 3, budget_min: 3000, budget_max: 8000,
-        teaching_mode: 'in_person', preferred_tutor_gender: 'any', special_requirements: '', preferred_time: '',
+        teaching_mode: 'in_person', preferred_tutor_gender: 'any', special_requirements: [] as string[], preferred_time: '',
       });
       fetchData();
     }
