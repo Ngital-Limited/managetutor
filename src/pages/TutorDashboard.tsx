@@ -14,7 +14,7 @@ import { formatDistanceToNow } from 'date-fns';
 import {
   GraduationCap, LogOut, Globe, Briefcase, MessageSquare, Star, User,
   CheckCircle2, Clock, XCircle, DollarSign, TrendingUp, Calendar, MapPin,
-  BookOpen, Settings, Eye, ArrowRight, AlertCircle, Phone, Mail
+  BookOpen, Settings, Eye, ArrowRight, AlertCircle, Phone, Mail, Zap, Sparkles, Crown
 } from 'lucide-react';
 
 interface Application {
@@ -47,7 +47,17 @@ interface TutorProfile {
   total_reviews: number;
   total_students: number;
   is_available: boolean;
+  is_featured: boolean;
   verification_status: string;
+}
+
+interface FeaturedListing {
+  id: string;
+  start_date: string;
+  end_date: string;
+  is_active: boolean;
+  amount_paid: number;
+  listing_type: string;
 }
 
 export default function TutorDashboard() {
