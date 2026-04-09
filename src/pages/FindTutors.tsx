@@ -556,6 +556,17 @@ export default function FindTutors() {
                   className="mt-3"
                 />
               </div>
+              <div className="flex items-center gap-2 sm:col-span-2 md:col-span-5">
+                <Checkbox 
+                  id="verified-only"
+                  checked={verifiedOnly}
+                  onCheckedChange={(checked) => setVerifiedOnly(checked === true)}
+                />
+                <Label htmlFor="verified-only" className="text-sm font-medium cursor-pointer flex items-center gap-1">
+                  <CheckCircle2 className="h-4 w-4 text-success" />
+                  Show Verified Tutors Only
+                </Label>
+              </div>
             </div>
           )}
 
