@@ -7,6 +7,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Slider } from '@/components/ui/slider';
+import { Checkbox } from '@/components/ui/checkbox';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -83,6 +84,7 @@ export default function FindTutors() {
   const [selectedMode, setSelectedMode] = useState<string>(searchParams.get('mode') || '');
   const [priceRange, setPriceRange] = useState<number[]>([0, 10000]);
   const [minRating, setMinRating] = useState<string>(searchParams.get('rating') || '');
+  const [verifiedOnly, setVerifiedOnly] = useState<boolean>(searchParams.get('verified') === 'true');
   const [sortBy, setSortBy] = useState<string>('rating');
 
   useEffect(() => {
@@ -91,7 +93,7 @@ export default function FindTutors() {
 
   useEffect(() => {
     fetchTutors();
-  }, [selectedDistrict, selectedSubject, selectedGender, selectedMode, priceRange, minRating, sortBy, currentPage]);
+  }, [selectedDistrict, selectedSubject, selectedGender, selectedMode, priceRange, minRating, verifiedOnly, sortBy, currentPage]);
 
   useEffect(() => {
     if (user && role === 'parent') {
@@ -147,6 +149,9 @@ export default function FindTutors() {
     if (minRating && minRating !== 'all') {
       countQuery = countQuery.gte('average_rating', parseFloat(minRating));
     }
+    if (verifiedOnly) {
+      countQuery = countQuery.eq('verification_status', 'approved');
+    }
 
     const { count } = await countQuery;
     setTotalCount(count || 0);
@@ -182,6 +187,9 @@ export default function FindTutors() {
 
     if (minRating && minRating !== 'all') {
       query = query.gte('average_rating', parseFloat(minRating));
+    }
+    if (verifiedOnly) {
+      query = query.eq('verification_status', 'approved');
     }
 
     // Sorting
@@ -267,13 +275,14 @@ export default function FindTutors() {
     setSelectedMode('any');
     setPriceRange([0, 10000]);
     setMinRating('all');
+    setVerifiedOnly(false);
     setSearchQuery('');
     setCurrentPage(1);
   };
 
   const totalPages = Math.ceil(totalCount / TUTORS_PER_PAGE);
 
-  const hasActiveFilters = (selectedDistrict && selectedDistrict !== 'all') || (selectedSubject && selectedSubject !== 'all') || (selectedGender && selectedGender !== 'any') || (selectedMode && selectedMode !== 'any') || (minRating && minRating !== 'all') || priceRange[0] > 0 || priceRange[1] < 10000;
+  const hasActiveFilters = (selectedDistrict && selectedDistrict !== 'all') || (selectedSubject && selectedSubject !== 'all') || (selectedGender && selectedGender !== 'any') || (selectedMode && selectedMode !== 'any') || (minRating && minRating !== 'all') || verifiedOnly || priceRange[0] > 0 || priceRange[1] < 10000;
 
   const TutorCard = ({ tutor, featured = false }: { tutor: TutorProfile; featured?: boolean }) => (
     <Link to={`/tutor/${tutor.id}`}>
@@ -546,6 +555,17 @@ export default function FindTutors() {
                   step={500}
                   className="mt-3"
                 />
+              </div>
+              <div className="flex items-center gap-2 sm:col-span-2 md:col-span-5">
+                <Checkbox 
+                  id="verified-only"
+                  checked={verifiedOnly}
+                  onCheckedChange={(checked) => setVerifiedOnly(checked === true)}
+                />
+                <Label htmlFor="verified-only" className="text-sm font-medium cursor-pointer flex items-center gap-1">
+                  <CheckCircle2 className="h-4 w-4 text-success" />
+                  Show Verified Tutors Only
+                </Label>
               </div>
             </div>
           )}

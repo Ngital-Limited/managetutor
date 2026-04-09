@@ -399,21 +399,35 @@ export default function TutorPublicProfile() {
                 </div>
 
                 <div className="space-y-3">
-                  <Button className="w-full" size="lg" onClick={startChat}>
-                    <MessageSquare className="h-4 w-4 mr-2" />
-                    Contact Tutor
-                  </Button>
-                  
-                  {role === 'parent' && (
-                    <Button
-                      variant={isFavorite ? 'secondary' : 'outline'}
-                      className="w-full"
-                      onClick={toggleFavorite}
-                      disabled={favoriteLoading}
-                    >
-                      <Heart className={`h-4 w-4 mr-2 ${isFavorite ? 'fill-current text-destructive' : ''}`} />
-                      {isFavorite ? 'Saved to Favorites' : 'Add to Favorites'}
-                    </Button>
+                  {user ? (
+                    <>
+                      <Button className="w-full" size="lg" onClick={startChat}>
+                        <MessageSquare className="h-4 w-4 mr-2" />
+                        Contact Tutor
+                      </Button>
+                      
+                      {role === 'parent' && (
+                        <Button
+                          variant={isFavorite ? 'secondary' : 'outline'}
+                          className="w-full"
+                          onClick={toggleFavorite}
+                          disabled={favoriteLoading}
+                        >
+                          <Heart className={`h-4 w-4 mr-2 ${isFavorite ? 'fill-current text-destructive' : ''}`} />
+                          {isFavorite ? 'Saved to Favorites' : 'Add to Favorites'}
+                        </Button>
+                      )}
+                    </>
+                  ) : (
+                    <div className="text-center space-y-3">
+                      <p className="text-sm text-muted-foreground">Login to view contact details and message this tutor</p>
+                      <Link to="/auth">
+                        <Button className="w-full" size="lg">
+                          <User className="h-4 w-4 mr-2" />
+                          Login to Contact
+                        </Button>
+                      </Link>
+                    </div>
                   )}
 
                   <Button variant="ghost" className="w-full" onClick={shareProfile}>
