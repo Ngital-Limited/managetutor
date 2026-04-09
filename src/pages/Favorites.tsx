@@ -8,7 +8,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import {
-  GraduationCap, ArrowLeft, Globe, Heart, Star, MapPin, Trash2, MessageSquare
+  GraduationCap, ArrowLeft, Globe, Heart, Star, MapPin, Trash2
 } from 'lucide-react';
 
 interface Favorite {
@@ -159,11 +159,6 @@ export default function Favorites() {
                         ৳{fav.tutor_profiles?.hourly_rate_min}-{fav.tutor_profiles?.hourly_rate_max}/hr
                       </div>
                       <div className="flex items-center gap-2">
-                        <Link to={`/messages?with=${fav.tutor_profiles?.user_id}`}>
-                          <Button size="sm" variant="outline">
-                            <MessageSquare className="h-4 w-4" />
-                          </Button>
-                        </Link>
                         <Button 
                           size="sm" 
                           variant="ghost" 

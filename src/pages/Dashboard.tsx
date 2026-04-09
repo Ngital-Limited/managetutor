@@ -16,7 +16,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { 
-  GraduationCap, LogOut, User, Briefcase, MessageSquare, Star, Globe,
+  GraduationCap, LogOut, User, Briefcase, Star, Globe,
   Plus, MapPin, Clock, Users, BookOpen, Search, CheckCircle2, Settings
 } from 'lucide-react';
 
@@ -367,16 +367,6 @@ export default function Dashboard() {
                 </Card>
               </Link>
 
-              <Card className="hover-lift cursor-pointer h-40">
-                <CardContent className="p-6 flex flex-col items-center justify-center text-center h-full">
-                  <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center mb-3">
-                    <MessageSquare className="h-6 w-6 text-accent" />
-                  </div>
-                  <h3 className="font-bold">Messages</h3>
-                  <p className="text-sm text-muted-foreground">Chat with tutors</p>
-                </CardContent>
-              </Card>
-            </div>
 
             {/* My Jobs */}
             <div>

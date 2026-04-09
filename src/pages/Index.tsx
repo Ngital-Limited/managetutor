@@ -182,7 +182,7 @@ export default function Index() {
                 {[
                   { icon: Shield, title: 'Verified Tutors', desc: 'All tutors go through our verification process' },
                   { icon: Clock, title: 'Flexible Scheduling', desc: 'Find tutors available when you need them' },
-                  { icon: MessageSquare, title: 'Direct Communication', desc: 'Message tutors directly through our platform' },
+                  { icon: Award, title: 'Trusted Platform', desc: 'Secure platform connecting parents with qualified tutors' },
                   { icon: Star, title: 'Reviews & Ratings', desc: 'Read genuine reviews from other parents' },
                 ].map((feature, i) => (
                   <div key={i} className="flex gap-4 items-start animate-fade-in" style={{ animationDelay: `${i * 100}ms` }}>
