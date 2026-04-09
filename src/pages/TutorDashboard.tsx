@@ -14,7 +14,7 @@ import { formatDistanceToNow } from 'date-fns';
 import {
   GraduationCap, LogOut, Globe, Briefcase, MessageSquare, Star, User,
   CheckCircle2, Clock, XCircle, DollarSign, TrendingUp, Calendar, MapPin,
-  BookOpen, Settings, Eye, ArrowRight, AlertCircle, Phone, Mail
+  BookOpen, Settings, Eye, ArrowRight, AlertCircle, Phone, Mail, Zap, Sparkles, Crown
 } from 'lucide-react';
 
 interface Application {
@@ -47,7 +47,17 @@ interface TutorProfile {
   total_reviews: number;
   total_students: number;
   is_available: boolean;
+  is_featured: boolean;
   verification_status: string;
+}
+
+interface FeaturedListing {
+  id: string;
+  start_date: string;
+  end_date: string;
+  is_active: boolean;
+  amount_paid: number;
+  listing_type: string;
 }
 
 export default function TutorDashboard() {
@@ -67,6 +77,8 @@ export default function TutorDashboard() {
     activeJobs: 0,
     totalEarnings: 0,
   });
+  const [activeFeatured, setActiveFeatured] = useState<FeaturedListing | null>(null);
+  const [boostLoading, setBoostLoading] = useState(false);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -129,9 +141,63 @@ export default function TutorDashboard() {
           totalEarnings: accepted.reduce((sum, a) => sum + (a.proposed_rate || 0), 0),
         });
       }
+      // Fetch active featured listing
+      const { data: featuredData } = await supabase
+        .from('featured_listings')
+        .select('*')
+        .eq('tutor_id', tutorData.id)
+        .eq('is_active', true)
+        .gte('end_date', new Date().toISOString())
+        .order('end_date', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (featuredData) {
+        setActiveFeatured(featuredData as FeaturedListing);
+      }
     }
 
     setLoading(false);
+  };
+
+  const handleBoostProfile = async (days: number, price: number) => {
+    if (!profile || !user) return;
+    setBoostLoading(true);
+    
+    try {
+      const startDate = new Date();
+      const endDate = new Date();
+      endDate.setDate(endDate.getDate() + days);
+
+      // Create featured listing
+      const { error: listingError } = await supabase
+        .from('featured_listings')
+        .insert({
+          tutor_id: profile.id,
+          listing_type: 'tutor_profile',
+          start_date: startDate.toISOString(),
+          end_date: endDate.toISOString(),
+          amount_paid: price,
+          is_active: true,
+        });
+
+      if (listingError) throw listingError;
+
+      // Update tutor profile
+      const { error: profileError } = await supabase
+        .from('tutor_profiles')
+        .update({ is_featured: true })
+        .eq('id', profile.id);
+
+      if (profileError) throw profileError;
+
+      toast({ title: 'Profile Boosted!', description: `Your profile is now featured for ${days} days.` });
+      fetchData();
+    } catch (error: any) {
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+    } finally {
+      setBoostLoading(false);
+    }
   };
 
   const withdrawApplication = async (appId: string) => {
@@ -340,6 +406,93 @@ export default function TutorDashboard() {
             </Card>
           </Link>
         </div>
+
+        {/* Boost Profile Section */}
+        <Card className="mb-8 border-accent/30 bg-gradient-to-r from-accent/5 to-primary/5">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Sparkles className="h-5 w-5 text-accent" />
+              Boost Your Profile
+            </CardTitle>
+            <CardDescription>
+              Get featured at the top of search results and attract more students
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {activeFeatured ? (
+              <div className="flex items-center gap-4 p-4 rounded-lg bg-accent/10 border border-accent/20">
+                <Crown className="h-8 w-8 text-accent" />
+                <div className="flex-1">
+                  <p className="font-bold text-accent">Your profile is currently boosted!</p>
+                  <p className="text-sm text-muted-foreground">
+                    Active until {new Date(activeFeatured.end_date).toLocaleDateString('en-US', { 
+                      year: 'numeric', month: 'long', day: 'numeric' 
+                    })}
+                  </p>
+                </div>
+                <Badge className="bg-accent text-accent-foreground">
+                  <Zap className="h-3 w-3 mr-1" />
+                  Active
+                </Badge>
+              </div>
+            ) : (
+              <div className="grid sm:grid-cols-3 gap-4">
+                <Card className="border-border hover:border-primary/50 transition-colors">
+                  <CardContent className="p-5 text-center">
+                    <p className="text-2xl font-bold text-primary">৳199</p>
+                    <p className="text-sm text-muted-foreground mb-1">7 Days</p>
+                    <p className="text-xs text-muted-foreground mb-4">~৳28/day</p>
+                    <Button 
+                      className="w-full" 
+                      variant="outline"
+                      disabled={boostLoading}
+                      onClick={() => handleBoostProfile(7, 199)}
+                    >
+                      <Zap className="h-4 w-4 mr-1" />
+                      Boost 7 Days
+                    </Button>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-accent shadow-md shadow-accent/10 relative">
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                    <Badge className="bg-accent text-accent-foreground px-3">Best Value</Badge>
+                  </div>
+                  <CardContent className="p-5 text-center">
+                    <p className="text-2xl font-bold text-accent">৳499</p>
+                    <p className="text-sm text-muted-foreground mb-1">30 Days</p>
+                    <p className="text-xs text-muted-foreground mb-4">~৳17/day</p>
+                    <Button 
+                      className="w-full bg-accent hover:bg-accent/90 text-accent-foreground"
+                      disabled={boostLoading}
+                      onClick={() => handleBoostProfile(30, 499)}
+                    >
+                      <Sparkles className="h-4 w-4 mr-1" />
+                      Boost 30 Days
+                    </Button>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-border hover:border-primary/50 transition-colors">
+                  <CardContent className="p-5 text-center">
+                    <p className="text-2xl font-bold text-primary">৳1,299</p>
+                    <p className="text-sm text-muted-foreground mb-1">90 Days</p>
+                    <p className="text-xs text-muted-foreground mb-4">~৳14/day</p>
+                    <Button 
+                      className="w-full" 
+                      variant="outline"
+                      disabled={boostLoading}
+                      onClick={() => handleBoostProfile(90, 1299)}
+                    >
+                      <Crown className="h-4 w-4 mr-1" />
+                      Boost 90 Days
+                    </Button>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
         {/* Applications */}
         <Card>
