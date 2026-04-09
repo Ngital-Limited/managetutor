@@ -232,8 +232,24 @@ export default function FindTutors() {
 
     const { data } = await query.range(from, to);
     
-    if (data) {
-      let filtered = data as unknown as TutorProfile[];
+    if (data && data.length > 0) {
+      // Fetch profiles separately since there's no FK
+      const userIds = data.map((t: any) => t.user_id);
+      const { data: profilesData } = await supabase
+        .from('profiles')
+        .select('id, full_name, avatar_url, district_id, districts (name_en, name_bn)')
+        .in('id', userIds);
+
+      const profilesMap = new Map<string, any>();
+      if (profilesData) {
+        profilesData.forEach((p: any) => profilesMap.set(p.id, p));
+      }
+
+      // Merge profiles into tutor data
+      let filtered = (data as unknown as TutorProfile[]).map(t => ({
+        ...t,
+        profiles: profilesMap.get(t.user_id) || null,
+      }));
       
       // Filter by district (client-side due to nested relation)
       if (selectedDistrict && selectedDistrict !== 'all') {
@@ -264,6 +280,9 @@ export default function FindTutors() {
       
       setFeaturedTutors(featured);
       setTutors(regular);
+    } else {
+      setFeaturedTutors([]);
+      setTutors([]);
     }
     
     setLoading(false);
