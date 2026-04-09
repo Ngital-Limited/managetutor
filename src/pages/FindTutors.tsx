@@ -348,8 +348,9 @@ export default function FindTutors() {
                 </div>
                 <div className="flex items-center gap-1">
                   {tutor.verification_status === 'approved' && (
-                    <Badge className="bg-success/10 text-success border-0">
-                      <CheckCircle2 className="h-3 w-3" />
+                    <Badge className="bg-green-500 text-white border-0 gap-1 px-2 py-0.5">
+                      <CheckCircle2 className="h-3.5 w-3.5" />
+                      <span>Verified</span>
                     </Badge>
                   )}
                   {role === 'parent' && (
