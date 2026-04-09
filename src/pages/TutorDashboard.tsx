@@ -814,6 +814,8 @@ export default function TutorDashboard() {
           </CardContent>
         </Card>
       </main>
-    </div>
+        </div>
+      </div>
+    </SidebarProvider>
   );
 }
