@@ -133,7 +133,7 @@ export default function TutorPublicProfile() {
         .select('id')
         .eq('parent_id', user.id)
         .eq('tutor_id', id)
-        .single();
+        .maybeSingle();
 
       setIsFavorite(!!favData);
     }
