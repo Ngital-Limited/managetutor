@@ -780,6 +780,8 @@ export default function ParentDashboard() {
                             </div>
                           )}
 
+                          {app.status === 'accepted' && (
+                            <div className="flex items-center gap-2 mt-4 pt-4 border-t">
                               <Link to={`/tutor/${app.tutor_profiles?.id}`}>
                                 <Button size="sm" variant="outline">
                                   <Eye className="h-4 w-4 mr-1" />
