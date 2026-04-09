@@ -332,30 +332,30 @@ export default function TutorDashboard() {
   const profileComplete = getProfileCompleteness();
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Navigation */}
-      <nav className="sticky top-0 z-50 bg-card/80 backdrop-blur-xl border-b border-border">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
-              <GraduationCap className="h-6 w-6 text-primary-foreground" />
-            </div>
-            <span className="font-bold text-xl">Manage Tutor</span>
-          </Link>
-          <div className="flex items-center gap-3">
-            <Button variant="ghost" size="sm" onClick={() => setLanguage(language === 'en' ? 'bn' : 'en')}>
-              <Globe className="h-4 w-4 mr-1" />
-              {language === 'en' ? 'বাংলা' : 'EN'}
-            </Button>
-            <Button variant="outline" onClick={handleSignOut}>
-              <LogOut className="h-4 w-4 mr-2" />
-              Logout
-            </Button>
-          </div>
-        </div>
-      </nav>
+    <SidebarProvider>
+      <div className="min-h-screen flex w-full bg-background">
+        <TutorSidebar />
 
-      <main className="container mx-auto px-4 py-8">
+        <div className="flex-1 flex flex-col min-w-0">
+          {/* Top Bar */}
+          <header className="sticky top-0 z-50 h-14 flex items-center justify-between border-b border-border bg-card/80 backdrop-blur-xl px-4">
+            <div className="flex items-center gap-2">
+              <SidebarTrigger />
+              <span className="text-lg font-bold hidden sm:inline">Tutor Dashboard</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <Button variant="ghost" size="sm" onClick={() => setLanguage(language === 'en' ? 'bn' : 'en')}>
+                <Globe className="h-4 w-4 mr-1" />
+                {language === 'en' ? 'বাংলা' : 'EN'}
+              </Button>
+              <Button variant="outline" size="sm" onClick={handleSignOut}>
+                <LogOut className="h-4 w-4 mr-2" />
+                Logout
+              </Button>
+            </div>
+          </header>
+
+      <main className="flex-1 p-4 md:p-8 overflow-auto">
         {/* Header */}
         <div className="flex items-start justify-between mb-8">
           <div className="flex items-center gap-4">
