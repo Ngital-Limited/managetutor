@@ -1,0 +1,76 @@
+export const CLASS_LEVELS = [
+  {
+    group: "Bangla Medium",
+    items: [
+      "Pre-School - Play",
+      "Pre-School - Nursery",
+      "Pre-School - KG",
+      "Class 1",
+      "Class 2",
+      "Class 3",
+      "Class 4",
+      "Class 5",
+      "Class 6",
+      "Class 7",
+      "Class 8",
+      "Class 9",
+      "Class 10 (SSC)",
+      "Class 11",
+      "Class 12 (HSC)",
+    ],
+  },
+  {
+    group: "English Medium",
+    items: [
+      "O Level",
+      "A Level - AS",
+      "A Level - A2",
+      "Play",
+      "Nursery",
+      "KG-1",
+      "KG-2",
+      "Standard 1",
+      "Standard 2",
+      "Standard 3",
+      "Standard 4",
+      "Standard 5",
+      "Standard 6",
+      "Standard 7",
+      "Standard 8",
+    ],
+  },
+  {
+    group: "Madrasah - Primary Level",
+    items: [
+      "Ibtedayi Class 1",
+      "Ibtedayi Class 2",
+      "Ibtedayi Class 3",
+      "Ibtedayi Class 4",
+      "Ibtedayi Class 5",
+    ],
+  },
+  {
+    group: "Madrasah - Secondary Level",
+    items: [
+      "Dakhil Class 6",
+      "Dakhil Class 7",
+      "Dakhil Class 8",
+      "Dakhil Class 9",
+      "Dakhil Class 10 (Dakhil Exam)",
+    ],
+  },
+  {
+    group: "Madrasah - Higher Secondary Level",
+    items: [
+      "Alim Class 11",
+      "Alim Class 12 (Alim Exam)",
+    ],
+  },
+  {
+    group: "Higher Islamic Studies",
+    items: [
+      "Fazil (Bachelor level equivalent)",
+      "Kamil (Master level equivalent)",
+    ],
+  },
+];
