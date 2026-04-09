@@ -34,7 +34,7 @@ import {
 } from '@/components/ui/sidebar';
 import { NavLink } from '@/components/NavLink';
 import {
-  GraduationCap, LogOut, Globe, Plus, MapPin, BookOpen, MessageSquare,
+  GraduationCap, LogOut, Globe, Plus, MapPin, BookOpen,
   Star, Briefcase, Users, Clock, CheckCircle2, XCircle, Search, ArrowRight,
   Eye, Edit, Trash2, Calendar, Home, Heart, Settings, AlertCircle,
   User, Phone, Mail, CreditCard
@@ -90,7 +90,6 @@ const sidebarItems = [
   { title: 'Dashboard', url: '/dashboard', icon: Home },
   { title: 'Find Tutors', url: '/tutors', icon: Search },
   { title: 'Browse Jobs', url: '/jobs', icon: Briefcase },
-  { title: 'Messages', url: '/messages', icon: MessageSquare },
   { title: 'Favorites', url: '/favorites', icon: Heart },
   { title: 'Pricing', url: '/pricing', icon: CreditCard },
 ];
@@ -778,23 +777,11 @@ export default function ParentDashboard() {
                                 <XCircle className="h-4 w-4 mr-1" />
                                 Reject
                               </Button>
-                              <Link to={`/messages?with=${app.tutor_profiles?.user_id}&job=${selectedJob.id}`}>
-                                <Button size="sm" variant="ghost">
-                                  <MessageSquare className="h-4 w-4 mr-1" />
-                                  Chat
-                                </Button>
-                              </Link>
                             </div>
                           )}
 
                           {app.status === 'accepted' && (
                             <div className="flex items-center gap-2 mt-4 pt-4 border-t">
-                              <Link to={`/messages?with=${app.tutor_profiles?.user_id}&job=${selectedJob.id}`}>
-                                <Button size="sm">
-                                  <MessageSquare className="h-4 w-4 mr-1" />
-                                  Message Tutor
-                                </Button>
-                              </Link>
                               <Link to={`/tutor/${app.tutor_profiles?.id}`}>
                                 <Button size="sm" variant="outline">
                                   <Eye className="h-4 w-4 mr-1" />

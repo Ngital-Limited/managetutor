@@ -12,7 +12,7 @@ import { useToast } from '@/hooks/use-toast';
 import { formatDistanceToNow } from 'date-fns';
 import {
   GraduationCap, Globe, MapPin, Star, CheckCircle2, Clock, Heart,
-  MessageSquare, Briefcase, BookOpen, User, Calendar, DollarSign,
+  Briefcase, BookOpen, User, Calendar, DollarSign,
   Award, Users, ArrowLeft, Share2
 } from 'lucide-react';
 import BookDemoClassDialog from '@/components/BookDemoClassDialog';
@@ -161,14 +161,6 @@ export default function TutorPublicProfile() {
     }
 
     setFavoriteLoading(false);
-  };
-
-  const startChat = () => {
-    if (!user) {
-      navigate('/auth');
-      return;
-    }
-    navigate(`/messages?with=${tutor?.user_id}`);
   };
 
   const shareProfile = async () => {
@@ -407,10 +399,6 @@ export default function TutorPublicProfile() {
                 <div className="space-y-3">
                   {user ? (
                     <>
-                      <Button className="w-full" size="lg" onClick={startChat}>
-                        <MessageSquare className="h-4 w-4 mr-2" />
-                        Contact Tutor
-                      </Button>
                       
                       {role === 'parent' && (
                         <>

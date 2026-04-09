@@ -26,7 +26,7 @@ import {
 } from '@/components/ui/sidebar';
 import { NavLink } from '@/components/NavLink';
 import {
-  GraduationCap, LogOut, Globe, Briefcase, MessageSquare, Star, User,
+  GraduationCap, LogOut, Globe, Briefcase, Star, User,
   CheckCircle2, Clock, XCircle, DollarSign, TrendingUp, Calendar, MapPin,
   BookOpen, Settings, Eye, ArrowRight, AlertCircle, Phone, Mail, Zap, Sparkles, Crown,
   Home, Search, CreditCard
@@ -78,7 +78,6 @@ interface FeaturedListing {
 const tutorSidebarItems = [
   { title: 'Dashboard', url: '/tutor/dashboard', icon: Home },
   { title: 'Browse Jobs', url: '/jobs', icon: Briefcase },
-  { title: 'Messages', url: '/messages', icon: MessageSquare },
   { title: 'My Profile', url: '/tutor/profile', icon: User },
   { title: 'Find Tutors', url: '/tutors', icon: Search },
   { title: 'Pricing', url: '/pricing', icon: CreditCard },
@@ -477,15 +476,6 @@ export default function TutorDashboard() {
             </Card>
           </Link>
 
-          <Link to="/messages">
-            <Card className="hover-lift cursor-pointer h-32">
-              <CardContent className="p-6 flex flex-col items-center justify-center text-center h-full">
-                <MessageSquare className="h-8 w-8 text-info mb-2" />
-                <h3 className="font-bold">Messages</h3>
-                <p className="text-xs text-muted-foreground">Chat with parents</p>
-              </CardContent>
-            </Card>
-          </Link>
 
           <Link to="/tutor/profile">
             <Card className="hover-lift cursor-pointer h-32">
@@ -772,14 +762,6 @@ export default function TutorDashboard() {
                                 >
                                   Withdraw
                                 </Button>
-                              )}
-                              {app.status === 'accepted' && app.jobs?.parent_id && (
-                                <Link to={`/messages?with=${app.jobs.parent_id}&job=${app.jobs.id}`}>
-                                  <Button size="sm" variant="outline">
-                                    <MessageSquare className="h-4 w-4 mr-1" />
-                                    Message
-                                  </Button>
-                                </Link>
                               )}
                               <Link to={`/jobs/${app.jobs?.id}`}>
                                 <Button size="sm" variant="ghost">
