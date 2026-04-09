@@ -7,7 +7,6 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { CLASS_LEVELS } from '@/constants/classLevels';
 import { SPECIAL_REQUIREMENTS } from '@/constants/specialRequirements';
 import { Badge } from '@/components/ui/badge';
@@ -327,23 +326,26 @@ export default function Dashboard() {
                           </SelectContent>
                         </Select>
                       </div>
-                      <div>
-                        <Label>Special Requirements (Optional)</Label>
-                        <Select value={jobForm.special_requirements} onValueChange={(v) => setJobForm({ ...jobForm, special_requirements: v })}>
-                          <SelectTrigger><SelectValue placeholder="Select requirement" /></SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="University graduate preferred">University Graduate Preferred</SelectItem>
-                            <SelectItem value="Experienced tutor needed">Experienced Tutor Needed</SelectItem>
-                            <SelectItem value="Gentle and patient personality">Gentle & Patient Personality</SelectItem>
-                            <SelectItem value="Good communication skills">Good Communication Skills</SelectItem>
-                            <SelectItem value="Subject matter expert">Subject Matter Expert</SelectItem>
-                            <SelectItem value="Female tutor preferred">Female Tutor Preferred</SelectItem>
-                            <SelectItem value="Male tutor preferred">Male Tutor Preferred</SelectItem>
-                            <SelectItem value="Religious and disciplined">Religious & Disciplined</SelectItem>
-                            <SelectItem value="Good moral character">Good Moral Character</SelectItem>
-                            <SelectItem value="Punctual and regular">Punctual & Regular</SelectItem>
-                          </SelectContent>
-                        </Select>
+                      <div className="col-span-2">
+                        <Label className="mb-2 block">Special Requirements (Optional)</Label>
+                        <div className="grid grid-cols-2 gap-2">
+                          {SPECIAL_REQUIREMENTS.map((req) => (
+                            <label key={req} className="flex items-center gap-2 text-sm cursor-pointer">
+                              <Checkbox
+                                checked={jobForm.special_requirements.includes(req)}
+                                onCheckedChange={(checked) => {
+                                  setJobForm(prev => ({
+                                    ...prev,
+                                    special_requirements: checked
+                                      ? [...prev.special_requirements, req]
+                                      : prev.special_requirements.filter(r => r !== req)
+                                  }));
+                                }}
+                              />
+                              {req}
+                            </label>
+                          ))}
+                        </div>
                       </div>
                     </div>
                     <Button type="submit" className="w-full" disabled={submitting}>
