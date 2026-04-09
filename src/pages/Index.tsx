@@ -4,7 +4,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { 
   GraduationCap, Users, MapPin, Star, Search, FileText, 
-  MessageSquare, Globe, CheckCircle2, ArrowRight, Shield,
+  Globe, ArrowRight, Shield,
   BookOpen, Clock, Award
 } from 'lucide-react';
 

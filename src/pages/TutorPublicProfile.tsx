@@ -163,6 +163,7 @@ export default function TutorPublicProfile() {
     setFavoriteLoading(false);
   };
 
+  const shareProfile = async () => {
     const url = window.location.href;
     if (navigator.share) {
       await navigator.share({ title: `${profile?.full_name} - Tutor Profile`, url });

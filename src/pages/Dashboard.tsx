@@ -366,7 +366,7 @@ export default function Dashboard() {
                   </CardContent>
                 </Card>
               </Link>
-
+            </div>
 
             {/* My Jobs */}
             <div>
