@@ -7,7 +7,6 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { CLASS_LEVELS } from '@/constants/classLevels';
 import { SPECIAL_REQUIREMENTS } from '@/constants/specialRequirements';
 import { Badge } from '@/components/ui/badge';
