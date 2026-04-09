@@ -26,7 +26,7 @@ import {
 } from '@/components/ui/sidebar';
 import { NavLink } from '@/components/NavLink';
 import {
-  GraduationCap, LogOut, Globe, Briefcase, MessageSquare, Star, User,
+  GraduationCap, LogOut, Globe, Briefcase, Star, User,
   CheckCircle2, Clock, XCircle, DollarSign, TrendingUp, Calendar, MapPin,
   BookOpen, Settings, Eye, ArrowRight, AlertCircle, Phone, Mail, Zap, Sparkles, Crown,
   Home, Search, CreditCard
@@ -78,7 +78,6 @@ interface FeaturedListing {
 const tutorSidebarItems = [
   { title: 'Dashboard', url: '/tutor/dashboard', icon: Home },
   { title: 'Browse Jobs', url: '/jobs', icon: Briefcase },
-  { title: 'Messages', url: '/messages', icon: MessageSquare },
   { title: 'My Profile', url: '/tutor/profile', icon: User },
   { title: 'Find Tutors', url: '/tutors', icon: Search },
   { title: 'Pricing', url: '/pricing', icon: CreditCard },
