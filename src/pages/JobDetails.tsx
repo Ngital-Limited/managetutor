@@ -31,6 +31,7 @@ interface Job {
   teaching_mode: string;
   preferred_tutor_gender: string;
   student_gender: string;
+  special_requirements: string | null;
   status: string;
   total_applications: number;
   created_at: string;
@@ -507,6 +508,12 @@ export default function JobDetails() {
                   <div className="flex items-center justify-between">
                     <span className="text-muted-foreground">Student Gender</span>
                     <Badge variant="outline" className="capitalize">{job.student_gender}</Badge>
+                  </div>
+                )}
+                {job.special_requirements && (
+                  <div className="mt-4 pt-4 border-t">
+                    <span className="text-muted-foreground text-sm font-medium">Special Requirements</span>
+                    <p className="mt-1 text-sm">{job.special_requirements}</p>
                   </div>
                 )}
               </CardContent>
