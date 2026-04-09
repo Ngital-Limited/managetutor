@@ -371,6 +371,7 @@ export type Database = {
           id: string
           is_featured: boolean | null
           parent_id: string
+          preferred_time: string | null
           preferred_tutor_gender: Database["public"]["Enums"]["gender"] | null
           special_requirements: string | null
           status: Database["public"]["Enums"]["job_status"] | null
@@ -396,6 +397,7 @@ export type Database = {
           id?: string
           is_featured?: boolean | null
           parent_id: string
+          preferred_time?: string | null
           preferred_tutor_gender?: Database["public"]["Enums"]["gender"] | null
           special_requirements?: string | null
           status?: Database["public"]["Enums"]["job_status"] | null
@@ -421,6 +423,7 @@ export type Database = {
           id?: string
           is_featured?: boolean | null
           parent_id?: string
+          preferred_time?: string | null
           preferred_tutor_gender?: Database["public"]["Enums"]["gender"] | null
           special_requirements?: string | null
           status?: Database["public"]["Enums"]["job_status"] | null

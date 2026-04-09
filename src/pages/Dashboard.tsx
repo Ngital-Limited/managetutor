@@ -51,6 +51,7 @@ export default function Dashboard() {
     teaching_mode: 'in_person',
     preferred_tutor_gender: 'any',
     special_requirements: '',
+    preferred_time: '',
   });
 
   useEffect(() => {
@@ -101,6 +102,7 @@ export default function Dashboard() {
       teaching_mode: jobForm.teaching_mode as 'online' | 'in_person' | 'hybrid',
       preferred_tutor_gender: jobForm.preferred_tutor_gender as 'male' | 'female' | 'any',
       special_requirements: jobForm.special_requirements || null,
+      preferred_time: jobForm.preferred_time || null,
     });
 
     if (error) {
@@ -111,7 +113,7 @@ export default function Dashboard() {
       setJobForm({
         title: '', description: '', subject_id: '', district_id: '', class_level: '',
         days_per_week: 3, budget_min: 3000, budget_max: 8000,
-        teaching_mode: 'in_person', preferred_tutor_gender: 'any', special_requirements: '',
+        teaching_mode: 'in_person', preferred_tutor_gender: 'any', special_requirements: '', preferred_time: '',
       });
       fetchData();
     }
@@ -308,14 +310,29 @@ export default function Dashboard() {
                         </Select>
                       </div>
                     </div>
-                    <div>
-                      <Label>Special Requirements (Optional)</Label>
-                      <Textarea
-                        placeholder="E.g. Preferred university, subject expertise, experience level, personality traits, etc."
-                        value={jobForm.special_requirements}
-                        onChange={(e) => setJobForm({ ...jobForm, special_requirements: e.target.value })}
-                        rows={3}
-                      />
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div>
+                        <Label>Preferred Time (Optional)</Label>
+                        <Select value={jobForm.preferred_time} onValueChange={(v) => setJobForm({ ...jobForm, preferred_time: v })}>
+                          <SelectTrigger><SelectValue placeholder="Select time" /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="morning">Morning (6AM - 12PM)</SelectItem>
+                            <SelectItem value="afternoon">Afternoon (12PM - 4PM)</SelectItem>
+                            <SelectItem value="evening">Evening (4PM - 8PM)</SelectItem>
+                            <SelectItem value="night">Night (8PM - 10PM)</SelectItem>
+                            <SelectItem value="flexible">Flexible</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label>Special Requirements (Optional)</Label>
+                        <Textarea
+                          placeholder="E.g. Preferred university, subject expertise, experience level, personality traits, etc."
+                          value={jobForm.special_requirements}
+                          onChange={(e) => setJobForm({ ...jobForm, special_requirements: e.target.value })}
+                          rows={2}
+                        />
+                      </div>
                     </div>
                     <Button type="submit" className="w-full" disabled={submitting}>
                       {submitting ? 'Posting...' : 'Post Job'}

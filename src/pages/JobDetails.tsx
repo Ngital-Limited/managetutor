@@ -32,6 +32,7 @@ interface Job {
   preferred_tutor_gender: string;
   student_gender: string;
   special_requirements: string | null;
+  preferred_time: string | null;
   status: string;
   total_applications: number;
   created_at: string;
@@ -508,6 +509,12 @@ export default function JobDetails() {
                   <div className="flex items-center justify-between">
                     <span className="text-muted-foreground">Student Gender</span>
                     <Badge variant="outline" className="capitalize">{job.student_gender}</Badge>
+                  </div>
+                )}
+                {job.preferred_time && (
+                  <div className="flex items-center justify-between mt-4">
+                    <span className="text-muted-foreground">Preferred Time</span>
+                    <Badge variant="outline" className="capitalize">{job.preferred_time}</Badge>
                   </div>
                 )}
                 {job.special_requirements && (
