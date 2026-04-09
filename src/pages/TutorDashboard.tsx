@@ -77,6 +77,8 @@ export default function TutorDashboard() {
     activeJobs: 0,
     totalEarnings: 0,
   });
+  const [activeFeatured, setActiveFeatured] = useState<FeaturedListing | null>(null);
+  const [boostLoading, setBoostLoading] = useState(false);
 
   useEffect(() => {
     if (!authLoading && !user) {
