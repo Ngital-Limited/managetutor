@@ -99,6 +99,7 @@ export default function Dashboard() {
       budget_max: jobForm.budget_max,
       teaching_mode: jobForm.teaching_mode as 'online' | 'in_person' | 'hybrid',
       preferred_tutor_gender: jobForm.preferred_tutor_gender as 'male' | 'female' | 'any',
+      special_requirements: jobForm.special_requirements || null,
     });
 
     if (error) {
@@ -109,7 +110,7 @@ export default function Dashboard() {
       setJobForm({
         title: '', description: '', subject_id: '', district_id: '', class_level: '',
         days_per_week: 3, budget_min: 3000, budget_max: 8000,
-        teaching_mode: 'in_person', preferred_tutor_gender: 'any',
+        teaching_mode: 'in_person', preferred_tutor_gender: 'any', special_requirements: '',
       });
       fetchData();
     }
@@ -305,6 +306,15 @@ export default function Dashboard() {
                           </SelectContent>
                         </Select>
                       </div>
+                    </div>
+                    <div>
+                      <Label>Special Requirements (Optional)</Label>
+                      <Textarea
+                        placeholder="E.g. Preferred university, subject expertise, experience level, personality traits, etc."
+                        value={jobForm.special_requirements}
+                        onChange={(e) => setJobForm({ ...jobForm, special_requirements: e.target.value })}
+                        rows={3}
+                      />
                     </div>
                     <Button type="submit" className="w-full" disabled={submitting}>
                       {submitting ? 'Posting...' : 'Post Job'}
