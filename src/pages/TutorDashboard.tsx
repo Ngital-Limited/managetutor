@@ -79,6 +79,7 @@ export default function TutorDashboard() {
   });
   const [activeFeatured, setActiveFeatured] = useState<FeaturedListing | null>(null);
   const [boostLoading, setBoostLoading] = useState(false);
+  const [demoBookings, setDemoBookings] = useState<any[]>([]);
 
   useEffect(() => {
     if (!authLoading && !user) {
