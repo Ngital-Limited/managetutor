@@ -53,6 +53,7 @@ const JOBS_PER_PAGE = 10;
 export default function BrowseJobs() {
   const { t, language, setLanguage } = useLanguage();
   const { user, role } = useAuth();
+  const navigate = useNavigate();
   const { toast } = useToast();
   const [districts, setDistricts] = useState<District[]>([]);
   const [subjects, setSubjects] = useState<Subject[]>([]);
