@@ -313,7 +313,46 @@ export default function JobDetails() {
                       <div className="font-medium capitalize">{job.preferred_tutor_gender || 'Any'} Gender</div>
                     </div>
                   </div>
+                  <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
+                    <Briefcase className="h-5 w-5 text-primary" />
+                    <div>
+                      <div className="text-xs text-muted-foreground">Teaching Mode</div>
+                      <div className="font-medium capitalize">{job.teaching_mode?.replace('_', ' ') || 'In Person'}</div>
+                    </div>
+                  </div>
+                  {job.student_gender && (
+                    <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
+                      <UserCheck className="h-5 w-5 text-primary" />
+                      <div>
+                        <div className="text-xs text-muted-foreground">Student Gender</div>
+                        <div className="font-medium capitalize">{job.student_gender}</div>
+                      </div>
+                    </div>
+                  )}
+                  {job.preferred_time && (
+                    <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
+                      <Clock className="h-5 w-5 text-primary" />
+                      <div>
+                        <div className="text-xs text-muted-foreground">Preferred Time</div>
+                        <div className="font-medium capitalize">{job.preferred_time}</div>
+                      </div>
+                    </div>
+                  )}
                 </div>
+
+                {job.special_requirements && (
+                  <div className="mt-6 p-4 bg-muted/50 rounded-lg">
+                    <h3 className="text-sm font-semibold mb-2 flex items-center gap-2">
+                      <CheckCircle2 className="h-4 w-4 text-primary" />
+                      Special Requirements
+                    </h3>
+                    <div className="flex flex-wrap gap-2">
+                      {job.special_requirements.split(', ').map((req, i) => (
+                        <Badge key={i} variant="secondary">{req}</Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
 
@@ -502,27 +541,13 @@ export default function JobDetails() {
                   <span className="font-bold text-lg">{job.total_applications}</span>
                 </div>
                 <div className="flex items-center justify-between mb-4">
-                  <span className="text-muted-foreground">Teaching Mode</span>
-                  <Badge variant="outline" className="capitalize">{job.teaching_mode?.replace('_', ' ')}</Badge>
+                  <span className="text-muted-foreground">Status</span>
+                  <Badge variant={job.status === 'open' ? 'default' : 'secondary'} className="capitalize">{job.status}</Badge>
                 </div>
-                {job.student_gender && (
-                  <div className="flex items-center justify-between">
-                    <span className="text-muted-foreground">Student Gender</span>
-                    <Badge variant="outline" className="capitalize">{job.student_gender}</Badge>
-                  </div>
-                )}
-                {job.preferred_time && (
-                  <div className="flex items-center justify-between mt-4">
-                    <span className="text-muted-foreground">Preferred Time</span>
-                    <Badge variant="outline" className="capitalize">{job.preferred_time}</Badge>
-                  </div>
-                )}
-                {job.special_requirements && (
-                  <div className="mt-4 pt-4 border-t">
-                    <span className="text-muted-foreground text-sm font-medium">Special Requirements</span>
-                    <p className="mt-1 text-sm">{job.special_requirements}</p>
-                  </div>
-                )}
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground">Budget</span>
+                  <span className="font-semibold">৳{job.budget_min} - {job.budget_max}</span>
+                </div>
               </CardContent>
             </Card>
 
