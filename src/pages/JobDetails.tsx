@@ -541,27 +541,13 @@ export default function JobDetails() {
                   <span className="font-bold text-lg">{job.total_applications}</span>
                 </div>
                 <div className="flex items-center justify-between mb-4">
-                  <span className="text-muted-foreground">Teaching Mode</span>
-                  <Badge variant="outline" className="capitalize">{job.teaching_mode?.replace('_', ' ')}</Badge>
+                  <span className="text-muted-foreground">Status</span>
+                  <Badge variant={job.status === 'open' ? 'default' : 'secondary'} className="capitalize">{job.status}</Badge>
                 </div>
-                {job.student_gender && (
-                  <div className="flex items-center justify-between">
-                    <span className="text-muted-foreground">Student Gender</span>
-                    <Badge variant="outline" className="capitalize">{job.student_gender}</Badge>
-                  </div>
-                )}
-                {job.preferred_time && (
-                  <div className="flex items-center justify-between mt-4">
-                    <span className="text-muted-foreground">Preferred Time</span>
-                    <Badge variant="outline" className="capitalize">{job.preferred_time}</Badge>
-                  </div>
-                )}
-                {job.special_requirements && (
-                  <div className="mt-4 pt-4 border-t">
-                    <span className="text-muted-foreground text-sm font-medium">Special Requirements</span>
-                    <p className="mt-1 text-sm">{job.special_requirements}</p>
-                  </div>
-                )}
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground">Budget</span>
+                  <span className="font-semibold">৳{job.budget_min} - {job.budget_max}</span>
+                </div>
               </CardContent>
             </Card>
 
