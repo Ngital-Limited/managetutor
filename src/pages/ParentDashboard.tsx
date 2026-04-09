@@ -88,7 +88,7 @@ export default function ParentDashboard() {
     teaching_mode: 'in_person',
     preferred_tutor_gender: 'any',
     student_gender: 'any',
-    special_requirements: '',
+    special_requirements: [] as string[],
     preferred_time: '',
   });
 
