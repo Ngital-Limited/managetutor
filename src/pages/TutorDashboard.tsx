@@ -156,6 +156,17 @@ export default function TutorDashboard() {
       if (featuredData) {
         setActiveFeatured(featuredData as FeaturedListing);
       }
+
+      // Fetch demo bookings
+      const { data: bookingsData } = await supabase
+        .from('demo_bookings')
+        .select('*, subjects(name_en, name_bn), profiles:parent_id(full_name, phone, email)')
+        .eq('tutor_id', tutorData.id)
+        .order('created_at', { ascending: false });
+
+      if (bookingsData) {
+        setDemoBookings(bookingsData);
+      }
     }
 
     setLoading(false);
