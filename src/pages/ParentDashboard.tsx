@@ -157,7 +157,7 @@ export default function ParentDashboard() {
       teaching_mode: jobForm.teaching_mode as 'online' | 'in_person' | 'hybrid',
       preferred_tutor_gender: jobForm.preferred_tutor_gender as 'male' | 'female' | 'any',
       student_gender: jobForm.student_gender as 'male' | 'female' | 'any',
-      special_requirements: jobForm.special_requirements || null,
+      special_requirements: jobForm.special_requirements.length > 0 ? jobForm.special_requirements.join(', ') : null,
       preferred_time: jobForm.preferred_time || null,
     });
 
@@ -177,7 +177,7 @@ export default function ParentDashboard() {
       title: '', description: '', subject_id: '', district_id: '', class_level: '',
       days_per_week: 3, budget_min: 3000, budget_max: 8000,
       teaching_mode: 'in_person', preferred_tutor_gender: 'any', student_gender: 'any',
-      special_requirements: '', preferred_time: '',
+      special_requirements: [] as string[], preferred_time: '',
     });
   };
 
@@ -412,23 +412,26 @@ export default function ParentDashboard() {
                       </SelectContent>
                     </Select>
                   </div>
-                  <div>
-                    <Label>Special Requirements (Optional)</Label>
-                    <Select value={jobForm.special_requirements} onValueChange={(v) => setJobForm({ ...jobForm, special_requirements: v })}>
-                      <SelectTrigger><SelectValue placeholder="Select requirement" /></SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="University graduate preferred">University Graduate Preferred</SelectItem>
-                        <SelectItem value="Experienced tutor needed">Experienced Tutor Needed</SelectItem>
-                        <SelectItem value="Gentle and patient personality">Gentle & Patient Personality</SelectItem>
-                        <SelectItem value="Good communication skills">Good Communication Skills</SelectItem>
-                        <SelectItem value="Subject matter expert">Subject Matter Expert</SelectItem>
-                        <SelectItem value="Female tutor preferred">Female Tutor Preferred</SelectItem>
-                        <SelectItem value="Male tutor preferred">Male Tutor Preferred</SelectItem>
-                        <SelectItem value="Religious and disciplined">Religious & Disciplined</SelectItem>
-                        <SelectItem value="Good moral character">Good Moral Character</SelectItem>
-                        <SelectItem value="Punctual and regular">Punctual & Regular</SelectItem>
-                      </SelectContent>
-                    </Select>
+                  <div className="col-span-2">
+                    <Label className="mb-2 block">Special Requirements (Optional)</Label>
+                    <div className="grid grid-cols-2 gap-2">
+                      {SPECIAL_REQUIREMENTS.map((req) => (
+                        <label key={req} className="flex items-center gap-2 text-sm cursor-pointer">
+                          <Checkbox
+                            checked={jobForm.special_requirements.includes(req)}
+                            onCheckedChange={(checked) => {
+                              setJobForm(prev => ({
+                                ...prev,
+                                special_requirements: checked
+                                  ? [...prev.special_requirements, req]
+                                  : prev.special_requirements.filter(r => r !== req)
+                              }));
+                            }}
+                          />
+                          {req}
+                        </label>
+                      ))}
+                    </div>
                   </div>
                 </div>
                 <Button type="submit" className="w-full" disabled={submitting}>
