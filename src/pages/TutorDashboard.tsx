@@ -12,9 +12,24 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { formatDistanceToNow } from 'date-fns';
 import {
+  Sidebar,
+  SidebarContent,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarProvider,
+  SidebarTrigger,
+  useSidebar,
+} from '@/components/ui/sidebar';
+import { NavLink } from '@/components/NavLink';
+import {
   GraduationCap, LogOut, Globe, Briefcase, MessageSquare, Star, User,
   CheckCircle2, Clock, XCircle, DollarSign, TrendingUp, Calendar, MapPin,
-  BookOpen, Settings, Eye, ArrowRight, AlertCircle, Phone, Mail, Zap, Sparkles, Crown
+  BookOpen, Settings, Eye, ArrowRight, AlertCircle, Phone, Mail, Zap, Sparkles, Crown,
+  Home, Search, CreditCard
 } from 'lucide-react';
 
 interface Application {
@@ -58,6 +73,56 @@ interface FeaturedListing {
   is_active: boolean;
   amount_paid: number;
   listing_type: string;
+}
+
+const tutorSidebarItems = [
+  { title: 'Dashboard', url: '/tutor/dashboard', icon: Home },
+  { title: 'Browse Jobs', url: '/jobs', icon: Briefcase },
+  { title: 'Messages', url: '/messages', icon: MessageSquare },
+  { title: 'My Profile', url: '/tutor/profile', icon: User },
+  { title: 'Find Tutors', url: '/tutors', icon: Search },
+  { title: 'Pricing', url: '/pricing', icon: CreditCard },
+];
+
+function TutorSidebar() {
+  const { state } = useSidebar();
+  const collapsed = state === 'collapsed';
+
+  return (
+    <Sidebar collapsible="icon">
+      <SidebarContent>
+        <SidebarGroup>
+          <SidebarGroupLabel>
+            {!collapsed && (
+              <div className="flex items-center gap-2">
+                <GraduationCap className="h-5 w-5 text-primary" />
+                <span className="font-bold">Manage Tutor</span>
+              </div>
+            )}
+          </SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {tutorSidebarItems.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton asChild>
+                    <NavLink
+                      to={item.url}
+                      end={item.url === '/tutor/dashboard'}
+                      className="hover:bg-muted/50"
+                      activeClassName="bg-muted text-primary font-medium"
+                    >
+                      <item.icon className="mr-2 h-4 w-4" />
+                      {!collapsed && <span>{item.title}</span>}
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </SidebarContent>
+    </Sidebar>
+  );
 }
 
 export default function TutorDashboard() {
