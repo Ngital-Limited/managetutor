@@ -127,7 +127,18 @@ export default function FindTutors() {
     if (districtsRes.data) setDistricts(districtsRes.data);
     if (subjectsRes.data) setSubjects(subjectsRes.data);
     
-    await fetchTutors();
+    await Promise.all([fetchTutors(), fetchRecentJobs()]);
+  };
+
+  const fetchRecentJobs = async () => {
+    const { data } = await supabase
+      .from('jobs')
+      .select('id, title, description, class_level, budget_min, budget_max, teaching_mode, days_per_week, total_applications, created_at, districts (name_en, name_bn), subjects (name_en, name_bn)')
+      .eq('status', 'open')
+      .order('created_at', { ascending: false })
+      .limit(6);
+    
+    if (data) setRecentJobs(data as unknown as Job[]);
   };
 
   const fetchFavorites = async () => {
