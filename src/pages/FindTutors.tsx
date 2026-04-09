@@ -14,7 +14,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { 
   GraduationCap, Search, MapPin, Star, Filter, Globe, 
-  User, Clock, BookOpen, CheckCircle2, X, ChevronDown, Heart, Award, ArrowRight, ChevronLeft, ChevronRight
+  User, Clock, BookOpen, CheckCircle2, X, ChevronDown, Heart, Award, ArrowRight, ChevronLeft, ChevronRight,
+  Briefcase, DollarSign
 } from 'lucide-react';
 
 interface District {
@@ -58,6 +59,21 @@ interface TutorProfile {
   tutor_subjects: { subjects: Subject }[];
 }
 
+interface Job {
+  id: string;
+  title: string;
+  description: string;
+  class_level: string | null;
+  budget_min: number | null;
+  budget_max: number | null;
+  teaching_mode: string | null;
+  days_per_week: number | null;
+  total_applications: number | null;
+  created_at: string;
+  districts: { name_en: string; name_bn: string } | null;
+  subjects: { name_en: string; name_bn: string } | null;
+}
+
 export default function FindTutors() {
   const [searchParams] = useSearchParams();
   const { t, language, setLanguage } = useLanguage();
@@ -68,6 +84,7 @@ export default function FindTutors() {
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [tutors, setTutors] = useState<TutorProfile[]>([]);
   const [featuredTutors, setFeaturedTutors] = useState<TutorProfile[]>([]);
+  const [recentJobs, setRecentJobs] = useState<Job[]>([]);
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [totalCount, setTotalCount] = useState(0);
@@ -110,7 +127,18 @@ export default function FindTutors() {
     if (districtsRes.data) setDistricts(districtsRes.data);
     if (subjectsRes.data) setSubjects(subjectsRes.data);
     
-    await fetchTutors();
+    await Promise.all([fetchTutors(), fetchRecentJobs()]);
+  };
+
+  const fetchRecentJobs = async () => {
+    const { data } = await supabase
+      .from('jobs')
+      .select('id, title, description, class_level, budget_min, budget_max, teaching_mode, days_per_week, total_applications, created_at, districts (name_en, name_bn), subjects (name_en, name_bn)')
+      .eq('status', 'open')
+      .order('created_at', { ascending: false })
+      .limit(6);
+    
+    if (data) setRecentJobs(data as unknown as Job[]);
   };
 
   const fetchFavorites = async () => {
@@ -689,6 +717,75 @@ export default function FindTutors() {
             <Button variant="outline" onClick={clearFilters}>Clear Filters</Button>
           </div>
         ) : null}
+
+        {/* Recent Jobs Section */}
+        {recentJobs.length > 0 && (
+          <div className="mt-12 mb-8">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold flex items-center gap-2">
+                <Briefcase className="h-6 w-6 text-primary" />
+                Recent Job Openings
+              </h2>
+              <Link to="/jobs">
+                <Button variant="outline" size="sm">
+                  View All Jobs
+                  <ArrowRight className="h-4 w-4 ml-1" />
+                </Button>
+              </Link>
+            </div>
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {recentJobs.map(job => (
+                <Link key={job.id} to={`/jobs/${job.id}`}>
+                  <Card className="hover-lift h-full group">
+                    <CardContent className="p-6">
+                      <h3 className="font-bold text-foreground mb-2 group-hover:text-primary transition-colors line-clamp-1">
+                        {job.title}
+                      </h3>
+                      <p className="text-sm text-muted-foreground line-clamp-2 mb-4">
+                        {job.description}
+                      </p>
+                      
+                      <div className="flex flex-wrap gap-2 mb-4">
+                        {job.subjects && (
+                          <Badge variant="secondary" className="text-xs">
+                            <BookOpen className="h-3 w-3 mr-1" />
+                            {language === 'en' ? job.subjects.name_en : job.subjects.name_bn}
+                          </Badge>
+                        )}
+                        {job.class_level && (
+                          <Badge variant="outline" className="text-xs">{job.class_level}</Badge>
+                        )}
+                        {job.teaching_mode && (
+                          <Badge variant="outline" className="text-xs capitalize">
+                            {job.teaching_mode.replace('_', ' ')}
+                          </Badge>
+                        )}
+                      </div>
+
+                      <div className="flex items-center justify-between pt-3 border-t border-border text-sm">
+                        <div className="flex items-center gap-1 text-muted-foreground">
+                          <MapPin className="h-3 w-3" />
+                          {language === 'en' ? job.districts?.name_en : job.districts?.name_bn}
+                        </div>
+                        {(job.budget_min || job.budget_max) && (
+                          <span className="font-bold text-primary">
+                            <DollarSign className="h-3 w-3 inline" />
+                            ৳{job.budget_min || 0}-{job.budget_max || 0}
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="mt-3 text-xs text-muted-foreground flex items-center justify-between">
+                        <span>{job.total_applications || 0} applications</span>
+                        <span>{job.days_per_week && `${job.days_per_week} days/week`}</span>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
