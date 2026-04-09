@@ -1,7 +1,10 @@
-import { Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { 
   GraduationCap, Users, MapPin, Star, Search, FileText, 
   Globe, ArrowRight, Shield,
@@ -11,6 +14,33 @@ import {
 export default function Index() {
   const { t, language, setLanguage } = useLanguage();
   const { user } = useAuth();
+  const navigate = useNavigate();
+
+  const [districts, setDistricts] = useState<{ id: string; name_en: string; name_bn: string }[]>([]);
+  const [subjectsList, setSubjectsList] = useState<{ id: string; name_en: string; name_bn: string }[]>([]);
+  const [selectedDistrict, setSelectedDistrict] = useState('');
+  const [selectedSubject, setSelectedSubject] = useState('');
+  const [selectedMode, setSelectedMode] = useState('');
+
+  useEffect(() => {
+    const fetchFilters = async () => {
+      const [{ data: d }, { data: s }] = await Promise.all([
+        supabase.from('districts').select('id, name_en, name_bn').order('name_en'),
+        supabase.from('subjects').select('id, name_en, name_bn').order('name_en'),
+      ]);
+      if (d) setDistricts(d);
+      if (s) setSubjectsList(s);
+    };
+    fetchFilters();
+  }, []);
+
+  const handleSearch = () => {
+    const params = new URLSearchParams();
+    if (selectedDistrict) params.set('district', selectedDistrict);
+    if (selectedSubject) params.set('subject', selectedSubject);
+    if (selectedMode) params.set('mode', selectedMode);
+    navigate(`/tutors?${params.toString()}`);
+  };
 
   const subjects = ['Physics', 'Mathematics', 'English', 'Chemistry', 'Biology', 'IELTS', 'Bangla', 'ICT'];
 
@@ -97,6 +127,63 @@ export default function Index() {
           <svg viewBox="0 0 1440 80" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full">
             <path d="M0 80L60 74.7C120 69 240 59 360 53.3C480 48 600 48 720 53.3C840 59 960 69 1080 69.3C1200 69 1320 59 1380 53.3L1440 48V80H1380C1320 80 1200 80 1080 80C960 80 840 80 720 80C600 80 480 80 360 80C240 80 120 80 60 80H0Z" fill="hsl(var(--background))"/>
           </svg>
+        </div>
+      </section>
+
+      {/* Search Filter Bar */}
+      <section className="relative z-10 -mt-10 pb-8">
+        <div className="container mx-auto px-4">
+          <div className="bg-card rounded-2xl shadow-xl shadow-foreground/10 p-6 md:p-8 border border-border">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-foreground">Location</label>
+                <Select value={selectedDistrict} onValueChange={setSelectedDistrict}>
+                  <SelectTrigger className="h-12 rounded-xl">
+                    <SelectValue placeholder="Select District" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {districts.map((d) => (
+                      <SelectItem key={d.id} value={d.id}>
+                        {language === 'bn' ? d.name_bn : d.name_en}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-foreground">Subject</label>
+                <Select value={selectedSubject} onValueChange={setSelectedSubject}>
+                  <SelectTrigger className="h-12 rounded-xl">
+                    <SelectValue placeholder="Select Subject" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {subjectsList.map((s) => (
+                      <SelectItem key={s.id} value={s.id}>
+                        {language === 'bn' ? s.name_bn : s.name_en}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-foreground">Tutoring Mode</label>
+                <Select value={selectedMode} onValueChange={setSelectedMode}>
+                  <SelectTrigger className="h-12 rounded-xl">
+                    <SelectValue placeholder="Select Mode" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="online">Online</SelectItem>
+                    <SelectItem value="in_person">In-Person</SelectItem>
+                    <SelectItem value="hybrid">Both</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <Button onClick={handleSearch} className="h-12 rounded-xl text-base font-semibold gap-2">
+                <Search className="h-5 w-5" />
+                Search Tutors
+              </Button>
+            </div>
+          </div>
         </div>
       </section>
 
