@@ -15,6 +15,7 @@ import AdminDashboard from "./pages/AdminDashboard";
 import TutorProfile from "./pages/TutorProfile";
 import TutorDashboard from "./pages/TutorDashboard";
 import ParentDashboard from "./pages/ParentDashboard";
+import ParentProfileEdit from "./pages/ParentProfileEdit";
 import Messages from "./pages/Messages";
 import WriteReview from "./pages/WriteReview";
 import TutorPublicProfile from "./pages/TutorPublicProfile";
@@ -44,6 +45,7 @@ const App = () => (
               <Route path="/auth" element={<Auth />} />
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/parent/dashboard" element={<ParentDashboard />} />
+              <Route path="/parent/profile" element={<ParentProfileEdit />} />
               <Route path="/tutor/dashboard" element={<TutorDashboard />} />
               <Route path="/tutor/profile" element={<TutorProfile />} />
               <Route path="/messages" element={<Messages />} />
