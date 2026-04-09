@@ -5,7 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { CLASS_LEVELS } from '@/constants/classLevels';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -311,11 +312,19 @@ export default function ParentDashboard() {
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
                     <Label>Class Level</Label>
-                    <Input
-                      placeholder="e.g., Class 10, HSC"
-                      value={jobForm.class_level}
-                      onChange={(e) => setJobForm({ ...jobForm, class_level: e.target.value })}
-                    />
+                    <Select value={jobForm.class_level} onValueChange={(v) => setJobForm({ ...jobForm, class_level: v })}>
+                      <SelectTrigger><SelectValue placeholder="Select class level" /></SelectTrigger>
+                      <SelectContent className="max-h-[300px]">
+                        {CLASS_LEVELS.map((group) => (
+                          <SelectGroup key={group.group}>
+                            <SelectLabel>{group.group}</SelectLabel>
+                            {group.items.map((item) => (
+                              <SelectItem key={item} value={item}>{item}</SelectItem>
+                            ))}
+                          </SelectGroup>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                   <div>
                     <Label>Days per Week</Label>
