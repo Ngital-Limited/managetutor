@@ -729,6 +729,61 @@ export default function ParentDashboard() {
             </CardContent>
           </Card>
         )}
+
+        {/* Demo Class Bookings */}
+        {demoBookings.length > 0 && (
+          <Card className="mt-8">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Calendar className="h-5 w-5" />
+                My Demo Class Bookings
+              </CardTitle>
+              <CardDescription>Track your trial lesson requests</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {demoBookings.map((booking: any) => (
+                <div key={booking.id} className="p-4 border rounded-xl hover:bg-muted/50 transition-colors">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <h4 className="font-bold">
+                          {booking.tutor_profiles?.profiles?.full_name || 'Tutor'}
+                        </h4>
+                        {booking.subjects && (
+                          <Badge variant="secondary">
+                            <BookOpen className="h-3 w-3 mr-1" />
+                            {language === 'en' ? booking.subjects.name_en : booking.subjects.name_bn}
+                          </Badge>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                        <span className="flex items-center gap-1">
+                          <Calendar className="h-3 w-3" />
+                          {new Date(booking.preferred_date).toLocaleDateString()}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Clock className="h-3 w-3" />
+                          {booking.preferred_time} ({booking.duration_minutes} min)
+                        </span>
+                        <span className="font-medium text-primary">৳{booking.class_fee}</span>
+                      </div>
+                    </div>
+                    <Badge className={
+                      booking.status === 'confirmed' ? 'bg-success' :
+                      booking.status === 'completed' ? 'bg-primary' :
+                      booking.status === 'cancelled' ? 'bg-destructive' :
+                      'bg-warning text-warning-foreground'
+                    }>
+                      {booking.status === 'pending' && <Clock className="h-3 w-3 mr-1" />}
+                      {booking.status === 'confirmed' && <CheckCircle2 className="h-3 w-3 mr-1" />}
+                      {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
+                    </Badge>
+                  </div>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        )}
       </main>
     </div>
   );
