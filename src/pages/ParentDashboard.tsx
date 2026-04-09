@@ -575,6 +575,9 @@ export default function ParentDashboard() {
                           ))}
                         </div>
                         <span className="text-sm font-medium text-muted-foreground">{profileInfo.percent}% complete</span>
+                        <Link to="/parent/profile">
+                          <Button size="sm">Edit Profile</Button>
+                        </Link>
                       </div>
                     </div>
                   </div>
