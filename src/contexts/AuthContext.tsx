@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
+import { lovable } from '@/integrations/lovable/index';
 
 type AppRole = 'parent' | 'tutor' | 'agency' | 'admin';
 
@@ -12,7 +13,6 @@ interface AuthContextType {
   signUp: (email: string, password: string, fullName: string, role: AppRole) => Promise<{ error: Error | null }>;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signInWithGoogle: () => Promise<{ error: Error | null }>;
-  signInWithFacebook: () => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
 }
 
@@ -125,23 +125,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signInWithGoogle = async () => {
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
-      },
+    const result = await lovable.auth.signInWithOAuth("google", {
+      redirect_uri: window.location.origin,
     });
-    return { error };
-  };
-
-  const signInWithFacebook = async () => {
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'facebook',
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
-      },
-    });
-    return { error };
+    if (result.error) {
+      return { error: result.error instanceof Error ? result.error : new Error(String(result.error)) };
+    }
+    return { error: null };
   };
 
   const signOut = async () => {
@@ -160,7 +150,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       signUp,
       signIn,
       signInWithGoogle,
-      signInWithFacebook,
       signOut,
     }}>
       {children}
