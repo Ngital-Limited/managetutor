@@ -15,6 +15,7 @@ import {
   MessageSquare, Briefcase, BookOpen, User, Calendar, DollarSign,
   Award, Users, ArrowLeft, Share2
 } from 'lucide-react';
+import BookDemoClassDialog from '@/components/BookDemoClassDialog';
 
 interface TutorProfile {
   id: string;
@@ -407,15 +408,24 @@ export default function TutorPublicProfile() {
                       </Button>
                       
                       {role === 'parent' && (
-                        <Button
-                          variant={isFavorite ? 'secondary' : 'outline'}
-                          className="w-full"
-                          onClick={toggleFavorite}
-                          disabled={favoriteLoading}
-                        >
-                          <Heart className={`h-4 w-4 mr-2 ${isFavorite ? 'fill-current text-destructive' : ''}`} />
-                          {isFavorite ? 'Saved to Favorites' : 'Add to Favorites'}
-                        </Button>
+                        <>
+                          <BookDemoClassDialog
+                            tutorId={tutor.id}
+                            tutorName={profile.full_name}
+                            hourlyRateMin={tutor.hourly_rate_min}
+                            hourlyRateMax={tutor.hourly_rate_max}
+                            subjects={subjects}
+                          />
+                          <Button
+                            variant={isFavorite ? 'secondary' : 'outline'}
+                            className="w-full"
+                            onClick={toggleFavorite}
+                            disabled={favoriteLoading}
+                          >
+                            <Heart className={`h-4 w-4 mr-2 ${isFavorite ? 'fill-current text-destructive' : ''}`} />
+                            {isFavorite ? 'Saved to Favorites' : 'Add to Favorites'}
+                          </Button>
+                        </>
                       )}
                     </>
                   ) : (

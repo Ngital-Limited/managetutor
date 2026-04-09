@@ -205,6 +205,78 @@ export type Database = {
         }
         Relationships: []
       }
+      demo_bookings: {
+        Row: {
+          cancellation_reason: string | null
+          class_fee: number
+          created_at: string
+          duration_minutes: number
+          id: string
+          notes: string | null
+          parent_id: string
+          parent_phone: string | null
+          platform_commission: number
+          preferred_date: string
+          preferred_time: string
+          status: string
+          subject_id: string | null
+          tutor_id: string
+          tutor_payout: number
+          updated_at: string
+        }
+        Insert: {
+          cancellation_reason?: string | null
+          class_fee: number
+          created_at?: string
+          duration_minutes?: number
+          id?: string
+          notes?: string | null
+          parent_id: string
+          parent_phone?: string | null
+          platform_commission?: number
+          preferred_date: string
+          preferred_time: string
+          status?: string
+          subject_id?: string | null
+          tutor_id: string
+          tutor_payout?: number
+          updated_at?: string
+        }
+        Update: {
+          cancellation_reason?: string | null
+          class_fee?: number
+          created_at?: string
+          duration_minutes?: number
+          id?: string
+          notes?: string | null
+          parent_id?: string
+          parent_phone?: string | null
+          platform_commission?: number
+          preferred_date?: string
+          preferred_time?: string
+          status?: string
+          subject_id?: string | null
+          tutor_id?: string
+          tutor_payout?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "demo_bookings_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "subjects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "demo_bookings_tutor_id_fkey"
+            columns: ["tutor_id"]
+            isOneToOne: false
+            referencedRelation: "tutor_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       demo_profiles: {
         Row: {
           avatar_url: string | null

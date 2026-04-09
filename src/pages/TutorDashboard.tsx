@@ -79,6 +79,7 @@ export default function TutorDashboard() {
   });
   const [activeFeatured, setActiveFeatured] = useState<FeaturedListing | null>(null);
   const [boostLoading, setBoostLoading] = useState(false);
+  const [demoBookings, setDemoBookings] = useState<any[]>([]);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -155,6 +156,17 @@ export default function TutorDashboard() {
       if (featuredData) {
         setActiveFeatured(featuredData as FeaturedListing);
       }
+
+      // Fetch demo bookings
+      const { data: bookingsData } = await supabase
+        .from('demo_bookings')
+        .select('*, subjects(name_en, name_bn), profiles:parent_id(full_name, phone, email)')
+        .eq('tutor_id', tutorData.id)
+        .order('created_at', { ascending: false });
+
+      if (bookingsData) {
+        setDemoBookings(bookingsData);
+      }
     }
 
     setLoading(false);
@@ -197,6 +209,20 @@ export default function TutorDashboard() {
       toast({ title: 'Error', description: error.message, variant: 'destructive' });
     } finally {
       setBoostLoading(false);
+    }
+  };
+
+  const updateBookingStatus = async (bookingId: string, status: string) => {
+    const { error } = await supabase
+      .from('demo_bookings')
+      .update({ status })
+      .eq('id', bookingId);
+
+    if (error) {
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+    } else {
+      toast({ title: 'Updated', description: `Booking ${status} successfully.` });
+      fetchData();
     }
   };
 
@@ -493,6 +519,97 @@ export default function TutorDashboard() {
             )}
           </CardContent>
         </Card>
+
+        {/* Demo Class Bookings */}
+        {demoBookings.length > 0 && (
+          <Card className="mb-8">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Calendar className="h-5 w-5" />
+                Demo Class Bookings
+              </CardTitle>
+              <CardDescription>Manage trial lesson requests from parents</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {demoBookings.map((booking: any) => (
+                <div key={booking.id} className="p-4 border rounded-xl hover:bg-muted/50 transition-colors">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <h4 className="font-bold">{booking.profiles?.full_name || 'Parent'}</h4>
+                        {booking.subjects && (
+                          <Badge variant="secondary">
+                            <BookOpen className="h-3 w-3 mr-1" />
+                            {booking.subjects.name_en}
+                          </Badge>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-3 text-sm text-muted-foreground mb-2">
+                        <span className="flex items-center gap-1">
+                          <Calendar className="h-3 w-3" />
+                          {new Date(booking.preferred_date).toLocaleDateString()}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Clock className="h-3 w-3" />
+                          {booking.preferred_time} ({booking.duration_minutes} min)
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <DollarSign className="h-3 w-3" />
+                          ৳{booking.tutor_payout} payout
+                        </span>
+                      </div>
+                      {booking.notes && (
+                        <p className="text-sm text-muted-foreground italic">"{booking.notes}"</p>
+                      )}
+                      {booking.status === 'confirmed' && booking.profiles && (
+                        <div className="mt-2 p-2 bg-success/10 rounded-lg text-sm">
+                          <span className="font-medium text-success">Contact: </span>
+                          {booking.profiles.phone && (
+                            <a href={`tel:${booking.profiles.phone}`} className="text-primary hover:underline mr-3">
+                              <Phone className="h-3 w-3 inline mr-1" />{booking.profiles.phone}
+                            </a>
+                          )}
+                          {booking.profiles.email && (
+                            <a href={`mailto:${booking.profiles.email}`} className="text-primary hover:underline">
+                              <Mail className="h-3 w-3 inline mr-1" />{booking.profiles.email}
+                            </a>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Badge className={
+                        booking.status === 'confirmed' ? 'bg-success' :
+                        booking.status === 'completed' ? 'bg-primary' :
+                        booking.status === 'cancelled' ? 'bg-destructive' :
+                        'bg-warning text-warning-foreground'
+                      }>
+                        {booking.status === 'pending' && <Clock className="h-3 w-3 mr-1" />}
+                        {booking.status === 'confirmed' && <CheckCircle2 className="h-3 w-3 mr-1" />}
+                        {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
+                      </Badge>
+                      {booking.status === 'pending' && (
+                        <div className="flex gap-1">
+                          <Button size="sm" onClick={() => updateBookingStatus(booking.id, 'confirmed')}>
+                            Accept
+                          </Button>
+                          <Button size="sm" variant="ghost" className="text-destructive" onClick={() => updateBookingStatus(booking.id, 'cancelled')}>
+                            Decline
+                          </Button>
+                        </div>
+                      )}
+                      {booking.status === 'confirmed' && (
+                        <Button size="sm" variant="outline" onClick={() => updateBookingStatus(booking.id, 'completed')}>
+                          Mark Done
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        )}
 
         {/* Applications */}
         <Card>
