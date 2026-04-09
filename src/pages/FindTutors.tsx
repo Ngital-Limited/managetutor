@@ -193,7 +193,6 @@ export default function FindTutors() {
       .select(`
         *,
         districts (name_en, name_bn),
-        profiles!tutor_profiles_user_id_fkey (full_name, avatar_url, district_id, districts (name_en, name_bn)),
         tutor_subjects (subjects (*))
       `)
       .eq('is_available', true);
