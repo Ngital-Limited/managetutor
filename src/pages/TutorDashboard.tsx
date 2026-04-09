@@ -476,15 +476,6 @@ export default function TutorDashboard() {
             </Card>
           </Link>
 
-          <Link to="/messages">
-            <Card className="hover-lift cursor-pointer h-32">
-              <CardContent className="p-6 flex flex-col items-center justify-center text-center h-full">
-                <MessageSquare className="h-8 w-8 text-info mb-2" />
-                <h3 className="font-bold">Messages</h3>
-                <p className="text-xs text-muted-foreground">Chat with parents</p>
-              </CardContent>
-            </Card>
-          </Link>
 
           <Link to="/tutor/profile">
             <Card className="hover-lift cursor-pointer h-32">
@@ -771,14 +762,6 @@ export default function TutorDashboard() {
                                 >
                                   Withdraw
                                 </Button>
-                              )}
-                              {app.status === 'accepted' && app.jobs?.parent_id && (
-                                <Link to={`/messages?with=${app.jobs.parent_id}&job=${app.jobs.id}`}>
-                                  <Button size="sm" variant="outline">
-                                    <MessageSquare className="h-4 w-4 mr-1" />
-                                    Message
-                                  </Button>
-                                </Link>
                               )}
                               <Link to={`/jobs/${app.jobs?.id}`}>
                                 <Button size="sm" variant="ghost">
