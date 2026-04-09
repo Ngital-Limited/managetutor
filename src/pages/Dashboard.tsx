@@ -50,6 +50,7 @@ export default function Dashboard() {
     budget_max: 8000,
     teaching_mode: 'in_person',
     preferred_tutor_gender: 'any',
+    special_requirements: '',
   });
 
   useEffect(() => {
