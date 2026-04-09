@@ -96,9 +96,14 @@ export default function TutorPublicProfile() {
       .from('profiles')
       .select('full_name, avatar_url, district_id, districts (name_en, name_bn)')
       .eq('id', tutorData.user_id)
-      .single();
+      .maybeSingle();
 
-    if (profileData) setProfile(profileData as unknown as Profile);
+    setProfile(profileData as unknown as Profile || {
+      full_name: tutorData.display_name || 'Tutor',
+      avatar_url: '',
+      district_id: tutorData.district_id || '',
+      districts: null,
+    } as Profile);
 
     // Fetch subjects
     const { data: subjectsData } = await supabase
@@ -128,7 +133,7 @@ export default function TutorPublicProfile() {
         .select('id')
         .eq('parent_id', user.id)
         .eq('tutor_id', id)
-        .single();
+        .maybeSingle();
 
       setIsFavorite(!!favData);
     }
