@@ -141,9 +141,63 @@ export default function TutorDashboard() {
           totalEarnings: accepted.reduce((sum, a) => sum + (a.proposed_rate || 0), 0),
         });
       }
+      // Fetch active featured listing
+      const { data: featuredData } = await supabase
+        .from('featured_listings')
+        .select('*')
+        .eq('tutor_id', tutorData.id)
+        .eq('is_active', true)
+        .gte('end_date', new Date().toISOString())
+        .order('end_date', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (featuredData) {
+        setActiveFeatured(featuredData as FeaturedListing);
+      }
     }
 
     setLoading(false);
+  };
+
+  const handleBoostProfile = async (days: number, price: number) => {
+    if (!profile || !user) return;
+    setBoostLoading(true);
+    
+    try {
+      const startDate = new Date();
+      const endDate = new Date();
+      endDate.setDate(endDate.getDate() + days);
+
+      // Create featured listing
+      const { error: listingError } = await supabase
+        .from('featured_listings')
+        .insert({
+          tutor_id: profile.id,
+          listing_type: 'tutor_profile',
+          start_date: startDate.toISOString(),
+          end_date: endDate.toISOString(),
+          amount_paid: price,
+          is_active: true,
+        });
+
+      if (listingError) throw listingError;
+
+      // Update tutor profile
+      const { error: profileError } = await supabase
+        .from('tutor_profiles')
+        .update({ is_featured: true })
+        .eq('id', profile.id);
+
+      if (profileError) throw profileError;
+
+      toast({ title: 'Profile Boosted!', description: `Your profile is now featured for ${days} days.` });
+      fetchData();
+    } catch (error: any) {
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+    } finally {
+      setBoostLoading(false);
+    }
   };
 
   const withdrawApplication = async (appId: string) => {
