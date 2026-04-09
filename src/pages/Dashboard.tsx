@@ -448,15 +448,6 @@ export default function Dashboard() {
                 </Card>
               </Link>
 
-              <Card className="hover-lift cursor-pointer h-40">
-                <CardContent className="p-6 flex flex-col items-center justify-center text-center h-full">
-                  <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center mb-3">
-                    <MessageSquare className="h-6 w-6 text-accent" />
-                  </div>
-                  <h3 className="font-bold">Messages</h3>
-                  <p className="text-sm text-muted-foreground">Chat with parents</p>
-                </CardContent>
-              </Card>
             </div>
 
             <Card>
