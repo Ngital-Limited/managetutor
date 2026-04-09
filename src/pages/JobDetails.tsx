@@ -313,7 +313,46 @@ export default function JobDetails() {
                       <div className="font-medium capitalize">{job.preferred_tutor_gender || 'Any'} Gender</div>
                     </div>
                   </div>
+                  <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
+                    <Briefcase className="h-5 w-5 text-primary" />
+                    <div>
+                      <div className="text-xs text-muted-foreground">Teaching Mode</div>
+                      <div className="font-medium capitalize">{job.teaching_mode?.replace('_', ' ') || 'In Person'}</div>
+                    </div>
+                  </div>
+                  {job.student_gender && (
+                    <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
+                      <UserCheck className="h-5 w-5 text-primary" />
+                      <div>
+                        <div className="text-xs text-muted-foreground">Student Gender</div>
+                        <div className="font-medium capitalize">{job.student_gender}</div>
+                      </div>
+                    </div>
+                  )}
+                  {job.preferred_time && (
+                    <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
+                      <Clock className="h-5 w-5 text-primary" />
+                      <div>
+                        <div className="text-xs text-muted-foreground">Preferred Time</div>
+                        <div className="font-medium capitalize">{job.preferred_time}</div>
+                      </div>
+                    </div>
+                  )}
                 </div>
+
+                {job.special_requirements && (
+                  <div className="mt-6 p-4 bg-muted/50 rounded-lg">
+                    <h3 className="text-sm font-semibold mb-2 flex items-center gap-2">
+                      <CheckCircle2 className="h-4 w-4 text-primary" />
+                      Special Requirements
+                    </h3>
+                    <div className="flex flex-wrap gap-2">
+                      {job.special_requirements.split(', ').map((req, i) => (
+                        <Badge key={i} variant="secondary">{req}</Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
 
