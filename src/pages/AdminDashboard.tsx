@@ -523,6 +523,39 @@ export default function AdminDashboard() {
     });
   };
 
+  const fetchChartData = async () => {
+    // Build last 30 days date labels
+    const days: string[] = [];
+    for (let i = 29; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      days.push(d.toISOString().slice(0, 10));
+    }
+    const startDate = days[0] + 'T00:00:00Z';
+
+    const [{ data: signupRows }, { data: jobRows }, { data: revenueRows }] = await Promise.all([
+      supabase.from('profiles').select('created_at').gte('created_at', startDate).order('created_at'),
+      supabase.from('jobs').select('created_at').gte('created_at', startDate).order('created_at'),
+      supabase.from('payment_transactions').select('created_at, amount').eq('status', 'completed').gte('created_at', startDate).order('created_at'),
+    ]);
+
+    const countByDay = (rows: { created_at: string }[] | null) => {
+      const map: Record<string, number> = {};
+      days.forEach(d => (map[d] = 0));
+      rows?.forEach(r => { const d = r.created_at?.slice(0, 10); if (d && map[d] !== undefined) map[d]++; });
+      return days.map(d => ({ date: d.slice(5), count: map[d] }));
+    };
+
+    const revenueByDay = () => {
+      const map: Record<string, number> = {};
+      days.forEach(d => (map[d] = 0));
+      revenueRows?.forEach(r => { const d = r.created_at?.slice(0, 10); if (d && map[d] !== undefined) map[d] += Number(r.amount); });
+      return days.map(d => ({ date: d.slice(5), amount: map[d] }));
+    };
+
+    setChartData({ signups: countByDay(signupRows), jobs: countByDay(jobRows), revenue: revenueByDay() });
+  };
+
   // ── Fetch functions per tab ──
   const fetchUsers = useCallback(async () => {
     let query = supabase.from('profiles').select('id, full_name, email, phone, avatar_url, is_banned, created_at').order('created_at', { ascending: false }).limit(100);
