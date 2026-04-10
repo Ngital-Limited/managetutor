@@ -484,6 +484,7 @@ export default function AdminDashboard() {
         toast({ title: 'Access Denied', description: 'Admin access required', variant: 'destructive' });
       } else {
         fetchStats();
+        fetchChartData();
       }
     }
   }, [user, role, loading]);
