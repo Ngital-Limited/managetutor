@@ -283,9 +283,79 @@ export default function Index() {
         </section>
       )}
 
-      {/* Featured Tutors */}
-      {featuredTutors.length > 0 && (
+      {/* Latest Tuition Jobs */}
+      {latestJobs.length > 0 && (
         <section className="py-16 bg-background">
+          <div className="container mx-auto px-4">
+            <div className="flex items-center justify-between mb-10">
+              <div>
+                <h2 className="text-3xl md:text-4xl font-extrabold mb-2">Latest Tuition Jobs</h2>
+                <p className="text-muted-foreground">New opportunities posted by parents and guardians</p>
+              </div>
+              <Link to="/jobs">
+                <Button variant="outline" className="hidden sm:flex gap-1">
+                  All Jobs <ChevronRight className="h-4 w-4" />
+                </Button>
+              </Link>
+            </div>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+              {latestJobs.map((job) => (
+                <Link key={job.id} to={`/jobs/${job.id}`}>
+                  <Card className="hover-lift border-border/50 overflow-hidden h-full">
+                    <CardContent className="p-5">
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-bold text-base truncate mb-1">{job.title}</h3>
+                          {job.job_reference && (
+                            <Badge variant="outline" className="text-xs font-mono mb-2">{job.job_reference}</Badge>
+                          )}
+                        </div>
+                        <Badge className="bg-success/10 text-success border-success/20 flex-shrink-0 ml-2">Open</Badge>
+                      </div>
+                      <p className="text-sm text-muted-foreground mb-3 line-clamp-2">{job.description}</p>
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground mb-3 flex-wrap">
+                        <span className="flex items-center gap-1">
+                          <MapPin className="h-3 w-3" />
+                          {language === 'bn' ? job.districts?.name_bn : job.districts?.name_en}
+                        </span>
+                        {job.subjects && (
+                          <span className="flex items-center gap-1">
+                            <BookOpen className="h-3 w-3" />
+                            {language === 'bn' ? job.subjects.name_bn : job.subjects.name_en}
+                          </span>
+                        )}
+                        {job.days_per_week && (
+                          <span className="flex items-center gap-1">
+                            <Clock className="h-3 w-3" />
+                            {job.days_per_week}d/wk
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex items-center justify-between">
+                        {(job.budget_min || job.budget_max) && (
+                          <span className="text-sm font-semibold text-primary">
+                            ৳{job.budget_min || 0} – ৳{job.budget_max || 0}/mo
+                          </span>
+                        )}
+                        <span className="text-xs text-muted-foreground">
+                          {formatDistanceToNow(new Date(job.created_at), { addSuffix: true })}
+                        </span>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
+              ))}
+            </div>
+            <div className="text-center mt-8 sm:hidden">
+              <Link to="/jobs"><Button variant="outline">View All Jobs <ChevronRight className="h-4 w-4 ml-1" /></Button></Link>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Tutor Profiles */}
+      {featuredTutors.length > 0 && (
+        <section className="py-16 gradient-soft">
           <div className="container mx-auto px-4">
             <div className="flex items-center justify-between mb-10">
               <div>
@@ -365,76 +435,6 @@ export default function Index() {
             </div>
             <div className="text-center mt-8 sm:hidden">
               <Link to="/tutors"><Button variant="outline">View All Tutors <ChevronRight className="h-4 w-4 ml-1" /></Button></Link>
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* Latest Tuition Jobs */}
-      {latestJobs.length > 0 && (
-        <section className="py-16 gradient-soft">
-          <div className="container mx-auto px-4">
-            <div className="flex items-center justify-between mb-10">
-              <div>
-                <h2 className="text-3xl md:text-4xl font-extrabold mb-2">Latest Tuition Jobs</h2>
-                <p className="text-muted-foreground">New opportunities posted by parents and guardians</p>
-              </div>
-              <Link to="/jobs">
-                <Button variant="outline" className="hidden sm:flex gap-1">
-                  All Jobs <ChevronRight className="h-4 w-4" />
-                </Button>
-              </Link>
-            </div>
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-              {latestJobs.map((job) => (
-                <Link key={job.id} to={`/jobs/${job.id}`}>
-                  <Card className="hover-lift border-border/50 overflow-hidden h-full">
-                    <CardContent className="p-5">
-                      <div className="flex items-start justify-between mb-3">
-                        <div className="flex-1 min-w-0">
-                          <h3 className="font-bold text-base truncate mb-1">{job.title}</h3>
-                          {job.job_reference && (
-                            <Badge variant="outline" className="text-xs font-mono mb-2">{job.job_reference}</Badge>
-                          )}
-                        </div>
-                        <Badge className="bg-success/10 text-success border-success/20 flex-shrink-0 ml-2">Open</Badge>
-                      </div>
-                      <p className="text-sm text-muted-foreground mb-3 line-clamp-2">{job.description}</p>
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground mb-3 flex-wrap">
-                        <span className="flex items-center gap-1">
-                          <MapPin className="h-3 w-3" />
-                          {language === 'bn' ? job.districts?.name_bn : job.districts?.name_en}
-                        </span>
-                        {job.subjects && (
-                          <span className="flex items-center gap-1">
-                            <BookOpen className="h-3 w-3" />
-                            {language === 'bn' ? job.subjects.name_bn : job.subjects.name_en}
-                          </span>
-                        )}
-                        {job.days_per_week && (
-                          <span className="flex items-center gap-1">
-                            <Clock className="h-3 w-3" />
-                            {job.days_per_week}d/wk
-                          </span>
-                        )}
-                      </div>
-                      <div className="flex items-center justify-between">
-                        {(job.budget_min || job.budget_max) && (
-                          <span className="text-sm font-semibold text-primary">
-                            ৳{job.budget_min || 0} – ৳{job.budget_max || 0}/mo
-                          </span>
-                        )}
-                        <span className="text-xs text-muted-foreground">
-                          {formatDistanceToNow(new Date(job.created_at), { addSuffix: true })}
-                        </span>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </Link>
-              ))}
-            </div>
-            <div className="text-center mt-8 sm:hidden">
-              <Link to="/jobs"><Button variant="outline">View All Jobs <ChevronRight className="h-4 w-4 ml-1" /></Button></Link>
             </div>
           </div>
         </section>
