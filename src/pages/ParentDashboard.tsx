@@ -338,7 +338,7 @@ export default function ParentDashboard() {
     setSubmitting(false);
   };
 
-
+  const handleApplicationAction = async (appId: string, status: 'accepted' | 'rejected') => {
     const { error } = await supabase.from('applications').update({ status }).eq('id', appId);
 
     if (error) {
