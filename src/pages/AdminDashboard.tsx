@@ -24,7 +24,7 @@ import {
   GraduationCap, Shield, Users, Briefcase, CheckCircle2, XCircle,
   Clock, AlertTriangle, BarChart3, FileText, Settings, Search,
   Eye, Ban, UserCheck, FileCheck,
-  LogOut, Home, Star, DollarSign, Trash2, CreditCard
+  LogOut, Home, Star, DollarSign, Trash2, CreditCard, Megaphone, Send
 } from 'lucide-react';
 
 // ──────────── Types ────────────
@@ -109,6 +109,125 @@ interface PaymentRow {
   completed_at: string | null;
   listing_type: string | null;
   profiles: { full_name: string; email: string };
+}
+
+// ──────────── Broadcast Tab ────────────
+function BroadcastTab({ toast }: { toast: ReturnType<typeof useToast>['toast'] }) {
+  const [target, setTarget] = useState<'all' | 'tutors' | 'parents'>('all');
+  const [title, setTitle] = useState('');
+  const [message, setMessage] = useState('');
+  const [sending, setSending] = useState(false);
+  const [sent, setSent] = useState<{ title: string; target: string; date: string }[]>([]);
+
+  const handleSend = async () => {
+    if (!title.trim() || !message.trim()) {
+      toast({ title: 'Missing fields', description: 'Title and message are required', variant: 'destructive' });
+      return;
+    }
+    setSending(true);
+    try {
+      // Determine which roles to target
+      const roles: ("parent" | "tutor")[] = target === 'all' ? ['parent', 'tutor'] : target === 'tutors' ? ['tutor'] : ['parent'];
+      const { data: roleRows } = await supabase.from('user_roles').select('user_id').in('role', roles);
+      if (!roleRows || roleRows.length === 0) {
+        toast({ title: 'No users found', description: 'No users match the selected audience', variant: 'destructive' });
+        setSending(false);
+        return;
+      }
+
+      // Deduplicate user IDs
+      const userIds = [...new Set(roleRows.map(r => r.user_id))];
+
+      // Insert notifications in batches of 500
+      const batchSize = 500;
+      for (let i = 0; i < userIds.length; i += batchSize) {
+        const batch = userIds.slice(i, i + batchSize).map(uid => ({
+          user_id: uid,
+          title: title.trim(),
+          message: message.trim(),
+          type: 'broadcast',
+        }));
+        const { error } = await supabase.from('notifications').insert(batch);
+        if (error) throw error;
+      }
+
+      toast({ title: 'Broadcast sent!', description: `Notification sent to ${userIds.length} user(s)` });
+      setSent(prev => [{ title: title.trim(), target, date: new Date().toISOString() }, ...prev]);
+      setTitle('');
+      setMessage('');
+    } catch (err: any) {
+      toast({ title: 'Error', description: err.message, variant: 'destructive' });
+    } finally {
+      setSending(false);
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <h1 className="text-3xl font-extrabold">Broadcast Notifications</h1>
+      <div className="grid md:grid-cols-2 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2"><Megaphone className="h-5 w-5 text-primary" /> Send Broadcast</CardTitle>
+            <CardDescription>Send a notification to all tutors, parents, or everyone at once.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <label className="text-sm font-medium">Audience</label>
+              <Select value={target} onValueChange={(v) => setTarget(v as any)}>
+                <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Users (Tutors & Parents)</SelectItem>
+                  <SelectItem value="tutors">Tutors Only</SelectItem>
+                  <SelectItem value="parents">Parents Only</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <label className="text-sm font-medium">Title</label>
+              <Input value={title} onChange={e => setTitle(e.target.value)} placeholder="e.g. Platform Maintenance Notice" className="mt-1" maxLength={100} />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Message</label>
+              <Textarea value={message} onChange={e => setMessage(e.target.value)} placeholder="Write your broadcast message..." className="mt-1" rows={4} maxLength={500} />
+              <p className="text-xs text-muted-foreground mt-1">{message.length}/500 characters</p>
+            </div>
+            <Button className="w-full" onClick={handleSend} disabled={sending || !title.trim() || !message.trim()}>
+              {sending ? <Clock className="h-4 w-4 mr-2 animate-spin" /> : <Send className="h-4 w-4 mr-2" />}
+              {sending ? 'Sending...' : 'Send Broadcast'}
+            </Button>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Recent Broadcasts</CardTitle>
+            <CardDescription>Broadcasts sent during this session</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {sent.length === 0 ? (
+              <p className="text-sm text-muted-foreground text-center py-8">No broadcasts sent yet</p>
+            ) : (
+              <div className="space-y-3">
+                {sent.map((s, i) => (
+                  <div key={i} className="flex items-start gap-3 p-3 bg-muted/50 rounded-lg">
+                    <Megaphone className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-sm truncate">{s.title}</p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <Badge variant="outline" className="text-xs capitalize">{s.target === 'all' ? 'Everyone' : s.target}</Badge>
+                        <span className="text-xs text-muted-foreground">{format(new Date(s.date), 'HH:mm')}</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
 }
 
 // ──────────── Component ────────────
@@ -348,6 +467,7 @@ export default function AdminDashboard() {
     { title: 'Reports', value: 'reports', icon: AlertTriangle, badge: stats.pendingReports },
     { title: 'Reviews', value: 'reviews', icon: Star },
     { title: 'Payments', value: 'payments', icon: CreditCard },
+    { title: 'Broadcast', value: 'broadcast', icon: Megaphone },
     { title: 'Settings', value: 'settings', icon: Settings },
   ];
 
@@ -820,6 +940,9 @@ export default function AdminDashboard() {
                 </Card>
               </div>
             )}
+
+            {/* ═══════ BROADCAST TAB ═══════ */}
+            {activeTab === 'broadcast' && <BroadcastTab toast={toast} />}
 
             {/* ═══════ SETTINGS TAB ═══════ */}
             {activeTab === 'settings' && (
