@@ -127,7 +127,7 @@ function BroadcastTab({ toast }: { toast: ReturnType<typeof useToast>['toast'] }
     setSending(true);
     try {
       // Determine which roles to target
-      const roles = target === 'all' ? ['parent', 'tutor'] : target === 'tutors' ? ['tutor'] : ['parent'];
+      const roles: ("parent" | "tutor")[] = target === 'all' ? ['parent', 'tutor'] : target === 'tutors' ? ['tutor'] : ['parent'];
       const { data: roleRows } = await supabase.from('user_roles').select('user_id').in('role', roles);
       if (!roleRows || roleRows.length === 0) {
         toast({ title: 'No users found', description: 'No users match the selected audience', variant: 'destructive' });
