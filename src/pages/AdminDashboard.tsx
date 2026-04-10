@@ -467,6 +467,7 @@ export default function AdminDashboard() {
   const [reports, setReports] = useState<Report[]>([]);
   const [reviews, setReviews] = useState<ReviewRow[]>([]);
   const [payments, setPayments] = useState<PaymentRow[]>([]);
+  const [chartData, setChartData] = useState<{ signups: any[]; jobs: any[]; revenue: any[] }>({ signups: [], jobs: [], revenue: [] });
 
   // Dialog states
   const [selectedTutor, setSelectedTutor] = useState<TutorVerification | null>(null);
