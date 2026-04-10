@@ -60,8 +60,16 @@ export default function Dashboard() {
   useEffect(() => {
     if (!loading && !user) {
       navigate('/auth');
+    } else if (!loading && user && role) {
+      if (role === 'tutor') {
+        navigate('/tutor/dashboard');
+      } else if (role === 'parent') {
+        navigate('/parent/dashboard');
+      } else if (role === 'admin') {
+        navigate('/admin');
+      }
     }
-  }, [user, loading, navigate]);
+  }, [user, loading, role, navigate]);
 
   useEffect(() => {
     if (user) {
