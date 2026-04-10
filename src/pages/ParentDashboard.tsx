@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
+import { SearchableSelect } from '@/components/SearchableSelect';
 import { CLASS_LEVELS } from '@/constants/classLevels';
 import { SPECIAL_REQUIREMENTS } from '@/constants/specialRequirements';
 import { Badge } from '@/components/ui/badge';
@@ -54,6 +55,7 @@ interface Job {
   budget_max: number;
   teaching_mode: string;
   days_per_week: number;
+  job_reference: string;
   districts: { name_en: string; name_bn: string };
   subjects: { name_en: string; name_bn: string } | null;
 }
@@ -324,6 +326,20 @@ export default function ParentDashboard() {
     return { percent: complete, missing };
   };
 
+  const districtOptions = useMemo(() => districts.map(d => ({
+    value: d.id,
+    label: language === 'en' ? d.name_en : d.name_bn,
+  })), [districts, language]);
+
+  const subjectOptions = useMemo(() => subjects.map(s => ({
+    value: s.id,
+    label: language === 'en' ? s.name_en : s.name_bn,
+  })), [subjects, language]);
+
+  const classLevelOptions = useMemo(() => CLASS_LEVELS.flatMap(group =>
+    group.items.map(item => ({ value: item, label: item, group: group.group }))
+  ), []);
+
   if (authLoading || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -388,43 +404,39 @@ export default function ParentDashboard() {
                     <div className="grid md:grid-cols-2 gap-4">
                       <div>
                         <Label>Subject</Label>
-                        <Select value={jobForm.subject_id} onValueChange={(v) => setJobForm({ ...jobForm, subject_id: v })}>
-                          <SelectTrigger><SelectValue placeholder="Select subject" /></SelectTrigger>
-                          <SelectContent>
-                            {subjects.map(s => (
-                              <SelectItem key={s.id} value={s.id}>{language === 'en' ? s.name_en : s.name_bn}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                        <SearchableSelect
+                          options={subjectOptions}
+                          value={jobForm.subject_id}
+                          onValueChange={(v) => setJobForm({ ...jobForm, subject_id: v })}
+                          placeholder="Search subject..."
+                          searchPlaceholder="Type to search subjects..."
+                          emptyText="No subjects found."
+                        />
                       </div>
                       <div>
                         <Label>Location *</Label>
-                        <Select value={jobForm.district_id} onValueChange={(v) => setJobForm({ ...jobForm, district_id: v })} required>
-                          <SelectTrigger><SelectValue placeholder="Select district" /></SelectTrigger>
-                          <SelectContent>
-                            {districts.map(d => (
-                              <SelectItem key={d.id} value={d.id}>{language === 'en' ? d.name_en : d.name_bn}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                        <SearchableSelect
+                          options={districtOptions}
+                          value={jobForm.district_id}
+                          onValueChange={(v) => setJobForm({ ...jobForm, district_id: v })}
+                          placeholder="Search district..."
+                          searchPlaceholder="Type to search districts..."
+                          emptyText="No districts found."
+                        />
                       </div>
                     </div>
                     <div className="grid md:grid-cols-2 gap-4">
                       <div>
                         <Label>Class Level</Label>
-                        <Select value={jobForm.class_level} onValueChange={(v) => setJobForm({ ...jobForm, class_level: v })}>
-                          <SelectTrigger><SelectValue placeholder="Select class level" /></SelectTrigger>
-                          <SelectContent className="max-h-[300px]">
-                            {CLASS_LEVELS.map((group) => (
-                              <SelectGroup key={group.group}>
-                                <SelectLabel>{group.group}</SelectLabel>
-                                {group.items.map((item) => (
-                                  <SelectItem key={item} value={item}>{item}</SelectItem>
-                                ))}
-                              </SelectGroup>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                        <SearchableSelect
+                          options={classLevelOptions}
+                          value={jobForm.class_level}
+                          onValueChange={(v) => setJobForm({ ...jobForm, class_level: v })}
+                          placeholder="Search class level..."
+                          searchPlaceholder="Type to search..."
+                          emptyText="No class levels found."
+                          grouped
+                        />
                       </div>
                       <div>
                         <Label>Days per Week</Label>
@@ -651,7 +663,12 @@ export default function ParentDashboard() {
                           >
                             <div className="flex items-start justify-between">
                               <div className="flex-1">
-                                <h4 className="font-bold mb-1">{job.title}</h4>
+                                <div className="flex items-center gap-2 mb-1">
+                                  <h4 className="font-bold">{job.title}</h4>
+                                  {(job as any).job_reference && (
+                                    <Badge variant="outline" className="text-xs font-mono">{(job as any).job_reference}</Badge>
+                                  )}
+                                </div>
                                 <div className="flex items-center gap-3 text-sm text-muted-foreground mb-2">
                                   <span className="flex items-center gap-1">
                                     <MapPin className="h-3 w-3" />

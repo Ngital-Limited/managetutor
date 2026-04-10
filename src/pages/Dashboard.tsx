@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
+import { SearchableSelect } from '@/components/SearchableSelect';
 import { CLASS_LEVELS } from '@/constants/classLevels';
 import { SPECIAL_REQUIREMENTS } from '@/constants/specialRequirements';
 import { Badge } from '@/components/ui/badge';
@@ -220,43 +221,36 @@ export default function Dashboard() {
                     <div className="grid md:grid-cols-2 gap-4">
                       <div>
                         <Label>Subject</Label>
-                        <Select value={jobForm.subject_id} onValueChange={(v) => setJobForm({ ...jobForm, subject_id: v })}>
-                          <SelectTrigger><SelectValue placeholder="Select subject" /></SelectTrigger>
-                          <SelectContent>
-                            {subjects.map(s => (
-                              <SelectItem key={s.id} value={s.id}>{s.name_en}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                        <SearchableSelect
+                          options={subjects.map(s => ({ value: s.id, label: s.name_en }))}
+                          value={jobForm.subject_id}
+                          onValueChange={(v) => setJobForm({ ...jobForm, subject_id: v })}
+                          placeholder="Search subject..."
+                          searchPlaceholder="Type to search subjects..."
+                        />
                       </div>
                       <div>
                         <Label>Location *</Label>
-                        <Select value={jobForm.district_id} onValueChange={(v) => setJobForm({ ...jobForm, district_id: v })} required>
-                          <SelectTrigger><SelectValue placeholder="Select district" /></SelectTrigger>
-                          <SelectContent>
-                            {districts.map(d => (
-                              <SelectItem key={d.id} value={d.id}>{d.name_en}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                        <SearchableSelect
+                          options={districts.map(d => ({ value: d.id, label: d.name_en }))}
+                          value={jobForm.district_id}
+                          onValueChange={(v) => setJobForm({ ...jobForm, district_id: v })}
+                          placeholder="Search district..."
+                          searchPlaceholder="Type to search districts..."
+                        />
                       </div>
                     </div>
                     <div className="grid md:grid-cols-2 gap-4">
                       <div>
                         <Label>Class Level</Label>
-                        <Select value={jobForm.class_level} onValueChange={(v) => setJobForm({ ...jobForm, class_level: v })}>
-                          <SelectTrigger><SelectValue placeholder="Select class level" /></SelectTrigger>
-                          <SelectContent className="max-h-[300px]">
-                            {CLASS_LEVELS.map((group) => (
-                              <SelectGroup key={group.group}>
-                                <SelectLabel>{group.group}</SelectLabel>
-                                {group.items.map((item) => (
-                                  <SelectItem key={item} value={item}>{item}</SelectItem>
-                                ))}
-                              </SelectGroup>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                        <SearchableSelect
+                          options={CLASS_LEVELS.flatMap(g => g.items.map(item => ({ value: item, label: item, group: g.group })))}
+                          value={jobForm.class_level}
+                          onValueChange={(v) => setJobForm({ ...jobForm, class_level: v })}
+                          placeholder="Search class level..."
+                          searchPlaceholder="Type to search..."
+                          grouped
+                        />
                       </div>
                       <div>
                         <Label>Days per Week</Label>
@@ -377,7 +371,12 @@ export default function Dashboard() {
                     <Card key={job.id}>
                       <CardContent className="p-4 flex items-center justify-between">
                         <div>
-                          <h3 className="font-bold">{job.title}</h3>
+                          <div className="flex items-center gap-2">
+                            <h3 className="font-bold">{job.title}</h3>
+                            {(job as any).job_reference && (
+                              <Badge variant="outline" className="text-xs font-mono">{(job as any).job_reference}</Badge>
+                            )}
+                          </div>
                           <p className="text-sm text-muted-foreground flex items-center gap-2">
                             <MapPin className="h-3 w-3" />
                             {job.districts?.name_en}
