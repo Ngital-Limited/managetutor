@@ -604,7 +604,8 @@ export default function ParentDashboard() {
                       </div>
                     </div>
                     <Button type="submit" className="w-full" disabled={submitting}>
-                      {submitting ? 'Posting...' : 'Post Job'}
+                      {submitting ? (editingJob ? 'Updating...' : 'Posting...') : (editingJob ? 'Update Job' : 'Post Job')}
+                    </Button>
                     </Button>
                   </form>
                 </DialogContent>
