@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -466,6 +467,7 @@ export default function AdminDashboard() {
   const [reports, setReports] = useState<Report[]>([]);
   const [reviews, setReviews] = useState<ReviewRow[]>([]);
   const [payments, setPayments] = useState<PaymentRow[]>([]);
+  const [chartData, setChartData] = useState<{ signups: any[]; jobs: any[]; revenue: any[] }>({ signups: [], jobs: [], revenue: [] });
 
   // Dialog states
   const [selectedTutor, setSelectedTutor] = useState<TutorVerification | null>(null);
@@ -482,6 +484,7 @@ export default function AdminDashboard() {
         toast({ title: 'Access Denied', description: 'Admin access required', variant: 'destructive' });
       } else {
         fetchStats();
+        fetchChartData();
       }
     }
   }, [user, role, loading]);
@@ -518,6 +521,39 @@ export default function AdminDashboard() {
       totalJobs: totalJobs || 0, completedJobs: completedJobs || 0,
       pendingReports: pendingReports || 0, totalReviews: totalReviews || 0, totalRevenue,
     });
+  };
+
+  const fetchChartData = async () => {
+    // Build last 30 days date labels
+    const days: string[] = [];
+    for (let i = 29; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      days.push(d.toISOString().slice(0, 10));
+    }
+    const startDate = days[0] + 'T00:00:00Z';
+
+    const [{ data: signupRows }, { data: jobRows }, { data: revenueRows }] = await Promise.all([
+      supabase.from('profiles').select('created_at').gte('created_at', startDate).order('created_at'),
+      supabase.from('jobs').select('created_at').gte('created_at', startDate).order('created_at'),
+      supabase.from('payment_transactions').select('created_at, amount').eq('status', 'completed').gte('created_at', startDate).order('created_at'),
+    ]);
+
+    const countByDay = (rows: { created_at: string }[] | null) => {
+      const map: Record<string, number> = {};
+      days.forEach(d => (map[d] = 0));
+      rows?.forEach(r => { const d = r.created_at?.slice(0, 10); if (d && map[d] !== undefined) map[d]++; });
+      return days.map(d => ({ date: d.slice(5), count: map[d] }));
+    };
+
+    const revenueByDay = () => {
+      const map: Record<string, number> = {};
+      days.forEach(d => (map[d] = 0));
+      revenueRows?.forEach(r => { const d = r.created_at?.slice(0, 10); if (d && map[d] !== undefined) map[d] += Number(r.amount); });
+      return days.map(d => ({ date: d.slice(5), amount: map[d] }));
+    };
+
+    setChartData({ signups: countByDay(signupRows), jobs: countByDay(jobRows), revenue: revenueByDay() });
   };
 
   // ── Fetch functions per tab ──
@@ -809,6 +845,69 @@ export default function AdminDashboard() {
                     </div>
                   </CardContent>
                 </Card>
+
+                {/* Analytics Charts */}
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-base flex items-center gap-2"><Users className="h-4 w-4 text-primary" /> User Signups</CardTitle>
+                      <CardDescription>Last 30 days</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="h-48">
+                        <ResponsiveContainer width="100%" height="100%">
+                          <AreaChart data={chartData.signups}>
+                            <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
+                            <XAxis dataKey="date" tick={{ fontSize: 10 }} interval="preserveStartEnd" className="text-muted-foreground" />
+                            <YAxis allowDecimals={false} tick={{ fontSize: 10 }} width={30} />
+                            <Tooltip contentStyle={{ fontSize: 12, borderRadius: 8, border: '1px solid hsl(var(--border))' }} />
+                            <Area type="monotone" dataKey="count" stroke="hsl(var(--primary))" fill="hsl(var(--primary)/0.15)" strokeWidth={2} name="Signups" />
+                          </AreaChart>
+                        </ResponsiveContainer>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-base flex items-center gap-2"><Briefcase className="h-4 w-4 text-accent" /> Job Postings</CardTitle>
+                      <CardDescription>Last 30 days</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="h-48">
+                        <ResponsiveContainer width="100%" height="100%">
+                          <BarChart data={chartData.jobs}>
+                            <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
+                            <XAxis dataKey="date" tick={{ fontSize: 10 }} interval="preserveStartEnd" />
+                            <YAxis allowDecimals={false} tick={{ fontSize: 10 }} width={30} />
+                            <Tooltip contentStyle={{ fontSize: 12, borderRadius: 8, border: '1px solid hsl(var(--border))' }} />
+                            <Bar dataKey="count" fill="hsl(var(--accent))" radius={[3, 3, 0, 0]} name="Jobs" />
+                          </BarChart>
+                        </ResponsiveContainer>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-base flex items-center gap-2"><DollarSign className="h-4 w-4 text-success" /> Revenue</CardTitle>
+                      <CardDescription>Last 30 days (৳)</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="h-48">
+                        <ResponsiveContainer width="100%" height="100%">
+                          <AreaChart data={chartData.revenue}>
+                            <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
+                            <XAxis dataKey="date" tick={{ fontSize: 10 }} interval="preserveStartEnd" />
+                            <YAxis tick={{ fontSize: 10 }} width={40} />
+                            <Tooltip contentStyle={{ fontSize: 12, borderRadius: 8, border: '1px solid hsl(var(--border))' }} formatter={(v: number) => [`৳${v.toLocaleString()}`, 'Revenue']} />
+                            <Area type="monotone" dataKey="amount" stroke="hsl(142 76% 36%)" fill="hsl(142 76% 36% / 0.15)" strokeWidth={2} name="Revenue" />
+                          </AreaChart>
+                        </ResponsiveContainer>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
               </div>
             )}
 
