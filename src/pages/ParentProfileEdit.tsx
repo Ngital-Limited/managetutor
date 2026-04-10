@@ -10,6 +10,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { PhoneInput, isValidBDPhone } from '@/components/PhoneInput';
 import { ArrowLeft, Save, Upload, User, MapPin, Phone } from 'lucide-react';
 
 interface District { id: string; name_en: string; name_bn: string; }
@@ -57,6 +58,10 @@ export default function ParentProfileEdit() {
   };
 
   const handleSave = async () => {
+    if (form.phone && !isValidBDPhone(form.phone)) {
+      toast({ title: 'Invalid Phone', description: 'Please enter a valid Bangladesh phone number.', variant: 'destructive' });
+      return;
+    }
     setSaving(true);
     const { error } = await supabase.from('profiles').update({
       full_name: form.full_name,
@@ -153,7 +158,7 @@ export default function ParentProfileEdit() {
               </div>
               <div>
                 <Label className="flex items-center gap-1"><Phone className="h-3 w-3" /> Phone Number</Label>
-                <Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="+880 1XXX-XXXXXX" />
+                <PhoneInput value={form.phone} onChange={(v) => setForm({ ...form, phone: v })} />
               </div>
               <div>
                 <Label className="flex items-center gap-1"><MapPin className="h-3 w-3" /> Location</Label>
