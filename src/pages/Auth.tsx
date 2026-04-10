@@ -33,11 +33,21 @@ export default function Auth() {
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
 
+  const { role: userRole } = useAuth();
+
   useEffect(() => {
-    if (user && !authLoading) {
-      navigate('/dashboard');
+    if (user && !authLoading && userRole) {
+      if (userRole === 'tutor') {
+        navigate('/tutor/dashboard');
+      } else if (userRole === 'parent') {
+        navigate('/parent/dashboard');
+      } else if (userRole === 'admin') {
+        navigate('/admin');
+      } else {
+        navigate('/dashboard');
+      }
     }
-  }, [user, authLoading, navigate]);
+  }, [user, authLoading, userRole, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
