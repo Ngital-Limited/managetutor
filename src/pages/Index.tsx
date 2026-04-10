@@ -188,16 +188,17 @@ export default function Index() {
                     <Globe className="h-3.5 w-3.5" />
                     Mode
                   </label>
-                  <Select value={selectedMode} onValueChange={setSelectedMode}>
-                    <SelectTrigger className="h-11 rounded-xl bg-muted/50 border-border/60 focus:bg-card">
-                      <SelectValue placeholder="Any Mode" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="online">Online</SelectItem>
-                      <SelectItem value="in_person">In-Person</SelectItem>
-                      <SelectItem value="hybrid">Both</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <SearchableSelect
+                    options={[
+                      { value: 'online', label: 'Online' },
+                      { value: 'in_person', label: 'In-Person' },
+                      { value: 'hybrid', label: 'Both' },
+                    ]}
+                    value={selectedMode}
+                    onValueChange={setSelectedMode}
+                    placeholder="Any Mode"
+                    className="h-11 rounded-xl bg-muted/50 border-border/60 focus:bg-card"
+                  />
                 </div>
               </div>
               <Button onClick={handleSearch} className="w-full h-12 rounded-xl text-base font-bold gap-2 shadow-lg shadow-primary/20">
