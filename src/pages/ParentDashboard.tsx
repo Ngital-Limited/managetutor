@@ -34,6 +34,7 @@ import {
   useSidebar,
 } from '@/components/ui/sidebar';
 import { NavLink } from '@/components/NavLink';
+import { NotificationBell } from '@/components/NotificationBell';
 import {
   GraduationCap, LogOut, Globe, Plus, MapPin, BookOpen,
   Star, Briefcase, Users, Clock, CheckCircle2, XCircle, Search, ArrowRight,
@@ -441,6 +442,7 @@ export default function ParentDashboard() {
               <span className="text-lg font-bold hidden sm:inline">Dashboard</span>
             </div>
             <div className="flex items-center gap-3">
+              <NotificationBell />
               <Button variant="ghost" size="sm" onClick={() => setLanguage(language === 'en' ? 'bn' : 'en')}>
                 <Globe className="h-4 w-4 mr-1" />
                 {language === 'en' ? 'বাংলা' : 'EN'}
