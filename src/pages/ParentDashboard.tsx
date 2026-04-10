@@ -55,6 +55,7 @@ interface Job {
   budget_max: number;
   teaching_mode: string;
   days_per_week: number;
+  job_reference: string;
   districts: { name_en: string; name_bn: string };
   subjects: { name_en: string; name_bn: string } | null;
 }
