@@ -1155,6 +1155,9 @@ export default function AdminDashboard() {
               </div>
             )}
 
+            {/* ═══════ SUBSCRIPTIONS TAB ═══════ */}
+            {activeTab === 'subscriptions' && <SubscriptionPlansTab toast={toast} />}
+
             {/* ═══════ BROADCAST TAB ═══════ */}
             {activeTab === 'broadcast' && <BroadcastTab toast={toast} />}
 
