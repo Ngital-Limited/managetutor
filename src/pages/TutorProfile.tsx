@@ -386,18 +386,16 @@ export default function TutorProfile() {
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
                   <Label>Father's Phone</Label>
-                  <Input
+                  <PhoneInput
                     value={profile.father_phone}
-                    onChange={(e) => setProfile({ ...profile, father_phone: e.target.value })}
-                    placeholder="+880 1XXX-XXXXXX"
+                    onChange={(v) => setProfile({ ...profile, father_phone: v })}
                   />
                 </div>
                 <div>
                   <Label>Mother's Phone</Label>
-                  <Input
+                  <PhoneInput
                     value={profile.mother_phone}
-                    onChange={(e) => setProfile({ ...profile, mother_phone: e.target.value })}
-                    placeholder="+880 1XXX-XXXXXX"
+                    onChange={(v) => setProfile({ ...profile, mother_phone: v })}
                   />
                 </div>
               </div>
@@ -412,10 +410,9 @@ export default function TutorProfile() {
                 </div>
                 <div>
                   <Label>Emergency Contact Phone</Label>
-                  <Input
+                  <PhoneInput
                     value={profile.emergency_contact_phone}
-                    onChange={(e) => setProfile({ ...profile, emergency_contact_phone: e.target.value })}
-                    placeholder="+880 1XXX-XXXXXX"
+                    onChange={(v) => setProfile({ ...profile, emergency_contact_phone: v })}
                   />
                 </div>
               </div>
