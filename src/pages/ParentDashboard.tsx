@@ -663,7 +663,12 @@ export default function ParentDashboard() {
                           >
                             <div className="flex items-start justify-between">
                               <div className="flex-1">
-                                <h4 className="font-bold mb-1">{job.title}</h4>
+                                <div className="flex items-center gap-2 mb-1">
+                                  <h4 className="font-bold">{job.title}</h4>
+                                  {(job as any).job_reference && (
+                                    <Badge variant="outline" className="text-xs font-mono">{(job as any).job_reference}</Badge>
+                                  )}
+                                </div>
                                 <div className="flex items-center gap-3 text-sm text-muted-foreground mb-2">
                                   <span className="flex items-center gap-1">
                                     <MapPin className="h-3 w-3" />
