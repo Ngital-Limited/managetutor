@@ -887,13 +887,20 @@ export type Database = {
           district_id: string | null
           education: string | null
           education_bn: string | null
+          education_detail: string | null
+          emergency_contact_name: string | null
+          emergency_contact_phone: string | null
           experience_years: number | null
+          father_phone: string | null
           gender: Database["public"]["Enums"]["gender"]
           hourly_rate_max: number | null
           hourly_rate_min: number | null
           id: string
           is_available: boolean | null
           is_featured: boolean | null
+          mother_phone: string | null
+          permanent_address: string | null
+          present_address: string | null
           teaching_mode: Database["public"]["Enums"]["teaching_mode"] | null
           total_reviews: number | null
           total_students: number | null
@@ -913,13 +920,20 @@ export type Database = {
           district_id?: string | null
           education?: string | null
           education_bn?: string | null
+          education_detail?: string | null
+          emergency_contact_name?: string | null
+          emergency_contact_phone?: string | null
           experience_years?: number | null
+          father_phone?: string | null
           gender: Database["public"]["Enums"]["gender"]
           hourly_rate_max?: number | null
           hourly_rate_min?: number | null
           id?: string
           is_available?: boolean | null
           is_featured?: boolean | null
+          mother_phone?: string | null
+          permanent_address?: string | null
+          present_address?: string | null
           teaching_mode?: Database["public"]["Enums"]["teaching_mode"] | null
           total_reviews?: number | null
           total_students?: number | null
@@ -939,13 +953,20 @@ export type Database = {
           district_id?: string | null
           education?: string | null
           education_bn?: string | null
+          education_detail?: string | null
+          emergency_contact_name?: string | null
+          emergency_contact_phone?: string | null
           experience_years?: number | null
+          father_phone?: string | null
           gender?: Database["public"]["Enums"]["gender"]
           hourly_rate_max?: number | null
           hourly_rate_min?: number | null
           id?: string
           is_available?: boolean | null
           is_featured?: boolean | null
+          mother_phone?: string | null
+          permanent_address?: string | null
+          present_address?: string | null
           teaching_mode?: Database["public"]["Enums"]["teaching_mode"] | null
           total_reviews?: number | null
           total_students?: number | null
