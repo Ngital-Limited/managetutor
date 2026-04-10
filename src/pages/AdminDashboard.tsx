@@ -231,6 +231,218 @@ function BroadcastTab({ toast }: { toast: ReturnType<typeof useToast>['toast'] }
   );
 }
 
+// ──────────── Subscription Plans Tab ────────────
+interface PlanForm {
+  name: string; name_bn: string; description: string;
+  price_monthly: number; price_quarterly: number; price_yearly: number;
+  max_applications_per_month: number; featured_profile: boolean; priority_support: boolean;
+  is_active: boolean;
+}
+const emptyPlan: PlanForm = {
+  name: '', name_bn: '', description: '',
+  price_monthly: 0, price_quarterly: 0, price_yearly: 0,
+  max_applications_per_month: 10, featured_profile: false, priority_support: false,
+  is_active: true,
+};
+
+function SubscriptionPlansTab({ toast }: { toast: ReturnType<typeof useToast>['toast'] }) {
+  const [plans, setPlans] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [form, setForm] = useState<PlanForm>({ ...emptyPlan });
+  const [saving, setSaving] = useState(false);
+
+  const fetchPlans = useCallback(async () => {
+    setLoading(true);
+    const { data } = await supabase.from('subscription_plans').select('*').order('price_monthly');
+    setPlans(data || []);
+    setLoading(false);
+  }, []);
+
+  useEffect(() => { fetchPlans(); }, [fetchPlans]);
+
+  const openCreate = () => { setEditingId(null); setForm({ ...emptyPlan }); setDialogOpen(true); };
+  const openEdit = (plan: any) => {
+    setEditingId(plan.id);
+    setForm({
+      name: plan.name || '', name_bn: plan.name_bn || '', description: plan.description || '',
+      price_monthly: plan.price_monthly || 0, price_quarterly: plan.price_quarterly || 0, price_yearly: plan.price_yearly || 0,
+      max_applications_per_month: plan.max_applications_per_month || 0,
+      featured_profile: plan.featured_profile || false, priority_support: plan.priority_support || false,
+      is_active: plan.is_active ?? true,
+    });
+    setDialogOpen(true);
+  };
+
+  const handleSave = async () => {
+    if (!form.name.trim()) { toast({ title: 'Name is required', variant: 'destructive' }); return; }
+    setSaving(true);
+    try {
+      if (editingId) {
+        const { error } = await supabase.from('subscription_plans').update({
+          name: form.name, name_bn: form.name_bn || null, description: form.description || null,
+          price_monthly: form.price_monthly, price_quarterly: form.price_quarterly || null, price_yearly: form.price_yearly || null,
+          max_applications_per_month: form.max_applications_per_month || null,
+          featured_profile: form.featured_profile, priority_support: form.priority_support, is_active: form.is_active,
+        }).eq('id', editingId);
+        if (error) throw error;
+        toast({ title: 'Plan updated' });
+      } else {
+        const { error } = await supabase.from('subscription_plans').insert({
+          name: form.name, name_bn: form.name_bn || null, description: form.description || null,
+          price_monthly: form.price_monthly, price_quarterly: form.price_quarterly || null, price_yearly: form.price_yearly || null,
+          max_applications_per_month: form.max_applications_per_month || null,
+          featured_profile: form.featured_profile, priority_support: form.priority_support, is_active: form.is_active,
+        });
+        if (error) throw error;
+        toast({ title: 'Plan created' });
+      }
+      setDialogOpen(false);
+      fetchPlans();
+    } catch (err: any) {
+      toast({ title: 'Error', description: err.message, variant: 'destructive' });
+    } finally { setSaving(false); }
+  };
+
+  const toggleActive = async (id: string, current: boolean) => {
+    const { error } = await supabase.from('subscription_plans').update({ is_active: !current }).eq('id', id);
+    if (error) toast({ title: 'Error', description: error.message, variant: 'destructive' });
+    else { toast({ title: `Plan ${!current ? 'activated' : 'deactivated'}` }); fetchPlans(); }
+  };
+
+  const deletePlan = async (id: string) => {
+    if (!confirm('Delete this plan? This cannot be undone.')) return;
+    const { error } = await supabase.from('subscription_plans').delete().eq('id', id);
+    if (error) toast({ title: 'Error', description: error.message, variant: 'destructive' });
+    else { toast({ title: 'Plan deleted' }); fetchPlans(); }
+  };
+
+  const set = (key: keyof PlanForm, value: any) => setForm(prev => ({ ...prev, [key]: value }));
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h1 className="text-3xl font-extrabold">Subscription Plans</h1>
+        <Button onClick={openCreate}><Plus className="h-4 w-4 mr-2" /> Create Plan</Button>
+      </div>
+
+      {loading ? (
+        <div className="flex justify-center py-12"><Clock className="h-6 w-6 animate-spin text-muted-foreground" /></div>
+      ) : plans.length === 0 ? (
+        <Card><CardContent className="py-12 text-center text-muted-foreground">No subscription plans yet. Create your first plan.</CardContent></Card>
+      ) : (
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {plans.map((plan) => (
+            <Card key={plan.id} className={`relative ${!plan.is_active ? 'opacity-60' : ''}`}>
+              <CardHeader className="pb-3">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <CardTitle className="text-lg">{plan.name}</CardTitle>
+                    {plan.name_bn && <p className="text-sm text-muted-foreground">{plan.name_bn}</p>}
+                  </div>
+                  <Badge variant={plan.is_active ? 'default' : 'secondary'} className="text-xs">
+                    {plan.is_active ? 'Active' : 'Inactive'}
+                  </Badge>
+                </div>
+                {plan.description && <CardDescription className="mt-1">{plan.description}</CardDescription>}
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="grid grid-cols-3 gap-2 text-center">
+                  <div className="bg-muted/50 rounded-lg p-2">
+                    <p className="text-lg font-bold">৳{plan.price_monthly}</p>
+                    <p className="text-[10px] text-muted-foreground">Monthly</p>
+                  </div>
+                  <div className="bg-muted/50 rounded-lg p-2">
+                    <p className="text-lg font-bold">৳{plan.price_quarterly || '—'}</p>
+                    <p className="text-[10px] text-muted-foreground">Quarterly</p>
+                  </div>
+                  <div className="bg-muted/50 rounded-lg p-2">
+                    <p className="text-lg font-bold">৳{plan.price_yearly || '—'}</p>
+                    <p className="text-[10px] text-muted-foreground">Yearly</p>
+                  </div>
+                </div>
+                <div className="space-y-1 text-sm">
+                  <div className="flex justify-between"><span className="text-muted-foreground">Applications/month</span><span className="font-medium">{plan.max_applications_per_month ?? 'Unlimited'}</span></div>
+                  <div className="flex justify-between"><span className="text-muted-foreground">Featured Profile</span><span>{plan.featured_profile ? '✓' : '✗'}</span></div>
+                  <div className="flex justify-between"><span className="text-muted-foreground">Priority Support</span><span>{plan.priority_support ? '✓' : '✗'}</span></div>
+                </div>
+                <div className="flex gap-2 pt-2">
+                  <Button variant="outline" size="sm" className="flex-1" onClick={() => openEdit(plan)}><Pencil className="h-3 w-3 mr-1" /> Edit</Button>
+                  <Button variant="outline" size="sm" onClick={() => toggleActive(plan.id, plan.is_active)}>
+                    {plan.is_active ? <ToggleRight className="h-4 w-4" /> : <ToggleLeft className="h-4 w-4" />}
+                  </Button>
+                  <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive" onClick={() => deletePlan(plan.id)}>
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader><DialogTitle>{editingId ? 'Edit Plan' : 'Create Plan'}</DialogTitle></DialogHeader>
+          <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-1">
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-sm font-medium">Plan Name *</label>
+                <Input value={form.name} onChange={e => set('name', e.target.value)} placeholder="e.g. Premium" className="mt-1" />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Name (Bangla)</label>
+                <Input value={form.name_bn} onChange={e => set('name_bn', e.target.value)} placeholder="বাংলা নাম" className="mt-1" />
+              </div>
+            </div>
+            <div>
+              <label className="text-sm font-medium">Description</label>
+              <Textarea value={form.description} onChange={e => set('description', e.target.value)} placeholder="Plan description..." className="mt-1" rows={2} />
+            </div>
+            <div className="grid grid-cols-3 gap-3">
+              <div>
+                <label className="text-sm font-medium">Monthly (৳) *</label>
+                <Input type="number" value={form.price_monthly} onChange={e => set('price_monthly', Number(e.target.value))} className="mt-1" />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Quarterly (৳)</label>
+                <Input type="number" value={form.price_quarterly} onChange={e => set('price_quarterly', Number(e.target.value))} className="mt-1" />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Yearly (৳)</label>
+                <Input type="number" value={form.price_yearly} onChange={e => set('price_yearly', Number(e.target.value))} className="mt-1" />
+              </div>
+            </div>
+            <div>
+              <label className="text-sm font-medium">Max Applications / Month</label>
+              <Input type="number" value={form.max_applications_per_month} onChange={e => set('max_applications_per_month', Number(e.target.value))} className="mt-1" />
+            </div>
+            <div className="flex items-center gap-6">
+              <label className="flex items-center gap-2 text-sm">
+                <input type="checkbox" checked={form.featured_profile} onChange={e => set('featured_profile', e.target.checked)} className="rounded" />
+                Featured Profile
+              </label>
+              <label className="flex items-center gap-2 text-sm">
+                <input type="checkbox" checked={form.priority_support} onChange={e => set('priority_support', e.target.checked)} className="rounded" />
+                Priority Support
+              </label>
+              <label className="flex items-center gap-2 text-sm">
+                <input type="checkbox" checked={form.is_active} onChange={e => set('is_active', e.target.checked)} className="rounded" />
+                Active
+              </label>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button>
+            <Button onClick={handleSave} disabled={saving}>{saving ? 'Saving...' : editingId ? 'Update Plan' : 'Create Plan'}</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
+
 // ──────────── Component ────────────
 export default function AdminDashboard() {
   const { user, role, loading } = useAuth();
