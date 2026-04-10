@@ -5,6 +5,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { SearchableSelect } from '@/components/SearchableSelect';
 import { 
   GraduationCap, Users, MapPin, Star, Search, FileText, 
   Globe, ArrowRight, Shield,
@@ -161,36 +162,26 @@ export default function Index() {
                     <MapPin className="h-3.5 w-3.5" />
                     Location
                   </label>
-                  <Select value={selectedDistrict} onValueChange={setSelectedDistrict}>
-                    <SelectTrigger className="h-11 rounded-xl bg-muted/50 border-border/60 focus:bg-card">
-                      <SelectValue placeholder="All Districts" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {districts.map((d) => (
-                        <SelectItem key={d.id} value={d.id}>
-                          {language === 'bn' ? d.name_bn : d.name_en}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <SearchableSelect
+                    options={districts.map(d => ({ value: d.id, label: language === 'bn' ? d.name_bn : d.name_en }))}
+                    value={selectedDistrict}
+                    onValueChange={setSelectedDistrict}
+                    placeholder="All Districts"
+                    className="h-11 rounded-xl bg-muted/50 border-border/60 focus:bg-card"
+                  />
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
                     <BookOpen className="h-3.5 w-3.5" />
                     Subject
                   </label>
-                  <Select value={selectedSubject} onValueChange={setSelectedSubject}>
-                    <SelectTrigger className="h-11 rounded-xl bg-muted/50 border-border/60 focus:bg-card">
-                      <SelectValue placeholder="All Subjects" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {subjectsList.map((s) => (
-                        <SelectItem key={s.id} value={s.id}>
-                          {language === 'bn' ? s.name_bn : s.name_en}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <SearchableSelect
+                    options={subjectsList.map(s => ({ value: s.id, label: language === 'bn' ? s.name_bn : s.name_en }))}
+                    value={selectedSubject}
+                    onValueChange={setSelectedSubject}
+                    placeholder="All Subjects"
+                    className="h-11 rounded-xl bg-muted/50 border-border/60 focus:bg-card"
+                  />
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
