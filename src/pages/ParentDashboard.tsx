@@ -326,19 +326,6 @@ export default function ParentDashboard() {
     return { percent: complete, missing };
   };
 
-  if (authLoading || loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-      </div>
-    );
-  }
-
-  const openJobs = jobs.filter(j => j.status === 'open');
-  const activeJobs = jobs.filter(j => j.status === 'in_progress');
-  const completedJobs = jobs.filter(j => j.status === 'completed');
-  const profileInfo = getProfileCompleteness();
-
   const districtOptions = useMemo(() => districts.map(d => ({
     value: d.id,
     label: language === 'en' ? d.name_en : d.name_bn,
@@ -352,6 +339,19 @@ export default function ParentDashboard() {
   const classLevelOptions = useMemo(() => CLASS_LEVELS.flatMap(group =>
     group.items.map(item => ({ value: item, label: item, group: group.group }))
   ), []);
+
+  if (authLoading || loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  const openJobs = jobs.filter(j => j.status === 'open');
+  const activeJobs = jobs.filter(j => j.status === 'in_progress');
+  const completedJobs = jobs.filter(j => j.status === 'completed');
+  const profileInfo = getProfileCompleteness();
 
   return (
     <SidebarProvider>
