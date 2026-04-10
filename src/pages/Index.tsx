@@ -91,116 +91,128 @@ export default function Index() {
         </div>
       </nav>
 
-      {/* Hero Section */}
+      {/* Hero Section with Integrated Search */}
       <section className="relative overflow-hidden">
-        <div className="gradient-hero text-primary-foreground py-24 md:py-36">
+        <div className="gradient-hero text-primary-foreground pt-16 pb-36 md:pt-24 md:pb-48">
           <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMiIvPjwvZz48L2c+PC9zdmc+')] opacity-50"></div>
+          
+          {/* Floating decorative elements */}
+          <div className="absolute top-20 left-10 w-20 h-20 bg-secondary/20 rounded-full blur-2xl animate-pulse"></div>
+          <div className="absolute top-40 right-16 w-32 h-32 bg-accent/15 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+          <div className="absolute bottom-40 left-1/4 w-16 h-16 bg-primary-foreground/10 rounded-full blur-xl animate-pulse" style={{ animationDelay: '2s' }}></div>
+
           <div className="container mx-auto px-4 text-center relative z-10">
-            <div className="inline-flex items-center gap-2 bg-primary-foreground/10 backdrop-blur-sm rounded-full px-4 py-2 mb-8 animate-fade-in">
-              <Shield className="h-4 w-4" />
-              <span className="text-sm font-medium">Trusted by 4,000+ families across Bangladesh</span>
+            <div className="inline-flex items-center gap-2 bg-primary-foreground/10 backdrop-blur-sm rounded-full px-5 py-2.5 mb-8 animate-fade-in border border-primary-foreground/10">
+              <Shield className="h-4 w-4 text-accent" />
+              <span className="text-sm font-semibold tracking-wide">Trusted by 4,000+ families across Bangladesh</span>
             </div>
-            <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold mb-6 animate-fade-in animation-delay-100 leading-tight">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold mb-4 animate-fade-in animation-delay-100 leading-tight max-w-4xl mx-auto">
               {t('hero.title')}
             </h1>
-            <p className="text-lg md:text-xl opacity-90 mb-10 max-w-2xl mx-auto animate-fade-in animation-delay-200 leading-relaxed">
+            <p className="text-base md:text-lg opacity-80 mb-6 max-w-xl mx-auto animate-fade-in animation-delay-200 leading-relaxed">
               {t('hero.subtitle')}
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in animation-delay-300">
-              <Link to="/tutors">
-                <Button size="lg" className="bg-secondary hover:bg-secondary/90 text-secondary-foreground text-lg px-8 h-14 rounded-xl shadow-lg shadow-secondary/30">
-                  <Search className="mr-2 h-5 w-5" />
-                  {t('hero.cta.findTutor')}
-                </Button>
-              </Link>
-              <Link to="/auth?mode=signup&role=tutor">
-                <Button size="lg" variant="outline" className="text-lg px-8 h-14 rounded-xl bg-primary-foreground/10 border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/20 backdrop-blur-sm">
-                  <GraduationCap className="mr-2 h-5 w-5" />
-                  {t('hero.cta.becomeTutor')}
-                </Button>
-              </Link>
-            </div>
           </div>
         </div>
-        
+
         {/* Wave separator */}
         <div className="absolute bottom-0 left-0 right-0">
-          <svg viewBox="0 0 1440 80" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full">
-            <path d="M0 80L60 74.7C120 69 240 59 360 53.3C480 48 600 48 720 53.3C840 59 960 69 1080 69.3C1200 69 1320 59 1380 53.3L1440 48V80H1380C1320 80 1200 80 1080 80C960 80 840 80 720 80C600 80 480 80 360 80C240 80 120 80 60 80H0Z" fill="hsl(var(--background))"/>
+          <svg viewBox="0 0 1440 100" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full">
+            <path d="M0 100L60 93.3C120 86.7 240 73.3 360 66.7C480 60 600 60 720 66.7C840 73.3 960 86.7 1080 86.7C1200 86.7 1320 73.3 1380 66.7L1440 60V100H1380C1320 100 1200 100 1080 100C960 100 840 100 720 100C600 100 480 100 360 100C240 100 120 100 60 100H0Z" fill="hsl(var(--background))"/>
           </svg>
         </div>
       </section>
 
-      {/* Search Filter Bar */}
-      <section className="relative z-10 -mt-10 pb-8">
-        <div className="container mx-auto px-4">
-          <div className="bg-card rounded-2xl shadow-xl shadow-foreground/10 p-6 md:p-8 border border-border">
-            {/* Tabs */}
-            <div className="flex gap-2 mb-6">
-              <Button
-                variant={searchType === 'tutors' ? 'default' : 'outline'}
+      {/* Search Card — overlapping hero */}
+      <section className="relative z-20 -mt-28 md:-mt-36 pb-8">
+        <div className="container mx-auto px-4 max-w-4xl">
+          <div className="bg-card rounded-2xl shadow-2xl shadow-primary/15 border border-border overflow-hidden animate-fade-in animation-delay-300">
+            {/* Tab Header */}
+            <div className="flex border-b border-border">
+              <button
                 onClick={() => setSearchType('tutors')}
-                className="rounded-xl gap-2"
+                className={`flex-1 flex items-center justify-center gap-2.5 px-6 py-4 text-sm font-bold transition-all duration-200 ${
+                  searchType === 'tutors'
+                    ? 'bg-primary text-primary-foreground'
+                    : 'bg-muted/50 text-muted-foreground hover:text-foreground hover:bg-muted'
+                }`}
               >
-                <Search className="h-4 w-4" />
-                Find Tutors
-              </Button>
-              <Button
-                variant={searchType === 'jobs' ? 'default' : 'outline'}
+                <Users className="h-4 w-4" />
+                Find a Tutor
+              </button>
+              <button
                 onClick={() => setSearchType('jobs')}
-                className="rounded-xl gap-2"
+                className={`flex-1 flex items-center justify-center gap-2.5 px-6 py-4 text-sm font-bold transition-all duration-200 ${
+                  searchType === 'jobs'
+                    ? 'bg-primary text-primary-foreground'
+                    : 'bg-muted/50 text-muted-foreground hover:text-foreground hover:bg-muted'
+                }`}
               >
                 <FileText className="h-4 w-4" />
-                Find Jobs
-              </Button>
+                Find Tuition Jobs
+              </button>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
-              <div className="space-y-2">
-                <label className="text-sm font-semibold text-foreground">Location</label>
-                <Select value={selectedDistrict} onValueChange={setSelectedDistrict}>
-                  <SelectTrigger className="h-12 rounded-xl">
-                    <SelectValue placeholder="Select District" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {districts.map((d) => (
-                      <SelectItem key={d.id} value={d.id}>
-                        {language === 'bn' ? d.name_bn : d.name_en}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+
+            {/* Filter Body */}
+            <div className="p-5 md:p-6">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+                    <MapPin className="h-3.5 w-3.5" />
+                    Location
+                  </label>
+                  <Select value={selectedDistrict} onValueChange={setSelectedDistrict}>
+                    <SelectTrigger className="h-11 rounded-xl bg-muted/50 border-border/60 focus:bg-card">
+                      <SelectValue placeholder="All Districts" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {districts.map((d) => (
+                        <SelectItem key={d.id} value={d.id}>
+                          {language === 'bn' ? d.name_bn : d.name_en}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+                    <BookOpen className="h-3.5 w-3.5" />
+                    Subject
+                  </label>
+                  <Select value={selectedSubject} onValueChange={setSelectedSubject}>
+                    <SelectTrigger className="h-11 rounded-xl bg-muted/50 border-border/60 focus:bg-card">
+                      <SelectValue placeholder="All Subjects" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {subjectsList.map((s) => (
+                        <SelectItem key={s.id} value={s.id}>
+                          {language === 'bn' ? s.name_bn : s.name_en}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+                    <Globe className="h-3.5 w-3.5" />
+                    Mode
+                  </label>
+                  <Select value={selectedMode} onValueChange={setSelectedMode}>
+                    <SelectTrigger className="h-11 rounded-xl bg-muted/50 border-border/60 focus:bg-card">
+                      <SelectValue placeholder="Any Mode" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="online">Online</SelectItem>
+                      <SelectItem value="in_person">In-Person</SelectItem>
+                      <SelectItem value="hybrid">Both</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
-              <div className="space-y-2">
-                <label className="text-sm font-semibold text-foreground">Subject</label>
-                <Select value={selectedSubject} onValueChange={setSelectedSubject}>
-                  <SelectTrigger className="h-12 rounded-xl">
-                    <SelectValue placeholder="Select Subject" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {subjectsList.map((s) => (
-                      <SelectItem key={s.id} value={s.id}>
-                        {language === 'bn' ? s.name_bn : s.name_en}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-semibold text-foreground">Tutoring Mode</label>
-                <Select value={selectedMode} onValueChange={setSelectedMode}>
-                  <SelectTrigger className="h-12 rounded-xl">
-                    <SelectValue placeholder="Select Mode" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="online">Online</SelectItem>
-                    <SelectItem value="in_person">In-Person</SelectItem>
-                    <SelectItem value="hybrid">Both</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <Button onClick={handleSearch} className="h-12 rounded-xl text-base font-semibold gap-2">
+              <Button onClick={handleSearch} className="w-full h-12 rounded-xl text-base font-bold gap-2 shadow-lg shadow-primary/20">
                 <Search className="h-5 w-5" />
-                {searchType === 'tutors' ? 'Search Tutors' : 'Search Jobs'}
+                {searchType === 'tutors' ? 'Search Tutors' : 'Search Tuition Jobs'}
+                <ArrowRight className="h-4 w-4 ml-1" />
               </Button>
             </div>
           </div>
