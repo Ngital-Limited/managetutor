@@ -62,6 +62,13 @@ export default function TutorProfile() {
     gender: 'male',
     is_available: true,
     verification_status: 'pending',
+    father_phone: '',
+    mother_phone: '',
+    emergency_contact_name: '',
+    emergency_contact_phone: '',
+    education_detail: '',
+    present_address: '',
+    permanent_address: '',
   });
 
   const [userProfile, setUserProfile] = useState({
@@ -112,6 +119,13 @@ export default function TutorProfile() {
         gender: tutorRes.data.gender || 'male',
         is_available: tutorRes.data.is_available ?? true,
         verification_status: tutorRes.data.verification_status || 'pending',
+        father_phone: (tutorRes.data as any).father_phone || '',
+        mother_phone: (tutorRes.data as any).mother_phone || '',
+        emergency_contact_name: (tutorRes.data as any).emergency_contact_name || '',
+        emergency_contact_phone: (tutorRes.data as any).emergency_contact_phone || '',
+        education_detail: (tutorRes.data as any).education_detail || '',
+        present_address: (tutorRes.data as any).present_address || '',
+        permanent_address: (tutorRes.data as any).permanent_address || '',
       });
     }
     if (docsRes.data) setDocuments(docsRes.data);
@@ -150,7 +164,14 @@ export default function TutorProfile() {
         teaching_mode: profile.teaching_mode as 'online' | 'in_person' | 'hybrid',
         gender: profile.gender as 'male' | 'female',
         is_available: profile.is_available,
-      }).eq('id', tutorData.id);
+        father_phone: profile.father_phone || null,
+        mother_phone: profile.mother_phone || null,
+        emergency_contact_name: profile.emergency_contact_name || null,
+        emergency_contact_phone: profile.emergency_contact_phone || null,
+        education_detail: profile.education_detail || null,
+        present_address: profile.present_address || null,
+        permanent_address: profile.permanent_address || null,
+      } as any).eq('id', tutorData.id);
 
       // Update subjects - delete old and insert new
       await supabase.from('tutor_subjects').delete().eq('tutor_profile_id', tutorData.id);
