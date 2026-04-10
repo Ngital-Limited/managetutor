@@ -244,11 +244,11 @@ export default function Index() {
             <div className="flex items-center justify-between mb-10">
               <div>
                 <h2 className="text-3xl md:text-4xl font-extrabold mb-2">Browse by Subject</h2>
-                <p className="text-muted-foreground">Find tutors across 50+ subjects in every category</p>
+                <p className="text-muted-foreground">Find tuition jobs across 50+ subjects in every category</p>
               </div>
-              <Link to="/tutors">
+              <Link to="/jobs">
                 <Button variant="outline" className="hidden sm:flex gap-1">
-                  All Subjects <ChevronRight className="h-4 w-4" />
+                  All Jobs <ChevronRight className="h-4 w-4" />
                 </Button>
               </Link>
             </div>
@@ -265,7 +265,7 @@ export default function Index() {
                     </div>
                     <div className="flex flex-wrap gap-1.5">
                       {cat.subjects.slice(0, 5).map((sub) => (
-                        <Link key={sub.id} to={`/tutors?subject=${sub.id}`}>
+                        <Link key={sub.id} to={`/jobs?subject=${sub.id}`}>
                           <Badge variant="outline" className="cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors text-xs">
                             {language === 'bn' ? sub.name_bn : sub.name_en}
                           </Badge>
