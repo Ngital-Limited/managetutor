@@ -158,6 +158,7 @@ export default function ParentDashboard() {
   const [loading, setLoading] = useState(true);
   const [demoBookings, setDemoBookings] = useState<any[]>([]);
   const [showPostJob, setShowPostJob] = useState(false);
+  const [editingJob, setEditingJob] = useState<Job | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
   const [jobForm, setJobForm] = useState({
