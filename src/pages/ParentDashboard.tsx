@@ -56,6 +56,13 @@ interface Job {
   teaching_mode: string;
   days_per_week: number;
   job_reference: string;
+  subject_id: string | null;
+  district_id: string;
+  class_level: string | null;
+  preferred_tutor_gender: string | null;
+  student_gender: string | null;
+  special_requirements: string | null;
+  preferred_time: string | null;
   districts: { name_en: string; name_bn: string };
   subjects: { name_en: string; name_bn: string } | null;
 }
