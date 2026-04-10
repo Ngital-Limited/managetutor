@@ -56,6 +56,13 @@ interface Job {
   teaching_mode: string;
   days_per_week: number;
   job_reference: string;
+  subject_id: string | null;
+  district_id: string;
+  class_level: string | null;
+  preferred_tutor_gender: string | null;
+  student_gender: string | null;
+  special_requirements: string | null;
+  preferred_time: string | null;
   districts: { name_en: string; name_bn: string };
   subjects: { name_en: string; name_bn: string } | null;
 }
@@ -151,6 +158,7 @@ export default function ParentDashboard() {
   const [loading, setLoading] = useState(true);
   const [demoBookings, setDemoBookings] = useState<any[]>([]);
   const [showPostJob, setShowPostJob] = useState(false);
+  const [editingJob, setEditingJob] = useState<Job | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
   const [jobForm, setJobForm] = useState({
@@ -277,6 +285,59 @@ export default function ParentDashboard() {
     }
   };
 
+  const startEditJob = (job: Job) => {
+    setJobForm({
+      title: job.title,
+      description: job.description,
+      subject_id: job.subject_id || '',
+      district_id: job.district_id,
+      class_level: job.class_level || '',
+      days_per_week: job.days_per_week || 3,
+      budget_min: job.budget_min || 3000,
+      budget_max: job.budget_max || 8000,
+      teaching_mode: job.teaching_mode || 'in_person',
+      preferred_tutor_gender: job.preferred_tutor_gender || 'any',
+      student_gender: job.student_gender || 'any',
+      special_requirements: job.special_requirements ? job.special_requirements.split(', ') : [],
+      preferred_time: job.preferred_time || '',
+    });
+    setEditingJob(job);
+    setShowPostJob(true);
+  };
+
+  const handleUpdateJob = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user || !editingJob) return;
+
+    setSubmitting(true);
+    const { error } = await supabase.from('jobs').update({
+      title: jobForm.title,
+      description: jobForm.description,
+      subject_id: jobForm.subject_id || null,
+      district_id: jobForm.district_id,
+      class_level: jobForm.class_level,
+      days_per_week: jobForm.days_per_week,
+      budget_min: jobForm.budget_min,
+      budget_max: jobForm.budget_max,
+      teaching_mode: jobForm.teaching_mode as 'online' | 'in_person' | 'hybrid',
+      preferred_tutor_gender: jobForm.preferred_tutor_gender as 'male' | 'female' | 'any',
+      student_gender: jobForm.student_gender as 'male' | 'female' | 'any',
+      special_requirements: jobForm.special_requirements.length > 0 ? jobForm.special_requirements.join(', ') : null,
+      preferred_time: jobForm.preferred_time || null,
+    }).eq('id', editingJob.id);
+
+    if (error) {
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+    } else {
+      toast({ title: 'Updated!', description: 'Job updated successfully' });
+      setShowPostJob(false);
+      setEditingJob(null);
+      resetJobForm();
+      fetchData();
+    }
+    setSubmitting(false);
+  };
+
   const handleApplicationAction = async (appId: string, status: 'accepted' | 'rejected') => {
     const { error } = await supabase.from('applications').update({ status }).eq('id', appId);
 
@@ -370,7 +431,10 @@ export default function ParentDashboard() {
                 <Globe className="h-4 w-4 mr-1" />
                 {language === 'en' ? 'বাংলা' : 'EN'}
               </Button>
-              <Dialog open={showPostJob} onOpenChange={setShowPostJob}>
+              <Dialog open={showPostJob} onOpenChange={(open) => {
+                setShowPostJob(open);
+                if (!open) { setEditingJob(null); resetJobForm(); }
+              }}>
                 <DialogTrigger asChild>
                   <Button size="sm">
                     <Plus className="h-4 w-4 mr-1" />
@@ -379,9 +443,9 @@ export default function ParentDashboard() {
                 </DialogTrigger>
                 <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                   <DialogHeader>
-                    <DialogTitle>Post a Tuition Job</DialogTitle>
+                    <DialogTitle>{editingJob ? 'Edit Tuition Job' : 'Post a Tuition Job'}</DialogTitle>
                   </DialogHeader>
-                  <form onSubmit={handlePostJob} className="space-y-4 mt-4">
+                  <form onSubmit={editingJob ? handleUpdateJob : handlePostJob} className="space-y-4 mt-4">
                     <div>
                       <Label>Job Title *</Label>
                       <Input
@@ -540,7 +604,7 @@ export default function ParentDashboard() {
                       </div>
                     </div>
                     <Button type="submit" className="w-full" disabled={submitting}>
-                      {submitting ? 'Posting...' : 'Post Job'}
+                      {submitting ? (editingJob ? 'Updating...' : 'Posting...') : (editingJob ? 'Update Job' : 'Post Job')}
                     </Button>
                   </form>
                 </DialogContent>
@@ -698,17 +762,29 @@ export default function ParentDashboard() {
                                   <div className="text-xs text-muted-foreground">applications</div>
                                 </div>
                                 {job.status === 'open' && (
-                                  <Button
-                                    size="icon"
-                                    variant="ghost"
-                                    className="text-destructive"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      deleteJob(job.id);
-                                    }}
-                                  >
-                                    <Trash2 className="h-4 w-4" />
-                                  </Button>
+                                  <>
+                                    <Button
+                                      size="icon"
+                                      variant="ghost"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        startEditJob(job);
+                                      }}
+                                    >
+                                      <Edit className="h-4 w-4" />
+                                    </Button>
+                                    <Button
+                                      size="icon"
+                                      variant="ghost"
+                                      className="text-destructive"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        deleteJob(job.id);
+                                      }}
+                                    >
+                                      <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                  </>
                                 )}
                               </div>
                             </div>
