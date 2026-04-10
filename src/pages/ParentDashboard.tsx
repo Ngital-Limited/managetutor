@@ -431,7 +431,10 @@ export default function ParentDashboard() {
                 <Globe className="h-4 w-4 mr-1" />
                 {language === 'en' ? 'বাংলা' : 'EN'}
               </Button>
-              <Dialog open={showPostJob} onOpenChange={setShowPostJob}>
+              <Dialog open={showPostJob} onOpenChange={(open) => {
+                setShowPostJob(open);
+                if (!open) { setEditingJob(null); resetJobForm(); }
+              }}>
                 <DialogTrigger asChild>
                   <Button size="sm">
                     <Plus className="h-4 w-4 mr-1" />
@@ -440,9 +443,9 @@ export default function ParentDashboard() {
                 </DialogTrigger>
                 <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                   <DialogHeader>
-                    <DialogTitle>Post a Tuition Job</DialogTitle>
+                    <DialogTitle>{editingJob ? 'Edit Tuition Job' : 'Post a Tuition Job'}</DialogTitle>
                   </DialogHeader>
-                  <form onSubmit={handlePostJob} className="space-y-4 mt-4">
+                  <form onSubmit={editingJob ? handleUpdateJob : handlePostJob} className="space-y-4 mt-4">
                     <div>
                       <Label>Job Title *</Label>
                       <Input
