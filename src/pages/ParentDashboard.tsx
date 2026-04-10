@@ -339,6 +339,20 @@ export default function ParentDashboard() {
   const completedJobs = jobs.filter(j => j.status === 'completed');
   const profileInfo = getProfileCompleteness();
 
+  const districtOptions = useMemo(() => districts.map(d => ({
+    value: d.id,
+    label: language === 'en' ? d.name_en : d.name_bn,
+  })), [districts, language]);
+
+  const subjectOptions = useMemo(() => subjects.map(s => ({
+    value: s.id,
+    label: language === 'en' ? s.name_en : s.name_bn,
+  })), [subjects, language]);
+
+  const classLevelOptions = useMemo(() => CLASS_LEVELS.flatMap(group =>
+    group.items.map(item => ({ value: item, label: item, group: group.group }))
+  ), []);
+
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-background">
