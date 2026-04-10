@@ -285,7 +285,60 @@ export default function ParentDashboard() {
     }
   };
 
-  const handleApplicationAction = async (appId: string, status: 'accepted' | 'rejected') => {
+  const startEditJob = (job: Job) => {
+    setJobForm({
+      title: job.title,
+      description: job.description,
+      subject_id: job.subject_id || '',
+      district_id: job.district_id,
+      class_level: job.class_level || '',
+      days_per_week: job.days_per_week || 3,
+      budget_min: job.budget_min || 3000,
+      budget_max: job.budget_max || 8000,
+      teaching_mode: job.teaching_mode || 'in_person',
+      preferred_tutor_gender: job.preferred_tutor_gender || 'any',
+      student_gender: job.student_gender || 'any',
+      special_requirements: job.special_requirements ? job.special_requirements.split(', ') : [],
+      preferred_time: job.preferred_time || '',
+    });
+    setEditingJob(job);
+    setShowPostJob(true);
+  };
+
+  const handleUpdateJob = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user || !editingJob) return;
+
+    setSubmitting(true);
+    const { error } = await supabase.from('jobs').update({
+      title: jobForm.title,
+      description: jobForm.description,
+      subject_id: jobForm.subject_id || null,
+      district_id: jobForm.district_id,
+      class_level: jobForm.class_level,
+      days_per_week: jobForm.days_per_week,
+      budget_min: jobForm.budget_min,
+      budget_max: jobForm.budget_max,
+      teaching_mode: jobForm.teaching_mode as 'online' | 'in_person' | 'hybrid',
+      preferred_tutor_gender: jobForm.preferred_tutor_gender as 'male' | 'female' | 'any',
+      student_gender: jobForm.student_gender as 'male' | 'female' | 'any',
+      special_requirements: jobForm.special_requirements.length > 0 ? jobForm.special_requirements.join(', ') : null,
+      preferred_time: jobForm.preferred_time || null,
+    }).eq('id', editingJob.id);
+
+    if (error) {
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+    } else {
+      toast({ title: 'Updated!', description: 'Job updated successfully' });
+      setShowPostJob(false);
+      setEditingJob(null);
+      resetJobForm();
+      fetchData();
+    }
+    setSubmitting(false);
+  };
+
+
     const { error } = await supabase.from('applications').update({ status }).eq('id', appId);
 
     if (error) {
