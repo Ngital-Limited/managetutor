@@ -429,9 +429,14 @@ export default function BrowseJobs() {
                             <Briefcase className="h-6 w-6 text-tutor" />
                           </div>
                           <div>
-                            <h3 className="font-bold text-lg text-foreground group-hover:text-primary transition-colors">
-                              {job.title}
-                            </h3>
+                            <div className="flex items-center gap-2">
+                              <h3 className="font-bold text-lg text-foreground group-hover:text-primary transition-colors">
+                                {job.title}
+                              </h3>
+                              {(job as any).job_reference && (
+                                <Badge variant="outline" className="text-xs font-mono">{(job as any).job_reference}</Badge>
+                              )}
+                            </div>
                             <p className="text-sm text-muted-foreground flex items-center gap-2">
                               <MapPin className="h-3 w-3" />
                               {job.districts ? (language === 'en' ? job.districts.name_en : job.districts.name_bn) : 'Location N/A'}
