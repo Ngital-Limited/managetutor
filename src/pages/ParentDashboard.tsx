@@ -404,43 +404,39 @@ export default function ParentDashboard() {
                     <div className="grid md:grid-cols-2 gap-4">
                       <div>
                         <Label>Subject</Label>
-                        <Select value={jobForm.subject_id} onValueChange={(v) => setJobForm({ ...jobForm, subject_id: v })}>
-                          <SelectTrigger><SelectValue placeholder="Select subject" /></SelectTrigger>
-                          <SelectContent>
-                            {subjects.map(s => (
-                              <SelectItem key={s.id} value={s.id}>{language === 'en' ? s.name_en : s.name_bn}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                        <SearchableSelect
+                          options={subjectOptions}
+                          value={jobForm.subject_id}
+                          onValueChange={(v) => setJobForm({ ...jobForm, subject_id: v })}
+                          placeholder="Search subject..."
+                          searchPlaceholder="Type to search subjects..."
+                          emptyText="No subjects found."
+                        />
                       </div>
                       <div>
                         <Label>Location *</Label>
-                        <Select value={jobForm.district_id} onValueChange={(v) => setJobForm({ ...jobForm, district_id: v })} required>
-                          <SelectTrigger><SelectValue placeholder="Select district" /></SelectTrigger>
-                          <SelectContent>
-                            {districts.map(d => (
-                              <SelectItem key={d.id} value={d.id}>{language === 'en' ? d.name_en : d.name_bn}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                        <SearchableSelect
+                          options={districtOptions}
+                          value={jobForm.district_id}
+                          onValueChange={(v) => setJobForm({ ...jobForm, district_id: v })}
+                          placeholder="Search district..."
+                          searchPlaceholder="Type to search districts..."
+                          emptyText="No districts found."
+                        />
                       </div>
                     </div>
                     <div className="grid md:grid-cols-2 gap-4">
                       <div>
                         <Label>Class Level</Label>
-                        <Select value={jobForm.class_level} onValueChange={(v) => setJobForm({ ...jobForm, class_level: v })}>
-                          <SelectTrigger><SelectValue placeholder="Select class level" /></SelectTrigger>
-                          <SelectContent className="max-h-[300px]">
-                            {CLASS_LEVELS.map((group) => (
-                              <SelectGroup key={group.group}>
-                                <SelectLabel>{group.group}</SelectLabel>
-                                {group.items.map((item) => (
-                                  <SelectItem key={item} value={item}>{item}</SelectItem>
-                                ))}
-                              </SelectGroup>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                        <SearchableSelect
+                          options={classLevelOptions}
+                          value={jobForm.class_level}
+                          onValueChange={(v) => setJobForm({ ...jobForm, class_level: v })}
+                          placeholder="Search class level..."
+                          searchPlaceholder="Type to search..."
+                          emptyText="No class levels found."
+                          grouped
+                        />
                       </div>
                       <div>
                         <Label>Days per Week</Label>
