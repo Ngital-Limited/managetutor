@@ -62,6 +62,13 @@ export default function TutorProfile() {
     gender: 'male',
     is_available: true,
     verification_status: 'pending',
+    father_phone: '',
+    mother_phone: '',
+    emergency_contact_name: '',
+    emergency_contact_phone: '',
+    education_detail: '',
+    present_address: '',
+    permanent_address: '',
   });
 
   const [userProfile, setUserProfile] = useState({
@@ -112,6 +119,13 @@ export default function TutorProfile() {
         gender: tutorRes.data.gender || 'male',
         is_available: tutorRes.data.is_available ?? true,
         verification_status: tutorRes.data.verification_status || 'pending',
+        father_phone: (tutorRes.data as any).father_phone || '',
+        mother_phone: (tutorRes.data as any).mother_phone || '',
+        emergency_contact_name: (tutorRes.data as any).emergency_contact_name || '',
+        emergency_contact_phone: (tutorRes.data as any).emergency_contact_phone || '',
+        education_detail: (tutorRes.data as any).education_detail || '',
+        present_address: (tutorRes.data as any).present_address || '',
+        permanent_address: (tutorRes.data as any).permanent_address || '',
       });
     }
     if (docsRes.data) setDocuments(docsRes.data);
@@ -150,7 +164,14 @@ export default function TutorProfile() {
         teaching_mode: profile.teaching_mode as 'online' | 'in_person' | 'hybrid',
         gender: profile.gender as 'male' | 'female',
         is_available: profile.is_available,
-      }).eq('id', tutorData.id);
+        father_phone: profile.father_phone || null,
+        mother_phone: profile.mother_phone || null,
+        emergency_contact_name: profile.emergency_contact_name || null,
+        emergency_contact_phone: profile.emergency_contact_phone || null,
+        education_detail: profile.education_detail || null,
+        present_address: profile.present_address || null,
+        permanent_address: profile.permanent_address || null,
+      } as any).eq('id', tutorData.id);
 
       // Update subjects - delete old and insert new
       await supabase.from('tutor_subjects').delete().eq('tutor_profile_id', tutorData.id);
@@ -339,7 +360,81 @@ export default function TutorProfile() {
             </CardContent>
           </Card>
 
-          {/* Teaching Details */}
+          {/* Contact & Family Details */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <MapPin className="h-5 w-5" />
+                Contact & Family Details
+              </CardTitle>
+              <CardDescription>Provide family contact info and addresses for verification purposes</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <Label>Father's Phone</Label>
+                  <Input
+                    value={profile.father_phone}
+                    onChange={(e) => setProfile({ ...profile, father_phone: e.target.value })}
+                    placeholder="+880 1XXX-XXXXXX"
+                  />
+                </div>
+                <div>
+                  <Label>Mother's Phone</Label>
+                  <Input
+                    value={profile.mother_phone}
+                    onChange={(e) => setProfile({ ...profile, mother_phone: e.target.value })}
+                    placeholder="+880 1XXX-XXXXXX"
+                  />
+                </div>
+              </div>
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <Label>Emergency Contact Name</Label>
+                  <Input
+                    value={profile.emergency_contact_name}
+                    onChange={(e) => setProfile({ ...profile, emergency_contact_name: e.target.value })}
+                    placeholder="e.g., Uncle, Guardian"
+                  />
+                </div>
+                <div>
+                  <Label>Emergency Contact Phone</Label>
+                  <Input
+                    value={profile.emergency_contact_phone}
+                    onChange={(e) => setProfile({ ...profile, emergency_contact_phone: e.target.value })}
+                    placeholder="+880 1XXX-XXXXXX"
+                  />
+                </div>
+              </div>
+              <div>
+                <Label>Detailed Education</Label>
+                <Textarea
+                  value={profile.education_detail}
+                  onChange={(e) => setProfile({ ...profile, education_detail: e.target.value })}
+                  placeholder="Institution name, degree, department, passing year, GPA/CGPA..."
+                  rows={3}
+                />
+              </div>
+              <div>
+                <Label>Present Address</Label>
+                <Textarea
+                  value={profile.present_address}
+                  onChange={(e) => setProfile({ ...profile, present_address: e.target.value })}
+                  placeholder="Your current address..."
+                  rows={2}
+                />
+              </div>
+              <div>
+                <Label>Permanent Address</Label>
+                <Textarea
+                  value={profile.permanent_address}
+                  onChange={(e) => setProfile({ ...profile, permanent_address: e.target.value })}
+                  placeholder="Your permanent address..."
+                  rows={2}
+                />
+              </div>
+            </CardContent>
+          </Card>
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
