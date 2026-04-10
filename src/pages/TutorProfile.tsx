@@ -323,10 +323,9 @@ export default function TutorProfile() {
                 </div>
                 <div>
                   <Label>Phone Number</Label>
-                  <Input
+                  <PhoneInput
                     value={userProfile.phone}
-                    onChange={(e) => setUserProfile({ ...userProfile, phone: e.target.value })}
-                    placeholder="+880 1XXX-XXXXXX"
+                    onChange={(v) => setUserProfile({ ...userProfile, phone: v })}
                   />
                 </div>
               </div>
