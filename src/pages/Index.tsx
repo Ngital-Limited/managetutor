@@ -21,6 +21,7 @@ export default function Index() {
   const [selectedDistrict, setSelectedDistrict] = useState('');
   const [selectedSubject, setSelectedSubject] = useState('');
   const [selectedMode, setSelectedMode] = useState('');
+  const [searchType, setSearchType] = useState<'tutors' | 'jobs'>('tutors');
 
   useEffect(() => {
     const fetchFilters = async () => {
@@ -39,7 +40,7 @@ export default function Index() {
     if (selectedDistrict) params.set('district', selectedDistrict);
     if (selectedSubject) params.set('subject', selectedSubject);
     if (selectedMode) params.set('mode', selectedMode);
-    navigate(`/tutors?${params.toString()}`);
+    navigate(`/${searchType === 'tutors' ? 'tutors' : 'jobs'}?${params.toString()}`);
   };
 
   const subjects = ['Physics', 'Mathematics', 'English', 'Chemistry', 'Biology', 'IELTS', 'Bangla', 'ICT'];
@@ -134,6 +135,25 @@ export default function Index() {
       <section className="relative z-10 -mt-10 pb-8">
         <div className="container mx-auto px-4">
           <div className="bg-card rounded-2xl shadow-xl shadow-foreground/10 p-6 md:p-8 border border-border">
+            {/* Tabs */}
+            <div className="flex gap-2 mb-6">
+              <Button
+                variant={searchType === 'tutors' ? 'default' : 'outline'}
+                onClick={() => setSearchType('tutors')}
+                className="rounded-xl gap-2"
+              >
+                <Search className="h-4 w-4" />
+                Find Tutors
+              </Button>
+              <Button
+                variant={searchType === 'jobs' ? 'default' : 'outline'}
+                onClick={() => setSearchType('jobs')}
+                className="rounded-xl gap-2"
+              >
+                <FileText className="h-4 w-4" />
+                Find Jobs
+              </Button>
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
               <div className="space-y-2">
                 <label className="text-sm font-semibold text-foreground">Location</label>
@@ -180,7 +200,7 @@ export default function Index() {
               </div>
               <Button onClick={handleSearch} className="h-12 rounded-xl text-base font-semibold gap-2">
                 <Search className="h-5 w-5" />
-                Search Tutors
+                {searchType === 'tutors' ? 'Search Tutors' : 'Search Jobs'}
               </Button>
             </div>
           </div>
