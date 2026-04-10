@@ -843,18 +843,27 @@ export default function ParentDashboard() {
                 <CardContent>
                   {applications.length > 0 ? (
                     <div className="space-y-4">
-                      {applications.map(app => (
+                      {applications.map(app => {
+                        const tutor = app.tutor_profiles;
+                        const tutorSubjects = tutor?.tutor_subjects?.map(ts => 
+                          language === 'en' ? ts.subjects?.name_en : ts.subjects?.name_bn
+                        ).filter(Boolean) || [];
+
+                        return (
                         <div key={app.id} className="p-4 border rounded-xl">
                           <div className="flex items-start gap-4">
-                            <Avatar className="h-12 w-12">
-                              <AvatarImage src={app.tutor_profiles?.profiles?.avatar_url} />
-                              <AvatarFallback>{app.tutor_profiles?.profiles?.full_name?.charAt(0) || 'T'}</AvatarFallback>
+                            <Avatar className="h-14 w-14">
+                              <AvatarImage src={tutor?.profiles?.avatar_url} />
+                              <AvatarFallback className="text-lg">{tutor?.profiles?.full_name?.charAt(0) || 'T'}</AvatarFallback>
                             </Avatar>
                             <div className="flex-1">
-                              <div className="flex items-center gap-2 mb-1">
-                                <h4 className="font-bold">{app.tutor_profiles?.profiles?.full_name}</h4>
-                                {app.tutor_profiles?.verification_status === 'approved' && (
+                              <div className="flex items-center gap-2 mb-1 flex-wrap">
+                                <h4 className="font-bold text-lg">{tutor?.profiles?.full_name}</h4>
+                                {tutor?.verification_status === 'approved' && (
                                   <Badge className="bg-success"><CheckCircle2 className="h-3 w-3 mr-1" />Verified</Badge>
+                                )}
+                                {tutor?.is_available && (
+                                  <Badge variant="outline" className="text-success border-success/50">Available</Badge>
                                 )}
                                 <Badge className={
                                   app.status === 'accepted' ? 'bg-success' :
@@ -864,21 +873,113 @@ export default function ParentDashboard() {
                                   {app.status.charAt(0).toUpperCase() + app.status.slice(1)}
                                 </Badge>
                               </div>
-                              <p className="text-sm text-muted-foreground mb-2">
-                                {app.tutor_profiles?.experience_years} yrs experience •
-                                <Star className="h-3 w-3 inline ml-1 text-accent" /> {app.tutor_profiles?.average_rating || 0}
-                                ({app.tutor_profiles?.total_reviews || 0} reviews)
-                              </p>
-                              <p className="text-sm mb-2">{app.cover_message}</p>
-                              <Badge variant="outline">Proposed: ৳{app.proposed_rate}/month</Badge>
+
+                              {/* Quick Stats Row */}
+                              <div className="flex items-center gap-3 text-sm text-muted-foreground mb-2 flex-wrap">
+                                <span className="flex items-center gap-1">
+                                  <Briefcase className="h-3 w-3" />
+                                  {tutor?.experience_years || 0} yrs exp
+                                </span>
+                                <span className="flex items-center gap-1">
+                                  <Star className="h-3 w-3 text-accent" /> {tutor?.average_rating || 0}
+                                  ({tutor?.total_reviews || 0} reviews)
+                                </span>
+                                <span className="flex items-center gap-1">
+                                  <Users className="h-3 w-3" />
+                                  {tutor?.total_students || 0} students
+                                </span>
+                                {tutor?.districts && (
+                                  <span className="flex items-center gap-1">
+                                    <MapPin className="h-3 w-3" />
+                                    {language === 'en' ? tutor.districts.name_en : tutor.districts.name_bn}
+                                  </span>
+                                )}
+                              </div>
+
+                              {/* Cover Message */}
+                              <p className="text-sm mb-3 bg-muted/50 p-3 rounded-lg italic">"{app.cover_message}"</p>
+                              
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <Badge variant="outline" className="font-semibold">Proposed: ৳{app.proposed_rate}/month</Badge>
+                                {tutor?.teaching_mode && (
+                                  <Badge variant="secondary">
+                                    {tutor.teaching_mode === 'in_person' ? 'In-Person' : tutor.teaching_mode === 'online' ? 'Online' : 'Hybrid'}
+                                  </Badge>
+                                )}
+                                {tutor?.gender && (
+                                  <Badge variant="secondary" className="capitalize">{tutor.gender}</Badge>
+                                )}
+                              </div>
                             </div>
                           </div>
 
+                          {/* Expandable Full Profile Section */}
+                          <details className="mt-4 pt-4 border-t group">
+                            <summary className="cursor-pointer text-sm font-medium text-primary flex items-center gap-1 hover:underline list-none">
+                              <Eye className="h-4 w-4" />
+                              View Full Profile Details
+                              <ArrowRight className="h-3 w-3 transition-transform group-open:rotate-90" />
+                            </summary>
+                            <div className="mt-4 space-y-4">
+                              {/* Education */}
+                              {(tutor?.education || tutor?.education_detail) && (
+                                <div>
+                                  <h5 className="text-sm font-bold flex items-center gap-1 mb-1">
+                                    <GraduationCap className="h-4 w-4" /> Education
+                                  </h5>
+                                  {tutor?.education && <p className="text-sm text-muted-foreground">{tutor.education}</p>}
+                                  {tutor?.education_detail && <p className="text-sm text-muted-foreground mt-1">{tutor.education_detail}</p>}
+                                </div>
+                              )}
+
+                              {/* Bio */}
+                              {tutor?.bio && (
+                                <div>
+                                  <h5 className="text-sm font-bold flex items-center gap-1 mb-1">
+                                    <User className="h-4 w-4" /> About
+                                  </h5>
+                                  <p className="text-sm text-muted-foreground">{tutor.bio}</p>
+                                </div>
+                              )}
+
+                              {/* Subjects */}
+                              {tutorSubjects.length > 0 && (
+                                <div>
+                                  <h5 className="text-sm font-bold flex items-center gap-1 mb-1">
+                                    <BookOpen className="h-4 w-4" /> Subjects
+                                  </h5>
+                                  <div className="flex flex-wrap gap-1.5">
+                                    {tutorSubjects.map((s, i) => (
+                                      <Badge key={i} variant="outline">{s}</Badge>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* Rate Range */}
+                              {(tutor?.hourly_rate_min || tutor?.hourly_rate_max) && (
+                                <div>
+                                  <h5 className="text-sm font-bold flex items-center gap-1 mb-1">
+                                    <CreditCard className="h-4 w-4" /> Expected Rate
+                                  </h5>
+                                  <p className="text-sm text-muted-foreground">
+                                    ৳{tutor.hourly_rate_min || '—'} – ৳{tutor.hourly_rate_max || '—'} / month
+                                  </p>
+                                </div>
+                              )}
+
+                              <div className="text-xs text-muted-foreground italic pt-2">
+                                Contact details will be shared after you accept this application.
+                              </div>
+                            </div>
+                          </details>
+
+                          {/* Action Buttons */}
                           {app.status === 'pending' && (
                             <div className="flex items-center gap-2 mt-4 pt-4 border-t">
                               <Button size="sm" onClick={() => handleApplicationAction(app.id, 'accepted')}>
                                 <CheckCircle2 className="h-4 w-4 mr-1" />
-                                Accept
+                                Select This Tutor
                               </Button>
                               <Button size="sm" variant="outline" onClick={() => handleApplicationAction(app.id, 'rejected')}>
                                 <XCircle className="h-4 w-4 mr-1" />
@@ -889,16 +990,17 @@ export default function ParentDashboard() {
 
                           {app.status === 'accepted' && (
                             <div className="flex items-center gap-2 mt-4 pt-4 border-t">
-                              <Link to={`/tutor/${app.tutor_profiles?.id}`}>
+                              <Link to={`/tutor/${tutor?.id}`}>
                                 <Button size="sm" variant="outline">
                                   <Eye className="h-4 w-4 mr-1" />
-                                  View Profile
+                                  View Full Public Profile
                                 </Button>
                               </Link>
                             </div>
                           )}
                         </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   ) : (
                     <div className="text-center py-8">
