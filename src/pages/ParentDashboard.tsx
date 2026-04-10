@@ -78,11 +78,21 @@ interface Application {
     user_id: string;
     bio: string;
     education: string;
+    education_detail: string | null;
     experience_years: number;
     average_rating: number;
     total_reviews: number;
+    total_students: number;
     verification_status: string;
+    teaching_mode: string;
+    gender: string;
+    hourly_rate_min: number | null;
+    hourly_rate_max: number | null;
+    is_available: boolean;
+    district_id: string | null;
+    districts: { name_en: string; name_bn: string } | null;
     profiles: { full_name: string; avatar_url: string };
+    tutor_subjects: { subjects: { name_en: string; name_bn: string } }[];
   };
 }
 
