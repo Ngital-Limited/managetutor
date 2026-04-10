@@ -232,8 +232,12 @@ export default function ParentDashboard() {
       .select(`
         *,
         tutor_profiles (
-          id, user_id, bio, education, experience_years, average_rating, total_reviews, verification_status,
-          profiles:user_id (full_name, avatar_url)
+          id, user_id, bio, education, education_detail, experience_years, 
+          average_rating, total_reviews, total_students, verification_status,
+          teaching_mode, gender, hourly_rate_min, hourly_rate_max, is_available,
+          district_id, districts (name_en, name_bn),
+          profiles:user_id (full_name, avatar_url),
+          tutor_subjects (subjects (name_en, name_bn))
         )
       `)
       .eq('job_id', jobId)
