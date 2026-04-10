@@ -219,7 +219,7 @@ export default function AdminDashboard() {
       .from('jobs')
       .select('id, title, job_reference, status, teaching_mode, total_applications, created_at, districts (name_en), subjects (name_en), profiles:parent_id (full_name)')
       .order('created_at', { ascending: false }).limit(100);
-    if (jobStatusFilter !== 'all') query = query.eq('status', jobStatusFilter);
+    if (jobStatusFilter !== 'all') query = query.eq('status', jobStatusFilter as 'open' | 'in_progress' | 'completed' | 'cancelled');
     const { data } = await query;
     if (data) setJobs(data as unknown as JobRow[]);
   }, [jobStatusFilter]);
@@ -326,7 +326,7 @@ export default function AdminDashboard() {
     else { toast({ title: `Review ${approved ? 'approved' : 'hidden'}` }); fetchReviews(); }
   };
 
-  const handleUpdateJobStatus = async (jobId: string, status: string) => {
+  const handleUpdateJobStatus = async (jobId: string, status: 'open' | 'in_progress' | 'completed' | 'cancelled') => {
     const { error } = await supabase.from('jobs').update({ status }).eq('id', jobId);
     if (error) toast({ title: 'Error', description: error.message, variant: 'destructive' });
     else { toast({ title: `Job status updated to ${status}` }); fetchJobs(); fetchStats(); }
