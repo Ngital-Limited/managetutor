@@ -822,6 +822,9 @@ export default function AdminDashboard() {
               </div>
             )}
 
+            {/* ═══════ BROADCAST TAB ═══════ */}
+            {activeTab === 'broadcast' && <BroadcastTab toast={toast} />}
+
             {/* ═══════ SETTINGS TAB ═══════ */}
             {activeTab === 'settings' && (
               <div className="space-y-6">
