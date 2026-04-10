@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
+import { PhoneInput, isValidBDPhone } from '@/components/PhoneInput';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -137,6 +138,19 @@ export default function TutorProfile() {
   };
 
   const handleSave = async () => {
+    // Validate phone numbers
+    const phoneFields = [
+      { value: userProfile.phone, label: 'Phone Number' },
+      { value: profile.father_phone, label: "Father's Phone" },
+      { value: profile.mother_phone, label: "Mother's Phone" },
+      { value: profile.emergency_contact_phone, label: 'Emergency Contact Phone' },
+    ];
+    const invalidPhone = phoneFields.find(f => f.value && !isValidBDPhone(f.value));
+    if (invalidPhone) {
+      toast({ title: 'Invalid Phone', description: `${invalidPhone.label} is not a valid Bangladesh phone number.`, variant: 'destructive' });
+      return;
+    }
+
     setSaving(true);
 
     // Update user profile
