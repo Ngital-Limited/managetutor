@@ -528,6 +528,36 @@ export default function TutorProfile() {
                   ))}
                 </div>
               </div>
+
+              {/* Class Levels */}
+              <div>
+                <Label className="mb-3 block">Class Levels You Teach</Label>
+                <div className="space-y-4">
+                  {CLASS_LEVELS.map(group => (
+                    <div key={group.group}>
+                      <p className="text-sm font-medium text-muted-foreground mb-2">{group.group}</p>
+                      <div className="flex flex-wrap gap-2">
+                        {group.items.map(level => (
+                          <Badge
+                            key={level}
+                            variant={selectedClassLevels.includes(level) ? 'default' : 'outline'}
+                            className="cursor-pointer"
+                            onClick={() => {
+                              if (selectedClassLevels.includes(level)) {
+                                setSelectedClassLevels(selectedClassLevels.filter(l => l !== level));
+                              } else {
+                                setSelectedClassLevels([...selectedClassLevels, level]);
+                              }
+                            }}
+                          >
+                            {level}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </CardContent>
           </Card>
 
