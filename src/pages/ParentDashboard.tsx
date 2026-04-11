@@ -624,12 +624,12 @@ export default function ParentDashboard() {
           </div>
           <div className="grid md:grid-cols-2 gap-4">
             <div>
-              <Label>Subject</Label>
-              <SearchableSelect
+              <Label>Subjects</Label>
+              <MultiSearchableSelect
                 options={subjectOptions}
-                value={jobForm.subject_id}
-                onValueChange={(v) => setJobForm({ ...jobForm, subject_id: v })}
-                placeholder="Search subject..."
+                values={jobForm.subject_ids}
+                onValuesChange={(v) => setJobForm({ ...jobForm, subject_ids: v })}
+                placeholder="Select subjects..."
                 searchPlaceholder="Type to search subjects..."
                 emptyText="No subjects found."
               />
