@@ -46,6 +46,7 @@ import {
 
 interface District { id: string; name_en: string; name_bn: string; }
 interface Subject { id: string; name_en: string; name_bn: string; }
+interface Area { id: string; name_en: string; name_bn: string; district_id: string; }
 
 interface Job {
   id: string;
@@ -58,14 +59,20 @@ interface Job {
   budget_max: number;
   teaching_mode: string;
   days_per_week: number;
+  duration_hours: number | null;
   job_reference: string;
   subject_ids: string[];
   district_id: string;
+  area_id: string | null;
   class_level: string | null;
   preferred_tutor_gender: string | null;
   student_gender: string | null;
   special_requirements: string | null;
   preferred_time: string | null;
+  number_of_students: number | null;
+  student_age: string | null;
+  start_date: string | null;
+  location_details: string | null;
   districts: { name_en: string; name_bn: string };
   subjects: { name_en: string; name_bn: string } | null;
   job_subjects?: { subjects: { name_en: string; name_bn: string } }[];
@@ -214,6 +221,7 @@ export default function ParentDashboard() {
 
   const [activeSection, setActiveSection] = useState<SectionKey>('overview');
   const [districts, setDistricts] = useState<District[]>([]);
+  const [areas, setAreas] = useState<Area[]>([]);
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [jobs, setJobs] = useState<Job[]>([]);
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
@@ -236,8 +244,10 @@ export default function ParentDashboard() {
     description: '',
     subject_ids: [] as string[],
     district_id: '',
+    area_id: '',
     class_level: '',
     days_per_week: 3,
+    duration_hours: 1.5,
     budget_min: 3000,
     budget_max: 8000,
     teaching_mode: 'in_person',
@@ -245,6 +255,10 @@ export default function ParentDashboard() {
     student_gender: 'any',
     special_requirements: [] as string[],
     preferred_time: '',
+    number_of_students: 1,
+    student_age: '',
+    start_date: '',
+    location_details: '',
   });
 
   const [userProfile, setUserProfile] = useState<UserProfileFull | null>(null);
