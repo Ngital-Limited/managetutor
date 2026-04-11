@@ -918,6 +918,7 @@ export type Database = {
           average_rating: number | null
           bio: string | null
           bio_bn: string | null
+          class_levels: string[] | null
           created_at: string | null
           display_name: string | null
           district_id: string | null
@@ -951,6 +952,7 @@ export type Database = {
           average_rating?: number | null
           bio?: string | null
           bio_bn?: string | null
+          class_levels?: string[] | null
           created_at?: string | null
           display_name?: string | null
           district_id?: string | null
@@ -984,6 +986,7 @@ export type Database = {
           average_rating?: number | null
           bio?: string | null
           bio_bn?: string | null
+          class_levels?: string[] | null
           created_at?: string | null
           display_name?: string | null
           district_id?: string | null

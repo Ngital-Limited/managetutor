@@ -52,6 +52,18 @@ interface Application {
   };
 }
 
+interface RecommendedJob {
+  id: string;
+  title: string;
+  budget_min: number;
+  budget_max: number;
+  teaching_mode: string;
+  class_level: string;
+  created_at: string;
+  districts: { name_en: string; name_bn: string } | null;
+  subjects: { name_en: string; name_bn: string } | null;
+}
+
 interface TutorProfile {
   id: string;
   bio: string;
@@ -145,6 +157,10 @@ export default function TutorDashboard() {
   const [activeFeatured, setActiveFeatured] = useState<FeaturedListing | null>(null);
   const [boostLoading, setBoostLoading] = useState(false);
   const [demoBookings, setDemoBookings] = useState<any[]>([]);
+  const [recommendedJobs, setRecommendedJobs] = useState<RecommendedJob[]>([]);
+  const [nearbyJobs, setNearbyJobs] = useState<RecommendedJob[]>([]);
+  const [highPayJobs, setHighPayJobs] = useState<RecommendedJob[]>([]);
+  const [jobTab, setJobTab] = useState('recommended');
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -232,6 +248,61 @@ export default function TutorDashboard() {
       if (bookingsData) {
         setDemoBookings(bookingsData);
       }
+
+      // Fetch recommended jobs
+      const tutorSubjectsRes = await supabase
+        .from('tutor_subjects')
+        .select('subject_id')
+        .eq('tutor_profile_id', tutorData.id);
+      const tutorSubjectIds = tutorSubjectsRes.data?.map(s => s.subject_id) || [];
+
+      // Applied job IDs to exclude
+      const appliedJobIds = (apps || []).map(a => a.job_id);
+
+      // Recommended: matching subjects
+      let recQuery = supabase
+        .from('jobs')
+        .select('id, title, budget_min, budget_max, teaching_mode, class_level, created_at, districts(name_en, name_bn), subjects(name_en, name_bn)')
+        .eq('status', 'open')
+        .order('created_at', { ascending: false })
+        .limit(10);
+      if (tutorSubjectIds.length > 0) {
+        recQuery = recQuery.in('subject_id', tutorSubjectIds);
+      }
+      if (appliedJobIds.length > 0) {
+        recQuery = recQuery.not('id', 'in', `(${appliedJobIds.join(',')})`);
+      }
+      const { data: recJobs } = await recQuery;
+      setRecommendedJobs((recJobs || []) as unknown as RecommendedJob[]);
+
+      // Near your location
+      if (tutorData.district_id) {
+        let nearQuery = supabase
+          .from('jobs')
+          .select('id, title, budget_min, budget_max, teaching_mode, class_level, created_at, districts(name_en, name_bn), subjects(name_en, name_bn)')
+          .eq('status', 'open')
+          .eq('district_id', tutorData.district_id)
+          .order('created_at', { ascending: false })
+          .limit(10);
+        if (appliedJobIds.length > 0) {
+          nearQuery = nearQuery.not('id', 'in', `(${appliedJobIds.join(',')})`);
+        }
+        const { data: nearData } = await nearQuery;
+        setNearbyJobs((nearData || []) as unknown as RecommendedJob[]);
+      }
+
+      // High-paying jobs
+      let highQuery = supabase
+        .from('jobs')
+        .select('id, title, budget_min, budget_max, teaching_mode, class_level, created_at, districts(name_en, name_bn), subjects(name_en, name_bn)')
+        .eq('status', 'open')
+        .order('budget_max', { ascending: false })
+        .limit(10);
+      if (appliedJobIds.length > 0) {
+        highQuery = highQuery.not('id', 'in', `(${appliedJobIds.join(',')})`);
+      }
+      const { data: highData } = await highQuery;
+      setHighPayJobs((highData || []) as unknown as RecommendedJob[]);
     }
 
     setLoading(false);
@@ -577,6 +648,89 @@ export default function TutorDashboard() {
           </CardContent>
         </Card>
 
+        {/* Recommended Jobs */}
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Sparkles className="h-5 w-5 text-primary" />
+              Job Recommendations
+            </CardTitle>
+            <CardDescription>Jobs matched to your profile, location, and earning potential</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Tabs value={jobTab} onValueChange={setJobTab}>
+              <TabsList className="mb-4">
+                <TabsTrigger value="recommended">
+                  <Sparkles className="h-3 w-3 mr-1" />
+                  Recommended ({recommendedJobs.length})
+                </TabsTrigger>
+                <TabsTrigger value="nearby">
+                  <MapPin className="h-3 w-3 mr-1" />
+                  Near You ({nearbyJobs.length})
+                </TabsTrigger>
+                <TabsTrigger value="highpay">
+                  <DollarSign className="h-3 w-3 mr-1" />
+                  High-Paying ({highPayJobs.length})
+                </TabsTrigger>
+              </TabsList>
+
+              {['recommended', 'nearby', 'highpay'].map(tab => {
+                const jobList = tab === 'recommended' ? recommendedJobs : tab === 'nearby' ? nearbyJobs : highPayJobs;
+                return (
+                  <TabsContent key={tab} value={tab} className="space-y-3">
+                    {jobList.length > 0 ? jobList.map(job => (
+                      <Link key={job.id} to={`/jobs/${job.id}`} className="block">
+                        <div className="p-4 border rounded-xl hover:bg-muted/50 transition-colors">
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <h4 className="font-bold text-foreground hover:text-primary transition-colors">{job.title}</h4>
+                              <div className="flex items-center gap-3 text-sm text-muted-foreground mt-1">
+                                {job.districts && (
+                                  <span className="flex items-center gap-1">
+                                    <MapPin className="h-3 w-3" />
+                                    {job.districts.name_en}
+                                  </span>
+                                )}
+                                {job.subjects && (
+                                  <span className="flex items-center gap-1">
+                                    <BookOpen className="h-3 w-3" />
+                                    {job.subjects.name_en}
+                                  </span>
+                                )}
+                                {job.class_level && (
+                                  <Badge variant="outline" className="text-xs">{job.class_level}</Badge>
+                                )}
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              {(job.budget_min || job.budget_max) && (
+                                <p className="font-bold text-primary">
+                                  ৳{job.budget_min || 0} - ৳{job.budget_max || 0}
+                                </p>
+                              )}
+                              <p className="text-xs text-muted-foreground">
+                                {formatDistanceToNow(new Date(job.created_at), { addSuffix: true })}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </Link>
+                    )) : (
+                      <div className="text-center py-8">
+                        <Briefcase className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                        <p className="text-muted-foreground">No {tab === 'recommended' ? 'recommended' : tab === 'nearby' ? 'nearby' : 'high-paying'} jobs found</p>
+                        <Link to="/jobs">
+                          <Button variant="link" className="mt-2">Browse All Jobs <ArrowRight className="h-4 w-4 ml-1" /></Button>
+                        </Link>
+                      </div>
+                    )}
+                  </TabsContent>
+                );
+              })}
+            </Tabs>
+          </CardContent>
+        </Card>
+
         {/* Demo Class Bookings */}
         {demoBookings.length > 0 && (
           <Card className="mb-8">
@@ -680,13 +834,15 @@ export default function TutorDashboard() {
           <CardContent>
             {applications.length > 0 ? (
               <Tabs defaultValue="all">
-                <TabsList className="mb-4">
+                <TabsList className="mb-4 flex-wrap">
                   <TabsTrigger value="all">All ({applications.length})</TabsTrigger>
                   <TabsTrigger value="pending">Pending ({stats.pendingApplications})</TabsTrigger>
-                  <TabsTrigger value="accepted">Accepted ({stats.acceptedApplications})</TabsTrigger>
+                  <TabsTrigger value="accepted">Shortlisted ({stats.acceptedApplications})</TabsTrigger>
+                  <TabsTrigger value="rejected">Rejected ({applications.filter(a => a.status === 'rejected').length})</TabsTrigger>
+                  <TabsTrigger value="withdrawn">Withdrawn ({applications.filter(a => a.status === 'withdrawn').length})</TabsTrigger>
                 </TabsList>
 
-                {['all', 'pending', 'accepted', 'rejected'].map(tab => (
+                {['all', 'pending', 'accepted', 'rejected', 'withdrawn'].map(tab => (
                   <TabsContent key={tab} value={tab} className="space-y-4">
                     {applications
                       .filter(a => tab === 'all' || a.status === tab)

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { CLASS_LEVELS } from '@/constants/classLevels';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -53,6 +54,8 @@ export default function TutorProfile() {
   const [documents, setDocuments] = useState<VerificationDoc[]>([]);
   const [uploading, setUploading] = useState(false);
   
+  const [selectedClassLevels, setSelectedClassLevels] = useState<string[]>([]);
+
   const [profile, setProfile] = useState({
     bio: '',
     education: '',
@@ -128,6 +131,7 @@ export default function TutorProfile() {
         present_address: (tutorRes.data as any).present_address || '',
         permanent_address: (tutorRes.data as any).permanent_address || '',
       });
+      setSelectedClassLevels((tutorRes.data as any).class_levels || []);
     }
     if (docsRes.data) setDocuments(docsRes.data);
     if (tutorSubjectsRes.data) {
@@ -185,6 +189,7 @@ export default function TutorProfile() {
         education_detail: profile.education_detail || null,
         present_address: profile.present_address || null,
         permanent_address: profile.permanent_address || null,
+        class_levels: selectedClassLevels,
       } as any).eq('id', tutorData.id);
 
       // Update subjects - delete old and insert new
@@ -520,6 +525,36 @@ export default function TutorProfile() {
                     >
                       {language === 'en' ? subject.name_en : subject.name_bn}
                     </Badge>
+                  ))}
+                </div>
+              </div>
+
+              {/* Class Levels */}
+              <div>
+                <Label className="mb-3 block">Class Levels You Teach</Label>
+                <div className="space-y-4">
+                  {CLASS_LEVELS.map(group => (
+                    <div key={group.group}>
+                      <p className="text-sm font-medium text-muted-foreground mb-2">{group.group}</p>
+                      <div className="flex flex-wrap gap-2">
+                        {group.items.map(level => (
+                          <Badge
+                            key={level}
+                            variant={selectedClassLevels.includes(level) ? 'default' : 'outline'}
+                            className="cursor-pointer"
+                            onClick={() => {
+                              if (selectedClassLevels.includes(level)) {
+                                setSelectedClassLevels(selectedClassLevels.filter(l => l !== level));
+                              } else {
+                                setSelectedClassLevels([...selectedClassLevels, level]);
+                              }
+                            }}
+                          >
+                            {level}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
                   ))}
                 </div>
               </div>
