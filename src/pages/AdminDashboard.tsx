@@ -994,8 +994,12 @@ export default function AdminDashboard() {
     { title: 'Payments', value: 'payments', icon: CreditCard },
     { title: 'Subscriptions', value: 'subscriptions', icon: Package },
     { title: 'Demo Requests', value: 'demo_requests', icon: GraduationCap },
+    { title: 'Revenue & Payouts', value: 'revenue', icon: Wallet },
+    { title: 'Support Tickets', value: 'tickets', icon: LifeBuoy },
+    { title: 'Geographic Analytics', value: 'geographic', icon: MapPin },
     { title: 'Contact Messages', value: 'contacts', icon: Mail },
     { title: 'Broadcast', value: 'broadcast', icon: Megaphone },
+    { title: 'Sub-Admin Roles', value: 'rbac', icon: ShieldCheck },
     { title: 'Settings', value: 'settings', icon: Settings },
   ];
 
