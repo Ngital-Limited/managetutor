@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { MapPin, Phone, Mail, Send, Clock, MessageCircle } from 'lucide-react';
