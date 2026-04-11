@@ -336,6 +336,65 @@ export default function TutorPublicProfile() {
               </CardContent>
             </Card>
 
+            {/* Video Introduction */}
+            {tutor.video_url && (() => {
+              const ytMatch = tutor.video_url?.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/);
+              const vimeoMatch = tutor.video_url?.match(/(?:vimeo\.com\/)(\d+)/);
+              const embedUrl = ytMatch ? `https://www.youtube.com/embed/${ytMatch[1]}` : vimeoMatch ? `https://player.vimeo.com/video/${vimeoMatch[1]}` : null;
+              if (!embedUrl) return null;
+              return (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Video className="h-5 w-5" />
+                      Video Introduction
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="aspect-video rounded-xl overflow-hidden">
+                      <iframe
+                        src={embedUrl}
+                        className="w-full h-full"
+                        allowFullScreen
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        title="Tutor Introduction Video"
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })()}
+
+            {/* Teaching Philosophy */}
+            {tutor.teaching_philosophy && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Lightbulb className="h-5 w-5" />
+                    Teaching Philosophy
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-muted-foreground whitespace-pre-wrap">{tutor.teaching_philosophy}</p>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Success Stories */}
+            {tutor.success_stories && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Trophy className="h-5 w-5" />
+                    Success Stories
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-muted-foreground whitespace-pre-wrap">{tutor.success_stories}</p>
+                </CardContent>
+              </Card>
+            )}
+
             {/* Reviews */}
             <Card>
               <CardHeader>
