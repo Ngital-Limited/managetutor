@@ -1335,6 +1335,125 @@ export default function ParentDashboard() {
                 </CardContent>
               </Card>
             )}
+
+            {/* Payment Details Section */}
+            <Card className="mt-6">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <CreditCard className="h-5 w-5" />
+                  Payment Details
+                </CardTitle>
+                <CardDescription>Transaction history, demo class fees, and subscription status</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* Subscription Status */}
+                <div>
+                  <h4 className="text-sm font-bold mb-3 flex items-center gap-2">
+                    <Receipt className="h-4 w-4" />
+                    Subscription Status
+                  </h4>
+                  {subscription ? (
+                    <div className="p-4 border rounded-xl bg-primary/5 border-primary/20">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-bold text-lg">{subscription.subscription_plans?.name || 'Active Plan'}</p>
+                          <p className="text-sm text-muted-foreground">
+                            ৳{subscription.subscription_plans?.price_monthly}/month
+                          </p>
+                        </div>
+                        <Badge className="bg-success">Active</Badge>
+                      </div>
+                      {subscription.current_period_end && (
+                        <p className="text-xs text-muted-foreground mt-2">
+                          Renews on {format(new Date(subscription.current_period_end), 'dd MMM yyyy')}
+                        </p>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="p-4 border rounded-xl text-center">
+                      <p className="text-muted-foreground text-sm">No active subscription</p>
+                      <Link to="/pricing">
+                        <Button size="sm" variant="outline" className="mt-2">View Plans</Button>
+                      </Link>
+                    </div>
+                  )}
+                </div>
+
+                {/* Demo Class Fees Summary */}
+                {demoBookings.length > 0 && (
+                  <div>
+                    <h4 className="text-sm font-bold mb-3 flex items-center gap-2">
+                      <DollarSign className="h-4 w-4" />
+                      Demo Class Fees
+                    </h4>
+                    <div className="grid grid-cols-3 gap-3">
+                      <div className="p-3 border rounded-lg text-center">
+                        <p className="text-xl font-bold text-primary">
+                          ৳{demoBookings.reduce((sum: number, b: any) => sum + (b.class_fee || 0), 0)}
+                        </p>
+                        <p className="text-xs text-muted-foreground">Total Fees</p>
+                      </div>
+                      <div className="p-3 border rounded-lg text-center">
+                        <p className="text-xl font-bold text-success">
+                          {demoBookings.filter((b: any) => b.status === 'completed').length}
+                        </p>
+                        <p className="text-xs text-muted-foreground">Completed</p>
+                      </div>
+                      <div className="p-3 border rounded-lg text-center">
+                        <p className="text-xl font-bold text-warning">
+                          {demoBookings.filter((b: any) => b.status === 'pending' || b.status === 'confirmed').length}
+                        </p>
+                        <p className="text-xs text-muted-foreground">Upcoming</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Transaction History */}
+                <div>
+                  <h4 className="text-sm font-bold mb-3 flex items-center gap-2">
+                    <Clock className="h-4 w-4" />
+                    Transaction History
+                  </h4>
+                  {transactions.length > 0 ? (
+                    <div className="space-y-2">
+                      {transactions.map((txn: any) => (
+                        <div key={txn.id} className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2">
+                              <p className="font-medium text-sm truncate">
+                                {txn.listing_type === 'verification_badge' ? 'Verified Badge' :
+                                 txn.listing_type ? `Featured: ${txn.listing_type}` :
+                                 txn.plan_id ? 'Subscription' : 'Payment'}
+                              </p>
+                              <Badge variant="outline" className="text-xs font-mono">{txn.transaction_id.slice(0, 15)}...</Badge>
+                            </div>
+                            <p className="text-xs text-muted-foreground">
+                              {format(new Date(txn.created_at), 'dd MMM yyyy, hh:mm a')}
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <p className="font-bold">৳{txn.amount}</p>
+                            <Badge className={
+                              txn.status === 'completed' ? 'bg-success' :
+                              txn.status === 'pending' ? 'bg-warning text-warning-foreground' :
+                              'bg-destructive'
+                            }>
+                              {txn.status.charAt(0).toUpperCase() + txn.status.slice(1)}
+                            </Badge>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-6 border rounded-lg">
+                      <Receipt className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                      <p className="text-sm text-muted-foreground">No transactions yet</p>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
           </main>
         </div>
       </div>
