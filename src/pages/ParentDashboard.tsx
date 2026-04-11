@@ -376,9 +376,10 @@ export default function ParentDashboard() {
     }
   };
 
-  const startEditJob = (job: Job) => {
-    const existingSubjectIds = job.job_subjects?.map(js => js.subjects?.name_en ? '' : '').filter(Boolean) || [];
-    // Get subject IDs from job_subjects
+  const startEditJob = async (job: Job) => {
+    // Fetch subject IDs from job_subjects
+    const { data: jsData } = await supabase.from('job_subjects').select('subject_id').eq('job_id', job.id);
+    const subjectIds = jsData?.map(js => js.subject_id) || [];
     setJobForm({
       title: job.title,
       description: job.description,
