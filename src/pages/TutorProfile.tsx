@@ -191,11 +191,20 @@ export default function TutorProfile() {
     setSaving(true);
 
     // Update user profile
-    await supabase.from('profiles').update({
+    const { error: profileError } = await supabase.from('profiles').update({
       full_name: userProfile.full_name,
       phone: userProfile.phone,
       district_id: userProfile.district_id || null,
     }).eq('id', user?.id);
+
+    if (profileError) {
+      const msg = profileError.message?.includes('idx_profiles_phone_unique')
+        ? 'This phone number is already registered with another account.'
+        : profileError.message;
+      toast({ title: 'Error', description: msg, variant: 'destructive' });
+      setSaving(false);
+      return;
+    }
 
     // Get tutor profile ID
     const { data: tutorData } = await supabase
