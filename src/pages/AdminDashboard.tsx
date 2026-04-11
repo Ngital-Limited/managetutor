@@ -27,8 +27,12 @@ import {
   Clock, AlertTriangle, BarChart3, FileText, Settings, Search,
   Eye, Ban, UserCheck, FileCheck,
   LogOut, Home, Star, DollarSign, Trash2, CreditCard, Megaphone, Send, Mail,
-  Package, Plus, Pencil, ToggleLeft, ToggleRight
+  Package, Plus, Pencil, ToggleLeft, ToggleRight, Wallet, MapPin, LifeBuoy, ShieldCheck
 } from 'lucide-react';
+import { RevenuePayoutTab } from '@/components/admin/RevenuePayoutTab';
+import { SupportTicketsTab } from '@/components/admin/SupportTicketsTab';
+import { GeographicHeatmapTab } from '@/components/admin/GeographicHeatmapTab';
+import { SubAdminRBACTab } from '@/components/admin/SubAdminRBACTab';
 
 // ──────────── Types ────────────
 interface Stats {
