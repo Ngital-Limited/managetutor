@@ -40,7 +40,7 @@ interface Message {
 export default function Messages() {
   const [searchParams] = useSearchParams();
   const { user, loading: authLoading } = useAuth();
-  const { language, setLanguage } = useLanguage();
+  const { language } = useLanguage();
   const navigate = useNavigate();
   const { toast } = useToast();
   const messagesEndRef = useRef<HTMLDivElement>(null);

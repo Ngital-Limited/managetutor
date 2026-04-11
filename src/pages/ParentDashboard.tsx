@@ -215,7 +215,7 @@ function ParentSidebar({ activeSection, setActiveSection, onPostJob }: { activeS
 
 export default function ParentDashboard() {
   const { user, signOut, loading: authLoading } = useAuth();
-  const { t, language, setLanguage } = useLanguage();
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -591,19 +591,19 @@ export default function ParentDashboard() {
 
   const districtOptions = useMemo(() => districts.map(d => ({
     value: d.id,
-    label: language === 'en' ? d.name_en : d.name_bn,
+    label: d.name_en,
   })), [districts, language]);
 
   const subjectOptions = useMemo(() => subjects.map(s => ({
     value: s.id,
-    label: language === 'en' ? s.name_en : s.name_bn,
+    label: s.name_en,
   })), [subjects, language]);
 
   const areaOptions = useMemo(() => {
     const filtered = jobForm.district_id ? areas.filter(a => a.district_id === jobForm.district_id) : areas;
     return filtered.map(a => ({
       value: a.id,
-      label: language === 'en' ? a.name_en : a.name_bn,
+      label: a.name_en,
     }));
   }, [areas, jobForm.district_id, language]);
 
@@ -1168,12 +1168,12 @@ export default function ParentDashboard() {
                           <div className="flex items-center gap-3 text-sm text-muted-foreground mb-2 flex-wrap">
                             <span className="flex items-center gap-1">
                               <MapPin className="h-3 w-3" />
-                              {language === 'en' ? job.districts?.name_en : job.districts?.name_bn}
+                              {job.districts?.name_en}
                             </span>
                             {job.subjects && (
                               <span className="flex items-center gap-1">
                                 <BookOpen className="h-3 w-3" />
-                                {language === 'en' ? job.subjects.name_en : job.subjects.name_bn}
+                                {job.subjects.name_en}
                               </span>
                             )}
                             <span className="flex items-center gap-1">
@@ -1271,7 +1271,7 @@ export default function ParentDashboard() {
                 {applications.map(app => {
                   const tutor = app.tutor_profiles;
                   const tutorSubjects = tutor?.tutor_subjects?.map(ts =>
-                    language === 'en' ? ts.subjects?.name_en : ts.subjects?.name_bn
+                    ts.subjects?.name_en
                   ).filter(Boolean) || [];
 
                   return (
@@ -1315,7 +1315,7 @@ export default function ParentDashboard() {
                             {tutor?.districts && (
                               <span className="flex items-center gap-1">
                                 <MapPin className="h-3 w-3" />
-                                {language === 'en' ? tutor.districts.name_en : tutor.districts.name_bn}
+                                {tutor.districts.name_en}
                               </span>
                             )}
                           </div>
@@ -1466,7 +1466,7 @@ export default function ParentDashboard() {
                       {booking.subjects && (
                         <Badge variant="secondary">
                           <BookOpen className="h-3 w-3 mr-1" />
-                          {language === 'en' ? booking.subjects.name_en : booking.subjects.name_bn}
+                          {booking.subjects.name_en}
                         </Badge>
                       )}
                     </div>
@@ -1700,10 +1700,7 @@ export default function ParentDashboard() {
             </div>
             <div className="flex items-center gap-3">
               <NotificationBell />
-              <Button variant="ghost" size="sm" onClick={() => setLanguage(language === 'en' ? 'bn' : 'en')}>
-                <Globe className="h-4 w-4 mr-1" />
-                {language === 'en' ? 'বাংলা' : 'EN'}
-              </Button>
+              
               <Button variant="outline" size="sm" onClick={handleSignOut}>
                 <LogOut className="h-4 w-4 mr-1" />
                 <span className="hidden sm:inline">Logout</span>

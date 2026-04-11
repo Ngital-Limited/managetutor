@@ -171,7 +171,7 @@ export default function ParentProfileEdit() {
                   <SelectTrigger><SelectValue placeholder="Select district" /></SelectTrigger>
                   <SelectContent>
                     {districts.map(d => (
-                      <SelectItem key={d.id} value={d.id}>{language === 'en' ? d.name_en : d.name_bn}</SelectItem>
+                      <SelectItem key={d.id} value={d.id}>{d.name_en}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>

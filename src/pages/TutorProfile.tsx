@@ -46,7 +46,7 @@ interface VerificationDoc {
 
 export default function TutorProfile() {
   const { user, role, loading: authLoading } = useAuth();
-  const { t, language, setLanguage } = useLanguage();
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -338,10 +338,7 @@ export default function TutorProfile() {
             <Logo size="md" />
           </Link>
           <div className="flex items-center gap-3">
-            <Button variant="ghost" size="sm" onClick={() => setLanguage(language === 'en' ? 'bn' : 'en')}>
-              <Globe className="h-4 w-4 mr-1" />
-              {language === 'en' ? 'বাংলা' : 'EN'}
-            </Button>
+            
             <Link to="/dashboard">
               <Button variant="outline">
                 <ArrowLeft className="h-4 w-4 mr-2" />
@@ -404,7 +401,7 @@ export default function TutorProfile() {
                     <SelectTrigger><SelectValue placeholder="Select district" /></SelectTrigger>
                     <SelectContent>
                       {districts.map(d => (
-                        <SelectItem key={d.id} value={d.id}>{language === 'en' ? d.name_en : d.name_bn}</SelectItem>
+                        <SelectItem key={d.id} value={d.id}>{d.name_en}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -576,7 +573,7 @@ export default function TutorProfile() {
                         }
                       }}
                     >
-                      {language === 'en' ? subject.name_en : subject.name_bn}
+                      {subject.name_en}
                     </Badge>
                   ))}
                 </div>

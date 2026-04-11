@@ -16,7 +16,7 @@ import { GraduationCap, ArrowLeft, Globe, Star } from 'lucide-react';
 export default function WriteReview() {
   const { tutorId } = useParams();
   const { user, loading: authLoading } = useAuth();
-  const { language, setLanguage } = useLanguage();
+  const { language } = useLanguage();
   const navigate = useNavigate();
   const { toast } = useToast();
 

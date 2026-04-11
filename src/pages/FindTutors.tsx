@@ -396,7 +396,7 @@ export default function FindTutors() {
             <div className="flex flex-wrap gap-1.5 mb-4">
               {tutor.tutor_subjects.slice(0, 3).map((ts, i) => (
                 <Badge key={i} variant="secondary" className="text-xs">
-                  {language === 'en' ? ts.subjects?.name_en : ts.subjects?.name_bn}
+                  {ts.subjects?.name_en}
                 </Badge>
               ))}
               {tutor.tutor_subjects.length > 3 && (
@@ -469,7 +469,7 @@ export default function FindTutors() {
                 <SelectItem value="all">All Locations</SelectItem>
                 {districts.map(d => (
                   <SelectItem key={d.id} value={d.id}>
-                    {language === 'en' ? d.name_en : d.name_bn}
+                    {d.name_en}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -483,7 +483,7 @@ export default function FindTutors() {
                 <SelectItem value="all">All Subjects</SelectItem>
                 {subjects.map(s => (
                   <SelectItem key={s.id} value={s.id}>
-                    {language === 'en' ? s.name_en : s.name_bn}
+                    {s.name_en}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -740,7 +740,7 @@ export default function FindTutors() {
                         {job.subjects && (
                           <Badge variant="secondary" className="text-xs">
                             <BookOpen className="h-3 w-3 mr-1" />
-                            {language === 'en' ? job.subjects.name_en : job.subjects.name_bn}
+                            {job.subjects.name_en}
                           </Badge>
                         )}
                         {job.class_level && (
@@ -756,7 +756,7 @@ export default function FindTutors() {
                       <div className="flex items-center justify-between pt-3 border-t border-border text-sm">
                         <div className="flex items-center gap-1 text-muted-foreground">
                           <MapPin className="h-3 w-3" />
-                          {language === 'en' ? job.districts?.name_en : job.districts?.name_bn}
+                          {job.districts?.name_en}
                         </div>
                         {(job.budget_min || job.budget_max) && (
                           <span className="font-bold text-primary">

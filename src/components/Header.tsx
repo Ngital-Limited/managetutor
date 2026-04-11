@@ -12,10 +12,10 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { Globe, Menu, X, LayoutDashboard, LogOut, User } from 'lucide-react';
+import { Menu, X, LayoutDashboard, LogOut, User } from 'lucide-react';
 
 export function Header() {
-  const { t, language, setLanguage } = useLanguage();
+  const { t } = useLanguage();
   const { user, profile, signOut } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -87,15 +87,6 @@ export function Header() {
           </div>
 
           <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setLanguage(language === 'en' ? 'bn' : 'en')}
-              className="h-9 px-3 text-muted-foreground hover:text-foreground rounded-lg"
-            >
-              <Globe className="h-4 w-4 mr-1.5" />
-              <span className="text-xs font-semibold">{language === 'en' ? 'বাংলা' : 'EN'}</span>
-            </Button>
 
             {/* Desktop auth */}
             <div className="hidden md:flex items-center gap-2">
