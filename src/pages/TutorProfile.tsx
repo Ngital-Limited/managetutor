@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { CLASS_LEVELS } from '@/constants/classLevels';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -53,6 +54,8 @@ export default function TutorProfile() {
   const [documents, setDocuments] = useState<VerificationDoc[]>([]);
   const [uploading, setUploading] = useState(false);
   
+  const [selectedClassLevels, setSelectedClassLevels] = useState<string[]>([]);
+
   const [profile, setProfile] = useState({
     bio: '',
     education: '',
