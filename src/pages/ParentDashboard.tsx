@@ -743,7 +743,12 @@ export default function ParentDashboard() {
               </Avatar>
               <div>
                 <h1 className="text-2xl font-bold">Welcome, {userProfile?.full_name || 'Parent'}!</h1>
-                <Badge className="bg-parent text-parent-foreground mt-1">Parent / Guardian</Badge>
+                <div className="flex items-center gap-2 mt-1">
+                  <Badge className="bg-parent text-parent-foreground">Parent / Guardian</Badge>
+                  {userProfile?.user_reference && (
+                    <Badge variant="outline" className="font-mono text-xs">{userProfile.user_reference}</Badge>
+                  )}
+                </div>
               </div>
             </div>
 

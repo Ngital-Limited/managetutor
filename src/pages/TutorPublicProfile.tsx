@@ -43,6 +43,7 @@ interface Profile {
   full_name: string;
   avatar_url: string;
   district_id: string;
+  user_reference: string | null;
   districts: { name_en: string; name_bn: string } | null;
 }
 
@@ -97,7 +98,7 @@ export default function TutorPublicProfile() {
     // Fetch user profile with district
     const { data: profileData } = await supabase
       .from('profiles')
-      .select('full_name, avatar_url, district_id, districts (name_en, name_bn)')
+      .select('full_name, avatar_url, district_id, user_reference, districts (name_en, name_bn)')
       .eq('id', tutorData.user_id)
       .maybeSingle();
 
@@ -248,6 +249,9 @@ export default function TutorPublicProfile() {
                   <div className="flex-1">
                     <div className="flex items-center gap-2 flex-wrap mb-2">
                       <h1 className="text-2xl font-bold">{profile.full_name}</h1>
+                      {profile.user_reference && (
+                        <Badge variant="outline" className="font-mono text-xs">{profile.user_reference}</Badge>
+                      )}
                       {tutor.verification_status === 'approved' && (
                         <Badge className="bg-success"><CheckCircle2 className="h-3 w-3 mr-1" />Verified</Badge>
                       )}

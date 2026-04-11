@@ -146,7 +146,7 @@ export default function TutorDashboard() {
   const [loading, setLoading] = useState(true);
   const [applications, setApplications] = useState<Application[]>([]);
   const [profile, setProfile] = useState<TutorProfile | null>(null);
-  const [userProfile, setUserProfile] = useState<{ full_name: string; avatar_url: string } | null>(null);
+  const [userProfile, setUserProfile] = useState<{ full_name: string; avatar_url: string; user_reference: string | null } | null>(null);
   const [stats, setStats] = useState({
     totalApplications: 0,
     acceptedApplications: 0,
@@ -176,7 +176,7 @@ export default function TutorDashboard() {
     // Fetch user profile
     const { data: profileData } = await supabase
       .from('profiles')
-      .select('full_name, avatar_url')
+      .select('full_name, avatar_url, user_reference')
       .eq('id', user.id)
       .single();
 
@@ -439,6 +439,9 @@ export default function TutorDashboard() {
               <h1 className="text-2xl font-bold">Welcome, {userProfile?.full_name || 'Tutor'}!</h1>
               <div className="flex items-center gap-2 mt-1">
                 <Badge className="bg-tutor text-tutor-foreground">Tutor</Badge>
+                {userProfile?.user_reference && (
+                  <Badge variant="outline" className="font-mono text-xs">{userProfile.user_reference}</Badge>
+                )}
                 {profile?.verification_status === 'approved' && (
                   <Badge className="bg-success"><CheckCircle2 className="h-3 w-3 mr-1" />Verified</Badge>
                 )}
