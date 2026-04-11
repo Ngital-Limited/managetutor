@@ -5,11 +5,19 @@ import { lovable } from '@/integrations/lovable/index';
 
 type AppRole = 'parent' | 'tutor' | 'agency' | 'admin';
 
+interface UserProfile {
+  full_name: string;
+  avatar_url: string | null;
+  phone: string | null;
+}
+
 interface AuthContextType {
   user: User | null;
   session: Session | null;
   role: AppRole | null;
+  profile: UserProfile | null;
   loading: boolean;
+  refreshProfile: () => Promise<void>;
   signUp: (email: string, password: string, fullName: string, role: AppRole) => Promise<{ error: Error | null }>;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signInWithGoogle: () => Promise<{ error: Error | null }>;
