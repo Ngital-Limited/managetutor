@@ -131,6 +131,7 @@ export default function TutorProfile() {
         present_address: (tutorRes.data as any).present_address || '',
         permanent_address: (tutorRes.data as any).permanent_address || '',
       });
+      setSelectedClassLevels((tutorRes.data as any).class_levels || []);
     }
     if (docsRes.data) setDocuments(docsRes.data);
     if (tutorSubjectsRes.data) {
