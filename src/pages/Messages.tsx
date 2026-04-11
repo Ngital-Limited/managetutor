@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
-import { Logo } from '@/components/Logo';
+import { Header } from '@/components/Header';
+import { Footer } from '@/components/Footer';
 import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -244,25 +245,7 @@ export default function Messages() {
   return (
     <div className="min-h-screen bg-background">
       {/* Navigation */}
-      <nav className="sticky top-0 z-50 bg-card/80 backdrop-blur-xl border-b border-border">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-3">
-            <Logo size="md" />
-          </Link>
-          <div className="flex items-center gap-3">
-            <Button variant="ghost" size="sm" onClick={() => setLanguage(language === 'en' ? 'bn' : 'en')}>
-              <Globe className="h-4 w-4 mr-1" />
-              {language === 'en' ? 'বাংলা' : 'EN'}
-            </Button>
-            <Link to="/dashboard">
-              <Button variant="outline">
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Dashboard
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </nav>
+      <Header />
 
       <main className="container mx-auto px-4 py-4">
         <div className="grid lg:grid-cols-3 gap-4 h-[calc(100vh-120px)]">
@@ -401,6 +384,7 @@ export default function Messages() {
           </Card>
         </div>
       </main>
+      <Footer />
     </div>
   );
 }

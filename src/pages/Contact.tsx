@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Logo } from '@/components/Logo';
+import { Header } from '@/components/Header';
+import { Footer } from '@/components/Footer';
 import { MapPin, Phone, Mail, Send, Clock, MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -46,19 +47,7 @@ export default function Contact() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Navbar */}
-      <nav className="sticky top-0 z-50 bg-background/95 backdrop-blur-md border-b border-border">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-3">
-            <Logo size="md" />
-          </Link>
-          <div className="flex items-center gap-4">
-            <Link to="/about" className="text-sm text-muted-foreground hover:text-foreground transition-colors hidden sm:inline">About</Link>
-            <Link to="/tutors" className="text-sm text-muted-foreground hover:text-foreground transition-colors hidden sm:inline">Find Tutors</Link>
-            <Link to="/auth" className="text-sm font-medium text-primary hover:underline">Login</Link>
-          </div>
-        </div>
-      </nav>
+      <Header />
 
       {/* Hero */}
       <section className="gradient-hero text-white py-16">
@@ -166,13 +155,7 @@ export default function Contact() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-foreground text-background py-8">
-        <div className="max-w-7xl mx-auto px-4 text-center text-background/40 text-sm">
-          © {new Date().getFullYear()} Manage Tutor. All rights reserved. |{' '}
-          <Link to="/privacy" className="hover:text-background transition-colors">Privacy Policy</Link> |{' '}
-          <Link to="/terms" className="hover:text-background transition-colors">Terms & Conditions</Link>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

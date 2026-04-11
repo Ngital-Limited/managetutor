@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
-import { Logo } from '@/components/Logo';
+import { Header } from '@/components/Header';
+import { Footer } from '@/components/Footer';
 import { Users, Shield, Award, Heart, Target, BookOpen, GraduationCap, MapPin, CheckCircle } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 
@@ -8,19 +9,7 @@ export default function About() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Navbar */}
-      <nav className="sticky top-0 z-50 bg-background/95 backdrop-blur-md border-b border-border">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-3">
-            <Logo size="md" />
-          </Link>
-          <div className="flex items-center gap-4">
-            <Link to="/tutors" className="text-sm text-muted-foreground hover:text-foreground transition-colors hidden sm:inline">Find Tutors</Link>
-            <Link to="/jobs" className="text-sm text-muted-foreground hover:text-foreground transition-colors hidden sm:inline">Browse Jobs</Link>
-            <Link to="/auth" className="text-sm font-medium text-primary hover:underline">Login</Link>
-          </div>
-        </div>
-      </nav>
+      <Header />
 
       {/* Hero */}
       <section className="gradient-hero text-white py-20">
@@ -116,13 +105,7 @@ export default function About() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-foreground text-background py-8">
-        <div className="max-w-7xl mx-auto px-4 text-center text-background/40 text-sm">
-          © {new Date().getFullYear()} Manage Tutor. All rights reserved. |{' '}
-          <Link to="/privacy" className="hover:text-background transition-colors">Privacy Policy</Link> |{' '}
-          <Link to="/terms" className="hover:text-background transition-colors">Terms & Conditions</Link>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

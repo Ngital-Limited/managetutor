@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react';
+import { Header } from '@/components/Header';
+import { Footer } from '@/components/Footer';
 import { Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -128,23 +130,7 @@ const Pricing = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Navigation */}
-      <nav className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-xl">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2">
-            <ArrowLeft className="h-4 w-4" />
-            <span className="font-bold text-xl text-primary">TutorBD</span>
-          </Link>
-          {user ? (
-            <Link to="/dashboard">
-              <Button>Dashboard</Button>
-            </Link>
-          ) : (
-            <Link to="/auth">
-              <Button>Login</Button>
-            </Link>
-          )}
-        </div>
-      </nav>
+      <Header />
 
       <div className="container mx-auto px-4 py-16">
         {/* Header */}
@@ -256,6 +242,7 @@ const Pricing = () => {
           </p>
         </div>
       </div>
+      <Footer />
     </div>
   );
 };
