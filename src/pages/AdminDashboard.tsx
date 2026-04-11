@@ -462,6 +462,8 @@ export default function AdminDashboard() {
   const [userSearch, setUserSearch] = useState('');
   const [userRoleFilter, setUserRoleFilter] = useState('all');
   const [pendingTutors, setPendingTutors] = useState<TutorVerification[]>([]);
+  const [verificationFilter, setVerificationFilter] = useState('pending');
+  const [verificationPayments, setVerificationPayments] = useState<PaymentRow[]>([]);
   const [jobs, setJobs] = useState<JobRow[]>([]);
   const [jobStatusFilter, setJobStatusFilter] = useState('all');
   const [reports, setReports] = useState<Report[]>([]);
@@ -574,13 +576,25 @@ export default function AdminDashboard() {
   }, [userSearch, userRoleFilter]);
 
   const fetchVerifications = useCallback(async () => {
-    const { data } = await supabase
+    let query = supabase
       .from('tutor_profiles')
       .select('id, user_id, verification_status, education, experience_years, gender, created_at, profiles:user_id (full_name, email, phone), verification_documents (id, document_type, document_url, status)')
-      .eq('verification_status', 'pending')
-      .order('created_at', { ascending: true }).limit(50);
+      .order('created_at', { ascending: false }).limit(100);
+    if (verificationFilter !== 'all') {
+      query = query.eq('verification_status', verificationFilter as 'pending' | 'approved' | 'rejected');
+    }
+    const { data } = await query;
     if (data) setPendingTutors(data as unknown as TutorVerification[]);
-  }, []);
+
+    // Fetch verification badge payments
+    const { data: vPayments } = await supabase
+      .from('payment_transactions')
+      .select('id, amount, currency, status, transaction_id, created_at, completed_at, listing_type, profiles:user_id (full_name, email)')
+      .eq('listing_type', 'verification_badge')
+      .order('created_at', { ascending: false })
+      .limit(50);
+    if (vPayments) setVerificationPayments(vPayments as unknown as PaymentRow[]);
+  }, [verificationFilter]);
 
   const fetchJobs = useCallback(async () => {
     let query = supabase
@@ -996,54 +1010,135 @@ export default function AdminDashboard() {
             {/* ═══════ VERIFICATIONS TAB ═══════ */}
             {activeTab === 'verifications' && (
               <div className="space-y-6">
-                <h1 className="text-3xl font-extrabold">Tutor Verifications</h1>
+                <div className="flex items-center justify-between">
+                  <h1 className="text-3xl font-extrabold">Tutor Verifications</h1>
+                  <Select value={verificationFilter} onValueChange={(v) => setVerificationFilter(v)}>
+                    <SelectTrigger className="w-44"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Tutors</SelectItem>
+                      <SelectItem value="pending">Pending</SelectItem>
+                      <SelectItem value="approved">Verified</SelectItem>
+                      <SelectItem value="rejected">Rejected</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
                 {pendingTutors.length === 0 ? (
                   <Card><CardContent className="py-16 text-center">
                     <CheckCircle2 className="h-12 w-12 text-success mx-auto mb-4" />
-                    <h3 className="font-bold mb-2">All caught up!</h3>
-                    <p className="text-muted-foreground">No pending verifications</p>
+                    <h3 className="font-bold mb-2">No tutors found</h3>
+                    <p className="text-muted-foreground">No tutors match the selected filter</p>
                   </CardContent></Card>
                 ) : (
-                  <div className="space-y-4">
-                    {pendingTutors.map((tutor) => (
-                      <Card key={tutor.id}>
-                        <CardContent className="p-5">
-                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                            <div className="flex items-center gap-4">
-                              <div className="w-12 h-12 rounded-xl bg-tutor/10 flex items-center justify-center">
-                                <GraduationCap className="h-6 w-6 text-tutor" />
-                              </div>
-                              <div>
-                                <h4 className="font-semibold">{tutor.profiles?.full_name}</h4>
-                                <p className="text-sm text-muted-foreground">{tutor.profiles?.email}</p>
-                                <div className="flex items-center gap-2 mt-1 flex-wrap">
+                  <Card>
+                    <CardContent className="p-0">
+                      <ScrollArea className="w-full">
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead>Tutor</TableHead>
+                              <TableHead>Email</TableHead>
+                              <TableHead>Education</TableHead>
+                              <TableHead>Experience</TableHead>
+                              <TableHead>Docs</TableHead>
+                              <TableHead>Status</TableHead>
+                              <TableHead className="text-right">Actions</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {pendingTutors.map((tutor) => (
+                              <TableRow key={tutor.id}>
+                                <TableCell>
+                                  <div className="flex items-center gap-2">
+                                    <div className="w-8 h-8 rounded-lg bg-tutor/10 flex items-center justify-center">
+                                      <GraduationCap className="h-4 w-4 text-tutor" />
+                                    </div>
+                                    <span className="font-medium text-sm">{tutor.profiles?.full_name}</span>
+                                  </div>
+                                </TableCell>
+                                <TableCell className="text-sm">{tutor.profiles?.email}</TableCell>
+                                <TableCell className="text-sm">{tutor.education || '—'}</TableCell>
+                                <TableCell className="text-sm">{tutor.experience_years} yrs</TableCell>
+                                <TableCell>
                                   <Badge variant="outline" className="text-xs">
                                     <FileCheck className="h-3 w-3 mr-1" />
-                                    {tutor.verification_documents?.length || 0} docs
+                                    {tutor.verification_documents?.length || 0}
                                   </Badge>
-                                  <Badge variant="outline" className="text-xs capitalize">{tutor.gender}</Badge>
-                                  {tutor.education && <Badge variant="outline" className="text-xs">{tutor.education}</Badge>}
-                                  <Badge variant="outline" className="text-xs">{tutor.experience_years} yrs exp</Badge>
-                                </div>
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <Button variant="outline" size="sm" onClick={() => setSelectedTutor(tutor)}>
-                                <Eye className="h-4 w-4 mr-1" /> Review
-                              </Button>
-                              <Button size="sm" className="bg-success hover:bg-success/90" onClick={() => handleVerifyTutor(tutor.id, 'approved')} disabled={processing}>
-                                <CheckCircle2 className="h-4 w-4 mr-1" /> Approve
-                              </Button>
-                              <Button variant="destructive" size="sm" onClick={() => handleVerifyTutor(tutor.id, 'rejected')} disabled={processing}>
-                                <XCircle className="h-4 w-4 mr-1" /> Reject
-                              </Button>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
+                                </TableCell>
+                                <TableCell>
+                                  <Badge className={`text-xs capitalize ${statusColor(tutor.verification_status)}`}>
+                                    {tutor.verification_status}
+                                  </Badge>
+                                </TableCell>
+                                <TableCell className="text-right">
+                                  <div className="flex gap-1 justify-end">
+                                    <Button variant="ghost" size="sm" onClick={() => setSelectedTutor(tutor)}>
+                                      <Eye className="h-4 w-4" />
+                                    </Button>
+                                    {tutor.verification_status !== 'approved' && (
+                                      <Button size="sm" variant="ghost" className="text-success hover:text-success" onClick={() => handleVerifyTutor(tutor.id, 'approved')} disabled={processing}>
+                                        <CheckCircle2 className="h-4 w-4" />
+                                      </Button>
+                                    )}
+                                    {tutor.verification_status === 'approved' && (
+                                      <Button size="sm" variant="ghost" className="text-destructive hover:text-destructive" onClick={() => handleVerifyTutor(tutor.id, 'rejected')} disabled={processing}>
+                                        <XCircle className="h-4 w-4" />
+                                      </Button>
+                                    )}
+                                    {tutor.verification_status === 'pending' && (
+                                      <Button size="sm" variant="ghost" className="text-destructive hover:text-destructive" onClick={() => handleVerifyTutor(tutor.id, 'rejected')} disabled={processing}>
+                                        <XCircle className="h-4 w-4" />
+                                      </Button>
+                                    )}
+                                  </div>
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </ScrollArea>
+                    </CardContent>
+                  </Card>
                 )}
+
+                {/* Verification Badge Payment History */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <CreditCard className="h-5 w-5 text-primary" />
+                      Verification Badge Payments
+                    </CardTitle>
+                    <CardDescription>Payment history for ৳50 verified badge purchases</CardDescription>
+                  </CardHeader>
+                  <CardContent className="p-0">
+                    <ScrollArea className="w-full">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Transaction ID</TableHead>
+                            <TableHead>Tutor</TableHead>
+                            <TableHead>Amount</TableHead>
+                            <TableHead>Status</TableHead>
+                            <TableHead>Date</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {verificationPayments.length === 0 ? (
+                            <TableRow><TableCell colSpan={5} className="text-center py-8 text-muted-foreground">No verification payments yet</TableCell></TableRow>
+                          ) : verificationPayments.map((p) => (
+                            <TableRow key={p.id}>
+                              <TableCell className="font-mono text-xs">{p.transaction_id}</TableCell>
+                              <TableCell className="text-sm">{(p.profiles as any)?.full_name}</TableCell>
+                              <TableCell className="text-sm font-semibold">৳{Number(p.amount).toLocaleString()}</TableCell>
+                              <TableCell><Badge className={`text-xs capitalize ${statusColor(p.status)}`}>{p.status}</Badge></TableCell>
+                              <TableCell className="text-xs text-muted-foreground">{format(new Date(p.created_at), 'dd MMM yyyy')}</TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </ScrollArea>
+                  </CardContent>
+                </Card>
               </div>
             )}
 
