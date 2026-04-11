@@ -46,6 +46,7 @@ interface Job {
   created_at: string;
   districts: { name_en: string; name_bn: string } | null;
   subjects: { name_en: string; name_bn: string } | null;
+  job_subjects?: { subjects: { name_en: string; name_bn: string } }[];
 }
 
 const JOBS_PER_PAGE = 10;
@@ -133,6 +134,16 @@ export default function BrowseJobs() {
   const fetchJobs = async () => {
     setLoading(true);
     
+    // If filtering by subject, first get matching job IDs from job_subjects
+    let subjectJobIds: string[] | null = null;
+    if (selectedSubject && selectedSubject !== 'all') {
+      const { data: jsData } = await supabase
+        .from('job_subjects')
+        .select('job_id')
+        .eq('subject_id', selectedSubject);
+      subjectJobIds = jsData?.map(js => js.job_id) || [];
+    }
+
     // Build count query
     let countQuery = supabase
       .from('jobs')
@@ -142,8 +153,14 @@ export default function BrowseJobs() {
     if (selectedDistrict && selectedDistrict !== 'all') {
       countQuery = countQuery.eq('district_id', selectedDistrict);
     }
-    if (selectedSubject && selectedSubject !== 'all') {
-      countQuery = countQuery.eq('subject_id', selectedSubject);
+    if (subjectJobIds !== null) {
+      if (subjectJobIds.length === 0) {
+        setTotalCount(0);
+        setJobs([]);
+        setLoading(false);
+        return;
+      }
+      countQuery = countQuery.in('id', subjectJobIds);
     }
     if (selectedMode && selectedMode !== 'all') {
       countQuery = countQuery.eq('teaching_mode', selectedMode as 'online' | 'in_person' | 'hybrid');
@@ -161,7 +178,8 @@ export default function BrowseJobs() {
       .select(`
         *,
         districts (name_en, name_bn),
-        subjects (name_en, name_bn)
+        subjects (name_en, name_bn),
+        job_subjects (subjects (name_en, name_bn))
       `)
       .eq('status', 'open')
       .order('created_at', { ascending: false })
@@ -171,8 +189,8 @@ export default function BrowseJobs() {
       query = query.eq('district_id', selectedDistrict);
     }
 
-    if (selectedSubject && selectedSubject !== 'all') {
-      query = query.eq('subject_id', selectedSubject);
+    if (subjectJobIds !== null) {
+      query = query.in('id', subjectJobIds);
     }
 
     if (selectedMode && selectedMode !== 'all') {
@@ -478,12 +496,19 @@ export default function BrowseJobs() {
                         </p>
 
                         <div className="flex flex-wrap gap-2 ml-15">
-                          {job.subjects && (
+                          {job.job_subjects && job.job_subjects.length > 0 ? (
+                            job.job_subjects.map((js, idx) => (
+                              <Badge key={idx} variant="secondary">
+                                <BookOpen className="h-3 w-3 mr-1" />
+                                {language === 'en' ? js.subjects.name_en : js.subjects.name_bn}
+                              </Badge>
+                            ))
+                          ) : job.subjects ? (
                             <Badge variant="secondary">
                               <BookOpen className="h-3 w-3 mr-1" />
                               {language === 'en' ? job.subjects.name_en : job.subjects.name_bn}
                             </Badge>
-                          )}
+                          ) : null}
                           {job.class_level && (
                             <Badge variant="outline">{job.class_level}</Badge>
                           )}
