@@ -30,7 +30,7 @@ import {
   GraduationCap, LogOut, Globe, Briefcase, Star, User,
   CheckCircle2, Clock, XCircle, DollarSign, TrendingUp, Calendar, MapPin,
   BookOpen, Settings, Eye, ArrowRight, AlertCircle, Phone, Mail, Zap, Sparkles, Crown,
-  Home, Search, CreditCard
+  Home, Search, CreditCard, FileText
 } from 'lucide-react';
 import { generateTutorCV } from '@/components/TutorCVGenerator';
 
