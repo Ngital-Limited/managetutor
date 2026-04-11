@@ -17,7 +17,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { formatDistanceToNow } from 'date-fns';
 import {
-  GraduationCap, ArrowLeft, Globe, MapPin, BookOpen, Calendar, Users,
+  GraduationCap, ArrowLeft, Globe, MapPin, BookOpen, Calendar, Users, User,
   DollarSign, Clock, CheckCircle2, XCircle, Send, Star, MessageSquare,
   Briefcase, UserCheck, Phone, Mail
 } from 'lucide-react';
@@ -28,6 +28,7 @@ interface Job {
   description: string;
   class_level: string;
   days_per_week: number;
+  duration_hours: number;
   budget_min: number;
   budget_max: number;
   teaching_mode: string;
@@ -39,6 +40,11 @@ interface Job {
   total_applications: number;
   created_at: string;
   parent_id: string;
+  number_of_students: number;
+  student_age: string | null;
+  start_date: string | null;
+  location_details: string | null;
+  job_reference: string | null;
   districts: { name_en: string; name_bn: string } | null;
   subjects: { name_en: string; name_bn: string } | null;
   job_subjects?: { subjects: { name_en: string; name_bn: string } }[];
@@ -266,9 +272,12 @@ export default function JobDetails() {
                   <div className="w-16 h-16 rounded-xl bg-tutor/10 flex items-center justify-center flex-shrink-0">
                     <Briefcase className="h-8 w-8 text-tutor" />
                   </div>
-                  <div className="flex-1">
+                    <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
                       <h1 className="text-2xl font-bold">{job.title}</h1>
+                      {job.job_reference && (
+                        <Badge variant="outline" className="text-xs font-mono">{job.job_reference}</Badge>
+                      )}
                       <Badge variant={job.status === 'open' ? 'default' : 'secondary'}>
                         {job.status}
                       </Badge>
@@ -320,9 +329,39 @@ export default function JobDetails() {
                     <Calendar className="h-5 w-5 text-primary" />
                     <div>
                       <div className="text-xs text-muted-foreground">Schedule</div>
-                      <div className="font-medium">{job.days_per_week} days/week</div>
+                      <div className="font-medium">
+                        {job.days_per_week} days/week
+                        {job.duration_hours ? ` • ${job.duration_hours}hr/session` : ''}
+                      </div>
                     </div>
                   </div>
+                  {job.number_of_students > 1 && (
+                    <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
+                      <Users className="h-5 w-5 text-primary" />
+                      <div>
+                        <div className="text-xs text-muted-foreground">Number of Students</div>
+                        <div className="font-medium">{job.number_of_students}</div>
+                      </div>
+                    </div>
+                  )}
+                  {job.student_age && (
+                    <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
+                      <User className="h-5 w-5 text-primary" />
+                      <div>
+                        <div className="text-xs text-muted-foreground">Student Age</div>
+                        <div className="font-medium">{job.student_age}</div>
+                      </div>
+                    </div>
+                  )}
+                  {job.start_date && (
+                    <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
+                      <Calendar className="h-5 w-5 text-primary" />
+                      <div>
+                        <div className="text-xs text-muted-foreground">Start Date</div>
+                        <div className="font-medium">{new Date(job.start_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</div>
+                      </div>
+                    </div>
+                  )}
                   <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
                     <Users className="h-5 w-5 text-primary" />
                     <div>
@@ -356,6 +395,17 @@ export default function JobDetails() {
                     </div>
                   )}
                 </div>
+
+                {job.location_details && (
+                  <div className="mt-4 p-4 bg-muted/50 rounded-lg">
+                    <h3 className="text-sm font-semibold mb-1 flex items-center gap-2">
+                      <MapPin className="h-4 w-4 text-primary" />
+                      Location Details
+                    </h3>
+                    <p className="text-sm text-muted-foreground">{job.location_details}</p>
+                  </div>
+                )}
+
 
                 {job.special_requirements && (
                   <div className="mt-6 p-4 bg-muted/50 rounded-lg">

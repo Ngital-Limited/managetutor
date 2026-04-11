@@ -46,6 +46,11 @@ interface Job {
   status: string;
   total_applications: number;
   created_at: string;
+  number_of_students: number;
+  student_age: string | null;
+  start_date: string | null;
+  location_details: string | null;
+  job_reference: string | null;
   districts: { name_en: string; name_bn: string } | null;
   subjects: { name_en: string; name_bn: string } | null;
   job_subjects?: { subjects: { name_en: string; name_bn: string } }[];
@@ -494,7 +499,19 @@ export default function BrowseJobs() {
                           {job.days_per_week && (
                             <Badge variant="outline">
                               <Calendar className="h-3 w-3 mr-1" />
-                              {job.days_per_week} days/week
+                              {job.days_per_week}d/wk{job.duration_hours ? ` • ${job.duration_hours}hr` : ''}
+                            </Badge>
+                          )}
+                          {job.number_of_students > 1 && (
+                            <Badge variant="outline">
+                              <Users className="h-3 w-3 mr-1" />
+                              {job.number_of_students} students
+                            </Badge>
+                          )}
+                          {job.start_date && (
+                            <Badge variant="outline">
+                              <Calendar className="h-3 w-3 mr-1" />
+                              Starts {new Date(job.start_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
                             </Badge>
                           )}
                         </div>
