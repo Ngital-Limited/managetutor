@@ -404,7 +404,6 @@ export default function JobDetails() {
                     </h3>
                     <p className="text-sm text-muted-foreground">{job.location_details}</p>
                   </div>
-                  </div>
                 )}
 
 
