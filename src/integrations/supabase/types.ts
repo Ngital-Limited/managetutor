@@ -563,11 +563,15 @@ export type Database = {
           id: string
           is_featured: boolean | null
           job_reference: string | null
+          location_details: string | null
+          number_of_students: number | null
           parent_id: string
           preferred_time: string | null
           preferred_tutor_gender: Database["public"]["Enums"]["gender"] | null
           special_requirements: string | null
+          start_date: string | null
           status: Database["public"]["Enums"]["job_status"] | null
+          student_age: string | null
           student_gender: Database["public"]["Enums"]["gender"] | null
           subject_id: string | null
           teaching_mode: Database["public"]["Enums"]["teaching_mode"] | null
@@ -590,11 +594,15 @@ export type Database = {
           id?: string
           is_featured?: boolean | null
           job_reference?: string | null
+          location_details?: string | null
+          number_of_students?: number | null
           parent_id: string
           preferred_time?: string | null
           preferred_tutor_gender?: Database["public"]["Enums"]["gender"] | null
           special_requirements?: string | null
+          start_date?: string | null
           status?: Database["public"]["Enums"]["job_status"] | null
+          student_age?: string | null
           student_gender?: Database["public"]["Enums"]["gender"] | null
           subject_id?: string | null
           teaching_mode?: Database["public"]["Enums"]["teaching_mode"] | null
@@ -617,11 +625,15 @@ export type Database = {
           id?: string
           is_featured?: boolean | null
           job_reference?: string | null
+          location_details?: string | null
+          number_of_students?: number | null
           parent_id?: string
           preferred_time?: string | null
           preferred_tutor_gender?: Database["public"]["Enums"]["gender"] | null
           special_requirements?: string | null
+          start_date?: string | null
           status?: Database["public"]["Enums"]["job_status"] | null
+          student_age?: string | null
           student_gender?: Database["public"]["Enums"]["gender"] | null
           subject_id?: string | null
           teaching_mode?: Database["public"]["Enums"]["teaching_mode"] | null
