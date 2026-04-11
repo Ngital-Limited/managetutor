@@ -834,13 +834,15 @@ export default function TutorDashboard() {
           <CardContent>
             {applications.length > 0 ? (
               <Tabs defaultValue="all">
-                <TabsList className="mb-4">
+                <TabsList className="mb-4 flex-wrap">
                   <TabsTrigger value="all">All ({applications.length})</TabsTrigger>
                   <TabsTrigger value="pending">Pending ({stats.pendingApplications})</TabsTrigger>
-                  <TabsTrigger value="accepted">Accepted ({stats.acceptedApplications})</TabsTrigger>
+                  <TabsTrigger value="accepted">Shortlisted ({stats.acceptedApplications})</TabsTrigger>
+                  <TabsTrigger value="rejected">Rejected ({applications.filter(a => a.status === 'rejected').length})</TabsTrigger>
+                  <TabsTrigger value="withdrawn">Withdrawn ({applications.filter(a => a.status === 'withdrawn').length})</TabsTrigger>
                 </TabsList>
 
-                {['all', 'pending', 'accepted', 'rejected'].map(tab => (
+                {['all', 'pending', 'accepted', 'rejected', 'withdrawn'].map(tab => (
                   <TabsContent key={tab} value={tab} className="space-y-4">
                     {applications
                       .filter(a => tab === 'all' || a.status === tab)
