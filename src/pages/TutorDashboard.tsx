@@ -101,6 +101,11 @@ const tutorSidebarItems = [
 function TutorSidebar() {
   const { state } = useSidebar();
   const collapsed = state === 'collapsed';
+  const { profile, user } = useAuth();
+
+  const initials = profile?.full_name
+    ? profile.full_name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
+    : user?.email?.[0]?.toUpperCase() || '?';
 
   return (
     <Sidebar collapsible="icon">
@@ -111,6 +116,18 @@ function TutorSidebar() {
               <Logo size="sm" />
             )}
           </SidebarGroupLabel>
+          <div className={`flex items-center gap-3 px-3 py-3 ${collapsed ? 'justify-center' : ''}`}>
+            <Avatar className="h-9 w-9 shrink-0 border-2 border-primary/20">
+              <AvatarImage src={profile?.avatar_url || ''} alt={profile?.full_name || 'User'} />
+              <AvatarFallback className="bg-primary/10 text-primary text-xs font-bold">{initials}</AvatarFallback>
+            </Avatar>
+            {!collapsed && (
+              <div className="min-w-0">
+                <p className="text-sm font-semibold truncate">{profile?.full_name || user?.email?.split('@')[0]}</p>
+                <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
+              </div>
+            )}
+          </div>
           <SidebarGroupContent>
             <SidebarMenu>
               {tutorSidebarItems.map((item) => (
