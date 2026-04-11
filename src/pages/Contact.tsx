@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { MapPin, Phone, Mail, Send, Clock, MessageCircle } from 'lucide-react';
@@ -151,6 +152,65 @@ export default function Contact() {
               </form>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* FAQ Section */}
+      <section className="py-16 px-4 bg-muted/30">
+        <div className="max-w-3xl mx-auto">
+          <h2 className="text-3xl font-bold text-center mb-2">Frequently Asked Questions</h2>
+          <p className="text-muted-foreground text-center mb-10">Find quick answers to common questions about ManageTutor.</p>
+
+          <Accordion type="single" collapsible className="space-y-3">
+            <AccordionItem value="item-1" className="bg-card rounded-xl border border-border px-6">
+              <AccordionTrigger className="hover:no-underline">How do I find a tutor?</AccordionTrigger>
+              <AccordionContent>
+                You can browse tutors on our "Find Tutors" page. Filter by subject, location, class level, and teaching mode to find the perfect match. You can also post a job and let tutors apply to you.
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="item-2" className="bg-card rounded-xl border border-border px-6">
+              <AccordionTrigger className="hover:no-underline">Is ManageTutor free for parents?</AccordionTrigger>
+              <AccordionContent>
+                Yes! Parents can create an account, browse tutors, post jobs, and communicate with tutors completely free of charge. We only charge a small commission on confirmed bookings.
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="item-3" className="bg-card rounded-xl border border-border px-6">
+              <AccordionTrigger className="hover:no-underline">How do I register as a tutor?</AccordionTrigger>
+              <AccordionContent>
+                Click "Join as Tutor" on the homepage, fill in your profile details including subjects, experience, and qualifications. Once submitted, our team will review and verify your profile within 24–48 hours.
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="item-4" className="bg-card rounded-xl border border-border px-6">
+              <AccordionTrigger className="hover:no-underline">Are tutors verified?</AccordionTrigger>
+              <AccordionContent>
+                Yes, all tutors go through a verification process where we review their identity documents, educational qualifications, and experience. Verified tutors display a badge on their profile.
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="item-5" className="bg-card rounded-xl border border-border px-6">
+              <AccordionTrigger className="hover:no-underline">Can I book a demo class before committing?</AccordionTrigger>
+              <AccordionContent>
+                Absolutely! You can book a demo class with any tutor to see if they're the right fit. Demo classes are a great way to evaluate a tutor's teaching style before making a long-term commitment.
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="item-6" className="bg-card rounded-xl border border-border px-6">
+              <AccordionTrigger className="hover:no-underline">What payment methods do you accept?</AccordionTrigger>
+              <AccordionContent>
+                We accept payments via bKash, Nagad, bank transfer, and major debit/credit cards through our secure SSLCommerz payment gateway. All transactions are encrypted and secure.
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="item-7" className="bg-card rounded-xl border border-border px-6">
+              <AccordionTrigger className="hover:no-underline">How do I contact support?</AccordionTrigger>
+              <AccordionContent>
+                You can reach us via email at care@managetutor.com, call our hotline at 09647-874034, or message us on WhatsApp at 01737-874034. Our support team is available Saturday to Thursday, 9 AM – 9 PM.
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
         </div>
       </section>
 
