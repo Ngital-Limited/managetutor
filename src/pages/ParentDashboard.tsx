@@ -5,21 +5,21 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { SearchableSelect } from '@/components/SearchableSelect';
 import { CLASS_LEVELS } from '@/constants/classLevels';
 import { SPECIAL_REQUIREMENTS } from '@/constants/specialRequirements';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { formatDistanceToNow } from 'date-fns';
+import { formatDistanceToNow, differenceInHours } from 'date-fns';
 import {
   Sidebar,
   SidebarContent,
@@ -38,8 +38,9 @@ import { NotificationBell } from '@/components/NotificationBell';
 import {
   GraduationCap, LogOut, Globe, Plus, MapPin, BookOpen,
   Star, Briefcase, Users, Clock, CheckCircle2, XCircle, Search, ArrowRight,
-  Eye, Edit, Trash2, Calendar, Home, Heart, Settings, AlertCircle,
-  User, Phone, Mail, CreditCard
+  Eye, Edit, Trash2, Calendar, Home, Heart, AlertCircle,
+  User, CreditCard, Pause, Play, Flag, Zap,
+  Send, AlertTriangle
 } from 'lucide-react';
 
 interface District { id: string; name_en: string; name_bn: string; }
@@ -171,6 +172,11 @@ export default function ParentDashboard() {
   const [showPostJob, setShowPostJob] = useState(false);
   const [editingJob, setEditingJob] = useState<Job | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [jobStatusFilter, setJobStatusFilter] = useState('all');
+  const [reportDialogOpen, setReportDialogOpen] = useState(false);
+  const [reportTargetApp, setReportTargetApp] = useState<Application | null>(null);
+  const [reportDescription, setReportDescription] = useState('');
+  const [reportType, setReportType] = useState('no_show');
 
   const [jobForm, setJobForm] = useState({
     title: '',
@@ -296,7 +302,23 @@ export default function ParentDashboard() {
     } else {
       toast({ title: 'Deleted', description: 'Job deleted successfully' });
       fetchData();
-      setSelectedJob(null);
+      if (selectedJob?.id === jobId) setSelectedJob(null);
+    }
+  };
+
+  const updateJobStatus = async (jobId: string, status: string) => {
+    const { error } = await supabase.from('jobs').update({ status: status as 'open' | 'in_progress' | 'completed' | 'cancelled' }).eq('id', jobId);
+    if (error) {
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+    } else {
+      const labels: Record<string, string> = {
+        cancelled: 'Job paused',
+        open: 'Job reactivated',
+        completed: 'Job marked as completed',
+        in_progress: 'Job marked as in progress',
+      };
+      toast({ title: 'Updated', description: labels[status] || 'Job status updated' });
+      fetchData();
     }
   };
 
@@ -362,9 +384,55 @@ export default function ParentDashboard() {
       toast({ title: 'Updated', description: `Application ${status}.` });
       if (status === 'accepted' && selectedJob) {
         await supabase.from('jobs').update({ status: 'in_progress' }).eq('id', selectedJob.id);
+        // Notify the tutor
+        const app = applications.find(a => a.id === appId);
+        if (app?.tutor_profiles?.user_id) {
+          await supabase.from('notifications').insert({
+            user_id: app.tutor_profiles.user_id,
+            title: 'You have been hired!',
+            message: `Congratulations! You have been selected for "${selectedJob.title}".`,
+            type: 'hired',
+            reference_id: selectedJob.id,
+          });
+        }
         fetchData();
       }
       if (selectedJob) fetchApplications(selectedJob.id);
+    }
+  };
+
+  const handleInviteToInterview = async (app: Application) => {
+    if (!selectedJob || !app.tutor_profiles?.user_id) return;
+    // Notify tutor about interview invitation
+    const { error } = await supabase.from('notifications').insert({
+      user_id: app.tutor_profiles.user_id,
+      title: 'Interview Invitation',
+      message: `You have been shortlisted for "${selectedJob.title}". The parent would like to schedule a demo class with you.`,
+      type: 'interview_invite',
+      reference_id: selectedJob.id,
+    });
+    if (error) {
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+    } else {
+      toast({ title: 'Invitation Sent', description: 'The tutor has been notified about the interview.' });
+    }
+  };
+
+  const handleReportIssue = async () => {
+    if (!user || !reportTargetApp) return;
+    const { error } = await supabase.from('reports').insert({
+      reporter_id: user.id,
+      reported_user_id: reportTargetApp.tutor_profiles.user_id,
+      report_type: reportType,
+      description: reportDescription,
+    });
+    if (error) {
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+    } else {
+      toast({ title: 'Report Submitted', description: 'Your report has been sent to the admin team for review.' });
+      setReportDialogOpen(false);
+      setReportDescription('');
+      setReportTargetApp(null);
     }
   };
 
@@ -427,7 +495,40 @@ export default function ParentDashboard() {
   const openJobs = jobs.filter(j => j.status === 'open');
   const activeJobs = jobs.filter(j => j.status === 'in_progress');
   const completedJobs = jobs.filter(j => j.status === 'completed');
+  const pausedJobs = jobs.filter(j => j.status === 'cancelled');
+  const totalApplicants = jobs.reduce((sum, j) => sum + (j.total_applications || 0), 0);
+  const shortlistedCount = applications.filter(a => a.status === 'accepted').length;
   const profileInfo = getProfileCompleteness();
+
+  // Determine jobs that need boost (open for 24h+ with 0 applications)
+  const boostCandidates = openJobs.filter(j => {
+    const hoursLive = differenceInHours(new Date(), new Date(j.created_at));
+    return hoursLive >= 24 && (j.total_applications || 0) === 0;
+  });
+
+  const filteredJobs = jobStatusFilter === 'all'
+    ? jobs
+    : jobs.filter(j => j.status === jobStatusFilter);
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'open': return 'bg-primary';
+      case 'in_progress': return 'bg-success';
+      case 'completed': return 'bg-accent';
+      case 'cancelled': return 'bg-muted text-muted-foreground';
+      default: return 'bg-secondary';
+    }
+  };
+
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case 'open': return 'Active';
+      case 'in_progress': return 'Hired';
+      case 'completed': return 'Completed';
+      case 'cancelled': return 'Paused';
+      default: return status;
+    }
+  };
 
   return (
     <SidebarProvider>
@@ -654,7 +755,7 @@ export default function ParentDashboard() {
                     <div className="flex-1">
                       <h3 className="font-bold text-lg mb-1">Complete Your Profile</h3>
                       <p className="text-sm text-muted-foreground mb-3">
-                        A complete profile helps tutors understand your needs better. Complete these to get started:
+                        A complete profile helps tutors understand your needs better.
                       </p>
                       <Progress value={profileInfo.percent} className="h-2 mb-3" />
                       <div className="flex items-center justify-between">
@@ -676,13 +777,43 @@ export default function ParentDashboard() {
               </Card>
             )}
 
-            {/* Stats */}
-            <div className="grid sm:grid-cols-3 gap-4 mb-6">
+            {/* Boost Post Alert */}
+            {boostCandidates.length > 0 && (
+              <Card className="mb-6 border-accent/50 bg-accent/5">
+                <CardContent className="p-5">
+                  <div className="flex items-start gap-4">
+                    <Zap className="h-8 w-8 text-accent flex-shrink-0 mt-0.5" />
+                    <div className="flex-1">
+                      <h3 className="font-bold text-lg mb-1">Boost Your Job Posts</h3>
+                      <p className="text-sm text-muted-foreground mb-3">
+                        {boostCandidates.length} job{boostCandidates.length > 1 ? 's have' : ' has'} been live for 24+ hours with no applicants. Consider increasing the offered salary or editing the requirements.
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        {boostCandidates.map(job => (
+                          <Button
+                            key={job.id}
+                            size="sm"
+                            variant="outline"
+                            onClick={() => startEditJob(job)}
+                          >
+                            <Edit className="h-3 w-3 mr-1" />
+                            Edit "{job.title}"
+                          </Button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Stats Cards */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
               <Card>
                 <CardContent className="p-5">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm text-muted-foreground">Open Jobs</p>
+                      <p className="text-sm text-muted-foreground">Active Jobs</p>
                       <p className="text-3xl font-bold">{openJobs.length}</p>
                     </div>
                     <Briefcase className="h-8 w-8 text-primary" />
@@ -693,10 +824,21 @@ export default function ParentDashboard() {
                 <CardContent className="p-5">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm text-muted-foreground">Active Tutors</p>
+                      <p className="text-sm text-muted-foreground">Total Applicants</p>
+                      <p className="text-3xl font-bold text-accent">{totalApplicants}</p>
+                    </div>
+                    <Users className="h-8 w-8 text-accent" />
+                  </div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-5">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-muted-foreground">Hired Tutors</p>
                       <p className="text-3xl font-bold text-success">{activeJobs.length}</p>
                     </div>
-                    <Users className="h-8 w-8 text-success" />
+                    <CheckCircle2 className="h-8 w-8 text-success" />
                   </div>
                 </CardContent>
               </Card>
@@ -705,51 +847,104 @@ export default function ParentDashboard() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm text-muted-foreground">Completed</p>
-                      <p className="text-3xl font-bold text-accent">{completedJobs.length}</p>
+                      <p className="text-3xl font-bold">{completedJobs.length}</p>
                     </div>
-                    <CheckCircle2 className="h-8 w-8 text-accent" />
+                    <Star className="h-8 w-8 text-warning" />
                   </div>
                 </CardContent>
               </Card>
             </div>
 
-            {/* Jobs List */}
+            {/* Quick Actions */}
+            <div className="grid sm:grid-cols-3 gap-3 mb-6">
+              <Button variant="outline" className="justify-start h-auto py-3" onClick={() => setShowPostJob(true)}>
+                <Plus className="h-5 w-5 mr-2 text-primary" />
+                <div className="text-left">
+                  <div className="font-medium">Post New Job</div>
+                  <div className="text-xs text-muted-foreground">Find a tutor for your child</div>
+                </div>
+              </Button>
+              <Link to="/tutors" className="block">
+                <Button variant="outline" className="justify-start h-auto py-3 w-full">
+                  <Search className="h-5 w-5 mr-2 text-primary" />
+                  <div className="text-left">
+                    <div className="font-medium">Browse Tutors</div>
+                    <div className="text-xs text-muted-foreground">View available tutor profiles</div>
+                  </div>
+                </Button>
+              </Link>
+              <Link to="/favorites" className="block">
+                <Button variant="outline" className="justify-start h-auto py-3 w-full">
+                  <Heart className="h-5 w-5 mr-2 text-destructive" />
+                  <div className="text-left">
+                    <div className="font-medium">My Favorites</div>
+                    <div className="text-xs text-muted-foreground">Shortlisted tutors</div>
+                  </div>
+                </Button>
+              </Link>
+            </div>
+
+            {/* Jobs List with Status Filter */}
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Briefcase className="h-5 w-5" />
-                  My Tuition Jobs
-                </CardTitle>
+                <div className="flex items-center justify-between flex-wrap gap-3">
+                  <CardTitle className="flex items-center gap-2">
+                    <Briefcase className="h-5 w-5" />
+                    My Tuition Jobs
+                  </CardTitle>
+                  <Link to="/jobs">
+                    <Button variant="ghost" size="sm">
+                      View All Jobs <ArrowRight className="h-4 w-4 ml-1" />
+                    </Button>
+                  </Link>
+                </div>
               </CardHeader>
               <CardContent>
                 {jobs.length > 0 ? (
-                  <Tabs defaultValue="open">
-                    <TabsList className="mb-4">
-                      <TabsTrigger value="open">Open ({openJobs.length})</TabsTrigger>
-                      <TabsTrigger value="in_progress">Active ({activeJobs.length})</TabsTrigger>
-                      <TabsTrigger value="completed">Completed ({completedJobs.length})</TabsTrigger>
-                    </TabsList>
+                  <>
+                    <Tabs value={jobStatusFilter} onValueChange={setJobStatusFilter}>
+                      <TabsList className="mb-4 flex-wrap">
+                        <TabsTrigger value="all">All ({jobs.length})</TabsTrigger>
+                        <TabsTrigger value="open">Active ({openJobs.length})</TabsTrigger>
+                        <TabsTrigger value="in_progress">Hired ({activeJobs.length})</TabsTrigger>
+                        <TabsTrigger value="cancelled">Paused ({pausedJobs.length})</TabsTrigger>
+                        <TabsTrigger value="completed">Completed ({completedJobs.length})</TabsTrigger>
+                      </TabsList>
+                    </Tabs>
 
-                    {['open', 'in_progress', 'completed'].map(status => (
-                      <TabsContent key={status} value={status} className="space-y-4">
-                        {jobs.filter(j => j.status === status).map(job => (
+                    <div className="space-y-4">
+                      {filteredJobs.map(job => {
+                        const hoursLive = differenceInHours(new Date(), new Date(job.created_at));
+                        const daysLive = Math.floor(hoursLive / 24);
+                        const needsBoost = job.status === 'open' && hoursLive >= 24 && (job.total_applications || 0) === 0;
+
+                        return (
                           <div
                             key={job.id}
-                            className={`p-4 border rounded-xl hover:bg-muted/50 transition-colors cursor-pointer ${selectedJob?.id === job.id ? 'border-primary bg-primary/5' : ''}`}
+                            className={`p-4 border rounded-xl hover:bg-muted/50 transition-colors cursor-pointer ${selectedJob?.id === job.id ? 'border-primary bg-primary/5' : ''} ${needsBoost ? 'border-accent/50' : ''}`}
                             onClick={() => {
                               setSelectedJob(job);
                               fetchApplications(job.id);
                             }}
                           >
-                            <div className="flex items-start justify-between">
-                              <div className="flex-1">
-                                <div className="flex items-center gap-2 mb-1">
+                            <div className="flex items-start justify-between gap-3">
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 mb-1 flex-wrap">
                                   <h4 className="font-bold">{job.title}</h4>
-                                  {(job as any).job_reference && (
-                                    <Badge variant="outline" className="text-xs font-mono">{(job as any).job_reference}</Badge>
+                                  {job.job_reference && (
+                                    <Badge variant="outline" className="text-xs font-mono">{job.job_reference}</Badge>
+                                  )}
+                                  <Badge className={getStatusColor(job.status)}>
+                                    {getStatusLabel(job.status)}
+                                  </Badge>
+                                  {needsBoost && (
+                                    <Badge variant="outline" className="text-accent border-accent/50">
+                                      <Zap className="h-3 w-3 mr-1" />
+                                      Needs Boost
+                                    </Badge>
                                   )}
                                 </div>
-                                <div className="flex items-center gap-3 text-sm text-muted-foreground mb-2">
+                                <div className="flex items-center gap-3 text-sm text-muted-foreground mb-2 flex-wrap">
                                   <span className="flex items-center gap-1">
                                     <MapPin className="h-3 w-3" />
                                     {language === 'en' ? job.districts?.name_en : job.districts?.name_bn}
@@ -764,6 +959,10 @@ export default function ParentDashboard() {
                                     <Calendar className="h-3 w-3" />
                                     {job.days_per_week} days/week
                                   </span>
+                                  <span className="flex items-center gap-1">
+                                    <Clock className="h-3 w-3" />
+                                    {daysLive > 0 ? `${daysLive}d` : `${hoursLive}h`} live
+                                  </span>
                                 </div>
                                 <div className="flex items-center gap-2">
                                   <Badge variant="outline">৳{job.budget_min}-{job.budget_max}/mo</Badge>
@@ -772,48 +971,79 @@ export default function ParentDashboard() {
                                   </span>
                                 </div>
                               </div>
-                              <div className="flex items-center gap-3">
-                                <div className="text-center">
+                              <div className="flex items-center gap-2 flex-shrink-0">
+                                <div className="text-center mr-2">
                                   <div className="text-lg font-bold text-primary">{job.total_applications}</div>
-                                  <div className="text-xs text-muted-foreground">applications</div>
+                                  <div className="text-xs text-muted-foreground">applicants</div>
                                 </div>
-                                {job.status === 'open' && (
-                                  <>
+                                {/* Action buttons */}
+                                <div className="flex gap-1">
+                                  {(job.status === 'open' || job.status === 'cancelled') && (
                                     <Button
                                       size="icon"
                                       variant="ghost"
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        startEditJob(job);
-                                      }}
+                                      title="Edit"
+                                      onClick={(e) => { e.stopPropagation(); startEditJob(job); }}
                                     >
                                       <Edit className="h-4 w-4" />
                                     </Button>
+                                  )}
+                                  {job.status === 'open' && (
+                                    <Button
+                                      size="icon"
+                                      variant="ghost"
+                                      title="Pause Job"
+                                      onClick={(e) => { e.stopPropagation(); updateJobStatus(job.id, 'cancelled'); }}
+                                    >
+                                      <Pause className="h-4 w-4" />
+                                    </Button>
+                                  )}
+                                  {job.status === 'cancelled' && (
+                                    <Button
+                                      size="icon"
+                                      variant="ghost"
+                                      title="Reactivate Job"
+                                      className="text-success"
+                                      onClick={(e) => { e.stopPropagation(); updateJobStatus(job.id, 'open'); }}
+                                    >
+                                      <Play className="h-4 w-4" />
+                                    </Button>
+                                  )}
+                                  {job.status === 'in_progress' && (
+                                    <Button
+                                      size="icon"
+                                      variant="ghost"
+                                      title="Mark Completed"
+                                      className="text-success"
+                                      onClick={(e) => { e.stopPropagation(); updateJobStatus(job.id, 'completed'); }}
+                                    >
+                                      <CheckCircle2 className="h-4 w-4" />
+                                    </Button>
+                                  )}
+                                  {(job.status === 'open' || job.status === 'cancelled') && (
                                     <Button
                                       size="icon"
                                       variant="ghost"
                                       className="text-destructive"
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        deleteJob(job.id);
-                                      }}
+                                      title="Delete"
+                                      onClick={(e) => { e.stopPropagation(); deleteJob(job.id); }}
                                     >
                                       <Trash2 className="h-4 w-4" />
                                     </Button>
-                                  </>
-                                )}
+                                  )}
+                                </div>
                               </div>
                             </div>
                           </div>
-                        ))}
-                        {jobs.filter(j => j.status === status).length === 0 && (
-                          <div className="text-center py-8">
-                            <p className="text-muted-foreground">No {status.replace('_', ' ')} jobs</p>
-                          </div>
-                        )}
-                      </TabsContent>
-                    ))}
-                  </Tabs>
+                        );
+                      })}
+                      {filteredJobs.length === 0 && (
+                        <div className="text-center py-8">
+                          <p className="text-muted-foreground">No jobs in this category</p>
+                        </div>
+                      )}
+                    </div>
+                  </>
                 ) : (
                   <div className="text-center py-12">
                     <Briefcase className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
@@ -836,6 +1066,7 @@ export default function ParentDashboard() {
                     <span className="flex items-center gap-2">
                       <Users className="h-5 w-5" />
                       Applications for "{selectedJob.title}"
+                      <Badge variant="outline">{applications.length}</Badge>
                     </span>
                     <Button variant="ghost" size="sm" onClick={() => setSelectedJob(null)}>
                       <XCircle className="h-4 w-4" />
@@ -923,7 +1154,6 @@ export default function ParentDashboard() {
                               <ArrowRight className="h-3 w-3 transition-transform group-open:rotate-90" />
                             </summary>
                             <div className="mt-4 space-y-4">
-                              {/* Education */}
                               {(tutor?.education || tutor?.education_detail) && (
                                 <div>
                                   <h5 className="text-sm font-bold flex items-center gap-1 mb-1">
@@ -933,8 +1163,6 @@ export default function ParentDashboard() {
                                   {tutor?.education_detail && <p className="text-sm text-muted-foreground mt-1">{tutor.education_detail}</p>}
                                 </div>
                               )}
-
-                              {/* Bio */}
                               {tutor?.bio && (
                                 <div>
                                   <h5 className="text-sm font-bold flex items-center gap-1 mb-1">
@@ -943,8 +1171,6 @@ export default function ParentDashboard() {
                                   <p className="text-sm text-muted-foreground">{tutor.bio}</p>
                                 </div>
                               )}
-
-                              {/* Subjects */}
                               {tutorSubjects.length > 0 && (
                                 <div>
                                   <h5 className="text-sm font-bold flex items-center gap-1 mb-1">
@@ -957,8 +1183,6 @@ export default function ParentDashboard() {
                                   </div>
                                 </div>
                               )}
-
-                              {/* Rate Range */}
                               {(tutor?.hourly_rate_min || tutor?.hourly_rate_max) && (
                                 <div>
                                   <h5 className="text-sm font-bold flex items-center gap-1 mb-1">
@@ -969,7 +1193,6 @@ export default function ParentDashboard() {
                                   </p>
                                 </div>
                               )}
-
                               <div className="text-xs text-muted-foreground italic pt-2">
                                 Contact details will be shared after you accept this application.
                               </div>
@@ -978,10 +1201,14 @@ export default function ParentDashboard() {
 
                           {/* Action Buttons */}
                           {app.status === 'pending' && (
-                            <div className="flex items-center gap-2 mt-4 pt-4 border-t">
+                            <div className="flex items-center gap-2 mt-4 pt-4 border-t flex-wrap">
                               <Button size="sm" onClick={() => handleApplicationAction(app.id, 'accepted')}>
                                 <CheckCircle2 className="h-4 w-4 mr-1" />
-                                Select This Tutor
+                                Hire This Tutor
+                              </Button>
+                              <Button size="sm" variant="secondary" onClick={() => handleInviteToInterview(app)}>
+                                <Send className="h-4 w-4 mr-1" />
+                                Invite to Interview
                               </Button>
                               <Button size="sm" variant="outline" onClick={() => handleApplicationAction(app.id, 'rejected')}>
                                 <XCircle className="h-4 w-4 mr-1" />
@@ -991,13 +1218,25 @@ export default function ParentDashboard() {
                           )}
 
                           {app.status === 'accepted' && (
-                            <div className="flex items-center gap-2 mt-4 pt-4 border-t">
+                            <div className="flex items-center gap-2 mt-4 pt-4 border-t flex-wrap">
                               <Link to={`/tutor/${tutor?.id}`}>
                                 <Button size="sm" variant="outline">
                                   <Eye className="h-4 w-4 mr-1" />
-                                  View Full Public Profile
+                                  View Public Profile
                                 </Button>
                               </Link>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="text-destructive"
+                                onClick={() => {
+                                  setReportTargetApp(app);
+                                  setReportDialogOpen(true);
+                                }}
+                              >
+                                <Flag className="h-4 w-4 mr-1" />
+                                Report Issue
+                              </Button>
                             </div>
                           )}
                         </div>
@@ -1071,6 +1310,56 @@ export default function ParentDashboard() {
           </main>
         </div>
       </div>
+
+      {/* Report Issue Dialog */}
+      <Dialog open={reportDialogOpen} onOpenChange={setReportDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-destructive" />
+              Report an Issue
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Report a problem with {reportTargetApp?.tutor_profiles?.profiles?.full_name || 'the tutor'}. Our admin team will review your report.
+            </p>
+            <div>
+              <Label>Issue Type</Label>
+              <Select value={reportType} onValueChange={setReportType}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="no_show">Tutor Not Showing Up</SelectItem>
+                  <SelectItem value="unprofessional">Unprofessional Behavior</SelectItem>
+                  <SelectItem value="quality">Poor Teaching Quality</SelectItem>
+                  <SelectItem value="communication">Communication Issues</SelectItem>
+                  <SelectItem value="other">Other</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Description</Label>
+              <Textarea
+                value={reportDescription}
+                onChange={(e) => setReportDescription(e.target.value)}
+                placeholder="Describe the issue in detail..."
+                rows={4}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setReportDialogOpen(false)}>Cancel</Button>
+            <Button
+              variant="destructive"
+              disabled={!reportDescription.trim()}
+              onClick={handleReportIssue}
+            >
+              <Flag className="h-4 w-4 mr-2" />
+              Submit Report
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </SidebarProvider>
   );
 }
