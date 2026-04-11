@@ -576,13 +576,25 @@ export default function AdminDashboard() {
   }, [userSearch, userRoleFilter]);
 
   const fetchVerifications = useCallback(async () => {
-    const { data } = await supabase
+    let query = supabase
       .from('tutor_profiles')
       .select('id, user_id, verification_status, education, experience_years, gender, created_at, profiles:user_id (full_name, email, phone), verification_documents (id, document_type, document_url, status)')
-      .eq('verification_status', 'pending')
-      .order('created_at', { ascending: true }).limit(50);
+      .order('created_at', { ascending: false }).limit(100);
+    if (verificationFilter !== 'all') {
+      query = query.eq('verification_status', verificationFilter as 'pending' | 'approved' | 'rejected');
+    }
+    const { data } = await query;
     if (data) setPendingTutors(data as unknown as TutorVerification[]);
-  }, []);
+
+    // Fetch verification badge payments
+    const { data: vPayments } = await supabase
+      .from('payment_transactions')
+      .select('id, amount, currency, status, transaction_id, created_at, completed_at, listing_type, profiles:user_id (full_name, email)')
+      .eq('listing_type', 'verification_badge')
+      .order('created_at', { ascending: false })
+      .limit(50);
+    if (vPayments) setVerificationPayments(vPayments as unknown as PaymentRow[]);
+  }, [verificationFilter]);
 
   const fetchJobs = useCallback(async () => {
     let query = supabase
