@@ -248,6 +248,61 @@ export default function TutorDashboard() {
       if (bookingsData) {
         setDemoBookings(bookingsData);
       }
+
+      // Fetch recommended jobs
+      const tutorSubjectsRes = await supabase
+        .from('tutor_subjects')
+        .select('subject_id')
+        .eq('tutor_profile_id', tutorData.id);
+      const tutorSubjectIds = tutorSubjectsRes.data?.map(s => s.subject_id) || [];
+
+      // Applied job IDs to exclude
+      const appliedJobIds = (apps || []).map(a => a.job_id);
+
+      // Recommended: matching subjects
+      let recQuery = supabase
+        .from('jobs')
+        .select('id, title, budget_min, budget_max, teaching_mode, class_level, created_at, districts(name_en, name_bn), subjects(name_en, name_bn)')
+        .eq('status', 'open')
+        .order('created_at', { ascending: false })
+        .limit(10);
+      if (tutorSubjectIds.length > 0) {
+        recQuery = recQuery.in('subject_id', tutorSubjectIds);
+      }
+      if (appliedJobIds.length > 0) {
+        recQuery = recQuery.not('id', 'in', `(${appliedJobIds.join(',')})`);
+      }
+      const { data: recJobs } = await recQuery;
+      setRecommendedJobs((recJobs || []) as unknown as RecommendedJob[]);
+
+      // Near your location
+      if (tutorData.district_id) {
+        let nearQuery = supabase
+          .from('jobs')
+          .select('id, title, budget_min, budget_max, teaching_mode, class_level, created_at, districts(name_en, name_bn), subjects(name_en, name_bn)')
+          .eq('status', 'open')
+          .eq('district_id', tutorData.district_id)
+          .order('created_at', { ascending: false })
+          .limit(10);
+        if (appliedJobIds.length > 0) {
+          nearQuery = nearQuery.not('id', 'in', `(${appliedJobIds.join(',')})`);
+        }
+        const { data: nearData } = await nearQuery;
+        setNearbyJobs((nearData || []) as unknown as RecommendedJob[]);
+      }
+
+      // High-paying jobs
+      let highQuery = supabase
+        .from('jobs')
+        .select('id, title, budget_min, budget_max, teaching_mode, class_level, created_at, districts(name_en, name_bn), subjects(name_en, name_bn)')
+        .eq('status', 'open')
+        .order('budget_max', { ascending: false })
+        .limit(10);
+      if (appliedJobIds.length > 0) {
+        highQuery = highQuery.not('id', 'in', `(${appliedJobIds.join(',')})`);
+      }
+      const { data: highData } = await highQuery;
+      setHighPayJobs((highData || []) as unknown as RecommendedJob[]);
     }
 
     setLoading(false);
