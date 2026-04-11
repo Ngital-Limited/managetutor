@@ -120,13 +120,12 @@ const sectionItems: { key: SectionKey; title: string; icon: any }[] = [
 ];
 
 const externalLinks = [
-  { title: 'Find Tutors', url: '/tutors', icon: Search },
-  { title: 'Browse Jobs', url: '/jobs', icon: Briefcase },
-  { title: 'Favorites', url: '/favorites', icon: Heart },
+  { title: 'Browse Tutors', url: '/tutors', icon: Search },
+  { title: 'My Favorites', url: '/favorites', icon: Heart },
   { title: 'Pricing', url: '/pricing', icon: CreditCard },
 ];
 
-function ParentSidebar({ activeSection, setActiveSection }: { activeSection: SectionKey; setActiveSection: (s: SectionKey) => void }) {
+function ParentSidebar({ activeSection, setActiveSection, onPostJob }: { activeSection: SectionKey; setActiveSection: (s: SectionKey) => void; onPostJob: () => void }) {
   const { state } = useSidebar();
   const collapsed = state === 'collapsed';
 
@@ -144,6 +143,15 @@ function ParentSidebar({ activeSection, setActiveSection }: { activeSection: Sec
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  onClick={onPostJob}
+                  className="cursor-pointer hover:bg-primary/10 text-primary font-medium"
+                >
+                  <Plus className="mr-2 h-4 w-4" />
+                  {!collapsed && <span>Post New Job</span>}
+                </SidebarMenuButton>
+              </SidebarMenuItem>
               {sectionItems.map((item) => (
                 <SidebarMenuItem key={item.key}>
                   <SidebarMenuButton
@@ -944,34 +952,6 @@ export default function ParentDashboard() {
         </Card>
       </div>
 
-      {/* Quick Actions */}
-      <div className="grid sm:grid-cols-3 gap-3">
-        <Button variant="outline" className="justify-start h-auto py-3" onClick={() => setShowPostJob(true)}>
-          <Plus className="h-5 w-5 mr-2 text-primary" />
-          <div className="text-left">
-            <div className="font-medium">Post New Job</div>
-            <div className="text-xs text-muted-foreground">Find a tutor for your child</div>
-          </div>
-        </Button>
-        <Link to="/tutors" className="block">
-          <Button variant="outline" className="justify-start h-auto py-3 w-full">
-            <Search className="h-5 w-5 mr-2 text-primary" />
-            <div className="text-left">
-              <div className="font-medium">Browse Tutors</div>
-              <div className="text-xs text-muted-foreground">View available tutor profiles</div>
-            </div>
-          </Button>
-        </Link>
-        <Link to="/favorites" className="block">
-          <Button variant="outline" className="justify-start h-auto py-3 w-full">
-            <Heart className="h-5 w-5 mr-2 text-destructive" />
-            <div className="text-left">
-              <div className="font-medium">My Favorites</div>
-              <div className="text-xs text-muted-foreground">Shortlisted tutors</div>
-            </div>
-          </Button>
-        </Link>
-      </div>
     </>
   );
 
@@ -1559,7 +1539,7 @@ export default function ParentDashboard() {
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-background">
-        <ParentSidebar activeSection={activeSection} setActiveSection={setActiveSection} />
+        <ParentSidebar activeSection={activeSection} setActiveSection={setActiveSection} onPostJob={() => setShowPostJob(true)} />
 
         <div className="flex-1 flex flex-col min-w-0">
           {/* Top Bar */}
