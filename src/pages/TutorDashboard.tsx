@@ -52,6 +52,18 @@ interface Application {
   };
 }
 
+interface RecommendedJob {
+  id: string;
+  title: string;
+  budget_min: number;
+  budget_max: number;
+  teaching_mode: string;
+  class_level: string;
+  created_at: string;
+  districts: { name_en: string; name_bn: string } | null;
+  subjects: { name_en: string; name_bn: string } | null;
+}
+
 interface TutorProfile {
   id: string;
   bio: string;
