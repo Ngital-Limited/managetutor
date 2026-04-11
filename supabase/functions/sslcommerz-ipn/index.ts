@@ -77,7 +77,32 @@ serve(async (req) => {
           }
         }
 
-        if (listingType && userId) {
+        if (listingType === 'verification_badge' && userId) {
+          // Verification badge payment - mark tutor as verified
+          const { data: tutorProfile } = await supabase
+            .from("tutor_profiles")
+            .select("id")
+            .eq("user_id", userId)
+            .single();
+
+          if (tutorProfile) {
+            await supabase
+              .from("tutor_profiles")
+              .update({ 
+                verification_status: "approved", 
+                verified_at: new Date().toISOString() 
+              })
+              .eq("id", tutorProfile.id);
+
+            // Notify tutor
+            await supabase.from("notifications").insert({
+              user_id: userId,
+              title: "Verified! ✅",
+              message: "Congratulations! Your profile is now verified. The verified badge is now visible on your profile.",
+              type: "verification",
+            });
+          }
+        } else if (listingType && userId) {
           // Featured listing payment
           const startDate = new Date();
           const endDate = new Date();
