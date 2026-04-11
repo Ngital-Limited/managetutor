@@ -73,7 +73,16 @@ export default function TutorProfile() {
     education_detail: '',
     present_address: '',
     permanent_address: '',
+    video_url: '',
+    teaching_philosophy: '',
+    success_stories: '',
   });
+
+  const [tutorProfileId, setTutorProfileId] = useState<string | null>(null);
+  const [reviews, setReviews] = useState<any[]>([]);
+  const [reviewRequests, setReviewRequests] = useState<any[]>([]);
+  const [reviewUpdateReason, setReviewUpdateReason] = useState('');
+  const [selectedReviewId, setSelectedReviewId] = useState<string | null>(null);
 
   const [userProfile, setUserProfile] = useState({
     full_name: '',
