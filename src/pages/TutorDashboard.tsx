@@ -30,8 +30,9 @@ import {
   GraduationCap, LogOut, Globe, Briefcase, Star, User,
   CheckCircle2, Clock, XCircle, DollarSign, TrendingUp, Calendar, MapPin,
   BookOpen, Settings, Eye, ArrowRight, AlertCircle, Phone, Mail, Zap, Sparkles, Crown,
-  Home, Search, CreditCard
+  Home, Search, CreditCard, FileText
 } from 'lucide-react';
+import { generateTutorCV } from '@/components/TutorCVGenerator';
 
 interface Application {
   id: string;
@@ -480,12 +481,29 @@ export default function TutorDashboard() {
               </div>
             </div>
           </div>
-          <Link to="/tutor/profile">
-            <Button variant="outline">
-              <Settings className="h-4 w-4 mr-2" />
-              Edit Profile
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={async () => {
+                if (!user) return;
+                try {
+                  await generateTutorCV(user.id);
+                } catch {
+                  toast({ title: 'Error', description: 'Failed to generate CV', variant: 'destructive' });
+                }
+              }}
+            >
+              <FileText className="h-4 w-4 mr-2" />
+              Download CV
             </Button>
-          </Link>
+            <Link to="/tutor/profile">
+              <Button variant="outline" size="sm">
+                <Settings className="h-4 w-4 mr-2" />
+                Edit Profile
+              </Button>
+            </Link>
+          </div>
         </div>
 
         {/* Profile Completeness Warning */}
