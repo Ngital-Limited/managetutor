@@ -406,7 +406,7 @@ export default function ParentDashboard() {
     const { error } = await supabase.from('jobs').update({
       title: jobForm.title,
       description: jobForm.description,
-      subject_id: jobForm.subject_id || null,
+      subject_id: jobForm.subject_ids.length > 0 ? jobForm.subject_ids[0] : null,
       district_id: jobForm.district_id,
       class_level: jobForm.class_level,
       days_per_week: jobForm.days_per_week,
@@ -422,6 +422,13 @@ export default function ParentDashboard() {
     if (error) {
       toast({ title: 'Error', description: error.message, variant: 'destructive' });
     } else {
+      // Update job_subjects
+      await supabase.from('job_subjects').delete().eq('job_id', editingJob.id);
+      if (jobForm.subject_ids.length > 0) {
+        await supabase.from('job_subjects').insert(
+          jobForm.subject_ids.map(sid => ({ job_id: editingJob.id, subject_id: sid }))
+        );
+      }
       toast({ title: 'Updated!', description: 'Job updated successfully' });
       setShowPostJob(false);
       setEditingJob(null);
