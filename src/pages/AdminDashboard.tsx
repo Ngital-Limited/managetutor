@@ -840,6 +840,7 @@ export default function AdminDashboard() {
     { title: 'Reviews', value: 'reviews', icon: Star },
     { title: 'Payments', value: 'payments', icon: CreditCard },
     { title: 'Subscriptions', value: 'subscriptions', icon: Package },
+    { title: 'Demo Requests', value: 'demo_requests', icon: GraduationCap },
     { title: 'Contact Messages', value: 'contacts', icon: Mail },
     { title: 'Broadcast', value: 'broadcast', icon: Megaphone },
     { title: 'Settings', value: 'settings', icon: Settings },
