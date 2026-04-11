@@ -592,12 +592,12 @@ export default function ParentDashboard() {
   const districtOptions = useMemo(() => districts.map(d => ({
     value: d.id,
     label: d.name_en,
-  })), [districts, language]);
+  })), [districts]);
 
   const subjectOptions = useMemo(() => subjects.map(s => ({
     value: s.id,
     label: s.name_en,
-  })), [subjects, language]);
+  })), [subjects]);
 
   const areaOptions = useMemo(() => {
     const filtered = jobForm.district_id ? areas.filter(a => a.district_id === jobForm.district_id) : areas;
@@ -605,7 +605,7 @@ export default function ParentDashboard() {
       value: a.id,
       label: a.name_en,
     }));
-  }, [areas, jobForm.district_id, language]);
+  }, [areas, jobForm.district_id]);
 
   const classLevelOptions = useMemo(() => CLASS_LEVELS.flatMap(group =>
     group.items.map(item => ({ value: item, label: item, group: group.group }))
