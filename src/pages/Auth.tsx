@@ -100,7 +100,7 @@ export default function Auth() {
         </div>
         <div className="relative z-10 text-primary-foreground max-w-md">
           <div className="flex items-center gap-3 mb-8">
-            <Logo size="lg" />
+            <Logo size="lg" variant="light" />
           </div>
           <h1 className="text-4xl font-bold leading-tight mb-4">
             {isLogin ? 'Welcome back!' : 'Join our community'}

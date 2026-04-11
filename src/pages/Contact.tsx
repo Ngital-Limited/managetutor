@@ -7,19 +7,41 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 export default function Contact() {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
-    setTimeout(() => {
+
+    const form = e.target as HTMLFormElement;
+    const formData = new FormData(form);
+    const name = (formData.get('name') as string)?.trim();
+    const email = (formData.get('email') as string)?.trim();
+    const phone = (formData.get('phone') as string)?.trim() || null;
+    const subject = (formData.get('subject') as string)?.trim();
+    const message = (formData.get('message') as string)?.trim();
+
+    if (!name || !email || !subject || !message) {
+      toast({ title: 'Please fill all required fields', variant: 'destructive' });
       setLoading(false);
-      toast({ title: 'Message sent!', description: 'We\'ll get back to you within 24 hours.' });
-      (e.target as HTMLFormElement).reset();
-    }, 1000);
+      return;
+    }
+
+    const { error } = await supabase.from('contact_messages').insert({
+      name, email, phone, subject, message
+    });
+
+    setLoading(false);
+    if (error) {
+      toast({ title: 'Failed to send message', description: 'Please try again later.', variant: 'destructive' });
+    } else {
+      toast({ title: 'Message sent!', description: "We'll get back to you within 24 hours." });
+      form.reset();
+    }
   };
 
   return (
@@ -115,24 +137,24 @@ export default function Contact() {
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="name">Full Name</Label>
-                    <Input id="name" placeholder="Your name" required />
+                    <Input id="name" name="name" placeholder="Your name" required />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="email">Email</Label>
-                    <Input id="email" type="email" placeholder="your@email.com" required />
+                    <Input id="email" name="email" type="email" placeholder="your@email.com" required />
                   </div>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="phone">Phone Number</Label>
-                  <Input id="phone" placeholder="+880..." />
+                  <Input id="phone" name="phone" placeholder="+880..." />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="subject">Subject</Label>
-                  <Input id="subject" placeholder="How can we help?" required />
+                  <Input id="subject" name="subject" placeholder="How can we help?" required />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="message">Message</Label>
-                  <Textarea id="message" placeholder="Write your message here..." rows={5} required />
+                  <Textarea id="message" name="message" placeholder="Write your message here..." rows={5} required />
                 </div>
                 <Button type="submit" className="w-full" disabled={loading}>
                   {loading ? 'Sending...' : <>Send Message <Send className="h-4 w-4 ml-2" /></>}
