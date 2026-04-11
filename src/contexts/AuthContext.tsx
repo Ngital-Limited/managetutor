@@ -85,6 +85,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const fetchProfile = async (userId: string) => {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('full_name, avatar_url, phone')
+      .eq('id', userId)
+      .single();
+    
+    if (data && !error) {
+      setProfile(data as UserProfile);
+    }
+  };
+
+  const refreshProfile = async () => {
+    if (user) {
+      await fetchProfile(user.id);
+    }
+  };
+
   const signUp = async (email: string, password: string, fullName: string, selectedRole: AppRole) => {
     const redirectUrl = `${window.location.origin}/`;
     
