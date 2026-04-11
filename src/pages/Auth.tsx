@@ -68,9 +68,8 @@ export default function Auth() {
       const { error } = await signIn(email, password);
       if (error) {
         toast({ title: 'Login Failed', description: error.message, variant: 'destructive' });
-      } else {
-        navigate('/dashboard');
       }
+      // Navigation handled by useEffect once role is loaded
     } else {
       if (!fullName.trim()) {
         toast({ title: 'Validation Error', description: 'Full name is required', variant: 'destructive' });
@@ -82,8 +81,8 @@ export default function Auth() {
         toast({ title: 'Sign Up Failed', description: error.message, variant: 'destructive' });
       } else {
         toast({ title: 'Success!', description: 'Account created successfully.' });
-        navigate('/dashboard');
       }
+      // Navigation handled by useEffect once role is loaded
     }
     setLoading(false);
   };
