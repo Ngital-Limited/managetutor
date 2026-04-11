@@ -155,7 +155,7 @@ function TutorSidebar() {
 
 export default function TutorDashboard() {
   const { user, signOut, loading: authLoading } = useAuth();
-  const { t, language, setLanguage } = useLanguage();
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const { toast } = useToast();
 

@@ -66,7 +66,7 @@ interface Application {
 export default function JobDetails() {
   const { id } = useParams();
   const { user, role } = useAuth();
-  const { t, language, setLanguage } = useLanguage();
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const { toast } = useToast();
 

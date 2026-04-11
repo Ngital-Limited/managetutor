@@ -38,7 +38,7 @@ interface TutorProfile {
 // SEO-optimized location landing page
 export default function LocationTutors() {
   const { location } = useParams();
-  const { language, setLanguage } = useLanguage();
+  const { language } = useLanguage();
 
   const [loading, setLoading] = useState(true);
   const [district, setDistrict] = useState<District | null>(null);

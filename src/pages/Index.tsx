@@ -56,7 +56,7 @@ interface SubjectCategory {
 }
 
 export default function Index() {
-  const { t, language, setLanguage } = useLanguage();
+  const { t } = useLanguage();
   const { user } = useAuth();
   const navigate = useNavigate();
 

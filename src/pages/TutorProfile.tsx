@@ -46,7 +46,7 @@ interface VerificationDoc {
 
 export default function TutorProfile() {
   const { user, role, loading: authLoading } = useAuth();
-  const { t, language, setLanguage } = useLanguage();
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const { toast } = useToast();
 

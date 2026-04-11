@@ -33,7 +33,7 @@ interface Favorite {
 
 export default function Favorites() {
   const { user, loading: authLoading } = useAuth();
-  const { language, setLanguage } = useLanguage();
+  const { language } = useLanguage();
   const navigate = useNavigate();
 
   const [loading, setLoading] = useState(true);
