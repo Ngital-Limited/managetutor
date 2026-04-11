@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { SearchableSelect } from '@/components/SearchableSelect';
+import { MultiSearchableSelect } from '@/components/MultiSearchableSelect';
 import { CLASS_LEVELS } from '@/constants/classLevels';
 import { SPECIAL_REQUIREMENTS } from '@/constants/specialRequirements';
 import { Badge } from '@/components/ui/badge';
@@ -57,7 +58,7 @@ interface Job {
   teaching_mode: string;
   days_per_week: number;
   job_reference: string;
-  subject_id: string | null;
+  subject_ids: string[];
   district_id: string;
   class_level: string | null;
   preferred_tutor_gender: string | null;
@@ -66,6 +67,7 @@ interface Job {
   preferred_time: string | null;
   districts: { name_en: string; name_bn: string };
   subjects: { name_en: string; name_bn: string } | null;
+  job_subjects?: { subjects: { name_en: string; name_bn: string } }[];
 }
 
 interface Application {
@@ -209,7 +211,7 @@ export default function ParentDashboard() {
   const [jobForm, setJobForm] = useState({
     title: '',
     description: '',
-    subject_id: '',
+    subject_ids: [] as string[],
     district_id: '',
     class_level: '',
     days_per_week: 3,
