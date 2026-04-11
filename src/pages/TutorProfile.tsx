@@ -189,6 +189,7 @@ export default function TutorProfile() {
         education_detail: profile.education_detail || null,
         present_address: profile.present_address || null,
         permanent_address: profile.permanent_address || null,
+        class_levels: selectedClassLevels,
       } as any).eq('id', tutorData.id);
 
       // Update subjects - delete old and insert new
