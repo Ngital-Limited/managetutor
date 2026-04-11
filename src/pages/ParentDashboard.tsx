@@ -952,34 +952,6 @@ export default function ParentDashboard() {
         </Card>
       </div>
 
-      {/* Quick Actions */}
-      <div className="grid sm:grid-cols-3 gap-3">
-        <Button variant="outline" className="justify-start h-auto py-3" onClick={() => setShowPostJob(true)}>
-          <Plus className="h-5 w-5 mr-2 text-primary" />
-          <div className="text-left">
-            <div className="font-medium">Post New Job</div>
-            <div className="text-xs text-muted-foreground">Find a tutor for your child</div>
-          </div>
-        </Button>
-        <Link to="/tutors" className="block">
-          <Button variant="outline" className="justify-start h-auto py-3 w-full">
-            <Search className="h-5 w-5 mr-2 text-primary" />
-            <div className="text-left">
-              <div className="font-medium">Browse Tutors</div>
-              <div className="text-xs text-muted-foreground">View available tutor profiles</div>
-            </div>
-          </Button>
-        </Link>
-        <Link to="/favorites" className="block">
-          <Button variant="outline" className="justify-start h-auto py-3 w-full">
-            <Heart className="h-5 w-5 mr-2 text-destructive" />
-            <div className="text-left">
-              <div className="font-medium">My Favorites</div>
-              <div className="text-xs text-muted-foreground">Shortlisted tutors</div>
-            </div>
-          </Button>
-        </Link>
-      </div>
     </>
   );
 
