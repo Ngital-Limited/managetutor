@@ -573,6 +573,7 @@ export default function Index() {
                 <Link to="/jobs" className="hover:text-background transition-colors">Browse Jobs</Link>
                 <Link to="/contact" className="hover:text-background transition-colors">Contact</Link>
                 <Link to="/privacy" className="hover:text-background transition-colors">Privacy Policy</Link>
+                <Link to="/terms" className="hover:text-background transition-colors">Terms & Conditions</Link>
               </div>
             </div>
           </div>
