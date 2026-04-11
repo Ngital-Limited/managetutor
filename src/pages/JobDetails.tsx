@@ -28,6 +28,7 @@ interface Job {
   description: string;
   class_level: string;
   days_per_week: number;
+  duration_hours: number;
   budget_min: number;
   budget_max: number;
   teaching_mode: string;
@@ -39,6 +40,11 @@ interface Job {
   total_applications: number;
   created_at: string;
   parent_id: string;
+  number_of_students: number;
+  student_age: string | null;
+  start_date: string | null;
+  location_details: string | null;
+  job_reference: string | null;
   districts: { name_en: string; name_bn: string } | null;
   subjects: { name_en: string; name_bn: string } | null;
   job_subjects?: { subjects: { name_en: string; name_bn: string } }[];
@@ -266,9 +272,12 @@ export default function JobDetails() {
                   <div className="w-16 h-16 rounded-xl bg-tutor/10 flex items-center justify-center flex-shrink-0">
                     <Briefcase className="h-8 w-8 text-tutor" />
                   </div>
-                  <div className="flex-1">
+                    <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
                       <h1 className="text-2xl font-bold">{job.title}</h1>
+                      {job.job_reference && (
+                        <Badge variant="outline" className="text-xs font-mono">{job.job_reference}</Badge>
+                      )}
                       <Badge variant={job.status === 'open' ? 'default' : 'secondary'}>
                         {job.status}
                       </Badge>
