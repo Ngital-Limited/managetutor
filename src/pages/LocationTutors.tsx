@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Logo } from '@/components/Logo';
+import { Header } from '@/components/Header';
+import { Footer } from '@/components/Footer';
 import { Link, useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -83,22 +84,7 @@ export default function LocationTutors() {
   return (
     <div className="min-h-screen bg-background">
       {/* Navigation */}
-      <nav className="sticky top-0 z-50 bg-card/80 backdrop-blur-xl border-b border-border">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-3">
-            <Logo size="md" />
-          </Link>
-          <div className="flex items-center gap-3">
-            <Button variant="ghost" size="sm" onClick={() => setLanguage(language === 'en' ? 'bn' : 'en')}>
-              <Globe className="h-4 w-4 mr-1" />
-              {language === 'en' ? 'বাংলা' : 'EN'}
-            </Button>
-            <Link to="/auth">
-              <Button>Get Started</Button>
-            </Link>
-          </div>
-        </div>
-      </nav>
+      <Header />
 
       {/* Hero Section - SEO Optimized */}
       <section className="gradient-hero text-primary-foreground py-16">
@@ -294,6 +280,7 @@ export default function LocationTutors() {
           </div>
         </div>
       </section>
+      <Footer />
     </div>
   );
 }
