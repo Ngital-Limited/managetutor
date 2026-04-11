@@ -144,7 +144,7 @@ export default function JobDetails() {
     setLoading(false);
   };
 
-  const handleApply = async (e: React.FormEvent) => {
+   const handleApply = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user || !job) return;
 
@@ -152,13 +152,35 @@ export default function JobDetails() {
 
     const { data: tutorProfile } = await supabase
       .from('tutor_profiles')
-      .select('id')
+      .select('id, bio, education, experience_years, hourly_rate_min, verification_status, gender, district_id, teaching_mode, class_levels')
       .eq('user_id', user.id)
       .single();
 
     if (!tutorProfile) {
       toast({ title: 'Complete Profile', description: 'Please complete your tutor profile first.', variant: 'destructive' });
       navigate('/tutor/profile');
+      setApplying(false);
+      return;
+    }
+
+    // Calculate profile completeness
+    let complete = 0;
+    if (tutorProfile.bio) complete += 10;
+    if (tutorProfile.education) complete += 10;
+    if (tutorProfile.experience_years && tutorProfile.experience_years > 0) complete += 10;
+    if (tutorProfile.hourly_rate_min && tutorProfile.hourly_rate_min > 0) complete += 10;
+    if (tutorProfile.gender) complete += 10;
+    if (tutorProfile.district_id) complete += 10;
+    if (tutorProfile.teaching_mode) complete += 10;
+    if (tutorProfile.class_levels && tutorProfile.class_levels.length > 0) complete += 10;
+    if (tutorProfile.verification_status === 'approved') complete += 10;
+    const { count } = await supabase.from('tutor_subjects').select('*', { count: 'exact', head: true }).eq('tutor_profile_id', tutorProfile.id);
+    if (count && count > 0) complete += 10;
+
+    if (complete < 70) {
+      toast({ title: 'Profile Incomplete', description: `Your profile is ${complete}% complete. You need at least 70% to apply.`, variant: 'destructive' });
+      navigate('/tutor/profile');
+      setApplying(false);
       return;
     }
 
