@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { SearchableSelect } from '@/components/SearchableSelect';
+import { MultiSearchableSelect } from '@/components/MultiSearchableSelect';
 import { CLASS_LEVELS } from '@/constants/classLevels';
 import { SPECIAL_REQUIREMENTS } from '@/constants/specialRequirements';
 import { Badge } from '@/components/ui/badge';
@@ -45,7 +46,7 @@ export default function Dashboard() {
   const [jobForm, setJobForm] = useState({
     title: '',
     description: '',
-    subject_id: '',
+    subject_ids: [] as string[],
     district_id: '',
     class_level: '',
     days_per_week: 3,
@@ -100,11 +101,11 @@ export default function Dashboard() {
     if (!user) return;
 
     setSubmitting(true);
-    const { error } = await supabase.from('jobs').insert({
+    const { data: jobData, error } = await supabase.from('jobs').insert({
       parent_id: user.id,
       title: jobForm.title,
       description: jobForm.description,
-      subject_id: jobForm.subject_id || null,
+      subject_id: jobForm.subject_ids.length > 0 ? jobForm.subject_ids[0] : null,
       district_id: jobForm.district_id,
       class_level: jobForm.class_level,
       days_per_week: jobForm.days_per_week,
@@ -114,15 +115,20 @@ export default function Dashboard() {
       preferred_tutor_gender: jobForm.preferred_tutor_gender as 'male' | 'female' | 'any',
       special_requirements: jobForm.special_requirements.length > 0 ? jobForm.special_requirements.join(', ') : null,
       preferred_time: jobForm.preferred_time || null,
-    });
+    }).select('id').single();
 
     if (error) {
       toast({ title: 'Error', description: error.message, variant: 'destructive' });
-    } else {
+    } else if (jobData) {
+      if (jobForm.subject_ids.length > 0) {
+        await supabase.from('job_subjects').insert(
+          jobForm.subject_ids.map(sid => ({ job_id: jobData.id, subject_id: sid }))
+        );
+      }
       toast({ title: 'Success!', description: 'Job posted successfully' });
       setShowPostJob(false);
       setJobForm({
-        title: '', description: '', subject_id: '', district_id: '', class_level: '',
+        title: '', description: '', subject_ids: [] as string[], district_id: '', class_level: '',
         days_per_week: 3, budget_min: 3000, budget_max: 8000,
         teaching_mode: 'in_person', preferred_tutor_gender: 'any', special_requirements: [] as string[], preferred_time: '',
       });
@@ -228,12 +234,12 @@ export default function Dashboard() {
                     </div>
                     <div className="grid md:grid-cols-2 gap-4">
                       <div>
-                        <Label>Subject</Label>
-                        <SearchableSelect
+                        <Label>Subjects</Label>
+                        <MultiSearchableSelect
                           options={subjects.map(s => ({ value: s.id, label: s.name_en }))}
-                          value={jobForm.subject_id}
-                          onValueChange={(v) => setJobForm({ ...jobForm, subject_id: v })}
-                          placeholder="Search subject..."
+                          values={jobForm.subject_ids}
+                          onValuesChange={(v) => setJobForm({ ...jobForm, subject_ids: v })}
+                          placeholder="Select subjects..."
                           searchPlaceholder="Type to search subjects..."
                         />
                       </div>

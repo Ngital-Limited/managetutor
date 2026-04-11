@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { SearchableSelect } from '@/components/SearchableSelect';
+import { MultiSearchableSelect } from '@/components/MultiSearchableSelect';
 import { CLASS_LEVELS } from '@/constants/classLevels';
 import { SPECIAL_REQUIREMENTS } from '@/constants/specialRequirements';
 import { Badge } from '@/components/ui/badge';
@@ -57,7 +58,7 @@ interface Job {
   teaching_mode: string;
   days_per_week: number;
   job_reference: string;
-  subject_id: string | null;
+  subject_ids: string[];
   district_id: string;
   class_level: string | null;
   preferred_tutor_gender: string | null;
@@ -66,6 +67,7 @@ interface Job {
   preferred_time: string | null;
   districts: { name_en: string; name_bn: string };
   subjects: { name_en: string; name_bn: string } | null;
+  job_subjects?: { subjects: { name_en: string; name_bn: string } }[];
 }
 
 interface Application {
@@ -209,7 +211,7 @@ export default function ParentDashboard() {
   const [jobForm, setJobForm] = useState({
     title: '',
     description: '',
-    subject_id: '',
+    subject_ids: [] as string[],
     district_id: '',
     class_level: '',
     days_per_week: 3,
@@ -240,7 +242,7 @@ export default function ParentDashboard() {
       supabase.from('subjects').select('*').order('name_en'),
       supabase.from('profiles').select('full_name, avatar_url, phone, email, district_id, area_id, user_reference').eq('id', user.id).single(),
       supabase.from('jobs')
-        .select('*, districts (name_en, name_bn), subjects (name_en, name_bn)')
+        .select('*, districts (name_en, name_bn), subjects (name_en, name_bn), job_subjects (subjects (name_en, name_bn))')
         .eq('parent_id', user.id)
         .order('created_at', { ascending: false }),
     ]);
@@ -304,11 +306,11 @@ export default function ParentDashboard() {
     if (!user) return;
 
     setSubmitting(true);
-    const { error } = await supabase.from('jobs').insert({
+    const { data: jobData, error } = await supabase.from('jobs').insert({
       parent_id: user.id,
       title: jobForm.title,
       description: jobForm.description,
-      subject_id: jobForm.subject_id || null,
+      subject_id: jobForm.subject_ids.length > 0 ? jobForm.subject_ids[0] : null,
       district_id: jobForm.district_id,
       class_level: jobForm.class_level,
       days_per_week: jobForm.days_per_week,
@@ -319,11 +321,17 @@ export default function ParentDashboard() {
       student_gender: jobForm.student_gender as 'male' | 'female' | 'any',
       special_requirements: jobForm.special_requirements.length > 0 ? jobForm.special_requirements.join(', ') : null,
       preferred_time: jobForm.preferred_time || null,
-    });
+    }).select('id').single();
 
     if (error) {
       toast({ title: 'Error', description: error.message, variant: 'destructive' });
-    } else {
+    } else if (jobData) {
+      // Insert job_subjects
+      if (jobForm.subject_ids.length > 0) {
+        await supabase.from('job_subjects').insert(
+          jobForm.subject_ids.map(sid => ({ job_id: jobData.id, subject_id: sid }))
+        );
+      }
       toast({ title: 'Success!', description: 'Job posted successfully' });
       setShowPostJob(false);
       resetJobForm();
@@ -334,7 +342,7 @@ export default function ParentDashboard() {
 
   const resetJobForm = () => {
     setJobForm({
-      title: '', description: '', subject_id: '', district_id: '', class_level: '',
+      title: '', description: '', subject_ids: [] as string[], district_id: '', class_level: '',
       days_per_week: 3, budget_min: 3000, budget_max: 8000,
       teaching_mode: 'in_person', preferred_tutor_gender: 'any', student_gender: 'any',
       special_requirements: [] as string[], preferred_time: '',
@@ -368,11 +376,13 @@ export default function ParentDashboard() {
     }
   };
 
-  const startEditJob = (job: Job) => {
+  const startEditJob = async (job: Job) => {
+    // Fetch subject IDs from job_subjects
+    const { data: jsData } = await supabase.from('job_subjects').select('subject_id').eq('job_id', job.id);
     setJobForm({
       title: job.title,
       description: job.description,
-      subject_id: job.subject_id || '',
+      subject_ids: jsData?.map(js => js.subject_id) || [],
       district_id: job.district_id,
       class_level: job.class_level || '',
       days_per_week: job.days_per_week || 3,
@@ -396,7 +406,7 @@ export default function ParentDashboard() {
     const { error } = await supabase.from('jobs').update({
       title: jobForm.title,
       description: jobForm.description,
-      subject_id: jobForm.subject_id || null,
+      subject_id: jobForm.subject_ids.length > 0 ? jobForm.subject_ids[0] : null,
       district_id: jobForm.district_id,
       class_level: jobForm.class_level,
       days_per_week: jobForm.days_per_week,
@@ -412,6 +422,13 @@ export default function ParentDashboard() {
     if (error) {
       toast({ title: 'Error', description: error.message, variant: 'destructive' });
     } else {
+      // Update job_subjects
+      await supabase.from('job_subjects').delete().eq('job_id', editingJob.id);
+      if (jobForm.subject_ids.length > 0) {
+        await supabase.from('job_subjects').insert(
+          jobForm.subject_ids.map(sid => ({ job_id: editingJob.id, subject_id: sid }))
+        );
+      }
       toast({ title: 'Updated!', description: 'Job updated successfully' });
       setShowPostJob(false);
       setEditingJob(null);
@@ -607,12 +624,12 @@ export default function ParentDashboard() {
           </div>
           <div className="grid md:grid-cols-2 gap-4">
             <div>
-              <Label>Subject</Label>
-              <SearchableSelect
+              <Label>Subjects</Label>
+              <MultiSearchableSelect
                 options={subjectOptions}
-                value={jobForm.subject_id}
-                onValueChange={(v) => setJobForm({ ...jobForm, subject_id: v })}
-                placeholder="Search subject..."
+                values={jobForm.subject_ids}
+                onValuesChange={(v) => setJobForm({ ...jobForm, subject_ids: v })}
+                placeholder="Select subjects..."
                 searchPlaceholder="Type to search subjects..."
                 emptyText="No subjects found."
               />

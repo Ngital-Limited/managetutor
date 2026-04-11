@@ -75,6 +75,7 @@ export default function BrowseJobs() {
   const [proposedRate, setProposedRate] = useState('');
   const [applying, setApplying] = useState(false);
   const [tutorProfileId, setTutorProfileId] = useState<string | null>(null);
+  const [tutorProfileCompleteness, setTutorProfileCompleteness] = useState(0);
 
   useEffect(() => {
     fetchData();
@@ -94,10 +95,27 @@ export default function BrowseJobs() {
     if (!user) return;
     const { data } = await supabase
       .from('tutor_profiles')
-      .select('id')
+      .select('id, bio, education, experience_years, hourly_rate_min, verification_status, gender, district_id, teaching_mode, class_levels')
       .eq('user_id', user.id)
       .single();
-    if (data) setTutorProfileId(data.id);
+    if (data) {
+      setTutorProfileId(data.id);
+      // Calculate completeness (10 fields, each worth 10%)
+      let complete = 0;
+      if (data.bio) complete += 10;
+      if (data.education) complete += 10;
+      if (data.experience_years && data.experience_years > 0) complete += 10;
+      if (data.hourly_rate_min && data.hourly_rate_min > 0) complete += 10;
+      if (data.gender) complete += 10;
+      if (data.district_id) complete += 10;
+      if (data.teaching_mode) complete += 10;
+      if (data.class_levels && data.class_levels.length > 0) complete += 10;
+      if (data.verification_status === 'approved') complete += 10;
+      // Check if tutor has subjects
+      const { count } = await supabase.from('tutor_subjects').select('*', { count: 'exact', head: true }).eq('tutor_profile_id', data.id);
+      if (count && count > 0) complete += 10;
+      setTutorProfileCompleteness(complete);
+    }
   };
 
   const fetchData = async () => {
@@ -200,7 +218,16 @@ export default function BrowseJobs() {
         description: "Please complete your tutor profile before applying.",
         variant: "destructive"
       });
-      navigate('/tutor-dashboard');
+      navigate('/tutor/profile');
+      return;
+    }
+    if (tutorProfileCompleteness < 70) {
+      toast({
+        title: "Profile Incomplete",
+        description: `Your profile is ${tutorProfileCompleteness}% complete. You need at least 70% to apply for jobs.`,
+        variant: "destructive"
+      });
+      navigate('/tutor/profile');
       return;
     }
     setSelectedJob(job);
