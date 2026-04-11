@@ -1,0 +1,1 @@
+ALTER TABLE public.tutor_profiles ADD COLUMN class_levels text[] DEFAULT '{}';
