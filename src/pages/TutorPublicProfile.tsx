@@ -34,6 +34,9 @@ interface TutorProfile {
   teaching_mode: string;
   gender: string;
   created_at: string;
+  video_url: string | null;
+  teaching_philosophy: string | null;
+  success_stories: string | null;
 }
 
 interface Profile {
