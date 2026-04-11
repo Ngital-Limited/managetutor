@@ -1611,6 +1611,9 @@ export default function AdminDashboard() {
             {/* ═══════ SUBSCRIPTIONS TAB ═══════ */}
             {activeTab === 'subscriptions' && <SubscriptionPlansTab toast={toast} />}
 
+            {/* ═══════ DEMO REQUESTS TAB ═══════ */}
+            {activeTab === 'demo_requests' && <DemoRequestsTab toast={toast} />}
+
             {/* ═══════ CONTACT MESSAGES TAB ═══════ */}
             {activeTab === 'contacts' && <ContactMessagesTab toast={toast} />}
 
