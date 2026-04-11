@@ -614,7 +614,7 @@ export default function TutorProfile() {
                 <div className="grid grid-cols-2 gap-2">
                   <div>
                     <Label>Height</Label>
-                    <Input value={profile.height} onChange={(e) => setProfile({ ...profile, height: e.target.value })} placeholder="e.g. 5'8\"" />
+                    <Input value={profile.height} onChange={(e) => setProfile({ ...profile, height: e.target.value })} placeholder={'e.g. 5\'8"'} />
                   </div>
                   <div>
                     <Label>Weight</Label>
