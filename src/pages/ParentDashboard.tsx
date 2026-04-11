@@ -460,8 +460,10 @@ export default function ParentDashboard() {
       description: jobForm.description,
       subject_id: jobForm.subject_ids.length > 0 ? jobForm.subject_ids[0] : null,
       district_id: jobForm.district_id,
+      area_id: jobForm.area_id || null,
       class_level: jobForm.class_level,
       days_per_week: jobForm.days_per_week,
+      duration_hours: jobForm.duration_hours,
       budget_min: jobForm.budget_min,
       budget_max: jobForm.budget_max,
       teaching_mode: jobForm.teaching_mode as 'online' | 'in_person' | 'hybrid',
@@ -469,6 +471,10 @@ export default function ParentDashboard() {
       student_gender: jobForm.student_gender as 'male' | 'female' | 'any',
       special_requirements: jobForm.special_requirements.length > 0 ? jobForm.special_requirements.join(', ') : null,
       preferred_time: jobForm.preferred_time || null,
+      number_of_students: jobForm.number_of_students,
+      student_age: jobForm.student_age || null,
+      start_date: jobForm.start_date || null,
+      location_details: jobForm.location_details || null,
     }).eq('id', editingJob.id);
 
     if (error) {
