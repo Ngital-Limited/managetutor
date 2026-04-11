@@ -247,6 +247,114 @@ const emptyPlan: PlanForm = {
   is_active: true,
 };
 
+function ContactMessagesTab({ toast }: { toast: ReturnType<typeof useToast>['toast'] }) {
+  const [messages, setMessages] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedMsg, setSelectedMsg] = useState<any>(null);
+
+  const fetchMessages = useCallback(async () => {
+    setLoading(true);
+    const { data } = await supabase.from('contact_messages').select('*').order('created_at', { ascending: false });
+    setMessages(data || []);
+    setLoading(false);
+  }, []);
+
+  useEffect(() => { fetchMessages(); }, [fetchMessages]);
+
+  const markAsRead = async (id: string) => {
+    await supabase.from('contact_messages').update({ is_read: true }).eq('id', id);
+    fetchMessages();
+  };
+
+  const deleteMessage = async (id: string) => {
+    await supabase.from('contact_messages').delete().eq('id', id);
+    toast({ title: 'Message deleted' });
+    setSelectedMsg(null);
+    fetchMessages();
+  };
+
+  const unreadCount = messages.filter(m => !m.is_read).length;
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h1 className="text-3xl font-extrabold">Contact Messages</h1>
+        {unreadCount > 0 && <Badge variant="destructive">{unreadCount} unread</Badge>}
+      </div>
+      <Card>
+        <CardContent className="p-0">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Status</TableHead>
+                <TableHead>Name</TableHead>
+                <TableHead>Email</TableHead>
+                <TableHead>Subject</TableHead>
+                <TableHead>Date</TableHead>
+                <TableHead>Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {loading ? (
+                <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">Loading...</TableCell></TableRow>
+              ) : messages.length === 0 ? (
+                <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">No contact messages yet</TableCell></TableRow>
+              ) : messages.map((msg) => (
+                <TableRow key={msg.id} className={!msg.is_read ? 'bg-primary/5 font-medium' : ''}>
+                  <TableCell>
+                    <Badge variant={msg.is_read ? 'secondary' : 'default'} className="text-xs">
+                      {msg.is_read ? 'Read' : 'New'}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>{msg.name}</TableCell>
+                  <TableCell className="text-sm text-muted-foreground">{msg.email}</TableCell>
+                  <TableCell className="max-w-[200px] truncate">{msg.subject}</TableCell>
+                  <TableCell className="text-sm text-muted-foreground">{formatDistanceToNow(new Date(msg.created_at), { addSuffix: true })}</TableCell>
+                  <TableCell>
+                    <div className="flex gap-1">
+                      <Button size="sm" variant="outline" onClick={() => { setSelectedMsg(msg); if (!msg.is_read) markAsRead(msg.id); }}>
+                        <Eye className="h-3 w-3" />
+                      </Button>
+                      <Button size="sm" variant="outline" className="text-destructive" onClick={() => deleteMessage(msg.id)}>
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+
+      <Dialog open={!!selectedMsg} onOpenChange={() => setSelectedMsg(null)}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>{selectedMsg?.subject}</DialogTitle>
+          </DialogHeader>
+          {selectedMsg && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-3 text-sm">
+                <div><span className="text-muted-foreground">Name:</span> <strong>{selectedMsg.name}</strong></div>
+                <div><span className="text-muted-foreground">Email:</span> <a href={`mailto:${selectedMsg.email}`} className="text-primary hover:underline">{selectedMsg.email}</a></div>
+                {selectedMsg.phone && <div><span className="text-muted-foreground">Phone:</span> {selectedMsg.phone}</div>}
+                <div><span className="text-muted-foreground">Date:</span> {format(new Date(selectedMsg.created_at), 'PPp')}</div>
+              </div>
+              <div className="bg-muted/50 rounded-lg p-4 text-sm whitespace-pre-wrap">{selectedMsg.message}</div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setSelectedMsg(null)}>Close</Button>
+            <Button variant="destructive" onClick={() => deleteMessage(selectedMsg?.id)}>
+              <Trash2 className="h-4 w-4 mr-2" /> Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
+
 function SubscriptionPlansTab({ toast }: { toast: ReturnType<typeof useToast>['toast'] }) {
   const [plans, setPlans] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
