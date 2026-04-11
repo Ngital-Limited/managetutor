@@ -1305,6 +1305,94 @@ export type Database = {
           },
         ]
       }
+      tutor_education: {
+        Row: {
+          created_at: string
+          degree: string
+          field_of_study: string | null
+          id: string
+          institution: string
+          is_current: boolean | null
+          passing_year: number | null
+          result: string | null
+          tutor_id: string
+        }
+        Insert: {
+          created_at?: string
+          degree: string
+          field_of_study?: string | null
+          id?: string
+          institution: string
+          is_current?: boolean | null
+          passing_year?: number | null
+          result?: string | null
+          tutor_id: string
+        }
+        Update: {
+          created_at?: string
+          degree?: string
+          field_of_study?: string | null
+          id?: string
+          institution?: string
+          is_current?: boolean | null
+          passing_year?: number | null
+          result?: string | null
+          tutor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tutor_education_tutor_id_fkey"
+            columns: ["tutor_id"]
+            isOneToOne: false
+            referencedRelation: "tutor_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tutor_job_experiences: {
+        Row: {
+          company: string
+          created_at: string
+          designation: string
+          end_date: string | null
+          id: string
+          is_current: boolean | null
+          responsibilities: string | null
+          start_date: string | null
+          tutor_id: string
+        }
+        Insert: {
+          company: string
+          created_at?: string
+          designation: string
+          end_date?: string | null
+          id?: string
+          is_current?: boolean | null
+          responsibilities?: string | null
+          start_date?: string | null
+          tutor_id: string
+        }
+        Update: {
+          company?: string
+          created_at?: string
+          designation?: string
+          end_date?: string | null
+          id?: string
+          is_current?: boolean | null
+          responsibilities?: string | null
+          start_date?: string | null
+          tutor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tutor_job_experiences_tutor_id_fkey"
+            columns: ["tutor_id"]
+            isOneToOne: false
+            referencedRelation: "tutor_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tutor_profiles: {
         Row: {
           average_rating: number | null
@@ -1312,6 +1400,7 @@ export type Database = {
           bio_bn: string | null
           class_levels: string[] | null
           created_at: string | null
+          date_of_birth: string | null
           display_name: string | null
           district_id: string | null
           education: string | null
@@ -1320,16 +1409,23 @@ export type Database = {
           emergency_contact_name: string | null
           emergency_contact_phone: string | null
           experience_years: number | null
+          father_name: string | null
           father_phone: string | null
           gender: Database["public"]["Enums"]["gender"]
+          height: string | null
           hourly_rate_max: number | null
           hourly_rate_min: number | null
           id: string
           is_available: boolean | null
           is_featured: boolean | null
+          marital_status: string | null
+          mother_name: string | null
           mother_phone: string | null
+          national_id_no: string | null
+          nationality: string | null
           permanent_address: string | null
           present_address: string | null
+          religion: string | null
           success_stories: string | null
           teaching_mode: Database["public"]["Enums"]["teaching_mode"] | null
           teaching_philosophy: string | null
@@ -1342,6 +1438,7 @@ export type Database = {
             | null
           verified_at: string | null
           video_url: string | null
+          weight: string | null
         }
         Insert: {
           average_rating?: number | null
@@ -1349,6 +1446,7 @@ export type Database = {
           bio_bn?: string | null
           class_levels?: string[] | null
           created_at?: string | null
+          date_of_birth?: string | null
           display_name?: string | null
           district_id?: string | null
           education?: string | null
@@ -1357,16 +1455,23 @@ export type Database = {
           emergency_contact_name?: string | null
           emergency_contact_phone?: string | null
           experience_years?: number | null
+          father_name?: string | null
           father_phone?: string | null
           gender: Database["public"]["Enums"]["gender"]
+          height?: string | null
           hourly_rate_max?: number | null
           hourly_rate_min?: number | null
           id?: string
           is_available?: boolean | null
           is_featured?: boolean | null
+          marital_status?: string | null
+          mother_name?: string | null
           mother_phone?: string | null
+          national_id_no?: string | null
+          nationality?: string | null
           permanent_address?: string | null
           present_address?: string | null
+          religion?: string | null
           success_stories?: string | null
           teaching_mode?: Database["public"]["Enums"]["teaching_mode"] | null
           teaching_philosophy?: string | null
@@ -1379,6 +1484,7 @@ export type Database = {
             | null
           verified_at?: string | null
           video_url?: string | null
+          weight?: string | null
         }
         Update: {
           average_rating?: number | null
@@ -1386,6 +1492,7 @@ export type Database = {
           bio_bn?: string | null
           class_levels?: string[] | null
           created_at?: string | null
+          date_of_birth?: string | null
           display_name?: string | null
           district_id?: string | null
           education?: string | null
@@ -1394,16 +1501,23 @@ export type Database = {
           emergency_contact_name?: string | null
           emergency_contact_phone?: string | null
           experience_years?: number | null
+          father_name?: string | null
           father_phone?: string | null
           gender?: Database["public"]["Enums"]["gender"]
+          height?: string | null
           hourly_rate_max?: number | null
           hourly_rate_min?: number | null
           id?: string
           is_available?: boolean | null
           is_featured?: boolean | null
+          marital_status?: string | null
+          mother_name?: string | null
           mother_phone?: string | null
+          national_id_no?: string | null
+          nationality?: string | null
           permanent_address?: string | null
           present_address?: string | null
+          religion?: string | null
           success_stories?: string | null
           teaching_mode?: Database["public"]["Enums"]["teaching_mode"] | null
           teaching_philosophy?: string | null
@@ -1416,6 +1530,7 @@ export type Database = {
             | null
           verified_at?: string | null
           video_url?: string | null
+          weight?: string | null
         }
         Relationships: [
           {
