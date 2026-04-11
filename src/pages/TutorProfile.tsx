@@ -122,25 +122,46 @@ export default function TutorProfile() {
       });
     }
     if (tutorRes.data) {
+      const td = tutorRes.data as any;
       setProfile({
-        bio: tutorRes.data.bio || '',
-        education: tutorRes.data.education || '',
-        experience_years: tutorRes.data.experience_years || 0,
-        hourly_rate_min: tutorRes.data.hourly_rate_min || 500,
-        hourly_rate_max: tutorRes.data.hourly_rate_max || 1500,
-        teaching_mode: tutorRes.data.teaching_mode || 'in_person',
-        gender: tutorRes.data.gender || 'male',
-        is_available: tutorRes.data.is_available ?? true,
-        verification_status: tutorRes.data.verification_status || 'pending',
-        father_phone: (tutorRes.data as any).father_phone || '',
-        mother_phone: (tutorRes.data as any).mother_phone || '',
-        emergency_contact_name: (tutorRes.data as any).emergency_contact_name || '',
-        emergency_contact_phone: (tutorRes.data as any).emergency_contact_phone || '',
-        education_detail: (tutorRes.data as any).education_detail || '',
-        present_address: (tutorRes.data as any).present_address || '',
-        permanent_address: (tutorRes.data as any).permanent_address || '',
+        bio: td.bio || '',
+        education: td.education || '',
+        experience_years: td.experience_years || 0,
+        hourly_rate_min: td.hourly_rate_min || 500,
+        hourly_rate_max: td.hourly_rate_max || 1500,
+        teaching_mode: td.teaching_mode || 'in_person',
+        gender: td.gender || 'male',
+        is_available: td.is_available ?? true,
+        verification_status: td.verification_status || 'pending',
+        father_phone: td.father_phone || '',
+        mother_phone: td.mother_phone || '',
+        emergency_contact_name: td.emergency_contact_name || '',
+        emergency_contact_phone: td.emergency_contact_phone || '',
+        education_detail: td.education_detail || '',
+        present_address: td.present_address || '',
+        permanent_address: td.permanent_address || '',
+        video_url: td.video_url || '',
+        teaching_philosophy: td.teaching_philosophy || '',
+        success_stories: td.success_stories || '',
       });
-      setSelectedClassLevels((tutorRes.data as any).class_levels || []);
+      setSelectedClassLevels(td.class_levels || []);
+      setTutorProfileId(td.id);
+
+      // Fetch reviews for this tutor
+      const { data: reviewsData } = await supabase
+        .from('reviews')
+        .select('*, profiles:parent_id(full_name, avatar_url)')
+        .eq('tutor_id', td.id)
+        .eq('is_approved', true)
+        .order('created_at', { ascending: false });
+      if (reviewsData) setReviews(reviewsData);
+
+      // Fetch existing review update requests
+      const { data: reqData } = await supabase
+        .from('review_update_requests')
+        .select('*')
+        .eq('tutor_id', td.id);
+      if (reqData) setReviewRequests(reqData);
     }
     if (docsRes.data) setDocuments(docsRes.data);
     if (tutorSubjectsRes.data) {
