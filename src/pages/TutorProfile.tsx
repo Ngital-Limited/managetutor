@@ -301,6 +301,16 @@ export default function TutorProfile() {
     }
   };
 
+
+  const getVideoEmbedUrl = (url: string): string | null => {
+    if (!url) return null;
+    const ytMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/);
+    if (ytMatch) return `https://www.youtube.com/embed/${ytMatch[1]}`;
+    const vimeoMatch = url.match(/(?:vimeo\.com\/)(\d+)/);
+    if (vimeoMatch) return `https://player.vimeo.com/video/${vimeoMatch[1]}`;
+    return null;
+  };
+
   if (loading || authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
