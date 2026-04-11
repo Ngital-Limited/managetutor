@@ -569,10 +569,6 @@ export default function JobDetails() {
             <Card>
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <span className="text-muted-foreground">Total Applications</span>
-                  <span className="font-bold text-lg">{job.total_applications}</span>
-                </div>
-                <div className="flex items-center justify-between mb-4">
                   <span className="text-muted-foreground">Status</span>
                   <Badge variant={job.status === 'open' ? 'default' : 'secondary'} className="capitalize">{job.status}</Badge>
                 </div>
