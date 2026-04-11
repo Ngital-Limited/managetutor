@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { SearchableSelect } from '@/components/SearchableSelect';
 import { CLASS_LEVELS } from '@/constants/classLevels';
@@ -13,7 +13,7 @@ import { SPECIAL_REQUIREMENTS } from '@/constants/specialRequirements';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -38,9 +38,9 @@ import { NotificationBell } from '@/components/NotificationBell';
 import {
   GraduationCap, LogOut, Globe, Plus, MapPin, BookOpen,
   Star, Briefcase, Users, Clock, CheckCircle2, XCircle, Search, ArrowRight,
-  Eye, Edit, Trash2, Calendar, Home, Heart, Settings, AlertCircle,
-  User, Phone, Mail, CreditCard, Pause, Play, Flag, Zap,
-  TrendingUp, Send, AlertTriangle, FileText
+  Eye, Edit, Trash2, Calendar, Home, Heart, AlertCircle,
+  User, CreditCard, Pause, Play, Flag, Zap,
+  Send, AlertTriangle
 } from 'lucide-react';
 
 interface District { id: string; name_en: string; name_bn: string; }
@@ -307,7 +307,7 @@ export default function ParentDashboard() {
   };
 
   const updateJobStatus = async (jobId: string, status: string) => {
-    const { error } = await supabase.from('jobs').update({ status }).eq('id', jobId);
+    const { error } = await supabase.from('jobs').update({ status: status as 'open' | 'in_progress' | 'completed' | 'cancelled' }).eq('id', jobId);
     if (error) {
       toast({ title: 'Error', description: error.message, variant: 'destructive' });
     } else {
