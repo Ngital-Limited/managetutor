@@ -71,7 +71,12 @@ export default function ParentProfileEdit() {
     }).eq('id', user!.id);
 
     if (error) {
-      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+      const msg = error.message?.includes('idx_profiles_phone_unique')
+        ? 'This phone number is already registered with another account.'
+        : error.message?.includes('profiles_email_unique')
+        ? 'This email is already registered with another account.'
+        : error.message;
+      toast({ title: 'Error', description: msg, variant: 'destructive' });
     } else {
       toast({ title: 'Profile saved!', description: 'Your profile has been updated.' });
     }
