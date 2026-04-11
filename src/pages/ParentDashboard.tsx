@@ -379,11 +379,10 @@ export default function ParentDashboard() {
   const startEditJob = async (job: Job) => {
     // Fetch subject IDs from job_subjects
     const { data: jsData } = await supabase.from('job_subjects').select('subject_id').eq('job_id', job.id);
-    const subjectIds = jsData?.map(js => js.subject_id) || [];
     setJobForm({
       title: job.title,
       description: job.description,
-      subject_ids: job.subject_ids || [],
+      subject_ids: jsData?.map(js => js.subject_id) || [],
       district_id: job.district_id,
       class_level: job.class_level || '',
       days_per_week: job.days_per_week || 3,
