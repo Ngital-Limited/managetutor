@@ -19,7 +19,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { formatDistanceToNow, differenceInHours } from 'date-fns';
+import { formatDistanceToNow, differenceInHours, format } from 'date-fns';
 import {
   Sidebar,
   SidebarContent,
@@ -40,7 +40,7 @@ import {
   Star, Briefcase, Users, Clock, CheckCircle2, XCircle, Search, ArrowRight,
   Eye, Edit, Trash2, Calendar, Home, Heart, AlertCircle,
   User, CreditCard, Pause, Play, Flag, Zap,
-  Send, AlertTriangle
+  Send, AlertTriangle, Receipt, DollarSign
 } from 'lucide-react';
 
 interface District { id: string; name_en: string; name_bn: string; }
@@ -170,6 +170,8 @@ export default function ParentDashboard() {
   const [applications, setApplications] = useState<Application[]>([]);
   const [loading, setLoading] = useState(true);
   const [demoBookings, setDemoBookings] = useState<any[]>([]);
+  const [transactions, setTransactions] = useState<any[]>([]);
+  const [subscription, setSubscription] = useState<any>(null);
   const [showPostJob, setShowPostJob] = useState(false);
   const [editingJob, setEditingJob] = useState<Job | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -230,6 +232,26 @@ export default function ParentDashboard() {
       .order('created_at', { ascending: false });
 
     if (bookingsData) setDemoBookings(bookingsData);
+
+    // Fetch payment transactions
+    const { data: txnData } = await supabase
+      .from('payment_transactions')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false })
+      .limit(20);
+
+    if (txnData) setTransactions(txnData);
+
+    // Fetch subscription
+    const { data: subData } = await supabase
+      .from('user_subscriptions')
+      .select('*, subscription_plans(name, price_monthly)')
+      .eq('user_id', user.id)
+      .eq('status', 'active')
+      .maybeSingle();
+
+    if (subData) setSubscription(subData);
 
     setLoading(false);
   };
