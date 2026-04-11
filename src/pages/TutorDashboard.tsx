@@ -648,6 +648,89 @@ export default function TutorDashboard() {
           </CardContent>
         </Card>
 
+        {/* Recommended Jobs */}
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Sparkles className="h-5 w-5 text-primary" />
+              Job Recommendations
+            </CardTitle>
+            <CardDescription>Jobs matched to your profile, location, and earning potential</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Tabs value={jobTab} onValueChange={setJobTab}>
+              <TabsList className="mb-4">
+                <TabsTrigger value="recommended">
+                  <Sparkles className="h-3 w-3 mr-1" />
+                  Recommended ({recommendedJobs.length})
+                </TabsTrigger>
+                <TabsTrigger value="nearby">
+                  <MapPin className="h-3 w-3 mr-1" />
+                  Near You ({nearbyJobs.length})
+                </TabsTrigger>
+                <TabsTrigger value="highpay">
+                  <DollarSign className="h-3 w-3 mr-1" />
+                  High-Paying ({highPayJobs.length})
+                </TabsTrigger>
+              </TabsList>
+
+              {['recommended', 'nearby', 'highpay'].map(tab => {
+                const jobList = tab === 'recommended' ? recommendedJobs : tab === 'nearby' ? nearbyJobs : highPayJobs;
+                return (
+                  <TabsContent key={tab} value={tab} className="space-y-3">
+                    {jobList.length > 0 ? jobList.map(job => (
+                      <Link key={job.id} to={`/jobs/${job.id}`} className="block">
+                        <div className="p-4 border rounded-xl hover:bg-muted/50 transition-colors">
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <h4 className="font-bold text-foreground hover:text-primary transition-colors">{job.title}</h4>
+                              <div className="flex items-center gap-3 text-sm text-muted-foreground mt-1">
+                                {job.districts && (
+                                  <span className="flex items-center gap-1">
+                                    <MapPin className="h-3 w-3" />
+                                    {job.districts.name_en}
+                                  </span>
+                                )}
+                                {job.subjects && (
+                                  <span className="flex items-center gap-1">
+                                    <BookOpen className="h-3 w-3" />
+                                    {job.subjects.name_en}
+                                  </span>
+                                )}
+                                {job.class_level && (
+                                  <Badge variant="outline" className="text-xs">{job.class_level}</Badge>
+                                )}
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              {(job.budget_min || job.budget_max) && (
+                                <p className="font-bold text-primary">
+                                  ৳{job.budget_min || 0} - ৳{job.budget_max || 0}
+                                </p>
+                              )}
+                              <p className="text-xs text-muted-foreground">
+                                {formatDistanceToNow(new Date(job.created_at), { addSuffix: true })}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </Link>
+                    )) : (
+                      <div className="text-center py-8">
+                        <Briefcase className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                        <p className="text-muted-foreground">No {tab === 'recommended' ? 'recommended' : tab === 'nearby' ? 'nearby' : 'high-paying'} jobs found</p>
+                        <Link to="/jobs">
+                          <Button variant="link" className="mt-2">Browse All Jobs <ArrowRight className="h-4 w-4 ml-1" /></Button>
+                        </Link>
+                      </div>
+                    )}
+                  </TabsContent>
+                );
+              })}
+            </Tabs>
+          </CardContent>
+        </Card>
+
         {/* Demo Class Bookings */}
         {demoBookings.length > 0 && (
           <Card className="mb-8">
