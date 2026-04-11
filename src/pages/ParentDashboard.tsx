@@ -668,7 +668,12 @@ export default function ParentDashboard() {
         <DialogHeader>
           <DialogTitle>{editingJob ? 'Edit Tuition Job' : 'Post a Tuition Job'}</DialogTitle>
         </DialogHeader>
-        <form onSubmit={editingJob ? handleUpdateJob : handlePostJob} className="space-y-4 mt-4">
+        <form onSubmit={editingJob ? handleUpdateJob : handlePostJob} className="space-y-5 mt-4">
+          {/* Section: Basic Info */}
+          <div className="space-y-1">
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Basic Information</p>
+            <div className="h-px bg-border" />
+          </div>
           <div>
             <Label>Job Title *</Label>
             <Input
@@ -681,16 +686,16 @@ export default function ParentDashboard() {
           <div>
             <Label>Description *</Label>
             <Textarea
-              placeholder="Describe your requirements, schedule preferences, etc."
+              placeholder="Describe your requirements, schedule preferences, learning goals, etc."
               value={jobForm.description}
               onChange={(e) => setJobForm({ ...jobForm, description: e.target.value })}
               required
-              rows={3}
+              rows={4}
             />
           </div>
           <div className="grid md:grid-cols-2 gap-4">
             <div>
-              <Label>Subjects</Label>
+              <Label>Subjects *</Label>
               <MultiSearchableSelect
                 options={subjectOptions}
                 values={jobForm.subject_ids}
@@ -700,19 +705,6 @@ export default function ParentDashboard() {
                 emptyText="No subjects found."
               />
             </div>
-            <div>
-              <Label>Location *</Label>
-              <SearchableSelect
-                options={districtOptions}
-                value={jobForm.district_id}
-                onValueChange={(v) => setJobForm({ ...jobForm, district_id: v })}
-                placeholder="Search district..."
-                searchPlaceholder="Type to search districts..."
-                emptyText="No districts found."
-              />
-            </div>
-          </div>
-          <div className="grid md:grid-cols-2 gap-4">
             <div>
               <Label>Class Level</Label>
               <SearchableSelect
@@ -725,6 +717,52 @@ export default function ParentDashboard() {
                 grouped
               />
             </div>
+          </div>
+
+          {/* Section: Student Details */}
+          <div className="space-y-1 pt-2">
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Student Details</p>
+            <div className="h-px bg-border" />
+          </div>
+          <div className="grid md:grid-cols-3 gap-4">
+            <div>
+              <Label>Number of Students</Label>
+              <Select value={String(jobForm.number_of_students)} onValueChange={(v) => setJobForm({ ...jobForm, number_of_students: Number(v) })}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {[1, 2, 3, 4, 5].map(n => (
+                    <SelectItem key={n} value={String(n)}>{n} student{n > 1 ? 's' : ''}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Student Age (Optional)</Label>
+              <Input
+                placeholder="e.g., 12 years"
+                value={jobForm.student_age}
+                onChange={(e) => setJobForm({ ...jobForm, student_age: e.target.value })}
+              />
+            </div>
+            <div>
+              <Label>Student Gender</Label>
+              <Select value={jobForm.student_gender} onValueChange={(v) => setJobForm({ ...jobForm, student_gender: v })}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="any">Any</SelectItem>
+                  <SelectItem value="male">Male</SelectItem>
+                  <SelectItem value="female">Female</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          {/* Section: Schedule & Budget */}
+          <div className="space-y-1 pt-2">
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Schedule & Budget</p>
+            <div className="h-px bg-border" />
+          </div>
+          <div className="grid md:grid-cols-3 gap-4">
             <div>
               <Label>Days per Week</Label>
               <Select value={String(jobForm.days_per_week)} onValueChange={(v) => setJobForm({ ...jobForm, days_per_week: Number(v) })}>
@@ -736,8 +774,35 @@ export default function ParentDashboard() {
                 </SelectContent>
               </Select>
             </div>
+            <div>
+              <Label>Duration per Session</Label>
+              <Select value={String(jobForm.duration_hours)} onValueChange={(v) => setJobForm({ ...jobForm, duration_hours: Number(v) })}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="0.5">30 minutes</SelectItem>
+                  <SelectItem value="1">1 hour</SelectItem>
+                  <SelectItem value="1.5">1.5 hours</SelectItem>
+                  <SelectItem value="2">2 hours</SelectItem>
+                  <SelectItem value="2.5">2.5 hours</SelectItem>
+                  <SelectItem value="3">3 hours</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Preferred Time</Label>
+              <Select value={jobForm.preferred_time} onValueChange={(v) => setJobForm({ ...jobForm, preferred_time: v })}>
+                <SelectTrigger><SelectValue placeholder="Select time" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="morning">Morning (6AM - 12PM)</SelectItem>
+                  <SelectItem value="afternoon">Afternoon (12PM - 4PM)</SelectItem>
+                  <SelectItem value="evening">Evening (4PM - 8PM)</SelectItem>
+                  <SelectItem value="night">Night (8PM - 10PM)</SelectItem>
+                  <SelectItem value="flexible">Flexible</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
-          <div className="grid md:grid-cols-2 gap-4">
+          <div className="grid md:grid-cols-3 gap-4">
             <div>
               <Label>Budget Min (৳/month)</Label>
               <Input
@@ -754,8 +819,46 @@ export default function ParentDashboard() {
                 onChange={(e) => setJobForm({ ...jobForm, budget_max: Number(e.target.value) })}
               />
             </div>
+            <div>
+              <Label>Start Date (Optional)</Label>
+              <Input
+                type="date"
+                value={jobForm.start_date}
+                onChange={(e) => setJobForm({ ...jobForm, start_date: e.target.value })}
+              />
+            </div>
           </div>
-          <div className="grid md:grid-cols-3 gap-4">
+
+          {/* Section: Location & Teaching */}
+          <div className="space-y-1 pt-2">
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Location & Teaching Preferences</p>
+            <div className="h-px bg-border" />
+          </div>
+          <div className="grid md:grid-cols-2 gap-4">
+            <div>
+              <Label>District *</Label>
+              <SearchableSelect
+                options={districtOptions}
+                value={jobForm.district_id}
+                onValueChange={(v) => setJobForm({ ...jobForm, district_id: v, area_id: '' })}
+                placeholder="Search district..."
+                searchPlaceholder="Type to search districts..."
+                emptyText="No districts found."
+              />
+            </div>
+            <div>
+              <Label>Area (Optional)</Label>
+              <SearchableSelect
+                options={areaOptions}
+                value={jobForm.area_id}
+                onValueChange={(v) => setJobForm({ ...jobForm, area_id: v })}
+                placeholder={jobForm.district_id ? "Search area..." : "Select district first"}
+                searchPlaceholder="Type to search areas..."
+                emptyText="No areas found."
+              />
+            </div>
+          </div>
+          <div className="grid md:grid-cols-2 gap-4">
             <div>
               <Label>Teaching Mode</Label>
               <Select value={jobForm.teaching_mode} onValueChange={(v) => setJobForm({ ...jobForm, teaching_mode: v })}>
@@ -778,54 +881,43 @@ export default function ParentDashboard() {
                 </SelectContent>
               </Select>
             </div>
-            <div>
-              <Label>Student Gender</Label>
-              <Select value={jobForm.student_gender} onValueChange={(v) => setJobForm({ ...jobForm, student_gender: v })}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="any">Any</SelectItem>
-                  <SelectItem value="male">Male</SelectItem>
-                  <SelectItem value="female">Female</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
           </div>
-          <div className="grid md:grid-cols-2 gap-4">
+          {jobForm.teaching_mode !== 'online' && (
             <div>
-              <Label>Preferred Time (Optional)</Label>
-              <Select value={jobForm.preferred_time} onValueChange={(v) => setJobForm({ ...jobForm, preferred_time: v })}>
-                <SelectTrigger><SelectValue placeholder="Select time" /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="morning">Morning (6AM - 12PM)</SelectItem>
-                  <SelectItem value="afternoon">Afternoon (12PM - 4PM)</SelectItem>
-                  <SelectItem value="evening">Evening (4PM - 8PM)</SelectItem>
-                  <SelectItem value="night">Night (8PM - 10PM)</SelectItem>
-                  <SelectItem value="flexible">Flexible</SelectItem>
-                </SelectContent>
-              </Select>
+              <Label>Location Details (Optional)</Label>
+              <Input
+                placeholder="e.g., House 12, Road 5, Dhanmondi, Dhaka"
+                value={jobForm.location_details}
+                onChange={(e) => setJobForm({ ...jobForm, location_details: e.target.value })}
+              />
+              <p className="text-xs text-muted-foreground mt-1">Specific address for in-person tutoring (shared only with selected tutor)</p>
             </div>
-            <div className="col-span-2">
-              <Label className="mb-2 block">Special Requirements (Optional)</Label>
-              <div className="grid grid-cols-2 gap-2">
-                {SPECIAL_REQUIREMENTS.map((req) => (
-                  <label key={req} className="flex items-center gap-2 text-sm cursor-pointer">
-                    <Checkbox
-                      checked={jobForm.special_requirements.includes(req)}
-                      onCheckedChange={(checked) => {
-                        setJobForm(prev => ({
-                          ...prev,
-                          special_requirements: checked
-                            ? [...prev.special_requirements, req]
-                            : prev.special_requirements.filter(r => r !== req)
-                        }));
-                      }}
-                    />
-                    {req}
-                  </label>
-                ))}
-              </div>
-            </div>
+          )}
+
+          {/* Section: Special Requirements */}
+          <div className="space-y-1 pt-2">
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Special Requirements (Optional)</p>
+            <div className="h-px bg-border" />
           </div>
+          <div className="grid grid-cols-2 gap-2">
+            {SPECIAL_REQUIREMENTS.map((req) => (
+              <label key={req} className="flex items-center gap-2 text-sm cursor-pointer">
+                <Checkbox
+                  checked={jobForm.special_requirements.includes(req)}
+                  onCheckedChange={(checked) => {
+                    setJobForm(prev => ({
+                      ...prev,
+                      special_requirements: checked
+                        ? [...prev.special_requirements, req]
+                        : prev.special_requirements.filter(r => r !== req)
+                    }));
+                  }}
+                />
+                {req}
+              </label>
+            ))}
+          </div>
+
           <Button type="submit" className="w-full" disabled={submitting}>
             {submitting ? (editingJob ? 'Updating...' : 'Posting...') : (editingJob ? 'Update Job' : 'Post Job')}
           </Button>
