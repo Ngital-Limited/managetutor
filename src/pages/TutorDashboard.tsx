@@ -388,6 +388,34 @@ export default function TutorDashboard() {
     return complete;
   };
 
+  const handlePayForVerification = async () => {
+    if (!user || !userProfile) return;
+    setVerifyLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('sslcommerz-init', {
+        body: {
+          amount: 50,
+          productName: 'Verified Badge',
+          productCategory: 'Verification',
+          customerName: userProfile.full_name,
+          customerEmail: user.email,
+          customerPhone: '01700000000',
+          userId: user.id,
+          listingType: 'verification_badge',
+        },
+      });
+      if (error) throw error;
+      if (data?.gatewayUrl) {
+        window.location.href = data.gatewayUrl;
+      } else {
+        throw new Error('No gateway URL returned');
+      }
+    } catch (err: any) {
+      toast({ title: 'Error', description: err.message || 'Payment initiation failed', variant: 'destructive' });
+    }
+    setVerifyLoading(false);
+  };
+
   const handleSignOut = async () => {
     await signOut();
     navigate('/');
