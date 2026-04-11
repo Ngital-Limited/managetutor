@@ -105,6 +105,7 @@ interface UserProfileFull {
   email: string;
   district_id: string | null;
   area_id: string | null;
+  user_reference: string | null;
 }
 
 const sidebarItems = [
@@ -210,7 +211,7 @@ export default function ParentDashboard() {
     const [districtsRes, subjectsRes, profileRes, jobsRes] = await Promise.all([
       supabase.from('districts').select('*').order('name_en'),
       supabase.from('subjects').select('*').order('name_en'),
-      supabase.from('profiles').select('full_name, avatar_url, phone, email, district_id, area_id').eq('id', user.id).single(),
+      supabase.from('profiles').select('full_name, avatar_url, phone, email, district_id, area_id, user_reference').eq('id', user.id).single(),
       supabase.from('jobs')
         .select('*, districts (name_en, name_bn), subjects (name_en, name_bn)')
         .eq('parent_id', user.id)
@@ -742,7 +743,12 @@ export default function ParentDashboard() {
               </Avatar>
               <div>
                 <h1 className="text-2xl font-bold">Welcome, {userProfile?.full_name || 'Parent'}!</h1>
-                <Badge className="bg-parent text-parent-foreground mt-1">Parent / Guardian</Badge>
+                <div className="flex items-center gap-2 mt-1">
+                  <Badge className="bg-parent text-parent-foreground">Parent / Guardian</Badge>
+                  {userProfile?.user_reference && (
+                    <Badge variant="outline" className="font-mono text-xs">{userProfile.user_reference}</Badge>
+                  )}
+                </div>
               </div>
             </div>
 

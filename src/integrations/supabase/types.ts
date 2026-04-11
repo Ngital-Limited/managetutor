@@ -700,6 +700,7 @@ export type Database = {
           phone_verified: boolean | null
           preferred_language: string | null
           updated_at: string | null
+          user_reference: string | null
         }
         Insert: {
           area_id?: string | null
@@ -718,6 +719,7 @@ export type Database = {
           phone_verified?: boolean | null
           preferred_language?: string | null
           updated_at?: string | null
+          user_reference?: string | null
         }
         Update: {
           area_id?: string | null
@@ -736,6 +738,7 @@ export type Database = {
           phone_verified?: boolean | null
           preferred_language?: string | null
           updated_at?: string | null
+          user_reference?: string | null
         }
         Relationships: [
           {
