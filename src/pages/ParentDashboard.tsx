@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
+import { Logo } from '@/components/Logo';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -135,10 +136,7 @@ function ParentSidebar({ activeSection, setActiveSection, onPostJob }: { activeS
         <SidebarGroup>
           <SidebarGroupLabel>
             {!collapsed && (
-              <div className="flex items-center gap-2">
-                <GraduationCap className="h-5 w-5 text-primary" />
-                <span className="font-bold">Manage Tutor</span>
-              </div>
+              <Logo size="sm" />
             )}
           </SidebarGroupLabel>
           <SidebarGroupContent>

@@ -8,6 +8,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { SearchableSelect } from '@/components/SearchableSelect';
+import { Logo } from '@/components/Logo';
 import { formatDistanceToNow } from 'date-fns';
 import {
   GraduationCap, Users, MapPin, Star, Search, FileText,
@@ -128,10 +129,7 @@ export default function Index() {
       <nav className="sticky top-0 z-50 bg-card/80 backdrop-blur-xl border-b border-border">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
-              <GraduationCap className="h-6 w-6 text-primary-foreground" />
-            </div>
-            <span className="font-bold text-xl text-foreground">Manage Tutor</span>
+            <Logo size="md" />
           </Link>
           <div className="hidden md:flex items-center gap-8">
             <Link to="/tutors" className="text-muted-foreground hover:text-primary transition-colors font-medium">{t('nav.findTutors')}</Link>
@@ -539,11 +537,8 @@ export default function Index() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {/* Brand */}
             <div>
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
-                  <GraduationCap className="h-6 w-6 text-primary-foreground" />
-                </div>
-                <span className="font-bold text-xl">Manage Tutor</span>
+              <div className="mb-3">
+                <Logo size="md" />
               </div>
               <p className="text-background/60 text-sm">{t('footer.tagline')}</p>
             </div>

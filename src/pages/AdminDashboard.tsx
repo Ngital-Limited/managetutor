@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { Logo } from '@/components/Logo';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -798,8 +799,7 @@ export default function AdminDashboard() {
           <header className="sticky top-0 z-50 h-14 flex items-center justify-between border-b border-border bg-card/80 backdrop-blur-xl px-4">
             <div className="flex items-center gap-2">
               <SidebarTrigger />
-              <GraduationCap className="h-5 w-5 text-primary" />
-              <span className="text-lg font-bold hidden sm:inline">Manage Tutor</span>
+              <Logo size="sm" />
               <Badge variant="destructive" className="hidden sm:inline-flex">Super Admin</Badge>
             </div>
             <div className="flex items-center gap-3">

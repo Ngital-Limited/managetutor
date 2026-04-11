@@ -6,49 +6,49 @@
 
 @layer base {
   :root {
-    /* Warm Educational Theme */
-    --background: 40 33% 98%;
-    --foreground: 240 10% 16%;
+    /* Clean Educational Theme - matching logo blues */
+    --background: 210 20% 98%;
+    --foreground: 222 47% 16%;
 
     --card: 0 0% 100%;
-    --card-foreground: 240 10% 16%;
+    --card-foreground: 222 47% 16%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 16%;
+    --popover-foreground: 222 47% 16%;
 
-    /* Primary - Deep Teal */
-    --primary: 174 62% 35%;
+    /* Primary - Logo Blue */
+    --primary: 211 85% 45%;
     --primary-foreground: 0 0% 100%;
 
-    /* Secondary - Warm Coral */
-    --secondary: 16 85% 58%;
+    /* Secondary - Deep Navy */
+    --secondary: 225 55% 28%;
     --secondary-foreground: 0 0% 100%;
 
-    /* Accent - Golden Yellow */
-    --accent: 43 96% 56%;
-    --accent-foreground: 240 10% 16%;
+    /* Accent - Light Sky Blue */
+    --accent: 199 89% 56%;
+    --accent-foreground: 0 0% 100%;
 
     /* Muted */
-    --muted: 40 20% 94%;
-    --muted-foreground: 240 5% 46%;
+    --muted: 210 15% 94%;
+    --muted-foreground: 215 10% 46%;
 
     /* Destructive */
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
 
     /* Borders & Inputs */
-    --border: 40 15% 88%;
-    --input: 40 15% 88%;
-    --ring: 174 62% 35%;
+    --border: 214 15% 88%;
+    --input: 214 15% 88%;
+    --ring: 211 85% 45%;
 
-    --radius: 1rem;
+    --radius: 0.75rem;
 
     /* Role colors */
     --success: 152 69% 40%;
     --success-foreground: 0 0% 100%;
     
     --warning: 38 92% 50%;
-    --warning-foreground: 240 10% 16%;
+    --warning-foreground: 222 47% 16%;
     
     --info: 199 89% 48%;
     --info-foreground: 0 0% 100%;
@@ -56,7 +56,7 @@
     --tutor: 262 60% 52%;
     --tutor-foreground: 0 0% 100%;
     
-    --parent: 199 70% 45%;
+    --parent: 211 70% 50%;
     --parent-foreground: 0 0% 100%;
     
     --agency: 16 85% 58%;
@@ -64,49 +64,49 @@
 
     /* Sidebar */
     --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 240 10% 16%;
-    --sidebar-primary: 174 62% 35%;
+    --sidebar-foreground: 222 47% 16%;
+    --sidebar-primary: 211 85% 45%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 40 20% 94%;
-    --sidebar-accent-foreground: 240 10% 16%;
-    --sidebar-border: 40 15% 88%;
-    --sidebar-ring: 174 62% 35%;
+    --sidebar-accent: 210 15% 94%;
+    --sidebar-accent-foreground: 222 47% 16%;
+    --sidebar-border: 214 15% 88%;
+    --sidebar-ring: 211 85% 45%;
   }
 
   .dark {
-    --background: 240 10% 10%;
-    --foreground: 40 20% 96%;
+    --background: 222 40% 8%;
+    --foreground: 210 20% 96%;
 
-    --card: 240 10% 14%;
-    --card-foreground: 40 20% 96%;
+    --card: 222 35% 12%;
+    --card-foreground: 210 20% 96%;
 
-    --popover: 240 10% 14%;
-    --popover-foreground: 40 20% 96%;
+    --popover: 222 35% 12%;
+    --popover-foreground: 210 20% 96%;
 
-    --primary: 174 55% 45%;
+    --primary: 211 80% 52%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 16 75% 55%;
+    --secondary: 225 45% 35%;
     --secondary-foreground: 0 0% 100%;
 
-    --accent: 43 90% 55%;
-    --accent-foreground: 240 10% 10%;
+    --accent: 199 80% 55%;
+    --accent-foreground: 222 47% 16%;
 
-    --muted: 240 8% 18%;
-    --muted-foreground: 40 10% 60%;
+    --muted: 222 30% 16%;
+    --muted-foreground: 215 15% 58%;
 
     --destructive: 0 62% 45%;
-    --destructive-foreground: 40 20% 96%;
+    --destructive-foreground: 210 20% 96%;
 
-    --border: 240 8% 22%;
-    --input: 240 8% 22%;
-    --ring: 174 55% 45%;
+    --border: 222 25% 20%;
+    --input: 222 25% 20%;
+    --ring: 211 80% 52%;
 
     --success: 152 60% 45%;
     --success-foreground: 0 0% 100%;
     
     --warning: 38 85% 50%;
-    --warning-foreground: 240 10% 10%;
+    --warning-foreground: 222 47% 16%;
     
     --info: 199 80% 55%;
     --info-foreground: 0 0% 100%;
@@ -114,20 +114,20 @@
     --tutor: 262 55% 60%;
     --tutor-foreground: 0 0% 100%;
     
-    --parent: 199 65% 55%;
+    --parent: 211 65% 58%;
     --parent-foreground: 0 0% 100%;
     
     --agency: 16 75% 58%;
     --agency-foreground: 0 0% 100%;
 
-    --sidebar-background: 240 10% 12%;
-    --sidebar-foreground: 40 20% 96%;
-    --sidebar-primary: 174 55% 45%;
+    --sidebar-background: 222 35% 10%;
+    --sidebar-foreground: 210 20% 96%;
+    --sidebar-primary: 211 80% 52%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 8% 18%;
-    --sidebar-accent-foreground: 40 20% 96%;
-    --sidebar-border: 240 8% 22%;
-    --sidebar-ring: 174 55% 45%;
+    --sidebar-accent: 222 30% 16%;
+    --sidebar-accent-foreground: 210 20% 96%;
+    --sidebar-border: 222 25% 20%;
+    --sidebar-ring: 211 80% 52%;
   }
 }
 
@@ -153,15 +153,15 @@
 
 @layer components {
   .gradient-hero {
-    background: linear-gradient(135deg, hsl(174 62% 35%) 0%, hsl(174 50% 25%) 50%, hsl(200 60% 30%) 100%);
+    background: linear-gradient(135deg, hsl(225 55% 22%) 0%, hsl(211 85% 35%) 50%, hsl(199 89% 45%) 100%);
   }
 
   .gradient-warm {
-    background: linear-gradient(135deg, hsl(16 85% 58%) 0%, hsl(43 96% 56%) 100%);
+    background: linear-gradient(135deg, hsl(211 85% 45%) 0%, hsl(199 89% 56%) 100%);
   }
 
   .gradient-soft {
-    background: linear-gradient(180deg, hsl(40 33% 98%) 0%, hsl(40 20% 94%) 100%);
+    background: linear-gradient(180deg, hsl(210 20% 98%) 0%, hsl(210 15% 94%) 100%);
   }
 
   .glass-card {
@@ -174,7 +174,7 @@
 
   .text-gradient {
     @apply bg-clip-text text-transparent;
-    background: linear-gradient(135deg, hsl(174 62% 35%) 0%, hsl(199 70% 45%) 100%);
+    background: linear-gradient(135deg, hsl(211 85% 45%) 0%, hsl(199 89% 56%) 100%);
   }
 
   .card-shine {
@@ -184,7 +184,7 @@
   .card-shine::before {
     content: '';
     @apply absolute inset-0 opacity-0 transition-opacity duration-500;
-    background: linear-gradient(135deg, transparent 40%, hsl(43 96% 56% / 0.1) 50%, transparent 60%);
+    background: linear-gradient(135deg, transparent 40%, hsl(199 89% 56% / 0.1) 50%, transparent 60%);
   }
 
   .card-shine:hover::before {
