@@ -173,6 +173,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
     setSession(null);
     setRole(null);
+    setProfile(null);
   };
 
   return (
@@ -180,7 +181,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       user,
       session,
       role,
+      profile,
       loading,
+      refreshProfile,
       signUp,
       signIn,
       signInWithGoogle,
