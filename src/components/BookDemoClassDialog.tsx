@@ -81,7 +81,7 @@ export default function BookDemoClassDialog({
 
       if (error) throw error;
 
-      toast({ title: 'Demo Class Booked!', description: `Your request has been sent to ${tutorName}. They will confirm shortly.` });
+      toast({ title: 'Demo Class Requested!', description: 'Your request has been submitted for admin approval. You will be notified once approved.' });
       setOpen(false);
       resetForm();
       onBooked?.();
