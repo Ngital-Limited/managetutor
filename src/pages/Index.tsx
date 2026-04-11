@@ -538,7 +538,7 @@ export default function Index() {
             {/* Brand */}
             <div>
               <div className="mb-3">
-                <Logo size="md" />
+                <Logo size="md" variant="light" />
               </div>
               <p className="text-background/60 text-sm">{t('footer.tagline')}</p>
             </div>
