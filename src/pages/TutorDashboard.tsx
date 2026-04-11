@@ -461,10 +461,7 @@ export default function TutorDashboard() {
             </div>
             <div className="flex items-center gap-3">
               <NotificationBell />
-              <Button variant="ghost" size="sm" onClick={() => setLanguage(language === 'en' ? 'bn' : 'en')}>
-                <Globe className="h-4 w-4 mr-1" />
-                {language === 'en' ? 'বাংলা' : 'EN'}
-              </Button>
+              
               <Button variant="outline" size="sm" onClick={handleSignOut}>
                 <LogOut className="h-4 w-4 mr-2" />
                 Logout

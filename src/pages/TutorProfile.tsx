@@ -338,10 +338,7 @@ export default function TutorProfile() {
             <Logo size="md" />
           </Link>
           <div className="flex items-center gap-3">
-            <Button variant="ghost" size="sm" onClick={() => setLanguage(language === 'en' ? 'bn' : 'en')}>
-              <Globe className="h-4 w-4 mr-1" />
-              {language === 'en' ? 'বাংলা' : 'EN'}
-            </Button>
+            
             <Link to="/dashboard">
               <Button variant="outline">
                 <ArrowLeft className="h-4 w-4 mr-2" />
