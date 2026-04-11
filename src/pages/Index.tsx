@@ -550,6 +550,24 @@ export default function Index() {
               <Link to="/privacy" className="hover:text-background transition-colors">Privacy</Link>
             </div>
           </div>
+
+          {/* SEO Content */}
+          <div className="border-t border-background/10 mt-8 pt-8 space-y-4 text-background/50 text-sm leading-relaxed max-w-4xl mx-auto">
+            <h2 className="text-background/70 font-semibold text-base">Find Trusted Home Tutors in Bangladesh with Manage Tutor</h2>
+            <p>
+              Manage Tutor is Bangladesh's most reliable platform for connecting students and parents with verified home tutors. Whether you're looking for a home tutor in Dhaka, Chattogram, Khulna, Rajshahi, or any other city, we make it easy to hire a trusted tutor with confidence. With over 1,00,000 verified male and female tutors, we specialize in one-on-one private tutoring across subjects like Physics, Math, English, IELTS preparation, and more.
+            </p>
+            <p>
+              Parents can safely find trusted home tuition services with our verified tutor system, designed to ensure quality and security. Choose a female home tutor or lady tutor in Dhaka if you prefer — we support flexible options tailored to your family's needs.
+            </p>
+            <p>
+              From home tuition benefits to subject-wise expert guidance, Manage Tutor supports all types of learners with personalized education at home. Our tutor registration system allows passionate educators to join our platform and earn from home tuition easily, whether they offer online, hybrid, or in-person teaching.
+            </p>
+            <p>
+              We've already facilitated 4,000+ successful tuition matches by focusing on safe tutor hiring, academic performance, and student satisfaction. Whether you're preparing for exams, boosting grades, or targeting an international score with a private IELTS tutor, Manage Tutor is your go-to choice for the best home tuition platform in Bangladesh.
+            </p>
+          </div>
+
           <div className="border-t border-background/10 mt-8 pt-8 text-center text-background/40 text-sm">
             {t('footer.copyright')}
           </div>
