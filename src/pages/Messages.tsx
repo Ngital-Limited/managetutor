@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { Logo } from '@/components/Logo';
 import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Logo } from '@/components/Logo';
 import { Link, useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
