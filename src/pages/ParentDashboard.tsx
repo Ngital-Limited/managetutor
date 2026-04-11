@@ -274,7 +274,7 @@ export default function ParentDashboard() {
   const fetchData = async () => {
     if (!user) return;
 
-    const [districtsRes, subjectsRes, profileRes, jobsRes] = await Promise.all([
+    const [districtsRes, subjectsRes, profileRes, jobsRes, areasRes] = await Promise.all([
       supabase.from('districts').select('*').order('name_en'),
       supabase.from('subjects').select('*').order('name_en'),
       supabase.from('profiles').select('full_name, avatar_url, phone, email, district_id, area_id, user_reference').eq('id', user.id).single(),
@@ -282,9 +282,11 @@ export default function ParentDashboard() {
         .select('*, districts (name_en, name_bn), subjects (name_en, name_bn), job_subjects (subjects (name_en, name_bn))')
         .eq('parent_id', user.id)
         .order('created_at', { ascending: false }),
+      supabase.from('areas').select('*').order('name_en'),
     ]);
 
     if (districtsRes.data) setDistricts(districtsRes.data);
+    if (areasRes.data) setAreas(areasRes.data);
     if (subjectsRes.data) setSubjects(subjectsRes.data);
     if (profileRes.data) setUserProfile(profileRes.data as UserProfileFull);
     if (jobsRes.data) setJobs(jobsRes.data as unknown as Job[]);
@@ -349,8 +351,10 @@ export default function ParentDashboard() {
       description: jobForm.description,
       subject_id: jobForm.subject_ids.length > 0 ? jobForm.subject_ids[0] : null,
       district_id: jobForm.district_id,
+      area_id: jobForm.area_id || null,
       class_level: jobForm.class_level,
       days_per_week: jobForm.days_per_week,
+      duration_hours: jobForm.duration_hours,
       budget_min: jobForm.budget_min,
       budget_max: jobForm.budget_max,
       teaching_mode: jobForm.teaching_mode as 'online' | 'in_person' | 'hybrid',
@@ -358,6 +362,10 @@ export default function ParentDashboard() {
       student_gender: jobForm.student_gender as 'male' | 'female' | 'any',
       special_requirements: jobForm.special_requirements.length > 0 ? jobForm.special_requirements.join(', ') : null,
       preferred_time: jobForm.preferred_time || null,
+      number_of_students: jobForm.number_of_students,
+      student_age: jobForm.student_age || null,
+      start_date: jobForm.start_date || null,
+      location_details: jobForm.location_details || null,
     }).select('id').single();
 
     if (error) {
@@ -379,10 +387,11 @@ export default function ParentDashboard() {
 
   const resetJobForm = () => {
     setJobForm({
-      title: '', description: '', subject_ids: [] as string[], district_id: '', class_level: '',
-      days_per_week: 3, budget_min: 3000, budget_max: 8000,
+      title: '', description: '', subject_ids: [] as string[], district_id: '', area_id: '', class_level: '',
+      days_per_week: 3, duration_hours: 1.5, budget_min: 3000, budget_max: 8000,
       teaching_mode: 'in_person', preferred_tutor_gender: 'any', student_gender: 'any',
       special_requirements: [] as string[], preferred_time: '',
+      number_of_students: 1, student_age: '', start_date: '', location_details: '',
     });
   };
 
@@ -421,8 +430,10 @@ export default function ParentDashboard() {
       description: job.description,
       subject_ids: jsData?.map(js => js.subject_id) || [],
       district_id: job.district_id,
+      area_id: job.area_id || '',
       class_level: job.class_level || '',
       days_per_week: job.days_per_week || 3,
+      duration_hours: job.duration_hours || 1.5,
       budget_min: job.budget_min || 3000,
       budget_max: job.budget_max || 8000,
       teaching_mode: job.teaching_mode || 'in_person',
@@ -430,6 +441,10 @@ export default function ParentDashboard() {
       student_gender: job.student_gender || 'any',
       special_requirements: job.special_requirements ? job.special_requirements.split(', ') : [],
       preferred_time: job.preferred_time || '',
+      number_of_students: job.number_of_students || 1,
+      student_age: job.student_age || '',
+      start_date: job.start_date || '',
+      location_details: job.location_details || '',
     });
     setEditingJob(job);
     setShowPostJob(true);
