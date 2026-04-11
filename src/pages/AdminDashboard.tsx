@@ -355,6 +355,155 @@ function ContactMessagesTab({ toast }: { toast: ReturnType<typeof useToast>['toa
   );
 }
 
+// ──────────── Demo Requests Tab ────────────
+function DemoRequestsTab({ toast }: { toast: ReturnType<typeof useToast>['toast'] }) {
+  const [requests, setRequests] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchRequests = useCallback(async () => {
+    setLoading(true);
+    const { data } = await supabase
+      .from('demo_bookings')
+      .select('*, subjects(name_en), tutor_profiles:tutor_id(id, display_name, profiles:user_id(full_name, email)), profiles:parent_id(full_name, email, phone)')
+      .order('created_at', { ascending: false });
+    setRequests(data || []);
+    setLoading(false);
+  }, []);
+
+  useEffect(() => { fetchRequests(); }, [fetchRequests]);
+
+  const updateStatus = async (id: string, status: string) => {
+    const { error } = await supabase
+      .from('demo_bookings')
+      .update({ status })
+      .eq('id', id);
+    if (error) {
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+      return;
+    }
+    toast({ title: 'Updated', description: `Demo request ${status}.` });
+
+    const request = requests.find(r => r.id === id);
+    if (request) {
+      if (status === 'approved') {
+        const { data: tp } = await supabase
+          .from('tutor_profiles')
+          .select('user_id')
+          .eq('id', request.tutor_profiles?.id)
+          .single();
+        if (tp) {
+          await supabase.from('notifications').insert({
+            user_id: tp.user_id,
+            title: 'New Demo Class Request',
+            message: 'A parent has requested a demo class with you. Check your dashboard for details.',
+            type: 'demo_approved',
+            reference_id: id,
+          });
+        }
+        await supabase.from('notifications').insert({
+          user_id: request.parent_id,
+          title: 'Demo Class Approved',
+          message: 'Your demo class request has been approved! The tutor has been notified.',
+          type: 'demo_approved',
+          reference_id: id,
+        });
+      } else if (status === 'rejected') {
+        await supabase.from('notifications').insert({
+          user_id: request.parent_id,
+          title: 'Demo Class Request Declined',
+          message: 'Your demo class request was not approved. Please try another tutor.',
+          type: 'demo_rejected',
+          reference_id: id,
+        });
+      }
+    }
+    fetchRequests();
+  };
+
+  const statusBadge = (s: string) => {
+    switch (s) {
+      case 'pending': return <Badge variant="outline" className="bg-warning/10 text-warning border-warning/20">Pending</Badge>;
+      case 'approved': return <Badge variant="outline" className="bg-success/10 text-success border-success/20">Approved</Badge>;
+      case 'rejected': return <Badge variant="outline" className="bg-destructive/10 text-destructive border-destructive/20">Rejected</Badge>;
+      case 'confirmed': return <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20">Confirmed</Badge>;
+      case 'completed': return <Badge variant="outline" className="bg-success/10 text-success border-success/20">Completed</Badge>;
+      default: return <Badge variant="outline">{s}</Badge>;
+    }
+  };
+
+  const pendingCount = requests.filter(r => r.status === 'pending').length;
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h1 className="text-3xl font-extrabold">Demo Class Requests</h1>
+        {pendingCount > 0 && (
+          <Badge className="bg-warning text-warning-foreground">{pendingCount} pending</Badge>
+        )}
+      </div>
+      <Card>
+        <CardContent className="p-0">
+          <ScrollArea className="max-h-[600px]">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Parent</TableHead>
+                  <TableHead>Tutor</TableHead>
+                  <TableHead>Subject</TableHead>
+                  <TableHead>Date & Time</TableHead>
+                  <TableHead>Fee</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {loading ? (
+                  <TableRow><TableCell colSpan={7} className="text-center py-8">Loading...</TableCell></TableRow>
+                ) : requests.length === 0 ? (
+                  <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">No demo class requests yet</TableCell></TableRow>
+                ) : requests.map((r) => (
+                  <TableRow key={r.id}>
+                    <TableCell>
+                      <div>
+                        <p className="font-medium text-sm">{r.profiles?.full_name || 'N/A'}</p>
+                        <p className="text-xs text-muted-foreground">{r.profiles?.email}</p>
+                        {r.parent_phone && <p className="text-xs text-muted-foreground">{r.parent_phone}</p>}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <p className="font-medium text-sm">{r.tutor_profiles?.profiles?.full_name || r.tutor_profiles?.display_name || 'N/A'}</p>
+                    </TableCell>
+                    <TableCell className="text-sm">{r.subjects?.name_en || '—'}</TableCell>
+                    <TableCell>
+                      <p className="text-sm">{r.preferred_date}</p>
+                      <p className="text-xs text-muted-foreground">{r.preferred_time} · {r.duration_minutes}min</p>
+                    </TableCell>
+                    <TableCell className="text-sm font-medium">৳{r.class_fee}</TableCell>
+                    <TableCell>{statusBadge(r.status)}</TableCell>
+                    <TableCell>
+                      {r.status === 'pending' ? (
+                        <div className="flex items-center gap-1">
+                          <Button size="sm" onClick={() => updateStatus(r.id, 'approved')}>
+                            <CheckCircle2 className="h-3.5 w-3.5 mr-1" /> Approve
+                          </Button>
+                          <Button size="sm" variant="outline" onClick={() => updateStatus(r.id, 'rejected')}>
+                            <XCircle className="h-3.5 w-3.5 mr-1" /> Reject
+                          </Button>
+                        </div>
+                      ) : null}
+                      {r.notes && <p className="text-xs text-muted-foreground mt-1 max-w-[200px] truncate" title={r.notes}>Note: {r.notes}</p>}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </ScrollArea>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
 function SubscriptionPlansTab({ toast }: { toast: ReturnType<typeof useToast>['toast'] }) {
   const [plans, setPlans] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
