@@ -1622,6 +1622,15 @@ export default function AdminDashboard() {
             {/* ═══════ DEMO REQUESTS TAB ═══════ */}
             {activeTab === 'demo_requests' && <DemoRequestsTab toast={toast} />}
 
+            {/* ═══════ REVENUE & PAYOUTS TAB ═══════ */}
+            {activeTab === 'revenue' && <RevenuePayoutTab toast={toast} />}
+
+            {/* ═══════ SUPPORT TICKETS TAB ═══════ */}
+            {activeTab === 'tickets' && <SupportTicketsTab toast={toast} />}
+
+            {/* ═══════ GEOGRAPHIC ANALYTICS TAB ═══════ */}
+            {activeTab === 'geographic' && <GeographicHeatmapTab toast={toast} />}
+
             {/* ═══════ CONTACT MESSAGES TAB ═══════ */}
             {activeTab === 'contacts' && <ContactMessagesTab toast={toast} />}
 
