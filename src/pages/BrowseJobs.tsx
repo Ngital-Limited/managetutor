@@ -134,6 +134,16 @@ export default function BrowseJobs() {
   const fetchJobs = async () => {
     setLoading(true);
     
+    // If filtering by subject, first get matching job IDs from job_subjects
+    let subjectJobIds: string[] | null = null;
+    if (selectedSubject && selectedSubject !== 'all') {
+      const { data: jsData } = await supabase
+        .from('job_subjects')
+        .select('job_id')
+        .eq('subject_id', selectedSubject);
+      subjectJobIds = jsData?.map(js => js.job_id) || [];
+    }
+
     // Build count query
     let countQuery = supabase
       .from('jobs')
@@ -143,8 +153,14 @@ export default function BrowseJobs() {
     if (selectedDistrict && selectedDistrict !== 'all') {
       countQuery = countQuery.eq('district_id', selectedDistrict);
     }
-    if (selectedSubject && selectedSubject !== 'all') {
-      countQuery = countQuery.eq('subject_id', selectedSubject);
+    if (subjectJobIds !== null) {
+      if (subjectJobIds.length === 0) {
+        setTotalCount(0);
+        setJobs([]);
+        setLoading(false);
+        return;
+      }
+      countQuery = countQuery.in('id', subjectJobIds);
     }
     if (selectedMode && selectedMode !== 'all') {
       countQuery = countQuery.eq('teaching_mode', selectedMode as 'online' | 'in_person' | 'hybrid');
@@ -173,8 +189,8 @@ export default function BrowseJobs() {
       query = query.eq('district_id', selectedDistrict);
     }
 
-    if (selectedSubject && selectedSubject !== 'all') {
-      query = query.eq('subject_id', selectedSubject);
+    if (subjectJobIds !== null) {
+      query = query.in('id', subjectJobIds);
     }
 
     if (selectedMode && selectedMode !== 'all') {
