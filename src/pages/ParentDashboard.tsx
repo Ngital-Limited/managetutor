@@ -125,7 +125,7 @@ const externalLinks = [
   { title: 'Pricing', url: '/pricing', icon: CreditCard },
 ];
 
-function ParentSidebar({ activeSection, setActiveSection }: { activeSection: SectionKey; setActiveSection: (s: SectionKey) => void }) {
+function ParentSidebar({ activeSection, setActiveSection, onPostJob }: { activeSection: SectionKey; setActiveSection: (s: SectionKey) => void; onPostJob: () => void }) {
   const { state } = useSidebar();
   const collapsed = state === 'collapsed';
 
@@ -143,6 +143,15 @@ function ParentSidebar({ activeSection, setActiveSection }: { activeSection: Sec
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  onClick={onPostJob}
+                  className="cursor-pointer hover:bg-primary/10 text-primary font-medium"
+                >
+                  <Plus className="mr-2 h-4 w-4" />
+                  {!collapsed && <span>Post New Job</span>}
+                </SidebarMenuButton>
+              </SidebarMenuItem>
               {sectionItems.map((item) => (
                 <SidebarMenuItem key={item.key}>
                   <SidebarMenuButton
