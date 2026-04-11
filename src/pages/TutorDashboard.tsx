@@ -157,6 +157,10 @@ export default function TutorDashboard() {
   const [activeFeatured, setActiveFeatured] = useState<FeaturedListing | null>(null);
   const [boostLoading, setBoostLoading] = useState(false);
   const [demoBookings, setDemoBookings] = useState<any[]>([]);
+  const [recommendedJobs, setRecommendedJobs] = useState<RecommendedJob[]>([]);
+  const [nearbyJobs, setNearbyJobs] = useState<RecommendedJob[]>([]);
+  const [highPayJobs, setHighPayJobs] = useState<RecommendedJob[]>([]);
+  const [jobTab, setJobTab] = useState('recommended');
 
   useEffect(() => {
     if (!authLoading && !user) {
