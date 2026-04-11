@@ -329,9 +329,39 @@ export default function JobDetails() {
                     <Calendar className="h-5 w-5 text-primary" />
                     <div>
                       <div className="text-xs text-muted-foreground">Schedule</div>
-                      <div className="font-medium">{job.days_per_week} days/week</div>
+                      <div className="font-medium">
+                        {job.days_per_week} days/week
+                        {job.duration_hours ? ` • ${job.duration_hours}hr/session` : ''}
+                      </div>
                     </div>
                   </div>
+                  {job.number_of_students > 1 && (
+                    <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
+                      <Users className="h-5 w-5 text-primary" />
+                      <div>
+                        <div className="text-xs text-muted-foreground">Number of Students</div>
+                        <div className="font-medium">{job.number_of_students}</div>
+                      </div>
+                    </div>
+                  )}
+                  {job.student_age && (
+                    <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
+                      <User className="h-5 w-5 text-primary" />
+                      <div>
+                        <div className="text-xs text-muted-foreground">Student Age</div>
+                        <div className="font-medium">{job.student_age}</div>
+                      </div>
+                    </div>
+                  )}
+                  {job.start_date && (
+                    <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
+                      <Calendar className="h-5 w-5 text-primary" />
+                      <div>
+                        <div className="text-xs text-muted-foreground">Start Date</div>
+                        <div className="font-medium">{new Date(job.start_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</div>
+                      </div>
+                    </div>
+                  )}
                   <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
                     <Users className="h-5 w-5 text-primary" />
                     <div>
@@ -364,6 +394,17 @@ export default function JobDetails() {
                       </div>
                     </div>
                   )}
+                </div>
+
+                {job.location_details && (
+                  <div className="mt-4 p-4 bg-muted/50 rounded-lg">
+                    <h3 className="text-sm font-semibold mb-1 flex items-center gap-2">
+                      <MapPin className="h-4 w-4 text-primary" />
+                      Location Details
+                    </h3>
+                    <p className="text-sm text-muted-foreground">{job.location_details}</p>
+                  </div>
+                )
                 </div>
 
                 {job.special_requirements && (
