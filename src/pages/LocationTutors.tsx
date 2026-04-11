@@ -79,7 +79,7 @@ export default function LocationTutors() {
     setLoading(false);
   };
 
-  const locationName = language === 'en' ? district?.name_en : district?.name_bn;
+  const locationName = district?.name_en;
 
   return (
     <div className="min-h-screen bg-background">
@@ -194,7 +194,7 @@ export default function LocationTutors() {
                       <div className="flex flex-wrap justify-center gap-1 mb-4">
                         {tutor.tutor_subjects?.slice(0, 2).map((ts, i) => (
                           <Badge key={i} variant="secondary" className="text-xs">
-                            {language === 'en' ? ts.subjects?.name_en : ts.subjects?.name_bn}
+                            {ts.subjects?.name_en}
                           </Badge>
                         ))}
                       </div>

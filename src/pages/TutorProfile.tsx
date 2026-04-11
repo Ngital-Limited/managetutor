@@ -404,7 +404,7 @@ export default function TutorProfile() {
                     <SelectTrigger><SelectValue placeholder="Select district" /></SelectTrigger>
                     <SelectContent>
                       {districts.map(d => (
-                        <SelectItem key={d.id} value={d.id}>{language === 'en' ? d.name_en : d.name_bn}</SelectItem>
+                        <SelectItem key={d.id} value={d.id}>{d.name_en}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -576,7 +576,7 @@ export default function TutorProfile() {
                         }
                       }}
                     >
-                      {language === 'en' ? subject.name_en : subject.name_bn}
+                      {subject.name_en}
                     </Badge>
                   ))}
                 </div>

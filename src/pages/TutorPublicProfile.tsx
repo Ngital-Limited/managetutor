@@ -198,7 +198,7 @@ export default function TutorPublicProfile() {
     );
   }
 
-  const districtName = language === 'en' ? profile.districts?.name_en : profile.districts?.name_bn;
+  const districtName = profile.districts?.name_en;
 
   return (
     <div className="min-h-screen bg-background">
@@ -284,7 +284,7 @@ export default function TutorPublicProfile() {
                       {subjects.map(subject => (
                         <Badge key={subject.id} variant="secondary">
                           <BookOpen className="h-3 w-3 mr-1" />
-                          {language === 'en' ? subject.name_en : subject.name_bn}
+                          {subject.name_en}
                         </Badge>
                       ))}
                     </div>

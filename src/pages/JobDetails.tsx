@@ -275,7 +275,7 @@ export default function JobDetails() {
                     </div>
                     <p className="text-muted-foreground flex items-center gap-2">
                       <MapPin className="h-4 w-4" />
-                      {language === 'en' ? job.districts?.name_en : job.districts?.name_bn}
+                      {job.districts?.name_en}
                       <span className="text-border">•</span>
                       Posted {formatDistanceToNow(new Date(job.created_at), { addSuffix: true })}
                     </p>
@@ -294,7 +294,7 @@ export default function JobDetails() {
                       <div>
                         <div className="text-xs text-muted-foreground">Subjects</div>
                         <div className="font-medium">
-                          {job.job_subjects.map(js => language === 'en' ? js.subjects.name_en : js.subjects.name_bn).join(', ')}
+                          {job.job_subjects.map(js => js.subjects.name_en).join(', ')}
                         </div>
                       </div>
                     </div>
@@ -303,7 +303,7 @@ export default function JobDetails() {
                       <BookOpen className="h-5 w-5 text-primary" />
                       <div>
                         <div className="text-xs text-muted-foreground">Subject</div>
-                        <div className="font-medium">{language === 'en' ? job.subjects.name_en : job.subjects.name_bn}</div>
+                        <div className="font-medium">{job.subjects.name_en}</div>
                       </div>
                     </div>
                   ) : null}

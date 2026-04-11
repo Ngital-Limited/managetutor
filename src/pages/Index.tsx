@@ -171,11 +171,11 @@ export default function Index() {
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
                 <div className="space-y-1.5">
                   <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5"><MapPin className="h-3.5 w-3.5" /> Location</label>
-                  <SearchableSelect options={districts.map(d => ({ value: d.id, label: language === 'bn' ? d.name_bn : d.name_en }))} value={selectedDistrict} onValueChange={setSelectedDistrict} placeholder="All Districts" className="h-11 rounded-xl bg-muted/50 border-border/60 focus:bg-card" />
+                  <SearchableSelect options={districts.map(d => ({ value: d.id, label: d.name_en }))} value={selectedDistrict} onValueChange={setSelectedDistrict} placeholder="All Districts" className="h-11 rounded-xl bg-muted/50 border-border/60 focus:bg-card" />
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5"><BookOpen className="h-3.5 w-3.5" /> Subject</label>
-                  <SearchableSelect options={subjectsList.map(s => ({ value: s.id, label: language === 'bn' ? s.name_bn : s.name_en }))} value={selectedSubject} onValueChange={setSelectedSubject} placeholder="All Subjects" className="h-11 rounded-xl bg-muted/50 border-border/60 focus:bg-card" />
+                  <SearchableSelect options={subjectsList.map(s => ({ value: s.id, label: s.name_en }))} value={selectedSubject} onValueChange={setSelectedSubject} placeholder="All Subjects" className="h-11 rounded-xl bg-muted/50 border-border/60 focus:bg-card" />
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5"><Globe className="h-3.5 w-3.5" /> Mode</label>
@@ -235,14 +235,14 @@ export default function Index() {
                       <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
                         <BookOpen className="h-5 w-5 text-primary" />
                       </div>
-                      <h3 className="font-bold text-lg">{language === 'bn' && cat.category_bn ? cat.category_bn : cat.category_en}</h3>
+                      <h3 className="font-bold text-lg">{cat.category_en}</h3>
                       <Badge variant="secondary" className="ml-auto">{cat.subjects.length}</Badge>
                     </div>
                     <div className="flex flex-wrap gap-1.5">
                       {cat.subjects.slice(0, 5).map((sub) => (
                         <Link key={sub.id} to={`/jobs?subject=${sub.id}`}>
                           <Badge variant="outline" className="cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors text-xs">
-                            {language === 'bn' ? sub.name_bn : sub.name_en}
+                            {sub.name_en}
                           </Badge>
                         </Link>
                       ))}
@@ -291,12 +291,12 @@ export default function Index() {
                       <div className="flex items-center gap-2 text-xs text-muted-foreground mb-3 flex-wrap">
                         <span className="flex items-center gap-1">
                           <MapPin className="h-3 w-3" />
-                          {language === 'bn' ? job.districts?.name_bn : job.districts?.name_en}
+                          {job.districts?.name_en}
                         </span>
                         {job.subjects && (
                           <span className="flex items-center gap-1">
                             <BookOpen className="h-3 w-3" />
-                            {language === 'bn' ? job.subjects.name_bn : job.subjects.name_en}
+                            {job.subjects.name_en}
                           </span>
                         )}
                         {job.days_per_week && (
@@ -346,7 +346,7 @@ export default function Index() {
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
               {featuredTutors.map((tutor) => {
                 const tutorSubjects = tutor.tutor_subjects?.map(ts =>
-                  language === 'bn' ? ts.subjects?.name_bn : ts.subjects?.name_en
+                  ts.subjects?.name_en
                 ).filter(Boolean).slice(0, 3) || [];
 
                 return (
@@ -377,7 +377,7 @@ export default function Index() {
                           {tutor.districts && (
                             <span className="flex items-center gap-1">
                               <MapPin className="h-3 w-3" />
-                              {language === 'bn' ? tutor.districts.name_bn : tutor.districts.name_en}
+                              {tutor.districts.name_en}
                             </span>
                           )}
                           <span className="flex items-center gap-1">

@@ -364,7 +364,7 @@ export default function BrowseJobs() {
                 <SelectItem value="all">All Locations</SelectItem>
                 {districts.map(d => (
                   <SelectItem key={d.id} value={d.id}>
-                    {language === 'en' ? d.name_en : d.name_bn}
+                    {d.name_en}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -378,7 +378,7 @@ export default function BrowseJobs() {
                 <SelectItem value="all">All Subjects</SelectItem>
                 {subjects.map(s => (
                   <SelectItem key={s.id} value={s.id}>
-                    {language === 'en' ? s.name_en : s.name_bn}
+                    {s.name_en}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -456,7 +456,7 @@ export default function BrowseJobs() {
                             </div>
                             <p className="text-sm text-muted-foreground flex items-center gap-2">
                               <MapPin className="h-3 w-3" />
-                              {job.districts ? (language === 'en' ? job.districts.name_en : job.districts.name_bn) : 'Location N/A'}
+                              {job.districts ? (job.districts.name_en) : 'Location N/A'}
                               <span className="text-border">•</span>
                               Posted {formatDistanceToNow(new Date(job.created_at), { addSuffix: true })}
                             </p>
@@ -472,13 +472,13 @@ export default function BrowseJobs() {
                             job.job_subjects.map((js, idx) => (
                               <Badge key={idx} variant="secondary">
                                 <BookOpen className="h-3 w-3 mr-1" />
-                                {language === 'en' ? js.subjects.name_en : js.subjects.name_bn}
+                                {js.subjects.name_en}
                               </Badge>
                             ))
                           ) : job.subjects ? (
                             <Badge variant="secondary">
                               <BookOpen className="h-3 w-3 mr-1" />
-                              {language === 'en' ? job.subjects.name_en : job.subjects.name_bn}
+                              {job.subjects.name_en}
                             </Badge>
                           ) : null}
                           {job.class_level && (
