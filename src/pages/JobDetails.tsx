@@ -39,6 +39,7 @@ interface Job {
   parent_id: string;
   districts: { name_en: string; name_bn: string } | null;
   subjects: { name_en: string; name_bn: string } | null;
+  job_subjects?: { subjects: { name_en: string; name_bn: string } }[];
 }
 
 interface Application {
@@ -89,7 +90,8 @@ export default function JobDetails() {
       .select(`
         *,
         districts (name_en, name_bn),
-        subjects (name_en, name_bn)
+        subjects (name_en, name_bn),
+        job_subjects (subjects (name_en, name_bn))
       `)
       .eq('id', id)
       .single();
@@ -303,7 +305,17 @@ export default function JobDetails() {
                 </div>
 
                 <div className="grid sm:grid-cols-2 gap-4">
-                  {job.subjects && (
+                  {job.job_subjects && job.job_subjects.length > 0 ? (
+                    <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
+                      <BookOpen className="h-5 w-5 text-primary" />
+                      <div>
+                        <div className="text-xs text-muted-foreground">Subjects</div>
+                        <div className="font-medium">
+                          {job.job_subjects.map(js => language === 'en' ? js.subjects.name_en : js.subjects.name_bn).join(', ')}
+                        </div>
+                      </div>
+                    </div>
+                  ) : job.subjects ? (
                     <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
                       <BookOpen className="h-5 w-5 text-primary" />
                       <div>
@@ -311,7 +323,7 @@ export default function JobDetails() {
                         <div className="font-medium">{language === 'en' ? job.subjects.name_en : job.subjects.name_bn}</div>
                       </div>
                     </div>
-                  )}
+                  ) : null}
                   {job.class_level && (
                     <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
                       <GraduationCap className="h-5 w-5 text-primary" />

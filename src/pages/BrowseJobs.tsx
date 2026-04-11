@@ -46,6 +46,7 @@ interface Job {
   created_at: string;
   districts: { name_en: string; name_bn: string } | null;
   subjects: { name_en: string; name_bn: string } | null;
+  job_subjects?: { subjects: { name_en: string; name_bn: string } }[];
 }
 
 const JOBS_PER_PAGE = 10;
@@ -161,7 +162,8 @@ export default function BrowseJobs() {
       .select(`
         *,
         districts (name_en, name_bn),
-        subjects (name_en, name_bn)
+        subjects (name_en, name_bn),
+        job_subjects (subjects (name_en, name_bn))
       `)
       .eq('status', 'open')
       .order('created_at', { ascending: false })
@@ -478,12 +480,19 @@ export default function BrowseJobs() {
                         </p>
 
                         <div className="flex flex-wrap gap-2 ml-15">
-                          {job.subjects && (
+                          {job.job_subjects && job.job_subjects.length > 0 ? (
+                            job.job_subjects.map((js, idx) => (
+                              <Badge key={idx} variant="secondary">
+                                <BookOpen className="h-3 w-3 mr-1" />
+                                {language === 'en' ? js.subjects.name_en : js.subjects.name_bn}
+                              </Badge>
+                            ))
+                          ) : job.subjects ? (
                             <Badge variant="secondary">
                               <BookOpen className="h-3 w-3 mr-1" />
                               {language === 'en' ? job.subjects.name_en : job.subjects.name_bn}
                             </Badge>
-                          )}
+                          ) : null}
                           {job.class_level && (
                             <Badge variant="outline">{job.class_level}</Badge>
                           )}
