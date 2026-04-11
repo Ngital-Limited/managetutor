@@ -599,6 +599,14 @@ export default function ParentDashboard() {
     label: language === 'en' ? s.name_en : s.name_bn,
   })), [subjects, language]);
 
+  const areaOptions = useMemo(() => {
+    const filtered = jobForm.district_id ? areas.filter(a => a.district_id === jobForm.district_id) : areas;
+    return filtered.map(a => ({
+      value: a.id,
+      label: language === 'en' ? a.name_en : a.name_bn,
+    }));
+  }, [areas, jobForm.district_id, language]);
+
   const classLevelOptions = useMemo(() => CLASS_LEVELS.flatMap(group =>
     group.items.map(item => ({ value: item, label: item, group: group.group }))
   ), []);
