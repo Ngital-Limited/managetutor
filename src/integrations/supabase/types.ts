@@ -793,6 +793,54 @@ export type Database = {
         }
         Relationships: []
       }
+      review_update_requests: {
+        Row: {
+          admin_notes: string | null
+          created_at: string
+          id: string
+          reason: string
+          review_id: string
+          status: string
+          tutor_id: string
+          updated_at: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          created_at?: string
+          id?: string
+          reason: string
+          review_id: string
+          status?: string
+          tutor_id: string
+          updated_at?: string
+        }
+        Update: {
+          admin_notes?: string | null
+          created_at?: string
+          id?: string
+          reason?: string
+          review_id?: string
+          status?: string
+          tutor_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "review_update_requests_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "reviews"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "review_update_requests_tutor_id_fkey"
+            columns: ["tutor_id"]
+            isOneToOne: false
+            referencedRelation: "tutor_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       reviews: {
         Row: {
           comment: string | null
@@ -938,7 +986,9 @@ export type Database = {
           mother_phone: string | null
           permanent_address: string | null
           present_address: string | null
+          success_stories: string | null
           teaching_mode: Database["public"]["Enums"]["teaching_mode"] | null
+          teaching_philosophy: string | null
           total_reviews: number | null
           total_students: number | null
           updated_at: string | null
@@ -947,6 +997,7 @@ export type Database = {
             | Database["public"]["Enums"]["verification_status"]
             | null
           verified_at: string | null
+          video_url: string | null
         }
         Insert: {
           average_rating?: number | null
@@ -972,7 +1023,9 @@ export type Database = {
           mother_phone?: string | null
           permanent_address?: string | null
           present_address?: string | null
+          success_stories?: string | null
           teaching_mode?: Database["public"]["Enums"]["teaching_mode"] | null
+          teaching_philosophy?: string | null
           total_reviews?: number | null
           total_students?: number | null
           updated_at?: string | null
@@ -981,6 +1034,7 @@ export type Database = {
             | Database["public"]["Enums"]["verification_status"]
             | null
           verified_at?: string | null
+          video_url?: string | null
         }
         Update: {
           average_rating?: number | null
@@ -1006,7 +1060,9 @@ export type Database = {
           mother_phone?: string | null
           permanent_address?: string | null
           present_address?: string | null
+          success_stories?: string | null
           teaching_mode?: Database["public"]["Enums"]["teaching_mode"] | null
+          teaching_philosophy?: string | null
           total_reviews?: number | null
           total_students?: number | null
           updated_at?: string | null
@@ -1015,6 +1071,7 @@ export type Database = {
             | Database["public"]["Enums"]["verification_status"]
             | null
           verified_at?: string | null
+          video_url?: string | null
         }
         Relationships: [
           {

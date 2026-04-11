@@ -16,8 +16,11 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { 
   GraduationCap, ArrowLeft, Save, Upload, FileText, CheckCircle2,
-  Clock, XCircle, AlertCircle, Trash2, Globe, User, MapPin
+  Clock, XCircle, AlertCircle, Globe, User, MapPin, Video, Lightbulb, Trophy, Star, MessageSquare, Send
 } from 'lucide-react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { formatDistanceToNow } from 'date-fns';
 
 interface Subject { id: string; name_en: string; name_bn: string; }
 interface District { id: string; name_en: string; name_bn: string; }
@@ -73,7 +76,16 @@ export default function TutorProfile() {
     education_detail: '',
     present_address: '',
     permanent_address: '',
+    video_url: '',
+    teaching_philosophy: '',
+    success_stories: '',
   });
+
+  const [tutorProfileId, setTutorProfileId] = useState<string | null>(null);
+  const [reviews, setReviews] = useState<any[]>([]);
+  const [reviewRequests, setReviewRequests] = useState<any[]>([]);
+  const [reviewUpdateReason, setReviewUpdateReason] = useState('');
+  const [selectedReviewId, setSelectedReviewId] = useState<string | null>(null);
 
   const [userProfile, setUserProfile] = useState({
     full_name: '',
@@ -113,25 +125,46 @@ export default function TutorProfile() {
       });
     }
     if (tutorRes.data) {
+      const td = tutorRes.data as any;
       setProfile({
-        bio: tutorRes.data.bio || '',
-        education: tutorRes.data.education || '',
-        experience_years: tutorRes.data.experience_years || 0,
-        hourly_rate_min: tutorRes.data.hourly_rate_min || 500,
-        hourly_rate_max: tutorRes.data.hourly_rate_max || 1500,
-        teaching_mode: tutorRes.data.teaching_mode || 'in_person',
-        gender: tutorRes.data.gender || 'male',
-        is_available: tutorRes.data.is_available ?? true,
-        verification_status: tutorRes.data.verification_status || 'pending',
-        father_phone: (tutorRes.data as any).father_phone || '',
-        mother_phone: (tutorRes.data as any).mother_phone || '',
-        emergency_contact_name: (tutorRes.data as any).emergency_contact_name || '',
-        emergency_contact_phone: (tutorRes.data as any).emergency_contact_phone || '',
-        education_detail: (tutorRes.data as any).education_detail || '',
-        present_address: (tutorRes.data as any).present_address || '',
-        permanent_address: (tutorRes.data as any).permanent_address || '',
+        bio: td.bio || '',
+        education: td.education || '',
+        experience_years: td.experience_years || 0,
+        hourly_rate_min: td.hourly_rate_min || 500,
+        hourly_rate_max: td.hourly_rate_max || 1500,
+        teaching_mode: td.teaching_mode || 'in_person',
+        gender: td.gender || 'male',
+        is_available: td.is_available ?? true,
+        verification_status: td.verification_status || 'pending',
+        father_phone: td.father_phone || '',
+        mother_phone: td.mother_phone || '',
+        emergency_contact_name: td.emergency_contact_name || '',
+        emergency_contact_phone: td.emergency_contact_phone || '',
+        education_detail: td.education_detail || '',
+        present_address: td.present_address || '',
+        permanent_address: td.permanent_address || '',
+        video_url: td.video_url || '',
+        teaching_philosophy: td.teaching_philosophy || '',
+        success_stories: td.success_stories || '',
       });
-      setSelectedClassLevels((tutorRes.data as any).class_levels || []);
+      setSelectedClassLevels(td.class_levels || []);
+      setTutorProfileId(td.id);
+
+      // Fetch reviews for this tutor
+      const { data: reviewsData } = await supabase
+        .from('reviews')
+        .select('*, profiles:parent_id(full_name, avatar_url)')
+        .eq('tutor_id', td.id)
+        .eq('is_approved', true)
+        .order('created_at', { ascending: false });
+      if (reviewsData) setReviews(reviewsData);
+
+      // Fetch existing review update requests
+      const { data: reqData } = await supabase
+        .from('review_update_requests')
+        .select('*')
+        .eq('tutor_id', td.id);
+      if (reqData) setReviewRequests(reqData);
     }
     if (docsRes.data) setDocuments(docsRes.data);
     if (tutorSubjectsRes.data) {
@@ -190,6 +223,9 @@ export default function TutorProfile() {
         present_address: profile.present_address || null,
         permanent_address: profile.permanent_address || null,
         class_levels: selectedClassLevels,
+        video_url: profile.video_url || null,
+        teaching_philosophy: profile.teaching_philosophy || null,
+        success_stories: profile.success_stories || null,
       } as any).eq('id', tutorData.id);
 
       // Update subjects - delete old and insert new
@@ -263,6 +299,16 @@ export default function TutorProfile() {
       default:
         return null;
     }
+  };
+
+
+  const getVideoEmbedUrl = (url: string): string | null => {
+    if (!url) return null;
+    const ytMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/);
+    if (ytMatch) return `https://www.youtube.com/embed/${ytMatch[1]}`;
+    const vimeoMatch = url.match(/(?:vimeo\.com\/)(\d+)/);
+    if (vimeoMatch) return `https://player.vimeo.com/video/${vimeoMatch[1]}`;
+    return null;
   };
 
   if (loading || authLoading) {
@@ -622,6 +668,152 @@ export default function TutorProfile() {
             </CardContent>
           </Card>
 
+          {/* Video Introduction */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Video className="h-5 w-5" />
+                Video Introduction
+              </CardTitle>
+              <CardDescription>Share a 30-second YouTube or Vimeo video showing your communication skills</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <Label>YouTube or Vimeo Video URL</Label>
+                <Input
+                  value={profile.video_url}
+                  onChange={(e) => setProfile({ ...profile, video_url: e.target.value })}
+                  placeholder="https://www.youtube.com/watch?v=... or https://vimeo.com/..."
+                />
+              </div>
+              {profile.video_url && getVideoEmbedUrl(profile.video_url) && (
+                <div className="aspect-video rounded-xl overflow-hidden border">
+                  <iframe
+                    src={getVideoEmbedUrl(profile.video_url)!}
+                    className="w-full h-full"
+                    allowFullScreen
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    title="Video Introduction"
+                  />
+                </div>
+              )}
+              {profile.video_url && !getVideoEmbedUrl(profile.video_url) && (
+                <p className="text-sm text-destructive">Please enter a valid YouTube or Vimeo URL</p>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Teaching Philosophy */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Lightbulb className="h-5 w-5" />
+                Teaching Philosophy
+              </CardTitle>
+              <CardDescription>Describe your approach to teaching and what makes your style unique</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Textarea
+                value={profile.teaching_philosophy}
+                onChange={(e) => setProfile({ ...profile, teaching_philosophy: e.target.value })}
+                placeholder="I believe every student learns differently. My approach focuses on..."
+                rows={5}
+              />
+            </CardContent>
+          </Card>
+
+          {/* Success Stories */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Trophy className="h-5 w-5" />
+                Success Stories
+              </CardTitle>
+              <CardDescription>Share achievements of your students or memorable teaching moments</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Textarea
+                value={profile.success_stories}
+                onChange={(e) => setProfile({ ...profile, success_stories: e.target.value })}
+                placeholder="One of my students improved from C grade to A+ in just 3 months..."
+                rows={5}
+              />
+            </CardContent>
+          </Card>
+
+          {/* Parent Reviews & Feedback */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Star className="h-5 w-5" />
+                Parent Feedback ({reviews.length})
+              </CardTitle>
+              <CardDescription>Reviews left by parents. You can request a review update if a dispute was resolved.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {reviews.length > 0 ? (
+                <div className="space-y-4">
+                  {reviews.map((review: any) => {
+                    const hasRequest = reviewRequests.some((r: any) => r.review_id === review.id);
+                    return (
+                      <div key={review.id} className="p-4 bg-muted/50 rounded-xl">
+                        <div className="flex items-start gap-3">
+                          <Avatar className="h-10 w-10">
+                            <AvatarImage src={review.profiles?.avatar_url} />
+                            <AvatarFallback>{review.profiles?.full_name?.charAt(0) || 'P'}</AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1">
+                            <div className="flex items-center justify-between mb-1">
+                              <span className="font-medium">{review.profiles?.full_name}</span>
+                              <span className="text-xs text-muted-foreground">
+                                {formatDistanceToNow(new Date(review.created_at), { addSuffix: true })}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-1 mb-2">
+                              {[1, 2, 3, 4, 5].map(star => (
+                                <Star
+                                  key={star}
+                                  className={`h-4 w-4 ${star <= review.rating ? 'fill-accent text-accent' : 'text-muted-foreground'}`}
+                                />
+                              ))}
+                            </div>
+                            {review.comment && (
+                              <p className="text-sm text-muted-foreground mb-2">{review.comment}</p>
+                            )}
+                            {hasRequest ? (
+                              <Badge variant="outline" className="text-xs">
+                                <Clock className="h-3 w-3 mr-1" />
+                                Review Update Requested
+                              </Badge>
+                            ) : (
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="text-xs"
+                                onClick={() => {
+                                  setSelectedReviewId(review.id);
+                                  setReviewUpdateReason('');
+                                }}
+                              >
+                                <MessageSquare className="h-3 w-3 mr-1" />
+                                Request Review Update
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <Star className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                  <p className="text-muted-foreground">No reviews yet. Reviews will appear once parents rate your teaching.</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
           {/* Save Button */}
           <div className="flex justify-end gap-4">
             <Link to="/dashboard">
@@ -633,6 +825,54 @@ export default function TutorProfile() {
             </Button>
           </div>
         </div>
+
+        {/* Review Update Request Dialog */}
+        <Dialog open={!!selectedReviewId} onOpenChange={(open) => !open && setSelectedReviewId(null)}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Request Review Update</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <p className="text-sm text-muted-foreground">
+                If a dispute with the parent has been resolved, you can request them to update their review. 
+                An admin will review your request.
+              </p>
+              <div>
+                <Label>Reason for Request</Label>
+                <Textarea
+                  value={reviewUpdateReason}
+                  onChange={(e) => setReviewUpdateReason(e.target.value)}
+                  placeholder="Explain why this review should be reconsidered..."
+                  rows={4}
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setSelectedReviewId(null)}>Cancel</Button>
+              <Button
+                disabled={!reviewUpdateReason.trim()}
+                onClick={async () => {
+                  if (!tutorProfileId || !selectedReviewId) return;
+                  const { error } = await supabase.from('review_update_requests').insert({
+                    tutor_id: tutorProfileId,
+                    review_id: selectedReviewId,
+                    reason: reviewUpdateReason,
+                  } as any);
+                  if (error) {
+                    toast({ title: 'Error', description: error.message, variant: 'destructive' });
+                  } else {
+                    toast({ title: 'Request Sent', description: 'Your review update request has been submitted for admin review.' });
+                    setSelectedReviewId(null);
+                    fetchData();
+                  }
+                }}
+              >
+                <Send className="h-4 w-4 mr-2" />
+                Submit Request
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </main>
     </div>
   );
