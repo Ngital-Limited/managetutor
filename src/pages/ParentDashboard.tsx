@@ -120,9 +120,8 @@ const sectionItems: { key: SectionKey; title: string; icon: any }[] = [
 ];
 
 const externalLinks = [
-  { title: 'Find Tutors', url: '/tutors', icon: Search },
-  { title: 'Browse Jobs', url: '/jobs', icon: Briefcase },
-  { title: 'Favorites', url: '/favorites', icon: Heart },
+  { title: 'Browse Tutors', url: '/tutors', icon: Search },
+  { title: 'My Favorites', url: '/favorites', icon: Heart },
   { title: 'Pricing', url: '/pricing', icon: CreditCard },
 ];
 
