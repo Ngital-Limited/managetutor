@@ -7,19 +7,41 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 export default function Contact() {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
-    setTimeout(() => {
+
+    const form = e.target as HTMLFormElement;
+    const formData = new FormData(form);
+    const name = (formData.get('name') as string)?.trim();
+    const email = (formData.get('email') as string)?.trim();
+    const phone = (formData.get('phone') as string)?.trim() || null;
+    const subject = (formData.get('subject') as string)?.trim();
+    const message = (formData.get('message') as string)?.trim();
+
+    if (!name || !email || !subject || !message) {
+      toast({ title: 'Please fill all required fields', variant: 'destructive' });
       setLoading(false);
-      toast({ title: 'Message sent!', description: 'We\'ll get back to you within 24 hours.' });
-      (e.target as HTMLFormElement).reset();
-    }, 1000);
+      return;
+    }
+
+    const { error } = await supabase.from('contact_messages').insert({
+      name, email, phone, subject, message
+    });
+
+    setLoading(false);
+    if (error) {
+      toast({ title: 'Failed to send message', description: 'Please try again later.', variant: 'destructive' });
+    } else {
+      toast({ title: 'Message sent!', description: "We'll get back to you within 24 hours." });
+      form.reset();
+    }
   };
 
   return (
