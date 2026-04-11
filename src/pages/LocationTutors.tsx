@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import {
+import { Logo } from '@/components/Logo';
   GraduationCap, Globe, MapPin, Star, User, Clock, BookOpen, CheckCircle2, ArrowRight
 } from 'lucide-react';
 
@@ -85,10 +86,7 @@ export default function LocationTutors() {
       <nav className="sticky top-0 z-50 bg-card/80 backdrop-blur-xl border-b border-border">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
-              <GraduationCap className="h-6 w-6 text-primary-foreground" />
-            </div>
-            <span className="font-bold text-xl">Manage Tutor</span>
+            <Logo size="md" />
           </Link>
           <div className="flex items-center gap-3">
             <Button variant="ghost" size="sm" onClick={() => setLanguage(language === 'en' ? 'bn' : 'en')}>

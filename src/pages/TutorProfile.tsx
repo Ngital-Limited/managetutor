@@ -21,6 +21,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { formatDistanceToNow } from 'date-fns';
+import { Logo } from '@/components/Logo';
 
 interface Subject { id: string; name_en: string; name_bn: string; }
 interface District { id: string; name_en: string; name_bn: string; }
@@ -334,10 +335,7 @@ export default function TutorProfile() {
       <nav className="sticky top-0 z-50 bg-card/80 backdrop-blur-xl border-b border-border">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
-              <GraduationCap className="h-6 w-6 text-primary-foreground" />
-            </div>
-            <span className="font-bold text-xl">Manage Tutor</span>
+            <Logo size="md" />
           </Link>
           <div className="flex items-center gap-3">
             <Button variant="ghost" size="sm" onClick={() => setLanguage(language === 'en' ? 'bn' : 'en')}>
