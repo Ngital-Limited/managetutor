@@ -462,6 +462,8 @@ export default function AdminDashboard() {
   const [userSearch, setUserSearch] = useState('');
   const [userRoleFilter, setUserRoleFilter] = useState('all');
   const [pendingTutors, setPendingTutors] = useState<TutorVerification[]>([]);
+  const [verificationFilter, setVerificationFilter] = useState('pending');
+  const [verificationPayments, setVerificationPayments] = useState<PaymentRow[]>([]);
   const [jobs, setJobs] = useState<JobRow[]>([]);
   const [jobStatusFilter, setJobStatusFilter] = useState('all');
   const [reports, setReports] = useState<Report[]>([]);
