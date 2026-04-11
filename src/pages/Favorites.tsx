@@ -8,7 +8,6 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import {
-import { Logo } from '@/components/Logo';
   GraduationCap, ArrowLeft, Globe, Heart, Star, MapPin, Trash2
 } from 'lucide-react';
 

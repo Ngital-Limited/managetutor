@@ -15,7 +15,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { formatDistanceToNow } from 'date-fns';
 import {
-import { Logo } from '@/components/Logo';
   GraduationCap, ArrowLeft, Globe, MapPin, BookOpen, Calendar, Users,
   DollarSign, Clock, CheckCircle2, XCircle, Send, Star, MessageSquare,
   Briefcase, UserCheck, Phone, Mail

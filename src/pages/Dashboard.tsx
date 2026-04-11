@@ -18,7 +18,6 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { 
-import { Logo } from '@/components/Logo';
   GraduationCap, LogOut, User, Briefcase, Star, Globe,
   Plus, MapPin, Clock, Users, BookOpen, Search, CheckCircle2, Settings
 } from 'lucide-react';

@@ -17,7 +17,6 @@ import {
   BookOpen, Users, Calendar, ArrowRight, ChevronLeft, ChevronRight, Send, Loader2, Monitor
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
-import { Logo } from '@/components/Logo';
 
 interface District {
   id: string;

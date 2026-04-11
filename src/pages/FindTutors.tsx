@@ -13,7 +13,6 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { 
-import { Logo } from '@/components/Logo';
   GraduationCap, Search, MapPin, Star, Filter, Globe, 
   User, Clock, BookOpen, CheckCircle2, X, ChevronDown, Heart, Award, ArrowRight, ChevronLeft, ChevronRight,
   Briefcase, DollarSign

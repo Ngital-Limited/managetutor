@@ -21,7 +21,6 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { formatDistanceToNow } from 'date-fns';
-import { Logo } from '@/components/Logo';
 
 interface Subject { id: string; name_en: string; name_bn: string; }
 interface District { id: string; name_en: string; name_bn: string; }

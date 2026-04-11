@@ -12,7 +12,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { formatDistanceToNow } from 'date-fns';
 import {
-import { Logo } from '@/components/Logo';
   GraduationCap, ArrowLeft, Globe, Send, MessageSquare, Search, Circle
 } from 'lucide-react';
 

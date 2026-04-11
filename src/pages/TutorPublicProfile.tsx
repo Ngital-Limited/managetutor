@@ -16,7 +16,6 @@ import {
   Award, Users, ArrowLeft, Share2, Video, Lightbulb, Trophy
 } from 'lucide-react';
 import BookDemoClassDialog from '@/components/BookDemoClassDialog';
-import { Logo } from '@/components/Logo';
 
 interface TutorProfile {
   id: string;
