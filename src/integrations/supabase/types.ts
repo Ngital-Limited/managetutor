@@ -14,6 +14,54 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_permissions: {
+        Row: {
+          can_manage_jobs: boolean
+          can_manage_revenue: boolean
+          can_manage_reviews: boolean
+          can_manage_settings: boolean
+          can_manage_tickets: boolean
+          can_manage_users: boolean
+          can_send_notifications: boolean
+          can_verify_documents: boolean
+          can_view_analytics: boolean
+          created_at: string
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          can_manage_jobs?: boolean
+          can_manage_revenue?: boolean
+          can_manage_reviews?: boolean
+          can_manage_settings?: boolean
+          can_manage_tickets?: boolean
+          can_manage_users?: boolean
+          can_send_notifications?: boolean
+          can_verify_documents?: boolean
+          can_view_analytics?: boolean
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          can_manage_jobs?: boolean
+          can_manage_revenue?: boolean
+          can_manage_reviews?: boolean
+          can_manage_settings?: boolean
+          can_manage_tickets?: boolean
+          can_manage_users?: boolean
+          can_send_notifications?: boolean
+          can_verify_documents?: boolean
+          can_view_analytics?: boolean
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       agency_profiles: {
         Row: {
           agency_name: string
@@ -730,6 +778,68 @@ export type Database = {
           },
         ]
       }
+      payout_requests: {
+        Row: {
+          account_name: string | null
+          account_number: string
+          admin_notes: string | null
+          amount: number
+          bank_name: string | null
+          branch_name: string | null
+          created_at: string
+          id: string
+          payment_method: string
+          processed_at: string | null
+          processed_by: string | null
+          status: string
+          tutor_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          account_name?: string | null
+          account_number: string
+          admin_notes?: string | null
+          amount: number
+          bank_name?: string | null
+          branch_name?: string | null
+          created_at?: string
+          id?: string
+          payment_method?: string
+          processed_at?: string | null
+          processed_by?: string | null
+          status?: string
+          tutor_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          account_name?: string | null
+          account_number?: string
+          admin_notes?: string | null
+          amount?: number
+          bank_name?: string | null
+          branch_name?: string | null
+          created_at?: string
+          id?: string
+          payment_method?: string
+          processed_at?: string | null
+          processed_by?: string | null
+          status?: string
+          tutor_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payout_requests_tutor_id_fkey"
+            columns: ["tutor_id"]
+            isOneToOne: false
+            referencedRelation: "tutor_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       platform_settings: {
         Row: {
           description: string | null
@@ -825,6 +935,56 @@ export type Database = {
             columns: ["district_id"]
             isOneToOne: false
             referencedRelation: "districts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      refund_requests: {
+        Row: {
+          admin_notes: string | null
+          amount: number
+          created_at: string
+          demo_booking_id: string | null
+          id: string
+          parent_id: string
+          processed_at: string | null
+          processed_by: string | null
+          reason: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          amount: number
+          created_at?: string
+          demo_booking_id?: string | null
+          id?: string
+          parent_id: string
+          processed_at?: string | null
+          processed_by?: string | null
+          reason: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          admin_notes?: string | null
+          amount?: number
+          created_at?: string
+          demo_booking_id?: string | null
+          id?: string
+          parent_id?: string
+          processed_at?: string | null
+          processed_by?: string | null
+          reason?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "refund_requests_demo_booking_id_fkey"
+            columns: ["demo_booking_id"]
+            isOneToOne: false
+            referencedRelation: "demo_bookings"
             referencedColumns: ["id"]
           },
         ]
@@ -1035,6 +1195,103 @@ export type Database = {
           priority_support?: boolean | null
         }
         Relationships: []
+      }
+      support_tickets: {
+        Row: {
+          admin_notes: string | null
+          assigned_to: string | null
+          category: string
+          created_at: string
+          description: string
+          id: string
+          priority: string
+          related_job_id: string | null
+          related_user_id: string | null
+          resolved_at: string | null
+          status: string
+          subject: string
+          ticket_number: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          assigned_to?: string | null
+          category?: string
+          created_at?: string
+          description: string
+          id?: string
+          priority?: string
+          related_job_id?: string | null
+          related_user_id?: string | null
+          resolved_at?: string | null
+          status?: string
+          subject: string
+          ticket_number?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          admin_notes?: string | null
+          assigned_to?: string | null
+          category?: string
+          created_at?: string
+          description?: string
+          id?: string
+          priority?: string
+          related_job_id?: string | null
+          related_user_id?: string | null
+          resolved_at?: string | null
+          status?: string
+          subject?: string
+          ticket_number?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "support_tickets_related_job_id_fkey"
+            columns: ["related_job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ticket_messages: {
+        Row: {
+          created_at: string
+          id: string
+          is_admin: boolean
+          message: string
+          sender_id: string
+          ticket_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_admin?: boolean
+          message: string
+          sender_id: string
+          ticket_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_admin?: boolean
+          message?: string
+          sender_id?: string
+          ticket_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ticket_messages_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "support_tickets"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       tutor_profiles: {
         Row: {

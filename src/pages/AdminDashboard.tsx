@@ -27,8 +27,12 @@ import {
   Clock, AlertTriangle, BarChart3, FileText, Settings, Search,
   Eye, Ban, UserCheck, FileCheck,
   LogOut, Home, Star, DollarSign, Trash2, CreditCard, Megaphone, Send, Mail,
-  Package, Plus, Pencil, ToggleLeft, ToggleRight
+  Package, Plus, Pencil, ToggleLeft, ToggleRight, Wallet, MapPin, LifeBuoy, ShieldCheck
 } from 'lucide-react';
+import { RevenuePayoutTab } from '@/components/admin/RevenuePayoutTab';
+import { SupportTicketsTab } from '@/components/admin/SupportTicketsTab';
+import { GeographicHeatmapTab } from '@/components/admin/GeographicHeatmapTab';
+import { SubAdminRBACTab } from '@/components/admin/SubAdminRBACTab';
 
 // ──────────── Types ────────────
 interface Stats {
@@ -990,8 +994,12 @@ export default function AdminDashboard() {
     { title: 'Payments', value: 'payments', icon: CreditCard },
     { title: 'Subscriptions', value: 'subscriptions', icon: Package },
     { title: 'Demo Requests', value: 'demo_requests', icon: GraduationCap },
+    { title: 'Revenue & Payouts', value: 'revenue', icon: Wallet },
+    { title: 'Support Tickets', value: 'tickets', icon: LifeBuoy },
+    { title: 'Geographic Analytics', value: 'geographic', icon: MapPin },
     { title: 'Contact Messages', value: 'contacts', icon: Mail },
     { title: 'Broadcast', value: 'broadcast', icon: Megaphone },
+    { title: 'Sub-Admin Roles', value: 'rbac', icon: ShieldCheck },
     { title: 'Settings', value: 'settings', icon: Settings },
   ];
 
@@ -1614,11 +1622,23 @@ export default function AdminDashboard() {
             {/* ═══════ DEMO REQUESTS TAB ═══════ */}
             {activeTab === 'demo_requests' && <DemoRequestsTab toast={toast} />}
 
+            {/* ═══════ REVENUE & PAYOUTS TAB ═══════ */}
+            {activeTab === 'revenue' && <RevenuePayoutTab toast={toast} />}
+
+            {/* ═══════ SUPPORT TICKETS TAB ═══════ */}
+            {activeTab === 'tickets' && <SupportTicketsTab toast={toast} />}
+
+            {/* ═══════ GEOGRAPHIC ANALYTICS TAB ═══════ */}
+            {activeTab === 'geographic' && <GeographicHeatmapTab toast={toast} />}
+
             {/* ═══════ CONTACT MESSAGES TAB ═══════ */}
             {activeTab === 'contacts' && <ContactMessagesTab toast={toast} />}
 
             {/* ═══════ BROADCAST TAB ═══════ */}
             {activeTab === 'broadcast' && <BroadcastTab toast={toast} />}
+
+            {/* ═══════ SUB-ADMIN RBAC TAB ═══════ */}
+            {activeTab === 'rbac' && <SubAdminRBACTab toast={toast} />}
 
             {/* ═══════ SETTINGS TAB ═══════ */}
             {activeTab === 'settings' && (
