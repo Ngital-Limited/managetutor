@@ -17,7 +17,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { formatDistanceToNow } from 'date-fns';
 import {
-  GraduationCap, ArrowLeft, Globe, MapPin, BookOpen, Calendar, Users,
+  GraduationCap, ArrowLeft, Globe, MapPin, BookOpen, Calendar, Users, User,
   DollarSign, Clock, CheckCircle2, XCircle, Send, Star, MessageSquare,
   Briefcase, UserCheck, Phone, Mail
 } from 'lucide-react';
@@ -404,8 +404,9 @@ export default function JobDetails() {
                     </h3>
                     <p className="text-sm text-muted-foreground">{job.location_details}</p>
                   </div>
-                )
-                </div>
+                  </div>
+                )}
+
 
                 {job.special_requirements && (
                   <div className="mt-6 p-4 bg-muted/50 rounded-lg">
