@@ -13,7 +13,7 @@ import { formatDistanceToNow } from 'date-fns';
 import {
   GraduationCap, Globe, MapPin, Star, CheckCircle2, Clock, Heart,
   Briefcase, BookOpen, User, Calendar, DollarSign,
-  Award, Users, ArrowLeft, Share2
+  Award, Users, ArrowLeft, Share2, Video, Lightbulb, Trophy
 } from 'lucide-react';
 import BookDemoClassDialog from '@/components/BookDemoClassDialog';
 
