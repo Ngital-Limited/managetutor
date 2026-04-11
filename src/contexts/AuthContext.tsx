@@ -5,11 +5,19 @@ import { lovable } from '@/integrations/lovable/index';
 
 type AppRole = 'parent' | 'tutor' | 'agency' | 'admin';
 
+interface UserProfile {
+  full_name: string;
+  avatar_url: string | null;
+  phone: string | null;
+}
+
 interface AuthContextType {
   user: User | null;
   session: Session | null;
   role: AppRole | null;
+  profile: UserProfile | null;
   loading: boolean;
+  refreshProfile: () => Promise<void>;
   signUp: (email: string, password: string, fullName: string, role: AppRole) => Promise<{ error: Error | null }>;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signInWithGoogle: () => Promise<{ error: Error | null }>;
@@ -22,6 +30,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [role, setRole] = useState<AppRole | null>(null);
+  const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -34,11 +43,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // Defer role fetching with setTimeout to prevent deadlock
         if (session?.user) {
           setTimeout(async () => {
-            await fetchUserRole(session.user.id);
+            await Promise.all([
+              fetchUserRole(session.user.id),
+              fetchProfile(session.user.id),
+            ]);
             setLoading(false);
           }, 0);
         } else {
           setRole(null);
+          setProfile(null);
           setLoading(false);
         }
       }
@@ -49,7 +62,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
-        await fetchUserRole(session.user.id);
+        await Promise.all([
+          fetchUserRole(session.user.id),
+          fetchProfile(session.user.id),
+        ]);
       }
       setLoading(false);
     });
@@ -66,6 +82,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     
     if (data && !error) {
       setRole(data.role as AppRole);
+    }
+  };
+
+  const fetchProfile = async (userId: string) => {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('full_name, avatar_url, phone')
+      .eq('id', userId)
+      .single();
+    
+    if (data && !error) {
+      setProfile(data as UserProfile);
+    }
+  };
+
+  const refreshProfile = async () => {
+    if (user) {
+      await fetchProfile(user.id);
     }
   };
 
@@ -139,6 +173,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
     setSession(null);
     setRole(null);
+    setProfile(null);
   };
 
   return (
@@ -146,7 +181,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       user,
       session,
       role,
+      profile,
       loading,
+      refreshProfile,
       signUp,
       signIn,
       signInWithGoogle,

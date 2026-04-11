@@ -1,17 +1,26 @@
 import { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Logo } from '@/components/Logo';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { Globe, Menu, X, ChevronRight } from 'lucide-react';
+import { Globe, Menu, X, LayoutDashboard, LogOut, User } from 'lucide-react';
 
 export function Header() {
   const { t, language, setLanguage } = useLanguage();
-  const { user } = useAuth();
+  const { user, profile, signOut } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 10);
@@ -19,7 +28,6 @@ export function Header() {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  // Close mobile menu on route change
   useEffect(() => {
     setMobileOpen(false);
   }, [location.pathname]);
@@ -33,6 +41,18 @@ export function Header() {
 
   const isActive = (path: string) => location.pathname === path;
 
+  const initials = profile?.full_name
+    ?.split(' ')
+    .map((n) => n[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2) || user?.email?.[0]?.toUpperCase() || '?';
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/');
+  };
+
   return (
     <>
       <nav
@@ -43,12 +63,10 @@ export function Header() {
         }`}
       >
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          {/* Logo */}
           <Link to="/" className="flex items-center gap-3 shrink-0">
             <Logo size="md" />
           </Link>
 
-          {/* Desktop nav */}
           <div className="hidden md:flex items-center gap-1">
             {navLinks.map((link) => (
               <Link
@@ -68,7 +86,6 @@ export function Header() {
             ))}
           </div>
 
-          {/* Right actions */}
           <div className="flex items-center gap-2">
             <Button
               variant="ghost"
@@ -83,12 +100,36 @@ export function Header() {
             {/* Desktop auth */}
             <div className="hidden md:flex items-center gap-2">
               {user ? (
-                <Link to="/dashboard">
-                  <Button size="sm" className="h-9 rounded-lg font-semibold shadow-sm">
-                    {t('nav.dashboard')}
-                    <ChevronRight className="h-3.5 w-3.5 ml-1" />
-                  </Button>
-                </Link>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button className="flex items-center gap-2.5 rounded-full p-1 pr-3 hover:bg-muted/60 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                      <Avatar className="h-8 w-8 border-2 border-primary/20">
+                        <AvatarImage src={profile?.avatar_url || undefined} alt={profile?.full_name || 'User'} />
+                        <AvatarFallback className="bg-primary/10 text-primary text-xs font-semibold">
+                          {initials}
+                        </AvatarFallback>
+                      </Avatar>
+                      <span className="text-sm font-medium text-foreground max-w-[120px] truncate">
+                        {profile?.full_name || user.email?.split('@')[0]}
+                      </span>
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-48">
+                    <DropdownMenuItem onClick={() => navigate('/dashboard')} className="cursor-pointer">
+                      <LayoutDashboard className="h-4 w-4 mr-2" />
+                      {t('nav.dashboard')}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate('/dashboard')} className="cursor-pointer">
+                      <User className="h-4 w-4 mr-2" />
+                      Profile
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer text-destructive focus:text-destructive">
+                      <LogOut className="h-4 w-4 mr-2" />
+                      Sign Out
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               ) : (
                 <>
                   <Link to="/auth">
@@ -128,6 +169,24 @@ export function Header() {
           />
           <div className="fixed top-16 left-0 right-0 z-50 md:hidden bg-card border-b border-border shadow-lg animate-in slide-in-from-top-2 duration-200">
             <div className="container mx-auto px-4 py-4 space-y-1">
+              {/* Mobile user info */}
+              {user && (
+                <div className="flex items-center gap-3 px-4 py-3 mb-2 bg-muted/40 rounded-xl">
+                  <Avatar className="h-10 w-10 border-2 border-primary/20">
+                    <AvatarImage src={profile?.avatar_url || undefined} alt={profile?.full_name || 'User'} />
+                    <AvatarFallback className="bg-primary/10 text-primary text-sm font-semibold">
+                      {initials}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-foreground truncate">
+                      {profile?.full_name || user.email?.split('@')[0]}
+                    </p>
+                    <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+                  </div>
+                </div>
+              )}
+
               {navLinks.map((link) => (
                 <Link
                   key={link.to}
@@ -148,12 +207,22 @@ export function Header() {
 
               <div className="pt-3 mt-2 border-t border-border space-y-2">
                 {user ? (
-                  <Link to="/dashboard" onClick={() => setMobileOpen(false)}>
-                    <Button className="w-full rounded-xl font-semibold shadow-sm">
-                      {t('nav.dashboard')}
-                      <ChevronRight className="h-4 w-4 ml-1" />
+                  <>
+                    <Link to="/dashboard" onClick={() => setMobileOpen(false)}>
+                      <Button variant="outline" className="w-full rounded-xl font-medium">
+                        <LayoutDashboard className="h-4 w-4 mr-2" />
+                        {t('nav.dashboard')}
+                      </Button>
+                    </Link>
+                    <Button
+                      variant="ghost"
+                      className="w-full rounded-xl font-medium text-destructive hover:text-destructive hover:bg-destructive/10"
+                      onClick={() => { setMobileOpen(false); handleSignOut(); }}
+                    >
+                      <LogOut className="h-4 w-4 mr-2" />
+                      Sign Out
                     </Button>
-                  </Link>
+                  </>
                 ) : (
                   <>
                     <Link to="/auth" onClick={() => setMobileOpen(false)}>
