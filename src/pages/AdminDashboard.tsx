@@ -26,7 +26,7 @@ import {
   GraduationCap, Shield, Users, Briefcase, CheckCircle2, XCircle,
   Clock, AlertTriangle, BarChart3, FileText, Settings, Search,
   Eye, Ban, UserCheck, FileCheck,
-  LogOut, Home, Star, DollarSign, Trash2, CreditCard, Megaphone, Send,
+  LogOut, Home, Star, DollarSign, Trash2, CreditCard, Megaphone, Send, Mail,
   Package, Plus, Pencil, ToggleLeft, ToggleRight
 } from 'lucide-react';
 
@@ -732,6 +732,7 @@ export default function AdminDashboard() {
     { title: 'Reviews', value: 'reviews', icon: Star },
     { title: 'Payments', value: 'payments', icon: CreditCard },
     { title: 'Subscriptions', value: 'subscriptions', icon: Package },
+    { title: 'Contact Messages', value: 'contacts', icon: Mail },
     { title: 'Broadcast', value: 'broadcast', icon: Megaphone },
     { title: 'Settings', value: 'settings', icon: Settings },
   ];
