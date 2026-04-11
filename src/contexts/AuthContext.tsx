@@ -43,11 +43,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // Defer role fetching with setTimeout to prevent deadlock
         if (session?.user) {
           setTimeout(async () => {
-            await fetchUserRole(session.user.id);
+            await Promise.all([
+              fetchUserRole(session.user.id),
+              fetchProfile(session.user.id),
+            ]);
             setLoading(false);
           }, 0);
         } else {
           setRole(null);
+          setProfile(null);
           setLoading(false);
         }
       }
