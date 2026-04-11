@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useToast } from '@/hooks/use-toast';
+import { Logo } from '@/components/Logo';
 import { GraduationCap, Users, Building2, Loader2, Mail, Lock, User, ArrowRight } from 'lucide-react';
 import { z } from 'zod';
 
@@ -99,10 +100,7 @@ export default function Auth() {
         </div>
         <div className="relative z-10 text-primary-foreground max-w-md">
           <div className="flex items-center gap-3 mb-8">
-            <div className="w-12 h-12 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
-              <GraduationCap className="h-7 w-7" />
-            </div>
-            <span className="font-bold text-2xl">Manage Tutor</span>
+            <Logo size="lg" />
           </div>
           <h1 className="text-4xl font-bold leading-tight mb-4">
             {isLogin ? 'Welcome back!' : 'Join our community'}
@@ -130,10 +128,7 @@ export default function Auth() {
         <div className="w-full max-w-[420px]">
           {/* Mobile logo */}
           <Link to="/" className="lg:hidden flex items-center gap-3 mb-10">
-            <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
-              <GraduationCap className="h-6 w-6 text-primary-foreground" />
-            </div>
-            <span className="font-bold text-xl text-foreground">Manage Tutor</span>
+            <Logo size="md" />
           </Link>
 
           <div className="mb-8">
