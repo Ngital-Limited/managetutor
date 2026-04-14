@@ -871,7 +871,7 @@ export default function AdminDashboard() {
       .from('jobs')
       .select('id, title, job_reference, status, teaching_mode, total_applications, created_at, districts (name_en), subjects (name_en), profiles:parent_id (full_name)')
       .order('created_at', { ascending: false }).limit(100);
-    if (jobStatusFilter !== 'all') query = query.eq('status', jobStatusFilter as 'open' | 'in_progress' | 'completed' | 'cancelled');
+    if (jobStatusFilter !== 'all') query = query.eq('status', jobStatusFilter as any);
     const { data } = await query;
     if (data) setJobs(data as unknown as JobRow[]);
   }, [jobStatusFilter]);
