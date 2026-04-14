@@ -1013,7 +1013,7 @@ export default function AdminDashboard() {
   const statusColor = (s: string) => {
     switch (s) {
       case 'open': case 'active': case 'approved': case 'completed': return 'bg-success/10 text-success border-success/20';
-      case 'pending': return 'bg-warning/10 text-warning border-warning/20';
+      case 'pending': case 'pending_approval': return 'bg-warning/10 text-warning border-warning/20';
       case 'rejected': case 'cancelled': case 'failed': return 'bg-destructive/10 text-destructive border-destructive/20';
       default: return 'bg-muted text-muted-foreground';
     }
