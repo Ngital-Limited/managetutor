@@ -1,4 +1,7 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
+import { Calendar as CalendarComponent } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { cn } from '@/lib/utils';
 import { Logo } from '@/components/Logo';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -238,6 +241,14 @@ export default function ParentDashboard() {
   const [reportTargetApp, setReportTargetApp] = useState<Application | null>(null);
   const [reportDescription, setReportDescription] = useState('');
   const [reportType, setReportType] = useState('no_show');
+
+  // Interview scheduling state
+  const [interviewDialogOpen, setInterviewDialogOpen] = useState(false);
+  const [interviewApp, setInterviewApp] = useState<Application | null>(null);
+  const [interviewDate, setInterviewDate] = useState<Date | undefined>(undefined);
+  const [interviewTime, setInterviewTime] = useState('');
+  const [interviewNotes, setInterviewNotes] = useState('');
+  const [schedulingInterview, setSchedulingInterview] = useState(false);
 
   const [jobForm, setJobForm] = useState({
     title: '',
@@ -521,20 +532,51 @@ export default function ParentDashboard() {
     }
   };
 
-  const handleInviteToInterview = async (app: Application) => {
-    if (!selectedJob || !app.tutor_profiles?.user_id) return;
-    const { error } = await supabase.from('notifications').insert({
-      user_id: app.tutor_profiles.user_id,
-      title: 'Interview Invitation',
-      message: `You have been shortlisted for "${selectedJob.title}". The parent would like to schedule a demo class with you.`,
+  const handleInviteToInterview = (app: Application) => {
+    setInterviewApp(app);
+    setInterviewDate(undefined);
+    setInterviewTime('');
+    setInterviewNotes('');
+    setInterviewDialogOpen(true);
+  };
+
+  const handleScheduleInterview = async () => {
+    if (!selectedJob || !interviewApp?.tutor_profiles?.user_id || !interviewDate || !interviewTime) {
+      toast({ title: 'Missing info', description: 'Please select a date and time', variant: 'destructive' });
+      return;
+    }
+    setSchedulingInterview(true);
+    const formattedDate = format(interviewDate, 'yyyy-MM-dd');
+
+    // Create a demo booking for the interview
+    const { error: bookingError } = await supabase.from('demo_bookings').insert({
+      parent_id: user!.id,
+      tutor_id: interviewApp.tutor_profiles.id,
+      preferred_date: formattedDate,
+      preferred_time: interviewTime,
+      notes: interviewNotes || null,
+      class_fee: 0,
+      status: 'pending',
+      subject_id: selectedJob.subject_ids?.[0] || null,
+    });
+
+    // Notify the tutor
+    const { error: notifError } = await supabase.from('notifications').insert({
+      user_id: interviewApp.tutor_profiles.user_id,
+      title: 'Interview/Demo Class Invitation',
+      message: `You have been invited for a demo class for "${selectedJob.title}" on ${format(interviewDate, 'PPP')} at ${interviewTime}.${interviewNotes ? ' Notes: ' + interviewNotes : ''}`,
       type: 'interview_invite',
       reference_id: selectedJob.id,
     });
-    if (error) {
-      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+
+    if (bookingError || notifError) {
+      toast({ title: 'Error', description: (bookingError || notifError)?.message, variant: 'destructive' });
     } else {
-      toast({ title: 'Invitation Sent', description: 'The tutor has been notified about the interview.' });
+      toast({ title: 'Interview Scheduled!', description: `Demo class scheduled for ${format(interviewDate, 'PPP')} at ${interviewTime}` });
+      setInterviewDialogOpen(false);
+      setInterviewApp(null);
     }
+    setSchedulingInterview(false);
   };
 
   const handleReportIssue = async () => {
@@ -981,6 +1023,92 @@ export default function ParentDashboard() {
     </Dialog>
   );
 
+  // ─── Interview Scheduling Dialog ───
+  const interviewDialog = (
+    <Dialog open={interviewDialogOpen} onOpenChange={setInterviewDialogOpen}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Calendar className="h-5 w-5 text-primary" />
+            Schedule Interview / Demo Class
+          </DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4">
+          {interviewApp && (
+            <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
+              <Avatar className="h-10 w-10">
+                <AvatarImage src={interviewApp.tutor_profiles?.profiles?.avatar_url} />
+                <AvatarFallback>{interviewApp.tutor_profiles?.profiles?.full_name?.charAt(0)}</AvatarFallback>
+              </Avatar>
+              <div>
+                <p className="font-medium text-sm">{interviewApp.tutor_profiles?.profiles?.full_name}</p>
+                <p className="text-xs text-muted-foreground">For: {selectedJob?.title}</p>
+              </div>
+            </div>
+          )}
+          <div>
+            <Label className="mb-2 block">Select Date</Label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !interviewDate && "text-muted-foreground")}>
+                  <Calendar className="mr-2 h-4 w-4" />
+                  {interviewDate ? format(interviewDate, 'PPP') : 'Pick a date'}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <CalendarComponent
+                  mode="single"
+                  selected={interviewDate}
+                  onSelect={setInterviewDate}
+                  disabled={(date) => date < new Date()}
+                  initialFocus
+                  className={cn("p-3 pointer-events-auto")}
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+          <div>
+            <Label className="mb-2 block">Select Time</Label>
+            <Select value={interviewTime} onValueChange={setInterviewTime}>
+              <SelectTrigger><SelectValue placeholder="Choose a time slot" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="8:00 AM">8:00 AM</SelectItem>
+                <SelectItem value="9:00 AM">9:00 AM</SelectItem>
+                <SelectItem value="10:00 AM">10:00 AM</SelectItem>
+                <SelectItem value="11:00 AM">11:00 AM</SelectItem>
+                <SelectItem value="12:00 PM">12:00 PM</SelectItem>
+                <SelectItem value="2:00 PM">2:00 PM</SelectItem>
+                <SelectItem value="3:00 PM">3:00 PM</SelectItem>
+                <SelectItem value="4:00 PM">4:00 PM</SelectItem>
+                <SelectItem value="5:00 PM">5:00 PM</SelectItem>
+                <SelectItem value="6:00 PM">6:00 PM</SelectItem>
+                <SelectItem value="7:00 PM">7:00 PM</SelectItem>
+                <SelectItem value="8:00 PM">8:00 PM</SelectItem>
+                <SelectItem value="9:00 PM">9:00 PM</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <Label className="mb-2 block">Notes (optional)</Label>
+            <Textarea
+              value={interviewNotes}
+              onChange={(e) => setInterviewNotes(e.target.value)}
+              placeholder="Any specific topics to cover, location details, etc."
+              rows={3}
+            />
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => setInterviewDialogOpen(false)}>Cancel</Button>
+          <Button onClick={handleScheduleInterview} disabled={schedulingInterview || !interviewDate || !interviewTime}>
+            <Send className="h-4 w-4 mr-2" />
+            {schedulingInterview ? 'Scheduling...' : 'Schedule & Notify Tutor'}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+
   // ─── Render section content ───
   const renderOverview = () => (
     <>
@@ -1409,25 +1537,33 @@ export default function ParentDashboard() {
                       )}
 
                       {app.status === 'accepted' && (
-                        <div className="flex items-center gap-2 mt-4 pt-4 border-t flex-wrap">
-                          <Link to={`/tutor/${tutor?.id}`}>
-                            <Button size="sm" variant="outline">
-                              <Eye className="h-4 w-4 mr-1" />
-                              View Public Profile
+                        <div className="mt-4 pt-4 border-t space-y-3">
+                          <div className="flex items-center gap-2">
+                            <Badge className="bg-success/10 text-success border-success/20">
+                              <CheckCircle2 className="h-3.5 w-3.5 mr-1" /> Hired
+                            </Badge>
+                            <span className="text-xs text-muted-foreground">This tutor has been assigned to your job.</span>
+                          </div>
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <Link to={`/tutor/${tutor?.id}`}>
+                              <Button size="sm" variant="outline">
+                                <Eye className="h-4 w-4 mr-1" />
+                                View Profile
+                              </Button>
+                            </Link>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="text-destructive"
+                              onClick={() => {
+                                setReportTargetApp(app);
+                                setReportDialogOpen(true);
+                              }}
+                            >
+                              <Flag className="h-4 w-4 mr-1" />
+                              Report Issue
                             </Button>
-                          </Link>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="text-destructive"
-                            onClick={() => {
-                              setReportTargetApp(app);
-                              setReportDialogOpen(true);
-                            }}
-                          >
-                            <Flag className="h-4 w-4 mr-1" />
-                            Report Issue
-                          </Button>
+                          </div>
                         </div>
                       )}
                     </div>
@@ -1719,6 +1855,7 @@ export default function ParentDashboard() {
 
       {postJobDialog}
       {reportDialog}
+      {interviewDialog}
     </SidebarProvider>
   );
 }
