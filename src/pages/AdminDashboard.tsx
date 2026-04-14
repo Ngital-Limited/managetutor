@@ -372,9 +372,29 @@ function DemoRequestsTab({ toast }: { toast: ReturnType<typeof useToast>['toast'
     setLoading(true);
     const { data } = await supabase
       .from('demo_bookings')
-      .select('*, subjects(name_en), tutor_profiles:tutor_id(id, display_name, profiles:user_id(full_name, email)), profiles:parent_id(full_name, email, phone)')
+      .select('*, subjects(name_en), tutor_id, parent_id')
       .order('created_at', { ascending: false });
-    setRequests(data || []);
+    if (data) {
+      const parentIds = [...new Set(data.map(d => d.parent_id))];
+      const tutorIds = [...new Set(data.map(d => d.tutor_id))];
+      const [{ data: parentProfs }, { data: tutorData }] = await Promise.all([
+        supabase.from('profiles').select('id, full_name, email, phone').in('id', parentIds),
+        supabase.from('tutor_profiles').select('id, user_id, display_name').in('id', tutorIds),
+      ]);
+      const parentMap = new Map(parentProfs?.map(p => [p.id, p]) || []);
+      const tutorUserIds = [...new Set(tutorData?.map(t => t.user_id) || [])];
+      const { data: tutorProfs } = await supabase.from('profiles').select('id, full_name').in('id', tutorUserIds);
+      const tutorProfMap = new Map(tutorProfs?.map(p => [p.id, p]) || []);
+      const tutorMap = new Map(tutorData?.map(t => [t.id, { ...t, profiles: tutorProfMap.get(t.user_id) || { full_name: t.display_name || 'Unknown' } }]) || []);
+      
+      setRequests(data.map(d => ({
+        ...d,
+        profiles: parentMap.get(d.parent_id) || { full_name: 'Unknown', email: '', phone: null },
+        tutor_profiles: tutorMap.get(d.tutor_id) || { id: d.tutor_id, display_name: 'Unknown', profiles: { full_name: 'Unknown' } },
+      })));
+    } else {
+      setRequests([]);
+    }
     setLoading(false);
   }, []);
 
