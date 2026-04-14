@@ -3,22 +3,22 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 
 export default function Dashboard() {
-  const { user, role, loading } = useAuth();
+  const { user, effectiveRole, loading } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
     if (!loading) {
       if (!user) {
         navigate('/auth');
-      } else if (role === 'tutor') {
+      } else if (effectiveRole === 'tutor') {
         navigate('/tutor/dashboard');
-      } else if (role === 'parent') {
+      } else if (effectiveRole === 'parent') {
         navigate('/parent/dashboard');
-      } else if (role === 'admin') {
+      } else if (effectiveRole === 'admin') {
         navigate('/admin');
       }
     }
-  }, [user, loading, role, navigate]);
+  }, [user, loading, effectiveRole, navigate]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background">
