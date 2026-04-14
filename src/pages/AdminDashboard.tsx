@@ -830,7 +830,7 @@ export default function AdminDashboard() {
 
   // ── Fetch functions per tab ──
   const fetchUsers = useCallback(async () => {
-    let query = supabase.from('profiles').select('id, full_name, email, phone, avatar_url, is_banned, created_at').order('created_at', { ascending: false }).limit(100);
+    let query = supabase.from('profiles').select('id, full_name, email, phone, avatar_url, is_banned, is_approved, created_at').order('created_at', { ascending: false }).limit(100);
     if (userSearch) query = query.or(`full_name.ilike.%${userSearch}%,email.ilike.%${userSearch}%,phone.ilike.%${userSearch}%`);
     const { data } = await query;
     if (!data) { setUsers([]); return; }
