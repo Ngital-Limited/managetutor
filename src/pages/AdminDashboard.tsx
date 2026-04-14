@@ -712,7 +712,7 @@ function SubscriptionPlansTab({ toast }: { toast: ReturnType<typeof useToast>['t
 
 // ──────────── Component ────────────
 export default function AdminDashboard() {
-  const { user, role, loading } = useAuth();
+  const { user, role, loading, impersonateUser, impersonation, stopImpersonation } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
 
