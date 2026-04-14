@@ -992,6 +992,37 @@ export default function AdminDashboard() {
     else { toast({ title: `Job status updated to ${status}` }); fetchJobs(); fetchStats(); }
   };
 
+  const openEditJob = async (jobId: string) => {
+    const { data } = await supabase.from('jobs').select('*').eq('id', jobId).single();
+    if (data) {
+      setEditingJob(data);
+      setEditJobForm({
+        title: data.title || '',
+        description: data.description || '',
+        status: data.status || 'open',
+        teaching_mode: data.teaching_mode || 'in_person',
+        budget_min: data.budget_min || 0,
+        budget_max: data.budget_max || 0,
+      });
+    }
+  };
+
+  const handleSaveJob = async () => {
+    if (!editingJob) return;
+    setProcessing(true);
+    const { error } = await supabase.from('jobs').update({
+      title: editJobForm.title,
+      description: editJobForm.description,
+      status: editJobForm.status as any,
+      teaching_mode: editJobForm.teaching_mode as any,
+      budget_min: editJobForm.budget_min || null,
+      budget_max: editJobForm.budget_max || null,
+    }).eq('id', editingJob.id);
+    if (error) toast({ title: 'Error', description: error.message, variant: 'destructive' });
+    else { toast({ title: 'Job updated successfully' }); setEditingJob(null); fetchJobs(); fetchStats(); }
+    setProcessing(false);
+  };
+
   if (loading || role !== 'admin') {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
