@@ -98,16 +98,30 @@ export function NotificationBell() {
       );
     }
 
-    // Navigate based on type
-    if (notification.reference_id) {
-      if (notification.type === 'new_job') {
-        navigate(`/jobs/${notification.reference_id}`);
-      } else {
-        // For application-related, go to dashboard
-        navigate('/dashboard');
-      }
-      setOpen(false);
+    // Navigate based on type and role
+    const ref = notification.reference_id;
+    const type = notification.type;
+
+    if (type === 'new_job' && ref) {
+      navigate(`/jobs/${ref}`);
+    } else if (type === 'application_received' && ref) {
+      // Parent received an application → go to parent dashboard with job context
+      navigate(`/parent-dashboard?job=${ref}`);
+    } else if ((type === 'application_accepted' || type === 'application_rejected') && ref) {
+      // Tutor's application status changed → go to tutor dashboard or job details
+      navigate(`/jobs/${ref}`);
+    } else if (type === 'interview_invite' && ref) {
+      // Tutor invited to interview → go to job details
+      navigate(`/jobs/${ref}`);
+    } else if (type === 'demo_booking' && ref) {
+      navigate('/dashboard');
+    } else if (type === 'hire' && ref) {
+      navigate(`/jobs/${ref}`);
+    } else {
+      // Fallback: go to dashboard
+      navigate('/dashboard');
     }
+    setOpen(false);
   };
 
   if (!user) return null;
