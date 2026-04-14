@@ -196,6 +196,11 @@ export default function ParentProfileEdit() {
                 <PhoneInput value={form.phone} onChange={(v) => setForm({ ...form, phone: v })} />
               </div>
               <div>
+                <Label className="flex items-center gap-1"><Mail className="h-3 w-3" /> Email Address</Label>
+                <Input value={form.email} disabled className="bg-muted/50" />
+                <p className="text-xs text-muted-foreground mt-1">Email is linked to your account and cannot be changed here.</p>
+              </div>
+              <div>
                 <Label className="flex items-center gap-1"><MapPin className="h-3 w-3" /> District</Label>
                 <Select value={form.district_id} onValueChange={(v) => setForm({ ...form, district_id: v, area_id: '' })}>
                   <SelectTrigger><SelectValue placeholder="Select district" /></SelectTrigger>
