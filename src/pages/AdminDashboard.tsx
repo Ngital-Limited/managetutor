@@ -793,6 +793,137 @@ export default function AdminDashboard() {
   const [editJobAreas, setEditJobAreas] = useState<{ id: string; name_en: string; district_id: string }[]>([]);
   const [editJobSubjects, setEditJobSubjects] = useState<{ id: string; name_en: string }[]>([]);
 
+  // Application viewer state
+  const [viewingJobApps, setViewingJobApps] = useState<{ jobId: string; jobTitle: string } | null>(null);
+  const [jobApplications, setJobApplications] = useState<JobApplication[]>([]);
+  const [loadingApps, setLoadingApps] = useState(false);
+  const [assignTutorSearch, setAssignTutorSearch] = useState('');
+  const [assignTutorResults, setAssignTutorResults] = useState<{ tutor_id: string; user_id: string; name: string; gender: string; experience: number }[]>([]);
+  const [searchingTutors, setSearchingTutors] = useState(false);
+
+  const fetchJobApplications = async (jobId: string) => {
+    setLoadingApps(true);
+    const { data } = await supabase
+      .from('applications')
+      .select('id, tutor_id, status, proposed_rate, cover_message, created_at')
+      .eq('job_id', jobId)
+      .order('created_at', { ascending: false });
+    if (data && data.length > 0) {
+      const tutorIds = [...new Set(data.map(a => a.tutor_id))];
+      const { data: tutors } = await supabase.from('tutor_profiles').select('id, user_id, gender, experience_years, verification_status').in('id', tutorIds);
+      const tutorUserIds = [...new Set(tutors?.map(t => t.user_id) || [])];
+      const { data: profs } = await supabase.from('profiles').select('id, full_name, email').in('id', tutorUserIds);
+      const profMap = new Map(profs?.map(p => [p.id, p]) || []);
+      const tutorMap = new Map(tutors?.map(t => [t.id, { ...t, profile: profMap.get(t.user_id) }]) || []);
+      setJobApplications(data.map(a => {
+        const t = tutorMap.get(a.tutor_id);
+        return {
+          ...a,
+          tutor_name: t?.profile?.full_name || 'Unknown',
+          tutor_email: t?.profile?.email || '',
+          tutor_gender: t?.gender || '',
+          tutor_experience: t?.experience_years || 0,
+          tutor_verification: t?.verification_status || 'pending',
+          tutor_user_id: t?.user_id || '',
+        };
+      }) as JobApplication[]);
+    } else {
+      setJobApplications([]);
+    }
+    setLoadingApps(false);
+  };
+
+  const handleAdminUpdateAppStatus = async (appId: string, status: 'accepted' | 'rejected', jobId: string) => {
+    setProcessing(true);
+    const { error } = await supabase.from('applications').update({ status: status as any }).eq('id', appId);
+    if (error) {
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+    } else {
+      // If accepting, also update job status to in_progress
+      if (status === 'accepted') {
+        await supabase.from('jobs').update({ status: 'in_progress' as any }).eq('id', jobId);
+      }
+      // Notify the tutor
+      const app = jobApplications.find(a => a.id === appId);
+      if (app?.tutor_user_id) {
+        const statusLabel = status === 'accepted' ? 'Congratulations! You have been assigned' : 'Your application was not selected';
+        await supabase.from('notifications').insert({
+          user_id: app.tutor_user_id,
+          title: statusLabel,
+          message: `For the job: ${viewingJobApps?.jobTitle || ''}`,
+          type: `application_${status}`,
+          reference_id: jobId,
+        });
+      }
+      toast({ title: `Application ${status}` });
+      fetchJobApplications(jobId);
+      fetchJobs();
+      fetchStats();
+    }
+    setProcessing(false);
+  };
+
+  const handleSearchTutors = async (query: string) => {
+    setAssignTutorSearch(query);
+    if (query.length < 2) { setAssignTutorResults([]); return; }
+    setSearchingTutors(true);
+    const { data: profs } = await supabase.from('profiles').select('id, full_name').ilike('full_name', `%${query}%`).limit(10);
+    if (profs && profs.length > 0) {
+      const profIds = profs.map(p => p.id);
+      const { data: tutors } = await supabase.from('tutor_profiles').select('id, user_id, gender, experience_years').in('user_id', profIds);
+      const profMap = new Map(profs.map(p => [p.id, p]));
+      setAssignTutorResults(tutors?.map(t => ({
+        tutor_id: t.id,
+        user_id: t.user_id,
+        name: profMap.get(t.user_id)?.full_name || 'Unknown',
+        gender: t.gender,
+        experience: t.experience_years || 0,
+      })) || []);
+    } else {
+      setAssignTutorResults([]);
+    }
+    setSearchingTutors(false);
+  };
+
+  const handleAssignTutor = async (tutorId: string, tutorUserId: string, tutorName: string) => {
+    if (!viewingJobApps) return;
+    // Check if already applied
+    const existing = jobApplications.find(a => a.tutor_id === tutorId);
+    if (existing) {
+      toast({ title: 'Already applied', description: `${tutorName} has already applied to this job`, variant: 'destructive' });
+      return;
+    }
+    setProcessing(true);
+    // Create an application with accepted status
+    const { error } = await supabase.from('applications').insert({
+      job_id: viewingJobApps.jobId,
+      tutor_id: tutorId,
+      status: 'accepted' as any,
+      cover_message: 'Assigned by admin',
+    });
+    if (error) {
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+    } else {
+      // Update job status to in_progress
+      await supabase.from('jobs').update({ status: 'in_progress' as any }).eq('id', viewingJobApps.jobId);
+      // Notify tutor
+      await supabase.from('notifications').insert({
+        user_id: tutorUserId,
+        title: 'You have been assigned to a job!',
+        message: `Admin has assigned you to: ${viewingJobApps.jobTitle}`,
+        type: 'application_accepted',
+        reference_id: viewingJobApps.jobId,
+      });
+      toast({ title: 'Tutor assigned successfully' });
+      setAssignTutorSearch('');
+      setAssignTutorResults([]);
+      fetchJobApplications(viewingJobApps.jobId);
+      fetchJobs();
+      fetchStats();
+    }
+    setProcessing(false);
+  };
+
   useEffect(() => {
     if (!loading) {
       if (!user) navigate('/auth');
