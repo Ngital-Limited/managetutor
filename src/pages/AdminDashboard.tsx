@@ -45,11 +45,27 @@ interface Stats {
   activeJobs: number;
   totalJobs: number;
   completedJobs: number;
+  acceptedJobs: number;
   pendingReports: number;
   totalReviews: number;
   totalRevenue: number;
   pendingJobs: number;
   pendingUsers: number;
+}
+
+interface JobApplication {
+  id: string;
+  tutor_id: string;
+  status: string;
+  proposed_rate: number | null;
+  cover_message: string | null;
+  created_at: string;
+  tutor_name: string;
+  tutor_email: string;
+  tutor_gender: string;
+  tutor_experience: number;
+  tutor_verification: string;
+  tutor_user_id: string;
 }
 
 interface UserRow {
