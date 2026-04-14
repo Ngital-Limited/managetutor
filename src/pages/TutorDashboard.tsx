@@ -159,7 +159,18 @@ export default function TutorDashboard() {
   const { user, signOut, loading: authLoading } = useAuth();
   const { t } = useLanguage();
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
+
+  // Scroll to hash section when route changes
+  useEffect(() => {
+    if (location.hash) {
+      setTimeout(() => {
+        const el = document.getElementById(location.hash.slice(1));
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 300);
+    }
+  }, [location.hash]);
 
   const [loading, setLoading] = useState(true);
   const [applications, setApplications] = useState<Application[]>([]);
