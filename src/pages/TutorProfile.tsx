@@ -56,6 +56,9 @@ export default function TutorProfile() {
   const { t } = useLanguage();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { userId: adminEditUserId } = useParams<{ userId: string }>();
+  const isAdminEdit = role === 'admin' && !!adminEditUserId;
+  const targetUserId = isAdminEdit ? adminEditUserId : user?.id;
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
