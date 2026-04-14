@@ -889,6 +889,7 @@ export type Database = {
           full_name: string
           full_name_bn: string | null
           id: string
+          is_approved: boolean | null
           is_banned: boolean | null
           phone: string | null
           phone_verified: boolean | null
@@ -908,6 +909,7 @@ export type Database = {
           full_name: string
           full_name_bn?: string | null
           id: string
+          is_approved?: boolean | null
           is_banned?: boolean | null
           phone?: string | null
           phone_verified?: boolean | null
@@ -927,6 +929,7 @@ export type Database = {
           full_name?: string
           full_name_bn?: string | null
           id?: string
+          is_approved?: boolean | null
           is_banned?: boolean | null
           phone?: string | null
           phone_verified?: boolean | null
