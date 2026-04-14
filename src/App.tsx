@@ -39,8 +39,8 @@ const App = () => (
         <TooltipProvider>
           <Toaster />
           <Sonner />
-          <ImpersonationBanner />
           <BrowserRouter>
+            <ImpersonationBanner />
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/tutors" element={<FindTutors />} />
