@@ -889,6 +889,7 @@ export type Database = {
           full_name: string
           full_name_bn: string | null
           id: string
+          is_approved: boolean | null
           is_banned: boolean | null
           phone: string | null
           phone_verified: boolean | null
@@ -908,6 +909,7 @@ export type Database = {
           full_name: string
           full_name_bn?: string | null
           id: string
+          is_approved?: boolean | null
           is_banned?: boolean | null
           phone?: string | null
           phone_verified?: boolean | null
@@ -927,6 +929,7 @@ export type Database = {
           full_name?: string
           full_name_bn?: string | null
           id?: string
+          is_approved?: boolean | null
           is_banned?: boolean | null
           phone?: string | null
           phone_verified?: boolean | null
@@ -1714,7 +1717,12 @@ export type Database = {
       app_role: "parent" | "tutor" | "agency" | "admin"
       application_status: "pending" | "accepted" | "rejected" | "withdrawn"
       gender: "male" | "female" | "any"
-      job_status: "open" | "in_progress" | "completed" | "cancelled"
+      job_status:
+        | "pending_approval"
+        | "open"
+        | "in_progress"
+        | "completed"
+        | "cancelled"
       teaching_mode: "online" | "in_person" | "hybrid"
       verification_status: "pending" | "approved" | "rejected"
     }
@@ -1847,7 +1855,13 @@ export const Constants = {
       app_role: ["parent", "tutor", "agency", "admin"],
       application_status: ["pending", "accepted", "rejected", "withdrawn"],
       gender: ["male", "female", "any"],
-      job_status: ["open", "in_progress", "completed", "cancelled"],
+      job_status: [
+        "pending_approval",
+        "open",
+        "in_progress",
+        "completed",
+        "cancelled",
+      ],
       teaching_mode: ["online", "in_person", "hybrid"],
       verification_status: ["pending", "approved", "rejected"],
     },

@@ -46,6 +46,8 @@ interface Stats {
   pendingReports: number;
   totalReviews: number;
   totalRevenue: number;
+  pendingJobs: number;
+  pendingUsers: number;
 }
 
 interface UserRow {
@@ -55,6 +57,7 @@ interface UserRow {
   phone: string | null;
   avatar_url: string | null;
   is_banned: boolean;
+  is_approved: boolean;
   created_at: string;
   role?: string;
 }
@@ -716,7 +719,7 @@ export default function AdminDashboard() {
   const [stats, setStats] = useState<Stats>({
     totalUsers: 0, totalTutors: 0, totalParents: 0,
     pendingVerifications: 0, activeJobs: 0, totalJobs: 0, completedJobs: 0,
-    pendingReports: 0, totalReviews: 0, totalRevenue: 0,
+    pendingReports: 0, totalReviews: 0, totalRevenue: 0, pendingJobs: 0, pendingUsers: 0,
   });
 
   // Data states
@@ -764,6 +767,8 @@ export default function AdminDashboard() {
       { count: completedJobs },
       { count: pendingReports },
       { count: totalReviews },
+      { count: pendingJobs },
+      { count: pendingUsers },
     ] = await Promise.all([
       supabase.from('profiles').select('id', { count: 'exact', head: true }),
       supabase.from('tutor_profiles').select('id', { count: 'exact', head: true }),
@@ -774,6 +779,8 @@ export default function AdminDashboard() {
       supabase.from('jobs').select('id', { count: 'exact', head: true }).eq('status', 'completed'),
       supabase.from('reports').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
       supabase.from('reviews').select('id', { count: 'exact', head: true }),
+      supabase.from('jobs').select('id', { count: 'exact', head: true }).eq('status', 'pending_approval' as any),
+      supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('is_approved', false),
     ]);
 
     const { data: rev } = await supabase.from('payment_transactions').select('amount').eq('status', 'completed');
@@ -784,6 +791,7 @@ export default function AdminDashboard() {
       pendingVerifications: pendingVerifications || 0, activeJobs: activeJobs || 0,
       totalJobs: totalJobs || 0, completedJobs: completedJobs || 0,
       pendingReports: pendingReports || 0, totalReviews: totalReviews || 0, totalRevenue,
+      pendingJobs: pendingJobs || 0, pendingUsers: pendingUsers || 0,
     });
   };
 
@@ -822,7 +830,7 @@ export default function AdminDashboard() {
 
   // ── Fetch functions per tab ──
   const fetchUsers = useCallback(async () => {
-    let query = supabase.from('profiles').select('id, full_name, email, phone, avatar_url, is_banned, created_at').order('created_at', { ascending: false }).limit(100);
+    let query = supabase.from('profiles').select('id, full_name, email, phone, avatar_url, is_banned, is_approved, created_at').order('created_at', { ascending: false }).limit(100);
     if (userSearch) query = query.or(`full_name.ilike.%${userSearch}%,email.ilike.%${userSearch}%,phone.ilike.%${userSearch}%`);
     const { data } = await query;
     if (!data) { setUsers([]); return; }
@@ -863,7 +871,7 @@ export default function AdminDashboard() {
       .from('jobs')
       .select('id, title, job_reference, status, teaching_mode, total_applications, created_at, districts (name_en), subjects (name_en), profiles:parent_id (full_name)')
       .order('created_at', { ascending: false }).limit(100);
-    if (jobStatusFilter !== 'all') query = query.eq('status', jobStatusFilter as 'open' | 'in_progress' | 'completed' | 'cancelled');
+    if (jobStatusFilter !== 'all') query = query.eq('status', jobStatusFilter as any);
     const { data } = await query;
     if (data) setJobs(data as unknown as JobRow[]);
   }, [jobStatusFilter]);
@@ -922,6 +930,12 @@ export default function AdminDashboard() {
     setProcessing(false);
   };
 
+  const handleApproveUser = async (userId: string) => {
+    const { error } = await supabase.from('profiles').update({ is_approved: true }).eq('id', userId);
+    if (error) toast({ title: 'Error', description: error.message, variant: 'destructive' });
+    else { toast({ title: 'User approved' }); fetchUsers(); fetchStats(); }
+  };
+
   const handleBanUser = async (userId: string, ban: boolean) => {
     setProcessing(true);
     const { error } = await supabase.from('profiles').update({
@@ -970,8 +984,8 @@ export default function AdminDashboard() {
     else { toast({ title: `Review ${approved ? 'approved' : 'hidden'}` }); fetchReviews(); }
   };
 
-  const handleUpdateJobStatus = async (jobId: string, status: 'open' | 'in_progress' | 'completed' | 'cancelled') => {
-    const { error } = await supabase.from('jobs').update({ status }).eq('id', jobId);
+  const handleUpdateJobStatus = async (jobId: string, status: string) => {
+    const { error } = await supabase.from('jobs').update({ status: status as any }).eq('id', jobId);
     if (error) toast({ title: 'Error', description: error.message, variant: 'destructive' });
     else { toast({ title: `Job status updated to ${status}` }); fetchJobs(); fetchStats(); }
   };
@@ -1006,7 +1020,7 @@ export default function AdminDashboard() {
   const statusColor = (s: string) => {
     switch (s) {
       case 'open': case 'active': case 'approved': case 'completed': return 'bg-success/10 text-success border-success/20';
-      case 'pending': return 'bg-warning/10 text-warning border-warning/20';
+      case 'pending': case 'pending_approval': return 'bg-warning/10 text-warning border-warning/20';
       case 'rejected': case 'cancelled': case 'failed': return 'bg-destructive/10 text-destructive border-destructive/20';
       default: return 'bg-muted text-muted-foreground';
     }
@@ -1091,6 +1105,8 @@ export default function AdminDashboard() {
                     { label: 'Active Jobs', value: stats.activeJobs, icon: Briefcase, color: 'text-accent' },
                     { label: 'Completed Jobs', value: stats.completedJobs, icon: CheckCircle2, color: 'text-success' },
                     { label: 'Pending Verifications', value: stats.pendingVerifications, icon: Clock, color: 'text-warning', action: () => setActiveTab('verifications') },
+                    { label: 'Pending Jobs', value: stats.pendingJobs, icon: Clock, color: 'text-warning', action: () => { setJobStatusFilter('pending_approval'); setActiveTab('jobs'); } },
+                    { label: 'Pending Users', value: stats.pendingUsers, icon: Clock, color: 'text-warning', action: () => setActiveTab('users') },
                     { label: 'Pending Reports', value: stats.pendingReports, icon: AlertTriangle, color: 'text-destructive', action: () => setActiveTab('reports') },
                     { label: 'Total Reviews', value: stats.totalReviews, icon: Star, color: 'text-accent' },
                     { label: 'Total Jobs', value: stats.totalJobs, icon: FileText, color: 'text-muted-foreground' },
@@ -1112,8 +1128,10 @@ export default function AdminDashboard() {
                   <CardContent>
                     <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
                       {[
+                        { label: 'Approve Jobs', icon: FileCheck, action: () => { setJobStatusFilter('pending_approval'); setActiveTab('jobs'); }, count: stats.pendingJobs },
                         { label: 'Review Verifications', icon: UserCheck, action: () => setActiveTab('verifications'), count: stats.pendingVerifications },
                         { label: 'Handle Reports', icon: AlertTriangle, action: () => setActiveTab('reports'), count: stats.pendingReports },
+                        { label: 'Approve Users', icon: Users, action: () => setActiveTab('users'), count: stats.pendingUsers },
                         { label: 'Manage Users', icon: Users, action: () => setActiveTab('users') },
                         { label: 'View Payments', icon: CreditCard, action: () => setActiveTab('payments') },
                       ].map((a, i) => (
@@ -1249,8 +1267,10 @@ export default function AdminDashboard() {
                               <TableCell>
                                 {u.is_banned ? (
                                   <Badge variant="destructive" className="text-xs">Banned</Badge>
+                                ) : !u.is_approved ? (
+                                  <Badge className="bg-warning/10 text-warning border-warning/20 text-xs">Pending Approval</Badge>
                                 ) : (
-                                  <Badge className="bg-success/10 text-success border-success/20 text-xs">Active</Badge>
+                                  <Badge className="bg-success/10 text-success border-success/20 text-xs">Approved</Badge>
                                 )}
                               </TableCell>
                               <TableCell className="text-xs text-muted-foreground">{formatDistanceToNow(new Date(u.created_at), { addSuffix: true })}</TableCell>
@@ -1258,6 +1278,11 @@ export default function AdminDashboard() {
                                 <div className="flex gap-1 justify-end">
                                   {u.role === 'tutor' && (
                                     <Button variant="ghost" size="sm" asChild><Link to={`/tutor/${u.id}`}><Eye className="h-4 w-4" /></Link></Button>
+                                  )}
+                                  {!u.is_approved && (
+                                    <Button variant="ghost" size="sm" onClick={() => handleApproveUser(u.id)} title="Approve User">
+                                      <UserCheck className="h-4 w-4 text-success" />
+                                    </Button>
                                   )}
                                   <Button variant="ghost" size="sm" onClick={() => { setSelectedUser(u); setAdminNotes(''); }}>
                                     {u.is_banned ? <CheckCircle2 className="h-4 w-4 text-success" /> : <Ban className="h-4 w-4 text-destructive" />}
@@ -1418,6 +1443,7 @@ export default function AdminDashboard() {
                     <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">All Status</SelectItem>
+                      <SelectItem value="pending_approval">Pending Approval</SelectItem>
                       <SelectItem value="open">Open</SelectItem>
                       <SelectItem value="in_progress">In Progress</SelectItem>
                       <SelectItem value="completed">Completed</SelectItem>
@@ -1458,6 +1484,16 @@ export default function AdminDashboard() {
                               <TableCell className="text-right">
                                 <div className="flex gap-1 justify-end">
                                   <Button variant="ghost" size="sm" asChild><Link to={`/jobs/${job.id}`}><Eye className="h-4 w-4" /></Link></Button>
+                                  {job.status === 'pending_approval' && (
+                                    <>
+                                      <Button variant="ghost" size="sm" onClick={() => handleUpdateJobStatus(job.id, 'open')} title="Approve">
+                                        <CheckCircle2 className="h-4 w-4 text-success" />
+                                      </Button>
+                                      <Button variant="ghost" size="sm" onClick={() => handleUpdateJobStatus(job.id, 'cancelled')} title="Reject">
+                                        <XCircle className="h-4 w-4 text-destructive" />
+                                      </Button>
+                                    </>
+                                  )}
                                   {job.status === 'open' && (
                                     <Button variant="ghost" size="sm" onClick={() => handleUpdateJobStatus(job.id, 'cancelled')}>
                                       <XCircle className="h-4 w-4 text-destructive" />
