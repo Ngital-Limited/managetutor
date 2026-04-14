@@ -642,6 +642,7 @@ export default function ParentDashboard() {
       case 'in_progress': return 'bg-success';
       case 'completed': return 'bg-accent';
       case 'cancelled': return 'bg-muted text-muted-foreground';
+      case 'pending_approval': return 'bg-warning text-warning-foreground';
       default: return 'bg-secondary';
     }
   };
@@ -652,6 +653,7 @@ export default function ParentDashboard() {
       case 'in_progress': return 'Hired';
       case 'completed': return 'Completed';
       case 'cancelled': return 'Paused';
+      case 'pending_approval': return 'Pending Approval';
       default: return status;
     }
   };
