@@ -57,6 +57,7 @@ interface UserRow {
   phone: string | null;
   avatar_url: string | null;
   is_banned: boolean;
+  is_approved: boolean;
   created_at: string;
   role?: string;
 }
