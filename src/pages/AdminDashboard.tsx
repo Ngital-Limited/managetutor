@@ -718,7 +718,7 @@ export default function AdminDashboard() {
   const [stats, setStats] = useState<Stats>({
     totalUsers: 0, totalTutors: 0, totalParents: 0,
     pendingVerifications: 0, activeJobs: 0, totalJobs: 0, completedJobs: 0,
-    pendingReports: 0, totalReviews: 0, totalRevenue: 0,
+    pendingReports: 0, totalReviews: 0, totalRevenue: 0, pendingJobs: 0, pendingUsers: 0,
   });
 
   // Data states
