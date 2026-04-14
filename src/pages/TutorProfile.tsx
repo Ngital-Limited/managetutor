@@ -245,7 +245,7 @@ export default function TutorProfile() {
       full_name: userProfile.full_name,
       phone: userProfile.phone,
       district_id: userProfile.district_id || null,
-    }).eq('id', user?.id);
+    }).eq('id', targetUserId);
 
     if (profileError) {
       const msg = profileError.message?.includes('idx_profiles_phone_unique')
