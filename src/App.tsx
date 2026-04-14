@@ -28,6 +28,7 @@ import About from "./pages/About";
 import Contact from "./pages/Contact";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
+import { ImpersonationBanner } from "./components/ImpersonationBanner";
 
 const queryClient = new QueryClient();
 
@@ -38,6 +39,7 @@ const App = () => (
         <TooltipProvider>
           <Toaster />
           <Sonner />
+          <ImpersonationBanner />
           <BrowserRouter>
             <Routes>
               <Route path="/" element={<Index />} />
