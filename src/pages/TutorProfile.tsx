@@ -121,13 +121,15 @@ export default function TutorProfile() {
     if (!authLoading) {
       if (!user) {
         navigate('/auth');
-      } else if (role !== 'tutor') {
+      } else if (role !== 'tutor' && role !== 'admin') {
         navigate('/dashboard');
-      } else {
+      } else if (role === 'tutor' || isAdminEdit) {
         fetchData();
+      } else {
+        navigate('/dashboard');
       }
     }
-  }, [user, role, authLoading]);
+  }, [user, role, authLoading, adminEditUserId]);
 
   const fetchData = async () => {
     const [subjectsRes, districtsRes, profileRes, tutorRes, docsRes, tutorSubjectsRes] = await Promise.all([
