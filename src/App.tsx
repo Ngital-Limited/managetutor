@@ -14,6 +14,7 @@ import JobDetails from "./pages/JobDetails";
 import AdminDashboard from "./pages/AdminDashboard";
 import TutorProfile from "./pages/TutorProfile";
 import TutorDashboard from "./pages/TutorDashboard";
+import TutorAppliedJobs from "./pages/TutorAppliedJobs";
 import ParentDashboard from "./pages/ParentDashboard";
 import ParentProfileEdit from "./pages/ParentProfileEdit";
 
@@ -54,6 +55,7 @@ const App = () => (
               <Route path="/parent/profile" element={<ParentProfileEdit />} />
               <Route path="/admin/parent/:userId" element={<ParentProfileEdit />} />
               <Route path="/tutor/dashboard" element={<TutorDashboard />} />
+              <Route path="/tutor/applications" element={<TutorAppliedJobs />} />
               <Route path="/tutor/profile" element={<TutorProfile />} />
               <Route path="/admin/tutor/:userId" element={<TutorProfile />} />
               
