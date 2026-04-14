@@ -815,6 +815,7 @@ export default function AdminDashboard() {
       { count: activeJobs },
       { count: totalJobs },
       { count: completedJobs },
+      { count: acceptedJobs },
       { count: pendingReports },
       { count: totalReviews },
       { count: pendingJobs },
@@ -827,6 +828,7 @@ export default function AdminDashboard() {
       supabase.from('jobs').select('id', { count: 'exact', head: true }).eq('status', 'open'),
       supabase.from('jobs').select('id', { count: 'exact', head: true }),
       supabase.from('jobs').select('id', { count: 'exact', head: true }).eq('status', 'completed'),
+      supabase.from('jobs').select('id', { count: 'exact', head: true }).eq('status', 'in_progress' as any),
       supabase.from('reports').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
       supabase.from('reviews').select('id', { count: 'exact', head: true }),
       supabase.from('jobs').select('id', { count: 'exact', head: true }).eq('status', 'pending_approval' as any),
@@ -839,7 +841,7 @@ export default function AdminDashboard() {
     setStats({
       totalUsers: totalUsers || 0, totalTutors: totalTutors || 0, totalParents: totalParents || 0,
       pendingVerifications: pendingVerifications || 0, activeJobs: activeJobs || 0,
-      totalJobs: totalJobs || 0, completedJobs: completedJobs || 0,
+      totalJobs: totalJobs || 0, completedJobs: completedJobs || 0, acceptedJobs: acceptedJobs || 0,
       pendingReports: pendingReports || 0, totalReviews: totalReviews || 0, totalRevenue,
       pendingJobs: pendingJobs || 0, pendingUsers: pendingUsers || 0,
     });
