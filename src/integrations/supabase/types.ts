@@ -1714,7 +1714,12 @@ export type Database = {
       app_role: "parent" | "tutor" | "agency" | "admin"
       application_status: "pending" | "accepted" | "rejected" | "withdrawn"
       gender: "male" | "female" | "any"
-      job_status: "open" | "in_progress" | "completed" | "cancelled"
+      job_status:
+        | "pending_approval"
+        | "open"
+        | "in_progress"
+        | "completed"
+        | "cancelled"
       teaching_mode: "online" | "in_person" | "hybrid"
       verification_status: "pending" | "approved" | "rejected"
     }
@@ -1847,7 +1852,13 @@ export const Constants = {
       app_role: ["parent", "tutor", "agency", "admin"],
       application_status: ["pending", "accepted", "rejected", "withdrawn"],
       gender: ["male", "female", "any"],
-      job_status: ["open", "in_progress", "completed", "cancelled"],
+      job_status: [
+        "pending_approval",
+        "open",
+        "in_progress",
+        "completed",
+        "cancelled",
+      ],
       teaching_mode: ["online", "in_person", "hybrid"],
       verification_status: ["pending", "approved", "rejected"],
     },
