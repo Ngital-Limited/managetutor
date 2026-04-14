@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -14,48 +14,65 @@ import { PhoneInput, isValidBDPhone } from '@/components/PhoneInput';
 import { ArrowLeft, Save, Upload, User, MapPin, Phone } from 'lucide-react';
 
 interface District { id: string; name_en: string; name_bn: string; }
+interface Area { id: string; name_en: string; name_bn: string; district_id: string; }
 
 export default function ParentProfileEdit() {
-  const { user, loading: authLoading } = useAuth();
+  const { user, role, loading: authLoading } = useAuth();
   const { language } = useLanguage();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { userId: adminEditUserId } = useParams<{ userId: string }>();
+  const isAdminEdit = role === 'admin' && !!adminEditUserId;
+  const targetUserId = isAdminEdit ? adminEditUserId : user?.id;
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [districts, setDistricts] = useState<District[]>([]);
+  const [areas, setAreas] = useState<Area[]>([]);
   const [form, setForm] = useState({
     full_name: '',
+    full_name_bn: '',
     phone: '',
     district_id: '',
+    area_id: '',
     avatar_url: '',
   });
 
   useEffect(() => {
-    if (!authLoading && !user) {
-      navigate('/auth');
-    } else if (user) {
-      fetchData();
+    if (!authLoading) {
+      if (!user) {
+        navigate('/auth');
+      } else if (!isAdminEdit && role !== 'parent') {
+        navigate('/dashboard');
+      } else {
+        fetchData();
+      }
     }
-  }, [user, authLoading]);
+  }, [user, authLoading, adminEditUserId]);
 
   const fetchData = async () => {
-    const [profileRes, districtsRes] = await Promise.all([
-      supabase.from('profiles').select('full_name, phone, district_id, avatar_url').eq('id', user!.id).single(),
+    const [profileRes, districtsRes, areasRes] = await Promise.all([
+      supabase.from('profiles').select('full_name, full_name_bn, phone, district_id, area_id, avatar_url').eq('id', targetUserId).single(),
       supabase.from('districts').select('*').order('name_en'),
+      supabase.from('areas').select('*').order('name_en'),
     ]);
     if (profileRes.data) {
       setForm({
         full_name: profileRes.data.full_name || '',
+        full_name_bn: profileRes.data.full_name_bn || '',
         phone: profileRes.data.phone || '',
         district_id: profileRes.data.district_id || '',
+        area_id: profileRes.data.area_id || '',
         avatar_url: profileRes.data.avatar_url || '',
       });
     }
     if (districtsRes.data) setDistricts(districtsRes.data);
+    if (areasRes.data) setAreas(areasRes.data);
     setLoading(false);
   };
+
+  const filteredAreas = areas.filter(a => a.district_id === form.district_id);
 
   const handleSave = async () => {
     if (form.phone && !isValidBDPhone(form.phone)) {
@@ -65,10 +82,12 @@ export default function ParentProfileEdit() {
     setSaving(true);
     const { error } = await supabase.from('profiles').update({
       full_name: form.full_name,
+      full_name_bn: form.full_name_bn || null,
       phone: form.phone,
       district_id: form.district_id || null,
+      area_id: form.area_id || null,
       avatar_url: form.avatar_url || null,
-    }).eq('id', user!.id);
+    }).eq('id', targetUserId);
 
     if (error) {
       const msg = error.message?.includes('idx_profiles_phone_unique')
@@ -78,18 +97,19 @@ export default function ParentProfileEdit() {
         : error.message;
       toast({ title: 'Error', description: msg, variant: 'destructive' });
     } else {
-      toast({ title: 'Profile saved!', description: 'Your profile has been updated.' });
+      toast({ title: 'Profile saved!', description: isAdminEdit ? 'Parent profile has been updated.' : 'Your profile has been updated.' });
+      if (isAdminEdit) navigate('/admin');
     }
     setSaving(false);
   };
 
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file || !user) return;
+    if (!file || !targetUserId) return;
     setUploading(true);
 
     const fileExt = file.name.split('.').pop();
-    const fileName = `${user.id}/avatar-${Date.now()}.${fileExt}`;
+    const fileName = `${targetUserId}/avatar-${Date.now()}.${fileExt}`;
 
     const { error: uploadError } = await supabase.storage.from('avatars').upload(fileName, file, { upsert: true });
     if (uploadError) {
@@ -111,22 +131,26 @@ export default function ParentProfileEdit() {
     );
   }
 
+  const backLink = isAdminEdit ? '/admin' : '/parent/dashboard';
+  const backLabel = isAdminEdit ? 'Back to Admin' : 'Back to Dashboard';
+
   return (
     <div className="min-h-screen bg-background">
       <nav className="sticky top-0 z-50 bg-card/80 backdrop-blur-xl border-b border-border">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <Link to="/parent/dashboard">
+          <Link to={backLink}>
             <Button variant="ghost">
               <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Dashboard
+              {backLabel}
             </Button>
           </Link>
+          {isAdminEdit && <span className="text-sm text-muted-foreground">Editing parent profile as admin</span>}
         </div>
       </nav>
 
       <main className="container mx-auto px-4 py-8 max-w-2xl">
-        <h1 className="text-3xl font-bold mb-2">Edit Profile</h1>
-        <p className="text-muted-foreground mb-8">Update your personal information</p>
+        <h1 className="text-3xl font-bold mb-2">{isAdminEdit ? 'Edit Parent Profile' : 'Edit Profile'}</h1>
+        <p className="text-muted-foreground mb-8">{isAdminEdit ? `Editing profile for user` : 'Update your personal information'}</p>
 
         <div className="space-y-6">
           {/* Avatar */}
@@ -158,16 +182,20 @@ export default function ParentProfileEdit() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <Label>Full Name</Label>
+                <Label>Full Name (English)</Label>
                 <Input value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} />
+              </div>
+              <div>
+                <Label>Full Name (Bangla)</Label>
+                <Input value={form.full_name_bn} onChange={(e) => setForm({ ...form, full_name_bn: e.target.value })} placeholder="বাংলা নাম" />
               </div>
               <div>
                 <Label className="flex items-center gap-1"><Phone className="h-3 w-3" /> Phone Number</Label>
                 <PhoneInput value={form.phone} onChange={(v) => setForm({ ...form, phone: v })} />
               </div>
               <div>
-                <Label className="flex items-center gap-1"><MapPin className="h-3 w-3" /> Location</Label>
-                <Select value={form.district_id} onValueChange={(v) => setForm({ ...form, district_id: v })}>
+                <Label className="flex items-center gap-1"><MapPin className="h-3 w-3" /> District</Label>
+                <Select value={form.district_id} onValueChange={(v) => setForm({ ...form, district_id: v, area_id: '' })}>
                   <SelectTrigger><SelectValue placeholder="Select district" /></SelectTrigger>
                   <SelectContent>
                     {districts.map(d => (
@@ -176,6 +204,19 @@ export default function ParentProfileEdit() {
                   </SelectContent>
                 </Select>
               </div>
+              {filteredAreas.length > 0 && (
+                <div>
+                  <Label className="flex items-center gap-1"><MapPin className="h-3 w-3" /> Area</Label>
+                  <Select value={form.area_id} onValueChange={(v) => setForm({ ...form, area_id: v })}>
+                    <SelectTrigger><SelectValue placeholder="Select area" /></SelectTrigger>
+                    <SelectContent>
+                      {filteredAreas.map(a => (
+                        <SelectItem key={a.id} value={a.id}>{a.name_en}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
             </CardContent>
           </Card>
 
