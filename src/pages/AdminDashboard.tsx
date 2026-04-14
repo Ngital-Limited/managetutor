@@ -766,6 +766,8 @@ export default function AdminDashboard() {
       { count: completedJobs },
       { count: pendingReports },
       { count: totalReviews },
+      { count: pendingJobs },
+      { count: pendingUsers },
     ] = await Promise.all([
       supabase.from('profiles').select('id', { count: 'exact', head: true }),
       supabase.from('tutor_profiles').select('id', { count: 'exact', head: true }),
@@ -776,6 +778,8 @@ export default function AdminDashboard() {
       supabase.from('jobs').select('id', { count: 'exact', head: true }).eq('status', 'completed'),
       supabase.from('reports').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
       supabase.from('reviews').select('id', { count: 'exact', head: true }),
+      supabase.from('jobs').select('id', { count: 'exact', head: true }).eq('status', 'pending_approval' as any),
+      supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('is_approved', false),
     ]);
 
     const { data: rev } = await supabase.from('payment_transactions').select('amount').eq('status', 'completed');
@@ -786,6 +790,7 @@ export default function AdminDashboard() {
       pendingVerifications: pendingVerifications || 0, activeJobs: activeJobs || 0,
       totalJobs: totalJobs || 0, completedJobs: completedJobs || 0,
       pendingReports: pendingReports || 0, totalReviews: totalReviews || 0, totalRevenue,
+      pendingJobs: pendingJobs || 0, pendingUsers: pendingUsers || 0,
     });
   };
 
