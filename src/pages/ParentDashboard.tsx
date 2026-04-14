@@ -242,6 +242,14 @@ export default function ParentDashboard() {
   const [reportDescription, setReportDescription] = useState('');
   const [reportType, setReportType] = useState('no_show');
 
+  // Interview scheduling state
+  const [interviewDialogOpen, setInterviewDialogOpen] = useState(false);
+  const [interviewApp, setInterviewApp] = useState<Application | null>(null);
+  const [interviewDate, setInterviewDate] = useState<Date | undefined>(undefined);
+  const [interviewTime, setInterviewTime] = useState('');
+  const [interviewNotes, setInterviewNotes] = useState('');
+  const [schedulingInterview, setSchedulingInterview] = useState(false);
+
   const [jobForm, setJobForm] = useState({
     title: '',
     description: '',
