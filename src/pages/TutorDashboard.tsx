@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Logo } from '@/components/Logo';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -92,6 +92,8 @@ interface FeaturedListing {
 
 const tutorSidebarItems = [
   { title: 'Dashboard', url: '/tutor/dashboard', icon: Home },
+  { title: 'My Applications', url: '/tutor/dashboard#applications', icon: FileText },
+  { title: 'Demo Classes', url: '/tutor/dashboard#demo-classes', icon: Calendar },
   { title: 'Browse Jobs', url: '/jobs', icon: Briefcase },
   { title: 'My Profile', url: '/tutor/profile', icon: User },
   { title: 'Find Tutors', url: '/tutors', icon: Search },
@@ -157,7 +159,18 @@ export default function TutorDashboard() {
   const { user, signOut, loading: authLoading } = useAuth();
   const { t } = useLanguage();
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
+
+  // Scroll to hash section when route changes
+  useEffect(() => {
+    if (location.hash) {
+      setTimeout(() => {
+        const el = document.getElementById(location.hash.slice(1));
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 300);
+    }
+  }, [location.hash]);
 
   const [loading, setLoading] = useState(true);
   const [applications, setApplications] = useState<Application[]>([]);
@@ -815,7 +828,7 @@ export default function TutorDashboard() {
 
         {/* Demo Class Bookings */}
         {demoBookings.length > 0 && (
-          <Card className="mb-8">
+          <Card className="mb-8" id="demo-classes">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Calendar className="h-5 w-5" />
@@ -905,7 +918,7 @@ export default function TutorDashboard() {
         )}
 
         {/* Applications */}
-        <Card>
+        <Card id="applications">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Briefcase className="h-5 w-5" />
