@@ -2290,6 +2290,100 @@ export default function AdminDashboard() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* View Applications & Assign Tutor Dialog */}
+      <Dialog open={!!viewingJobApps} onOpenChange={() => { setViewingJobApps(null); setAssignTutorSearch(''); setAssignTutorResults([]); }}>
+        <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Briefcase className="h-5 w-5 text-primary" />
+              Applications for "{viewingJobApps?.jobTitle}"
+            </DialogTitle>
+          </DialogHeader>
+
+          {/* Assign Tutor Section */}
+          <div className="border rounded-lg p-4 bg-muted/30 space-y-3">
+            <h3 className="text-sm font-semibold flex items-center gap-2"><Plus className="h-4 w-4" /> Assign Tutor Manually</h3>
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search tutor by name..."
+                value={assignTutorSearch}
+                onChange={(e) => handleSearchTutors(e.target.value)}
+                className="pl-9"
+              />
+            </div>
+            {searchingTutors && <p className="text-xs text-muted-foreground">Searching...</p>}
+            {assignTutorResults.length > 0 && (
+              <div className="space-y-2 max-h-40 overflow-y-auto">
+                {assignTutorResults.map((t) => (
+                  <div key={t.tutor_id} className="flex items-center justify-between p-2 rounded-md border bg-background">
+                    <div>
+                      <span className="font-medium text-sm">{t.name}</span>
+                      <span className="text-xs text-muted-foreground ml-2 capitalize">{t.gender} · {t.experience} yrs exp</span>
+                    </div>
+                    <Button size="sm" onClick={() => handleAssignTutor(t.tutor_id, t.user_id, t.name)} disabled={processing}>
+                      <Plus className="h-3 w-3 mr-1" /> Assign
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Applications List */}
+          <div className="space-y-3">
+            <h3 className="text-sm font-semibold">Applications ({jobApplications.length})</h3>
+            {loadingApps ? (
+              <div className="text-center py-8 text-muted-foreground">Loading applications...</div>
+            ) : jobApplications.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">No applications yet. Use the search above to assign a tutor.</div>
+            ) : (
+              jobApplications.map((app) => (
+                <div key={app.id} className="border rounded-lg p-4 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <Avatar className="h-10 w-10">
+                        <AvatarFallback>{app.tutor_name.charAt(0)}</AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <p className="font-medium text-sm">{app.tutor_name}</p>
+                        <p className="text-xs text-muted-foreground">{app.tutor_email}</p>
+                      </div>
+                    </div>
+                    <Badge className={`text-xs capitalize ${statusColor(app.status)}`}>{app.status}</Badge>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <Badge variant="outline" className="text-xs capitalize">{app.tutor_gender}</Badge>
+                    <Badge variant="outline" className="text-xs">{app.tutor_experience} yrs exp</Badge>
+                    <Badge variant="outline" className={`text-xs capitalize ${app.tutor_verification === 'approved' ? 'border-success text-success' : ''}`}>
+                      {app.tutor_verification}
+                    </Badge>
+                    {app.proposed_rate && <Badge variant="secondary" className="text-xs">৳{app.proposed_rate}/month</Badge>}
+                  </div>
+                  {app.cover_message && (
+                    <p className="text-sm bg-muted/50 p-2 rounded text-muted-foreground">{app.cover_message}</p>
+                  )}
+                  <div className="text-xs text-muted-foreground">Applied {formatDistanceToNow(new Date(app.created_at), { addSuffix: true })}</div>
+                  {app.status === 'pending' && (
+                    <div className="flex gap-2">
+                      <Button size="sm" className="bg-success hover:bg-success/90" onClick={() => handleAdminUpdateAppStatus(app.id, 'accepted', viewingJobApps!.jobId)} disabled={processing}>
+                        <CheckCircle2 className="h-3.5 w-3.5 mr-1" /> Accept
+                      </Button>
+                      <Button size="sm" variant="destructive" onClick={() => handleAdminUpdateAppStatus(app.id, 'rejected', viewingJobApps!.jobId)} disabled={processing}>
+                        <XCircle className="h-3.5 w-3.5 mr-1" /> Reject
+                      </Button>
+                    </div>
+                  )}
+                  {app.status === 'accepted' && (
+                    <p className="text-xs text-success font-medium flex items-center gap-1"><CheckCircle2 className="h-3.5 w-3.5" /> Assigned to this job</p>
+                  )}
+                </div>
+              ))
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </SidebarProvider>
   );
 }
