@@ -1098,6 +1098,8 @@ export default function AdminDashboard() {
                     { label: 'Active Jobs', value: stats.activeJobs, icon: Briefcase, color: 'text-accent' },
                     { label: 'Completed Jobs', value: stats.completedJobs, icon: CheckCircle2, color: 'text-success' },
                     { label: 'Pending Verifications', value: stats.pendingVerifications, icon: Clock, color: 'text-warning', action: () => setActiveTab('verifications') },
+                    { label: 'Pending Jobs', value: stats.pendingJobs, icon: Clock, color: 'text-warning', action: () => { setJobStatusFilter('pending_approval'); setActiveTab('jobs'); } },
+                    { label: 'Pending Users', value: stats.pendingUsers, icon: Clock, color: 'text-warning', action: () => setActiveTab('users') },
                     { label: 'Pending Reports', value: stats.pendingReports, icon: AlertTriangle, color: 'text-destructive', action: () => setActiveTab('reports') },
                     { label: 'Total Reviews', value: stats.totalReviews, icon: Star, color: 'text-accent' },
                     { label: 'Total Jobs', value: stats.totalJobs, icon: FileText, color: 'text-muted-foreground' },
