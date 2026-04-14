@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Logo } from '@/components/Logo';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { CLASS_LEVELS } from '@/constants/classLevels';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
