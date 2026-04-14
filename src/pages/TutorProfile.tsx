@@ -259,7 +259,7 @@ export default function TutorProfile() {
     const { data: tutorData } = await supabase
       .from('tutor_profiles')
       .select('id')
-      .eq('user_id', user?.id)
+      .eq('user_id', targetUserId)
       .single();
 
     if (tutorData) {
