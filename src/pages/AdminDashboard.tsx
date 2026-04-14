@@ -984,8 +984,8 @@ export default function AdminDashboard() {
     else { toast({ title: `Review ${approved ? 'approved' : 'hidden'}` }); fetchReviews(); }
   };
 
-  const handleUpdateJobStatus = async (jobId: string, status: 'open' | 'in_progress' | 'completed' | 'cancelled') => {
-    const { error } = await supabase.from('jobs').update({ status }).eq('id', jobId);
+  const handleUpdateJobStatus = async (jobId: string, status: string) => {
+    const { error } = await supabase.from('jobs').update({ status: status as any }).eq('id', jobId);
     if (error) toast({ title: 'Error', description: error.message, variant: 'destructive' });
     else { toast({ title: `Job status updated to ${status}` }); fetchJobs(); fetchStats(); }
   };
