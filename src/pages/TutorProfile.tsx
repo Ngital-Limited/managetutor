@@ -114,6 +114,7 @@ export default function TutorProfile() {
   const [userProfile, setUserProfile] = useState({
     full_name: '',
     phone: '',
+    email: '',
     district_id: '',
   });
 
