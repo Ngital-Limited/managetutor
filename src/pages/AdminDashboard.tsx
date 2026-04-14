@@ -1523,6 +1523,7 @@ export default function AdminDashboard() {
                               <TableCell className="text-right">
                                 <div className="flex gap-1 justify-end">
                                   <Button variant="ghost" size="sm" asChild><Link to={`/jobs/${job.id}`}><Eye className="h-4 w-4" /></Link></Button>
+                                  <Button variant="ghost" size="sm" onClick={() => openEditJob(job.id)} title="Edit Job"><Pencil className="h-4 w-4" /></Button>
                                   {job.status === 'pending_approval' && (
                                     <>
                                       <Button variant="ghost" size="sm" onClick={() => handleUpdateJobStatus(job.id, 'open')} title="Approve">
