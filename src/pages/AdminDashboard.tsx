@@ -765,7 +765,17 @@ export default function AdminDashboard() {
   const [adminNotes, setAdminNotes] = useState('');
   const [processing, setProcessing] = useState(false);
   const [editingJob, setEditingJob] = useState<any | null>(null);
-  const [editJobForm, setEditJobForm] = useState({ title: '', description: '', status: '', teaching_mode: '', budget_min: 0, budget_max: 0 });
+  const [editJobForm, setEditJobForm] = useState({
+    title: '', description: '', status: '', teaching_mode: '',
+    budget_min: 0, budget_max: 0, district_id: '', area_id: '',
+    class_level: '', subject_id: '', days_per_week: 0, duration_hours: 0,
+    preferred_time: '', preferred_tutor_gender: 'any', student_gender: '',
+    student_age: '', number_of_students: 1, location_details: '',
+    special_requirements: '', start_date: '',
+  });
+  const [editJobDistricts, setEditJobDistricts] = useState<{ id: string; name_en: string }[]>([]);
+  const [editJobAreas, setEditJobAreas] = useState<{ id: string; name_en: string; district_id: string }[]>([]);
+  const [editJobSubjects, setEditJobSubjects] = useState<{ id: string; name_en: string }[]>([]);
 
   useEffect(() => {
     if (!loading) {
