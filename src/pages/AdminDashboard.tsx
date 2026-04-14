@@ -45,11 +45,27 @@ interface Stats {
   activeJobs: number;
   totalJobs: number;
   completedJobs: number;
+  acceptedJobs: number;
   pendingReports: number;
   totalReviews: number;
   totalRevenue: number;
   pendingJobs: number;
   pendingUsers: number;
+}
+
+interface JobApplication {
+  id: string;
+  tutor_id: string;
+  status: string;
+  proposed_rate: number | null;
+  cover_message: string | null;
+  created_at: string;
+  tutor_name: string;
+  tutor_email: string;
+  tutor_gender: string;
+  tutor_experience: number;
+  tutor_verification: string;
+  tutor_user_id: string;
 }
 
 interface UserRow {
@@ -740,7 +756,7 @@ export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState('overview');
   const [stats, setStats] = useState<Stats>({
     totalUsers: 0, totalTutors: 0, totalParents: 0,
-    pendingVerifications: 0, activeJobs: 0, totalJobs: 0, completedJobs: 0,
+    pendingVerifications: 0, activeJobs: 0, totalJobs: 0, completedJobs: 0, acceptedJobs: 0,
     pendingReports: 0, totalReviews: 0, totalRevenue: 0, pendingJobs: 0, pendingUsers: 0,
   });
 
@@ -777,6 +793,137 @@ export default function AdminDashboard() {
   const [editJobAreas, setEditJobAreas] = useState<{ id: string; name_en: string; district_id: string }[]>([]);
   const [editJobSubjects, setEditJobSubjects] = useState<{ id: string; name_en: string }[]>([]);
 
+  // Application viewer state
+  const [viewingJobApps, setViewingJobApps] = useState<{ jobId: string; jobTitle: string } | null>(null);
+  const [jobApplications, setJobApplications] = useState<JobApplication[]>([]);
+  const [loadingApps, setLoadingApps] = useState(false);
+  const [assignTutorSearch, setAssignTutorSearch] = useState('');
+  const [assignTutorResults, setAssignTutorResults] = useState<{ tutor_id: string; user_id: string; name: string; gender: string; experience: number }[]>([]);
+  const [searchingTutors, setSearchingTutors] = useState(false);
+
+  const fetchJobApplications = async (jobId: string) => {
+    setLoadingApps(true);
+    const { data } = await supabase
+      .from('applications')
+      .select('id, tutor_id, status, proposed_rate, cover_message, created_at')
+      .eq('job_id', jobId)
+      .order('created_at', { ascending: false });
+    if (data && data.length > 0) {
+      const tutorIds = [...new Set(data.map(a => a.tutor_id))];
+      const { data: tutors } = await supabase.from('tutor_profiles').select('id, user_id, gender, experience_years, verification_status').in('id', tutorIds);
+      const tutorUserIds = [...new Set(tutors?.map(t => t.user_id) || [])];
+      const { data: profs } = await supabase.from('profiles').select('id, full_name, email').in('id', tutorUserIds);
+      const profMap = new Map(profs?.map(p => [p.id, p]) || []);
+      const tutorMap = new Map(tutors?.map(t => [t.id, { ...t, profile: profMap.get(t.user_id) }]) || []);
+      setJobApplications(data.map(a => {
+        const t = tutorMap.get(a.tutor_id);
+        return {
+          ...a,
+          tutor_name: t?.profile?.full_name || 'Unknown',
+          tutor_email: t?.profile?.email || '',
+          tutor_gender: t?.gender || '',
+          tutor_experience: t?.experience_years || 0,
+          tutor_verification: t?.verification_status || 'pending',
+          tutor_user_id: t?.user_id || '',
+        };
+      }) as JobApplication[]);
+    } else {
+      setJobApplications([]);
+    }
+    setLoadingApps(false);
+  };
+
+  const handleAdminUpdateAppStatus = async (appId: string, status: 'accepted' | 'rejected', jobId: string) => {
+    setProcessing(true);
+    const { error } = await supabase.from('applications').update({ status: status as any }).eq('id', appId);
+    if (error) {
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+    } else {
+      // If accepting, also update job status to in_progress
+      if (status === 'accepted') {
+        await supabase.from('jobs').update({ status: 'in_progress' as any }).eq('id', jobId);
+      }
+      // Notify the tutor
+      const app = jobApplications.find(a => a.id === appId);
+      if (app?.tutor_user_id) {
+        const statusLabel = status === 'accepted' ? 'Congratulations! You have been assigned' : 'Your application was not selected';
+        await supabase.from('notifications').insert({
+          user_id: app.tutor_user_id,
+          title: statusLabel,
+          message: `For the job: ${viewingJobApps?.jobTitle || ''}`,
+          type: `application_${status}`,
+          reference_id: jobId,
+        });
+      }
+      toast({ title: `Application ${status}` });
+      fetchJobApplications(jobId);
+      fetchJobs();
+      fetchStats();
+    }
+    setProcessing(false);
+  };
+
+  const handleSearchTutors = async (query: string) => {
+    setAssignTutorSearch(query);
+    if (query.length < 2) { setAssignTutorResults([]); return; }
+    setSearchingTutors(true);
+    const { data: profs } = await supabase.from('profiles').select('id, full_name').ilike('full_name', `%${query}%`).limit(10);
+    if (profs && profs.length > 0) {
+      const profIds = profs.map(p => p.id);
+      const { data: tutors } = await supabase.from('tutor_profiles').select('id, user_id, gender, experience_years').in('user_id', profIds);
+      const profMap = new Map(profs.map(p => [p.id, p]));
+      setAssignTutorResults(tutors?.map(t => ({
+        tutor_id: t.id,
+        user_id: t.user_id,
+        name: profMap.get(t.user_id)?.full_name || 'Unknown',
+        gender: t.gender,
+        experience: t.experience_years || 0,
+      })) || []);
+    } else {
+      setAssignTutorResults([]);
+    }
+    setSearchingTutors(false);
+  };
+
+  const handleAssignTutor = async (tutorId: string, tutorUserId: string, tutorName: string) => {
+    if (!viewingJobApps) return;
+    // Check if already applied
+    const existing = jobApplications.find(a => a.tutor_id === tutorId);
+    if (existing) {
+      toast({ title: 'Already applied', description: `${tutorName} has already applied to this job`, variant: 'destructive' });
+      return;
+    }
+    setProcessing(true);
+    // Create an application with accepted status
+    const { error } = await supabase.from('applications').insert({
+      job_id: viewingJobApps.jobId,
+      tutor_id: tutorId,
+      status: 'accepted' as any,
+      cover_message: 'Assigned by admin',
+    });
+    if (error) {
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+    } else {
+      // Update job status to in_progress
+      await supabase.from('jobs').update({ status: 'in_progress' as any }).eq('id', viewingJobApps.jobId);
+      // Notify tutor
+      await supabase.from('notifications').insert({
+        user_id: tutorUserId,
+        title: 'You have been assigned to a job!',
+        message: `Admin has assigned you to: ${viewingJobApps.jobTitle}`,
+        type: 'application_accepted',
+        reference_id: viewingJobApps.jobId,
+      });
+      toast({ title: 'Tutor assigned successfully' });
+      setAssignTutorSearch('');
+      setAssignTutorResults([]);
+      fetchJobApplications(viewingJobApps.jobId);
+      fetchJobs();
+      fetchStats();
+    }
+    setProcessing(false);
+  };
+
   useEffect(() => {
     if (!loading) {
       if (!user) navigate('/auth');
@@ -799,6 +946,7 @@ export default function AdminDashboard() {
       { count: activeJobs },
       { count: totalJobs },
       { count: completedJobs },
+      { count: acceptedJobs },
       { count: pendingReports },
       { count: totalReviews },
       { count: pendingJobs },
@@ -811,6 +959,7 @@ export default function AdminDashboard() {
       supabase.from('jobs').select('id', { count: 'exact', head: true }).eq('status', 'open'),
       supabase.from('jobs').select('id', { count: 'exact', head: true }),
       supabase.from('jobs').select('id', { count: 'exact', head: true }).eq('status', 'completed'),
+      supabase.from('jobs').select('id', { count: 'exact', head: true }).eq('status', 'in_progress' as any),
       supabase.from('reports').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
       supabase.from('reviews').select('id', { count: 'exact', head: true }),
       supabase.from('jobs').select('id', { count: 'exact', head: true }).eq('status', 'pending_approval' as any),
@@ -823,7 +972,7 @@ export default function AdminDashboard() {
     setStats({
       totalUsers: totalUsers || 0, totalTutors: totalTutors || 0, totalParents: totalParents || 0,
       pendingVerifications: pendingVerifications || 0, activeJobs: activeJobs || 0,
-      totalJobs: totalJobs || 0, completedJobs: completedJobs || 0,
+      totalJobs: totalJobs || 0, completedJobs: completedJobs || 0, acceptedJobs: acceptedJobs || 0,
       pendingReports: pendingReports || 0, totalReviews: totalReviews || 0, totalRevenue,
       pendingJobs: pendingJobs || 0, pendingUsers: pendingUsers || 0,
     });
@@ -1267,12 +1416,13 @@ export default function AdminDashboard() {
                 </div>
 
                 {/* Key metrics — compact grid */}
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-3">
                   {[
                     { label: 'Users', value: stats.totalUsers, icon: Users },
                     { label: 'Tutors', value: stats.totalTutors, icon: GraduationCap },
                     { label: 'Parents', value: stats.totalParents, icon: Users },
                     { label: 'Active Jobs', value: stats.activeJobs, icon: Briefcase },
+                    { label: 'Accepted', value: stats.acceptedJobs, icon: CheckCircle2 },
                     { label: 'Total Jobs', value: stats.totalJobs, icon: FileText },
                     { label: 'Revenue', value: `৳${stats.totalRevenue.toLocaleString()}`, icon: DollarSign },
                   ].map((stat, i) => (
@@ -1631,13 +1781,20 @@ export default function AdminDashboard() {
                               <TableCell className="text-sm">{(job.profiles as any)?.full_name}</TableCell>
                               <TableCell className="text-sm">{(job.districts as any)?.name_en}</TableCell>
                               <TableCell className="text-sm">{(job.subjects as any)?.name_en || '—'}</TableCell>
-                              <TableCell><Badge variant="secondary" className="text-xs">{job.total_applications}</Badge></TableCell>
-                              <TableCell><Badge className={`text-xs capitalize ${statusColor(job.status)}`}>{job.status}</Badge></TableCell>
+                              <TableCell>
+                                <Button variant="ghost" size="sm" className="text-xs gap-1" onClick={() => { setViewingJobApps({ jobId: job.id, jobTitle: job.title }); fetchJobApplications(job.id); }}>
+                                  <Users className="h-3 w-3" /> {job.total_applications}
+                                </Button>
+                              </TableCell>
+                              <TableCell><Badge className={`text-xs capitalize ${statusColor(job.status)}`}>{job.status?.replace('_', ' ')}</Badge></TableCell>
                               <TableCell className="text-xs text-muted-foreground">{formatDistanceToNow(new Date(job.created_at), { addSuffix: true })}</TableCell>
                               <TableCell className="text-right">
-                                <div className="flex gap-1 justify-end">
+                                <div className="flex gap-1 justify-end flex-wrap">
                                   <Button variant="ghost" size="sm" asChild><Link to={`/jobs/${job.id}`}><Eye className="h-4 w-4" /></Link></Button>
                                   <Button variant="ghost" size="sm" onClick={() => openEditJob(job.id)} title="Edit Job"><Pencil className="h-4 w-4" /></Button>
+                                  <Button variant="outline" size="sm" className="text-xs gap-1" onClick={() => { setViewingJobApps({ jobId: job.id, jobTitle: job.title }); fetchJobApplications(job.id); }} title="View Applications & Assign Tutor">
+                                    <UserCheck className="h-3.5 w-3.5" /> Assign
+                                  </Button>
                                   {job.status === 'pending_approval' && (
                                     <>
                                       <Button variant="ghost" size="sm" onClick={() => handleUpdateJobStatus(job.id, 'open')} title="Approve">
@@ -2131,6 +2288,100 @@ export default function AdminDashboard() {
             <Button variant="outline" onClick={() => setEditingJob(null)}>Cancel</Button>
             <Button onClick={handleSaveJob} disabled={processing}>{processing ? 'Saving...' : 'Save Changes'}</Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* View Applications & Assign Tutor Dialog */}
+      <Dialog open={!!viewingJobApps} onOpenChange={() => { setViewingJobApps(null); setAssignTutorSearch(''); setAssignTutorResults([]); }}>
+        <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Briefcase className="h-5 w-5 text-primary" />
+              Applications for "{viewingJobApps?.jobTitle}"
+            </DialogTitle>
+          </DialogHeader>
+
+          {/* Assign Tutor Section */}
+          <div className="border rounded-lg p-4 bg-muted/30 space-y-3">
+            <h3 className="text-sm font-semibold flex items-center gap-2"><Plus className="h-4 w-4" /> Assign Tutor Manually</h3>
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search tutor by name..."
+                value={assignTutorSearch}
+                onChange={(e) => handleSearchTutors(e.target.value)}
+                className="pl-9"
+              />
+            </div>
+            {searchingTutors && <p className="text-xs text-muted-foreground">Searching...</p>}
+            {assignTutorResults.length > 0 && (
+              <div className="space-y-2 max-h-40 overflow-y-auto">
+                {assignTutorResults.map((t) => (
+                  <div key={t.tutor_id} className="flex items-center justify-between p-2 rounded-md border bg-background">
+                    <div>
+                      <span className="font-medium text-sm">{t.name}</span>
+                      <span className="text-xs text-muted-foreground ml-2 capitalize">{t.gender} · {t.experience} yrs exp</span>
+                    </div>
+                    <Button size="sm" onClick={() => handleAssignTutor(t.tutor_id, t.user_id, t.name)} disabled={processing}>
+                      <Plus className="h-3 w-3 mr-1" /> Assign
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Applications List */}
+          <div className="space-y-3">
+            <h3 className="text-sm font-semibold">Applications ({jobApplications.length})</h3>
+            {loadingApps ? (
+              <div className="text-center py-8 text-muted-foreground">Loading applications...</div>
+            ) : jobApplications.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">No applications yet. Use the search above to assign a tutor.</div>
+            ) : (
+              jobApplications.map((app) => (
+                <div key={app.id} className="border rounded-lg p-4 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <Avatar className="h-10 w-10">
+                        <AvatarFallback>{app.tutor_name.charAt(0)}</AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <p className="font-medium text-sm">{app.tutor_name}</p>
+                        <p className="text-xs text-muted-foreground">{app.tutor_email}</p>
+                      </div>
+                    </div>
+                    <Badge className={`text-xs capitalize ${statusColor(app.status)}`}>{app.status}</Badge>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <Badge variant="outline" className="text-xs capitalize">{app.tutor_gender}</Badge>
+                    <Badge variant="outline" className="text-xs">{app.tutor_experience} yrs exp</Badge>
+                    <Badge variant="outline" className={`text-xs capitalize ${app.tutor_verification === 'approved' ? 'border-success text-success' : ''}`}>
+                      {app.tutor_verification}
+                    </Badge>
+                    {app.proposed_rate && <Badge variant="secondary" className="text-xs">৳{app.proposed_rate}/month</Badge>}
+                  </div>
+                  {app.cover_message && (
+                    <p className="text-sm bg-muted/50 p-2 rounded text-muted-foreground">{app.cover_message}</p>
+                  )}
+                  <div className="text-xs text-muted-foreground">Applied {formatDistanceToNow(new Date(app.created_at), { addSuffix: true })}</div>
+                  {app.status === 'pending' && (
+                    <div className="flex gap-2">
+                      <Button size="sm" className="bg-success hover:bg-success/90" onClick={() => handleAdminUpdateAppStatus(app.id, 'accepted', viewingJobApps!.jobId)} disabled={processing}>
+                        <CheckCircle2 className="h-3.5 w-3.5 mr-1" /> Accept
+                      </Button>
+                      <Button size="sm" variant="destructive" onClick={() => handleAdminUpdateAppStatus(app.id, 'rejected', viewingJobApps!.jobId)} disabled={processing}>
+                        <XCircle className="h-3.5 w-3.5 mr-1" /> Reject
+                      </Button>
+                    </div>
+                  )}
+                  {app.status === 'accepted' && (
+                    <p className="text-xs text-success font-medium flex items-center gap-1"><CheckCircle2 className="h-3.5 w-3.5" /> Assigned to this job</p>
+                  )}
+                </div>
+              ))
+            )}
+          </div>
         </DialogContent>
       </Dialog>
     </SidebarProvider>
