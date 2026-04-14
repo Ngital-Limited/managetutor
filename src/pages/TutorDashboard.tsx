@@ -817,7 +817,7 @@ export default function TutorDashboard() {
 
         {/* Demo Class Bookings */}
         {demoBookings.length > 0 && (
-          <Card className="mb-8">
+          <Card className="mb-8" id="demo-classes">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Calendar className="h-5 w-5" />
@@ -907,7 +907,7 @@ export default function TutorDashboard() {
         )}
 
         {/* Applications */}
-        <Card>
+        <Card id="applications">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Briefcase className="h-5 w-5" />
