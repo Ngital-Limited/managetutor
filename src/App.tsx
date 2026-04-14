@@ -52,6 +52,7 @@ const App = () => (
               <Route path="/parent/profile" element={<ParentProfileEdit />} />
               <Route path="/tutor/dashboard" element={<TutorDashboard />} />
               <Route path="/tutor/profile" element={<TutorProfile />} />
+              <Route path="/admin/tutor/:userId" element={<TutorProfile />} />
               
               <Route path="/review/:tutorId" element={<WriteReview />} />
               <Route path="/favorites" element={<Favorites />} />
