@@ -15,6 +15,7 @@ interface ImpersonationData {
   userId: string;
   role: AppRole;
   profile: UserProfile;
+  originalSession: Session;
 }
 
 interface AuthContextType {
@@ -30,8 +31,8 @@ interface AuthContextType {
   signOut: () => Promise<void>;
   // Impersonation
   impersonation: ImpersonationData | null;
-  impersonateUser: (userId: string) => Promise<void>;
-  stopImpersonation: () => void;
+  impersonateUser: (userId: string) => Promise<{ error: string | null }>;
+  stopImpersonation: () => Promise<void>;
   effectiveUserId: string | null;
   effectiveRole: AppRole | null;
 }
@@ -49,6 +50,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
+        // Skip auth state changes while impersonating (we manage it manually)
+        if (impersonation) return;
+
         setSession(session);
         setUser(session?.user ?? null);
         
@@ -63,7 +67,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         } else {
           setRole(null);
           setProfile(null);
-          setImpersonation(null);
           setLoading(false);
         }
       }
@@ -118,27 +121,79 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const impersonateUser = async (userId: string) => {
-    // Only admins can impersonate
-    if (role !== 'admin') return;
+  const impersonateUser = async (userId: string): Promise<{ error: string | null }> => {
+    if (role !== 'admin' || !session) {
+      return { error: 'Admin access required' };
+    }
 
-    const [profileRes, roleRes] = await Promise.all([
-      supabase.from('profiles').select('full_name, avatar_url, phone').eq('id', userId).single(),
-      supabase.from('user_roles').select('role').eq('user_id', userId),
-    ]);
+    try {
+      const { data, error } = await supabase.functions.invoke('impersonate-user', {
+        body: { targetUserId: userId },
+      });
 
-    if (profileRes.data && roleRes.data && roleRes.data.length > 0) {
-      const userRole = roleRes.data[0].role as AppRole;
+      if (error) {
+        console.error('Impersonation error:', error);
+        return { error: error.message || 'Failed to impersonate' };
+      }
+
+      if (data?.error) {
+        return { error: data.error };
+      }
+
+      if (!data?.session) {
+        return { error: 'No session returned' };
+      }
+
+      // Store original admin session
+      const originalSession = session;
+
+      // Set the impersonated user's session in the supabase client
+      await supabase.auth.setSession({
+        access_token: data.session.access_token,
+        refresh_token: data.session.refresh_token,
+      });
+
+      // Update state with impersonated user data
       setImpersonation({
         userId,
-        role: userRole,
-        profile: profileRes.data as UserProfile,
+        role: data.role as AppRole,
+        profile: data.profile as UserProfile,
+        originalSession,
       });
+
+      // Update displayed role and profile
+      setRole(data.role as AppRole);
+      setProfile(data.profile as UserProfile);
+      setUser(data.session.user);
+      setSession(data.session);
+
+      return { error: null };
+    } catch (err: any) {
+      console.error('Impersonation error:', err);
+      return { error: err.message || 'Failed to impersonate' };
     }
   };
 
-  const stopImpersonation = () => {
+  const stopImpersonation = async () => {
+    if (!impersonation) return;
+
+    const { originalSession } = impersonation;
+
+    // Restore admin session
+    await supabase.auth.setSession({
+      access_token: originalSession.access_token,
+      refresh_token: originalSession.refresh_token,
+    });
+
     setImpersonation(null);
+    setUser(originalSession.user);
+    setSession(originalSession);
+
+    // Re-fetch admin role and profile
+    await Promise.all([
+      fetchUserRole(originalSession.user.id),
+      fetchProfile(originalSession.user.id),
+    ]);
   };
 
   const signUp = async (email: string, password: string, fullName: string, selectedRole: AppRole) => {
@@ -149,15 +204,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       password,
       options: {
         emailRedirectTo: redirectUrl,
-        data: {
-          full_name: fullName,
-        },
+        data: { full_name: fullName },
       },
     });
 
-    if (error) {
-      return { error };
-    }
+    if (error) return { error };
 
     if (data.user) {
       const { error: roleError } = await supabase
@@ -187,10 +238,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
     return { error };
   };
 
@@ -205,6 +253,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signOut = async () => {
+    if (impersonation) {
+      await stopImpersonation();
+      return;
+    }
     await supabase.auth.signOut();
     setUser(null);
     setSession(null);
@@ -213,9 +265,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setImpersonation(null);
   };
 
-  // Effective values: when impersonating, use impersonated user's data
-  const effectiveUserId = impersonation ? impersonation.userId : user?.id ?? null;
-  const effectiveRole = impersonation ? impersonation.role : role;
+  const effectiveUserId = user?.id ?? null;
+  const effectiveRole = role;
 
   return (
     <AuthContext.Provider value={{
