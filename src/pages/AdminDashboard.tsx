@@ -1134,6 +1134,7 @@ export default function AdminDashboard() {
     { title: 'Contact Messages', value: 'contacts', icon: Mail },
     { title: 'Broadcast', value: 'broadcast', icon: Megaphone },
     { title: 'Sub-Admin Roles', value: 'rbac', icon: ShieldCheck },
+    { title: 'Platform Data', value: 'platform_data', icon: BookOpen },
     { title: 'Settings', value: 'settings', icon: Settings },
   ];
 
@@ -1779,6 +1780,9 @@ export default function AdminDashboard() {
 
             {/* ═══════ SUB-ADMIN RBAC TAB ═══════ */}
             {activeTab === 'rbac' && <SubAdminRBACTab toast={toast} />}
+
+            {/* ═══════ PLATFORM DATA TAB ═══════ */}
+            {activeTab === 'platform_data' && <PlatformDataTab toast={toast} />}
 
             {/* ═══════ SETTINGS TAB ═══════ */}
             {activeTab === 'settings' && (
