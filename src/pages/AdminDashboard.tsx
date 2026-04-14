@@ -27,7 +27,8 @@ import {
   Clock, AlertTriangle, BarChart3, FileText, Settings, Search,
   Eye, Ban, UserCheck, FileCheck,
   LogOut, Home, Star, DollarSign, Trash2, CreditCard, Megaphone, Send, Mail,
-  Package, Plus, Pencil, ToggleLeft, ToggleRight, Wallet, MapPin, LifeBuoy, ShieldCheck
+  Package, Plus, Pencil, ToggleLeft, ToggleRight, Wallet, MapPin, LifeBuoy, ShieldCheck,
+  LogIn
 } from 'lucide-react';
 import { RevenuePayoutTab } from '@/components/admin/RevenuePayoutTab';
 import { SupportTicketsTab } from '@/components/admin/SupportTicketsTab';
@@ -711,7 +712,7 @@ function SubscriptionPlansTab({ toast }: { toast: ReturnType<typeof useToast>['t
 
 // ──────────── Component ────────────
 export default function AdminDashboard() {
-  const { user, role, loading } = useAuth();
+  const { user, role, loading, impersonateUser, impersonation, stopImpersonation } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -1023,6 +1024,20 @@ export default function AdminDashboard() {
     setProcessing(false);
   };
 
+  const handleImpersonate = async (userId: string) => {
+    await impersonateUser(userId);
+    const { data } = await supabase.from('user_roles').select('role').eq('user_id', userId);
+    if (data && data.length > 0) {
+      const targetRole = data[0].role;
+      if (targetRole === 'tutor') {
+        navigate('/tutor/dashboard');
+      } else if (targetRole === 'parent') {
+        navigate('/parent/dashboard');
+      }
+      toast({ title: 'Impersonation Active', description: `You are now viewing as this user. Click "Stop Impersonation" banner to return.` });
+    }
+  };
+
   if (loading || role !== 'admin') {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -1309,6 +1324,11 @@ export default function AdminDashboard() {
                               <TableCell className="text-xs text-muted-foreground">{formatDistanceToNow(new Date(u.created_at), { addSuffix: true })}</TableCell>
                               <TableCell className="text-right">
                                 <div className="flex gap-1 justify-end">
+                                  {(u.role === 'tutor' || u.role === 'parent') && (
+                                    <Button variant="ghost" size="sm" onClick={() => handleImpersonate(u.id)} title={`Login as ${u.full_name}`}>
+                                      <LogIn className="h-4 w-4 text-primary" />
+                                    </Button>
+                                  )}
                                   {u.role === 'tutor' && (
                                     <>
                                       <Button variant="ghost" size="sm" asChild><Link to={`/tutor/${u.id}`}><Eye className="h-4 w-4" /></Link></Button>

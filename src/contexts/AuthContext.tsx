@@ -11,6 +11,12 @@ interface UserProfile {
   phone: string | null;
 }
 
+interface ImpersonationData {
+  userId: string;
+  role: AppRole;
+  profile: UserProfile;
+}
+
 interface AuthContextType {
   user: User | null;
   session: Session | null;
@@ -22,6 +28,12 @@ interface AuthContextType {
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signInWithGoogle: () => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
+  // Impersonation
+  impersonation: ImpersonationData | null;
+  impersonateUser: (userId: string) => Promise<void>;
+  stopImpersonation: () => void;
+  effectiveUserId: string | null;
+  effectiveRole: AppRole | null;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -32,15 +44,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [role, setRole] = useState<AppRole | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [impersonation, setImpersonation] = useState<ImpersonationData | null>(null);
 
   useEffect(() => {
-    // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
         
-        // Defer role fetching with setTimeout to prevent deadlock
         if (session?.user) {
           setTimeout(async () => {
             await Promise.all([
@@ -52,12 +63,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         } else {
           setRole(null);
           setProfile(null);
+          setImpersonation(null);
           setLoading(false);
         }
       }
     );
 
-    // THEN check for existing session
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
@@ -80,7 +91,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .eq('user_id', userId);
     
     if (data && !error && data.length > 0) {
-      // Prioritize admin role if user has multiple roles
       const roles = data.map(d => d.role as AppRole);
       if (roles.includes('admin')) {
         setRole('admin');
@@ -108,6 +118,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const impersonateUser = async (userId: string) => {
+    // Only admins can impersonate
+    if (role !== 'admin') return;
+
+    const [profileRes, roleRes] = await Promise.all([
+      supabase.from('profiles').select('full_name, avatar_url, phone').eq('id', userId).single(),
+      supabase.from('user_roles').select('role').eq('user_id', userId),
+    ]);
+
+    if (profileRes.data && roleRes.data && roleRes.data.length > 0) {
+      const userRole = roleRes.data[0].role as AppRole;
+      setImpersonation({
+        userId,
+        role: userRole,
+        profile: profileRes.data as UserProfile,
+      });
+    }
+  };
+
+  const stopImpersonation = () => {
+    setImpersonation(null);
+  };
+
   const signUp = async (email: string, password: string, fullName: string, selectedRole: AppRole) => {
     const redirectUrl = `${window.location.origin}/`;
     
@@ -126,7 +159,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return { error };
     }
 
-    // If signup successful and we have a user, add their role
     if (data.user) {
       const { error: roleError } = await supabase
         .from('user_roles')
@@ -138,11 +170,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setRole(selectedRole);
       }
 
-      // Create tutor or agency profile if needed
       if (selectedRole === 'tutor') {
         await supabase.from('tutor_profiles').insert({
           user_id: data.user.id,
-          gender: 'male', // Default, user will update later
+          gender: 'male',
         });
       } else if (selectedRole === 'agency') {
         await supabase.from('agency_profiles').insert({
@@ -179,7 +210,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setSession(null);
     setRole(null);
     setProfile(null);
+    setImpersonation(null);
   };
+
+  // Effective values: when impersonating, use impersonated user's data
+  const effectiveUserId = impersonation ? impersonation.userId : user?.id ?? null;
+  const effectiveRole = impersonation ? impersonation.role : role;
 
   return (
     <AuthContext.Provider value={{
@@ -193,6 +229,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       signIn,
       signInWithGoogle,
       signOut,
+      impersonation,
+      impersonateUser,
+      stopImpersonation,
+      effectiveUserId,
+      effectiveRole,
     }}>
       {children}
     </AuthContext.Provider>
