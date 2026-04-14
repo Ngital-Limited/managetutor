@@ -532,20 +532,51 @@ export default function ParentDashboard() {
     }
   };
 
-  const handleInviteToInterview = async (app: Application) => {
-    if (!selectedJob || !app.tutor_profiles?.user_id) return;
-    const { error } = await supabase.from('notifications').insert({
-      user_id: app.tutor_profiles.user_id,
-      title: 'Interview Invitation',
-      message: `You have been shortlisted for "${selectedJob.title}". The parent would like to schedule a demo class with you.`,
+  const handleInviteToInterview = (app: Application) => {
+    setInterviewApp(app);
+    setInterviewDate(undefined);
+    setInterviewTime('');
+    setInterviewNotes('');
+    setInterviewDialogOpen(true);
+  };
+
+  const handleScheduleInterview = async () => {
+    if (!selectedJob || !interviewApp?.tutor_profiles?.user_id || !interviewDate || !interviewTime) {
+      toast({ title: 'Missing info', description: 'Please select a date and time', variant: 'destructive' });
+      return;
+    }
+    setSchedulingInterview(true);
+    const formattedDate = format(interviewDate, 'yyyy-MM-dd');
+
+    // Create a demo booking for the interview
+    const { error: bookingError } = await supabase.from('demo_bookings').insert({
+      parent_id: user!.id,
+      tutor_id: interviewApp.tutor_profiles.id,
+      preferred_date: formattedDate,
+      preferred_time: interviewTime,
+      notes: interviewNotes || null,
+      class_fee: 0,
+      status: 'pending',
+      subject_id: selectedJob.subject_ids?.[0] || null,
+    });
+
+    // Notify the tutor
+    const { error: notifError } = await supabase.from('notifications').insert({
+      user_id: interviewApp.tutor_profiles.user_id,
+      title: 'Interview/Demo Class Invitation',
+      message: `You have been invited for a demo class for "${selectedJob.title}" on ${format(interviewDate, 'PPP')} at ${interviewTime}.${interviewNotes ? ' Notes: ' + interviewNotes : ''}`,
       type: 'interview_invite',
       reference_id: selectedJob.id,
     });
-    if (error) {
-      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+
+    if (bookingError || notifError) {
+      toast({ title: 'Error', description: (bookingError || notifError)?.message, variant: 'destructive' });
     } else {
-      toast({ title: 'Invitation Sent', description: 'The tutor has been notified about the interview.' });
+      toast({ title: 'Interview Scheduled!', description: `Demo class scheduled for ${format(interviewDate, 'PPP')} at ${interviewTime}` });
+      setInterviewDialogOpen(false);
+      setInterviewApp(null);
     }
+    setSchedulingInterview(false);
   };
 
   const handleReportIssue = async () => {
