@@ -1781,13 +1781,20 @@ export default function AdminDashboard() {
                               <TableCell className="text-sm">{(job.profiles as any)?.full_name}</TableCell>
                               <TableCell className="text-sm">{(job.districts as any)?.name_en}</TableCell>
                               <TableCell className="text-sm">{(job.subjects as any)?.name_en || '—'}</TableCell>
-                              <TableCell><Badge variant="secondary" className="text-xs">{job.total_applications}</Badge></TableCell>
-                              <TableCell><Badge className={`text-xs capitalize ${statusColor(job.status)}`}>{job.status}</Badge></TableCell>
+                              <TableCell>
+                                <Button variant="ghost" size="sm" className="text-xs gap-1" onClick={() => { setViewingJobApps({ jobId: job.id, jobTitle: job.title }); fetchJobApplications(job.id); }}>
+                                  <Users className="h-3 w-3" /> {job.total_applications}
+                                </Button>
+                              </TableCell>
+                              <TableCell><Badge className={`text-xs capitalize ${statusColor(job.status)}`}>{job.status?.replace('_', ' ')}</Badge></TableCell>
                               <TableCell className="text-xs text-muted-foreground">{formatDistanceToNow(new Date(job.created_at), { addSuffix: true })}</TableCell>
                               <TableCell className="text-right">
-                                <div className="flex gap-1 justify-end">
+                                <div className="flex gap-1 justify-end flex-wrap">
                                   <Button variant="ghost" size="sm" asChild><Link to={`/jobs/${job.id}`}><Eye className="h-4 w-4" /></Link></Button>
                                   <Button variant="ghost" size="sm" onClick={() => openEditJob(job.id)} title="Edit Job"><Pencil className="h-4 w-4" /></Button>
+                                  <Button variant="outline" size="sm" className="text-xs gap-1" onClick={() => { setViewingJobApps({ jobId: job.id, jobTitle: job.title }); fetchJobApplications(job.id); }} title="View Applications & Assign Tutor">
+                                    <UserCheck className="h-3.5 w-3.5" /> Assign
+                                  </Button>
                                   {job.status === 'pending_approval' && (
                                     <>
                                       <Button variant="ghost" size="sm" onClick={() => handleUpdateJobStatus(job.id, 'open')} title="Approve">
