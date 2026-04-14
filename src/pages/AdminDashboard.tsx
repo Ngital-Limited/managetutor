@@ -930,6 +930,12 @@ export default function AdminDashboard() {
     setProcessing(false);
   };
 
+  const handleApproveUser = async (userId: string) => {
+    const { error } = await supabase.from('profiles').update({ is_approved: true }).eq('id', userId);
+    if (error) toast({ title: 'Error', description: error.message, variant: 'destructive' });
+    else { toast({ title: 'User approved' }); fetchUsers(); fetchStats(); }
+  };
+
   const handleBanUser = async (userId: string, ban: boolean) => {
     setProcessing(true);
     const { error } = await supabase.from('profiles').update({
