@@ -148,6 +148,7 @@ export default function TutorProfile() {
       setUserProfile({
         full_name: profileRes.data.full_name || '',
         phone: profileRes.data.phone || '',
+        email: profileRes.data.email || user?.email || '',
         district_id: profileRes.data.district_id || '',
       });
     }
