@@ -1420,13 +1420,16 @@ export default function AdminDashboard() {
                                       <LogIn className="h-4 w-4 text-primary" />
                                     </Button>
                                   )}
-                                  {u.role === 'tutor' && (
+                                   {u.role === 'tutor' && (
                                     <>
                                       <Button variant="ghost" size="sm" asChild><Link to={`/tutor/${u.id}`}><Eye className="h-4 w-4" /></Link></Button>
                                       <Button variant="ghost" size="sm" asChild title="Edit Tutor Profile"><Link to={`/admin/tutor/${u.id}`}><Pencil className="h-4 w-4" /></Link></Button>
                                     </>
-                                  )}
-                                  {!u.is_approved && (
+                                   )}
+                                   {u.role === 'parent' && (
+                                    <Button variant="ghost" size="sm" asChild title="Edit Parent Profile"><Link to={`/admin/parent/${u.id}`}><Pencil className="h-4 w-4" /></Link></Button>
+                                   )}
+                                   {!u.is_approved && (
                                     <Button variant="ghost" size="sm" onClick={() => handleApproveUser(u.id)} title="Approve User">
                                       <UserCheck className="h-4 w-4 text-success" />
                                     </Button>
