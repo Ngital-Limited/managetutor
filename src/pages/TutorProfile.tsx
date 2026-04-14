@@ -135,10 +135,10 @@ export default function TutorProfile() {
     const [subjectsRes, districtsRes, profileRes, tutorRes, docsRes, tutorSubjectsRes] = await Promise.all([
       supabase.from('subjects').select('*').order('name_en'),
       supabase.from('districts').select('*').order('name_en'),
-      supabase.from('profiles').select('*').eq('id', user?.id).single(),
-      supabase.from('tutor_profiles').select('*').eq('user_id', user?.id).single(),
-      supabase.from('verification_documents').select('*').eq('tutor_id', user?.id),
-      supabase.from('tutor_subjects').select('subject_id').eq('tutor_profile_id', user?.id),
+      supabase.from('profiles').select('*').eq('id', targetUserId).single(),
+      supabase.from('tutor_profiles').select('*').eq('user_id', targetUserId).single(),
+      supabase.from('verification_documents').select('*').eq('tutor_id', targetUserId),
+      supabase.from('tutor_subjects').select('subject_id').eq('tutor_profile_id', targetUserId),
     ]);
 
     if (subjectsRes.data) setSubjects(subjectsRes.data);
