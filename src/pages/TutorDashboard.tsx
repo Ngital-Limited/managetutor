@@ -92,7 +92,7 @@ interface FeaturedListing {
 
 const tutorSidebarItems = [
   { title: 'Dashboard', url: '/tutor/dashboard', icon: Home },
-  { title: 'My Applications', url: '/tutor/dashboard#applications', icon: FileText },
+  { title: 'My Applications', url: '/tutor/applications', icon: FileText },
   { title: 'Demo Classes', url: '/tutor/dashboard#demo-classes', icon: Calendar },
   { title: 'Browse Jobs', url: '/jobs', icon: Briefcase },
   { title: 'My Profile', url: '/tutor/profile', icon: User },
