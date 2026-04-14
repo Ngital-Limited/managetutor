@@ -1364,6 +1364,9 @@ export default function AdminDashboard() {
                                 </TableCell>
                                 <TableCell className="text-right">
                                   <div className="flex gap-1 justify-end">
+                                    <Button variant="ghost" size="sm" asChild title="Edit Profile">
+                                      <Link to={`/admin/tutor/${tutor.user_id}`}><Pencil className="h-4 w-4" /></Link>
+                                    </Button>
                                     <Button variant="ghost" size="sm" onClick={() => setSelectedTutor(tutor)}>
                                       <Eye className="h-4 w-4" />
                                     </Button>
