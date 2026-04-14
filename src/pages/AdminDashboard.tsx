@@ -175,7 +175,7 @@ function BroadcastTab({ toast }: { toast: ReturnType<typeof useToast>['toast'] }
 
   return (
     <div className="space-y-6">
-      <h1 className="text-3xl font-extrabold">Broadcast Notifications</h1>
+      <h1 className="text-xl font-semibold">Broadcast Notifications</h1>
       <div className="grid md:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
@@ -286,7 +286,7 @@ function ContactMessagesTab({ toast }: { toast: ReturnType<typeof useToast>['toa
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-extrabold">Contact Messages</h1>
+        <h1 className="text-xl font-semibold">Contact Messages</h1>
         {unreadCount > 0 && <Badge variant="destructive">{unreadCount} unread</Badge>}
       </div>
       <Card>
@@ -444,7 +444,7 @@ function DemoRequestsTab({ toast }: { toast: ReturnType<typeof useToast>['toast'
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-extrabold">Demo Class Requests</h1>
+        <h1 className="text-xl font-semibold">Demo Class Requests</h1>
         {pendingCount > 0 && (
           <Badge className="bg-warning text-warning-foreground">{pendingCount} pending</Badge>
         )}
@@ -590,7 +590,7 @@ function SubscriptionPlansTab({ toast }: { toast: ReturnType<typeof useToast>['t
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-extrabold">Subscription Plans</h1>
+        <h1 className="text-xl font-semibold">Subscription Plans</h1>
         <Button onClick={openCreate}><Plus className="h-4 w-4 mr-2" /> Create Plan</Button>
       </div>
 
@@ -1082,13 +1082,13 @@ export default function AdminDashboard() {
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-background">
         {/* Sidebar */}
-        <Sidebar collapsible="icon" className="border-r border-border">
+        <Sidebar collapsible="icon" className="border-r border-border/50">
           <SidebarContent>
             <SidebarGroup>
               <SidebarGroupLabel className="px-4 py-3">
                 <div className="flex items-center gap-2">
-                  <Shield className="h-5 w-5 text-destructive" />
-                  <span className="font-bold">Admin Panel</span>
+                  <Shield className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Admin</span>
                 </div>
               </SidebarGroupLabel>
               <SidebarGroupContent>
@@ -1097,12 +1097,12 @@ export default function AdminDashboard() {
                     <SidebarMenuItem key={item.value}>
                       <SidebarMenuButton
                         onClick={() => setActiveTab(item.value)}
-                        className={`w-full justify-start ${activeTab === item.value ? 'bg-primary/10 text-primary font-semibold' : ''}`}
+                        className={`w-full justify-start text-sm ${activeTab === item.value ? 'bg-primary/8 text-primary font-medium' : 'text-muted-foreground hover:text-foreground'}`}
                       >
-                        <item.icon className="h-4 w-4 mr-2" />
-                        <span className="flex-1 text-left">{item.title}</span>
+                        <item.icon className="h-4 w-4 mr-2.5 shrink-0" />
+                        <span className="flex-1 text-left truncate">{item.title}</span>
                         {item.badge ? (
-                          <Badge variant="destructive" className="ml-auto h-5 text-[10px]">{item.badge}</Badge>
+                          <span className="ml-auto text-[10px] font-medium bg-destructive/10 text-destructive px-1.5 py-0.5 rounded-full">{item.badge}</span>
                         ) : null}
                       </SidebarMenuButton>
                     </SidebarMenuItem>
@@ -1110,12 +1110,12 @@ export default function AdminDashboard() {
                 </SidebarMenu>
               </SidebarGroupContent>
             </SidebarGroup>
-            <SidebarGroup>
+            <SidebarGroup className="mt-auto">
               <SidebarGroupContent>
                 <SidebarMenu>
                   <SidebarMenuItem>
                     <SidebarMenuButton asChild>
-                      <Link to="/" className="flex items-center gap-2 text-muted-foreground">
+                      <Link to="/" className="flex items-center gap-2 text-muted-foreground hover:text-foreground text-sm">
                         <Home className="h-4 w-4" />
                         <span>Back to Site</span>
                       </Link>
@@ -1129,135 +1129,107 @@ export default function AdminDashboard() {
 
         {/* Main Content */}
         <div className="flex-1 flex flex-col min-h-screen overflow-hidden">
-          <header className="sticky top-0 z-50 h-14 flex items-center justify-between border-b border-border bg-card/80 backdrop-blur-xl px-4">
-            <div className="flex items-center gap-2">
-              <SidebarTrigger />
-              <Logo size="sm" />
-              <Badge variant="destructive" className="hidden sm:inline-flex">Super Admin</Badge>
-            </div>
+          <header className="sticky top-0 z-50 h-12 flex items-center justify-between border-b border-border/50 bg-background/95 backdrop-blur-sm px-4">
             <div className="flex items-center gap-3">
+              <SidebarTrigger className="text-muted-foreground" />
+              <span className="text-sm font-medium text-muted-foreground hidden sm:inline">Super Admin</span>
+            </div>
+            <div className="flex items-center gap-2">
               <NotificationBell />
-              <Button variant="outline" size="sm" onClick={() => { supabase.auth.signOut(); navigate('/'); }}>
-                <LogOut className="h-4 w-4 mr-2" />
-                Logout
+              <Button variant="ghost" size="sm" className="text-muted-foreground text-xs" onClick={() => { supabase.auth.signOut(); navigate('/'); }}>
+                <LogOut className="h-3.5 w-3.5" />
               </Button>
             </div>
           </header>
 
-          <main className="flex-1 p-4 md:p-8 overflow-auto">
+          <main className="flex-1 p-4 md:p-6 overflow-auto">
             {/* ═══════ OVERVIEW TAB ═══════ */}
             {activeTab === 'overview' && (
-              <div className="space-y-6">
-                <h1 className="text-3xl font-extrabold">Dashboard Overview</h1>
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+              <div className="space-y-6 max-w-6xl">
+                <div>
+                  <h1 className="text-xl font-semibold">Overview</h1>
+                  <p className="text-sm text-muted-foreground mt-0.5">Platform health at a glance</p>
+                </div>
+
+                {/* Key metrics — compact grid */}
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
                   {[
-                    { label: 'Total Users', value: stats.totalUsers, icon: Users, color: 'text-primary' },
-                    { label: 'Tutors', value: stats.totalTutors, icon: GraduationCap, color: 'text-tutor' },
-                    { label: 'Parents', value: stats.totalParents, icon: Users, color: 'text-secondary' },
-                    { label: 'Active Jobs', value: stats.activeJobs, icon: Briefcase, color: 'text-accent' },
-                    { label: 'Completed Jobs', value: stats.completedJobs, icon: CheckCircle2, color: 'text-success' },
-                    { label: 'Pending Verifications', value: stats.pendingVerifications, icon: Clock, color: 'text-warning', action: () => setActiveTab('verifications') },
-                    { label: 'Pending Jobs', value: stats.pendingJobs, icon: Clock, color: 'text-warning', action: () => { setJobStatusFilter('pending_approval'); setActiveTab('jobs'); } },
-                    { label: 'Pending Users', value: stats.pendingUsers, icon: Clock, color: 'text-warning', action: () => setActiveTab('users') },
-                    { label: 'Pending Reports', value: stats.pendingReports, icon: AlertTriangle, color: 'text-destructive', action: () => setActiveTab('reports') },
-                    { label: 'Total Reviews', value: stats.totalReviews, icon: Star, color: 'text-accent' },
-                    { label: 'Total Jobs', value: stats.totalJobs, icon: FileText, color: 'text-muted-foreground' },
-                    { label: 'Revenue', value: `৳${stats.totalRevenue.toLocaleString()}`, icon: DollarSign, color: 'text-success' },
+                    { label: 'Users', value: stats.totalUsers, icon: Users },
+                    { label: 'Tutors', value: stats.totalTutors, icon: GraduationCap },
+                    { label: 'Parents', value: stats.totalParents, icon: Users },
+                    { label: 'Active Jobs', value: stats.activeJobs, icon: Briefcase },
+                    { label: 'Total Jobs', value: stats.totalJobs, icon: FileText },
+                    { label: 'Revenue', value: `৳${stats.totalRevenue.toLocaleString()}`, icon: DollarSign },
                   ].map((stat, i) => (
-                    <Card key={i} className={`cursor-pointer hover-lift ${stat.action ? 'border-warning/30' : ''}`} onClick={stat.action}>
-                      <CardContent className="p-4">
-                        <stat.icon className={`h-5 w-5 ${stat.color} mb-2`} />
-                        <div className="text-2xl font-bold">{stat.value}</div>
-                        <div className="text-xs text-muted-foreground">{stat.label}</div>
-                      </CardContent>
-                    </Card>
+                    <div key={i} className="rounded-lg border border-border/50 p-3">
+                      <div className="flex items-center gap-1.5 mb-1">
+                        <stat.icon className="h-3.5 w-3.5 text-muted-foreground" />
+                        <span className="text-[11px] text-muted-foreground uppercase tracking-wide">{stat.label}</span>
+                      </div>
+                      <div className="text-lg font-semibold">{stat.value}</div>
+                    </div>
                   ))}
                 </div>
 
-                {/* Quick Actions */}
-                <Card>
-                  <CardHeader><CardTitle>Quick Actions</CardTitle></CardHeader>
-                  <CardContent>
-                    <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                      {[
-                        { label: 'Approve Jobs', icon: FileCheck, action: () => { setJobStatusFilter('pending_approval'); setActiveTab('jobs'); }, count: stats.pendingJobs },
-                        { label: 'Review Verifications', icon: UserCheck, action: () => setActiveTab('verifications'), count: stats.pendingVerifications },
-                        { label: 'Handle Reports', icon: AlertTriangle, action: () => setActiveTab('reports'), count: stats.pendingReports },
-                        { label: 'Approve Users', icon: Users, action: () => setActiveTab('users'), count: stats.pendingUsers },
-                        { label: 'Manage Users', icon: Users, action: () => setActiveTab('users') },
-                        { label: 'View Payments', icon: CreditCard, action: () => setActiveTab('payments') },
-                      ].map((a, i) => (
-                        <Button key={i} variant="outline" className="h-auto py-4 flex flex-col items-center gap-2" onClick={a.action}>
-                          <a.icon className="h-6 w-6" />
-                          <span className="text-sm font-medium">{a.label}</span>
-                          {a.count ? <Badge variant="destructive">{a.count} pending</Badge> : null}
-                        </Button>
-                      ))}
+                {/* Pending items — only show if there are any */}
+                {(stats.pendingVerifications > 0 || stats.pendingJobs > 0 || stats.pendingUsers > 0 || stats.pendingReports > 0) && (
+                  <div className="flex flex-wrap gap-2">
+                    {[
+                      { label: 'Pending Verifications', count: stats.pendingVerifications, tab: 'verifications' },
+                      { label: 'Pending Jobs', count: stats.pendingJobs, tab: 'jobs', filter: () => setJobStatusFilter('pending_approval') },
+                      { label: 'Pending Users', count: stats.pendingUsers, tab: 'users' },
+                      { label: 'Pending Reports', count: stats.pendingReports, tab: 'reports' },
+                    ].filter(p => p.count > 0).map((p, i) => (
+                      <button
+                        key={i}
+                        onClick={() => { p.filter?.(); setActiveTab(p.tab); }}
+                        className="flex items-center gap-2 rounded-md border border-warning/30 bg-warning/5 px-3 py-2 text-sm hover:bg-warning/10 transition-colors"
+                      >
+                        <Clock className="h-3.5 w-3.5 text-warning" />
+                        <span className="font-medium">{p.count}</span>
+                        <span className="text-muted-foreground">{p.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                {/* Charts — 2 column, compact */}
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div className="rounded-lg border border-border/50 p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <span className="text-sm font-medium">User Signups</span>
+                      <span className="text-[11px] text-muted-foreground">30 days</span>
                     </div>
-                  </CardContent>
-                </Card>
+                    <div className="h-36">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <AreaChart data={chartData.signups}>
+                          <CartesianGrid strokeDasharray="3 3" className="stroke-border/30" />
+                          <XAxis dataKey="date" tick={{ fontSize: 9 }} interval="preserveStartEnd" className="text-muted-foreground" />
+                          <YAxis allowDecimals={false} tick={{ fontSize: 9 }} width={24} />
+                          <Tooltip contentStyle={{ fontSize: 11, borderRadius: 6, border: '1px solid hsl(var(--border))' }} />
+                          <Area type="monotone" dataKey="count" stroke="hsl(var(--primary))" fill="hsl(var(--primary)/0.1)" strokeWidth={1.5} name="Signups" />
+                        </AreaChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </div>
 
-                {/* Analytics Charts */}
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  <Card>
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-base flex items-center gap-2"><Users className="h-4 w-4 text-primary" /> User Signups</CardTitle>
-                      <CardDescription>Last 30 days</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="h-48">
-                        <ResponsiveContainer width="100%" height="100%">
-                          <AreaChart data={chartData.signups}>
-                            <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
-                            <XAxis dataKey="date" tick={{ fontSize: 10 }} interval="preserveStartEnd" className="text-muted-foreground" />
-                            <YAxis allowDecimals={false} tick={{ fontSize: 10 }} width={30} />
-                            <Tooltip contentStyle={{ fontSize: 12, borderRadius: 8, border: '1px solid hsl(var(--border))' }} />
-                            <Area type="monotone" dataKey="count" stroke="hsl(var(--primary))" fill="hsl(var(--primary)/0.15)" strokeWidth={2} name="Signups" />
-                          </AreaChart>
-                        </ResponsiveContainer>
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  <Card>
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-base flex items-center gap-2"><Briefcase className="h-4 w-4 text-accent" /> Job Postings</CardTitle>
-                      <CardDescription>Last 30 days</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="h-48">
-                        <ResponsiveContainer width="100%" height="100%">
-                          <BarChart data={chartData.jobs}>
-                            <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
-                            <XAxis dataKey="date" tick={{ fontSize: 10 }} interval="preserveStartEnd" />
-                            <YAxis allowDecimals={false} tick={{ fontSize: 10 }} width={30} />
-                            <Tooltip contentStyle={{ fontSize: 12, borderRadius: 8, border: '1px solid hsl(var(--border))' }} />
-                            <Bar dataKey="count" fill="hsl(var(--accent))" radius={[3, 3, 0, 0]} name="Jobs" />
-                          </BarChart>
-                        </ResponsiveContainer>
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  <Card>
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-base flex items-center gap-2"><DollarSign className="h-4 w-4 text-success" /> Revenue</CardTitle>
-                      <CardDescription>Last 30 days (৳)</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="h-48">
-                        <ResponsiveContainer width="100%" height="100%">
-                          <AreaChart data={chartData.revenue}>
-                            <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
-                            <XAxis dataKey="date" tick={{ fontSize: 10 }} interval="preserveStartEnd" />
-                            <YAxis tick={{ fontSize: 10 }} width={40} />
-                            <Tooltip contentStyle={{ fontSize: 12, borderRadius: 8, border: '1px solid hsl(var(--border))' }} formatter={(v: number) => [`৳${v.toLocaleString()}`, 'Revenue']} />
-                            <Area type="monotone" dataKey="amount" stroke="hsl(142 76% 36%)" fill="hsl(142 76% 36% / 0.15)" strokeWidth={2} name="Revenue" />
-                          </AreaChart>
-                        </ResponsiveContainer>
-                      </div>
-                    </CardContent>
-                  </Card>
+                  <div className="rounded-lg border border-border/50 p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <span className="text-sm font-medium">Job Postings</span>
+                      <span className="text-[11px] text-muted-foreground">30 days</span>
+                    </div>
+                    <div className="h-36">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={chartData.jobs}>
+                          <CartesianGrid strokeDasharray="3 3" className="stroke-border/30" />
+                          <XAxis dataKey="date" tick={{ fontSize: 9 }} interval="preserveStartEnd" />
+                          <YAxis allowDecimals={false} tick={{ fontSize: 9 }} width={24} />
+                          <Tooltip contentStyle={{ fontSize: 11, borderRadius: 6, border: '1px solid hsl(var(--border))' }} />
+                          <Bar dataKey="count" fill="hsl(var(--primary)/0.6)" radius={[2, 2, 0, 0]} name="Jobs" />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </div>
                 </div>
               </div>
             )}
@@ -1265,7 +1237,7 @@ export default function AdminDashboard() {
             {/* ═══════ USERS TAB ═══════ */}
             {activeTab === 'users' && (
               <div className="space-y-6">
-                <h1 className="text-3xl font-extrabold">User Management</h1>
+                <h1 className="text-xl font-semibold">User Management</h1>
                 <div className="flex flex-col sm:flex-row gap-3">
                   <div className="relative flex-1">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -1363,7 +1335,7 @@ export default function AdminDashboard() {
             {activeTab === 'verifications' && (
               <div className="space-y-6">
                 <div className="flex items-center justify-between">
-                  <h1 className="text-3xl font-extrabold">Tutor Verifications</h1>
+                  <h1 className="text-xl font-semibold">Tutor Verifications</h1>
                   <Select value={verificationFilter} onValueChange={(v) => setVerificationFilter(v)}>
                     <SelectTrigger className="w-44"><SelectValue /></SelectTrigger>
                     <SelectContent>
@@ -1501,7 +1473,7 @@ export default function AdminDashboard() {
             {activeTab === 'jobs' && (
               <div className="space-y-6">
                 <div className="flex items-center justify-between">
-                  <h1 className="text-3xl font-extrabold">Job Management</h1>
+                  <h1 className="text-xl font-semibold">Job Management</h1>
                   <Select value={jobStatusFilter} onValueChange={setJobStatusFilter}>
                     <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
                     <SelectContent>
@@ -1581,7 +1553,7 @@ export default function AdminDashboard() {
             {/* ═══════ REPORTS TAB ═══════ */}
             {activeTab === 'reports' && (
               <div className="space-y-6">
-                <h1 className="text-3xl font-extrabold">User Reports</h1>
+                <h1 className="text-xl font-semibold">User Reports</h1>
                 {reports.length === 0 ? (
                   <Card><CardContent className="py-16 text-center">
                     <Shield className="h-12 w-12 text-success mx-auto mb-4" />
@@ -1626,7 +1598,7 @@ export default function AdminDashboard() {
             {/* ═══════ REVIEWS TAB ═══════ */}
             {activeTab === 'reviews' && (
               <div className="space-y-6">
-                <h1 className="text-3xl font-extrabold">Review Moderation</h1>
+                <h1 className="text-xl font-semibold">Review Moderation</h1>
                 <Card>
                   <CardContent className="p-0">
                     <ScrollArea className="w-full">
@@ -1680,7 +1652,7 @@ export default function AdminDashboard() {
             {/* ═══════ PAYMENTS TAB ═══════ */}
             {activeTab === 'payments' && (
               <div className="space-y-6">
-                <h1 className="text-3xl font-extrabold">Payment Transactions</h1>
+                <h1 className="text-xl font-semibold">Payment Transactions</h1>
                 <Card>
                   <CardContent className="p-0">
                     <ScrollArea className="w-full">
@@ -1743,7 +1715,7 @@ export default function AdminDashboard() {
             {/* ═══════ SETTINGS TAB ═══════ */}
             {activeTab === 'settings' && (
               <div className="space-y-6">
-                <h1 className="text-3xl font-extrabold">Platform Settings</h1>
+                <h1 className="text-xl font-semibold">Platform Settings</h1>
                 <div className="grid md:grid-cols-2 gap-6">
                   <Card>
                     <CardHeader>
