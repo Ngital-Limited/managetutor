@@ -1451,25 +1451,33 @@ export default function ParentDashboard() {
                       )}
 
                       {app.status === 'accepted' && (
-                        <div className="flex items-center gap-2 mt-4 pt-4 border-t flex-wrap">
-                          <Link to={`/tutor/${tutor?.id}`}>
-                            <Button size="sm" variant="outline">
-                              <Eye className="h-4 w-4 mr-1" />
-                              View Public Profile
+                        <div className="mt-4 pt-4 border-t space-y-3">
+                          <div className="flex items-center gap-2">
+                            <Badge className="bg-success/10 text-success border-success/20">
+                              <CheckCircle2 className="h-3.5 w-3.5 mr-1" /> Hired
+                            </Badge>
+                            <span className="text-xs text-muted-foreground">This tutor has been assigned to your job.</span>
+                          </div>
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <Link to={`/tutor/${tutor?.id}`}>
+                              <Button size="sm" variant="outline">
+                                <Eye className="h-4 w-4 mr-1" />
+                                View Profile
+                              </Button>
+                            </Link>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="text-destructive"
+                              onClick={() => {
+                                setReportTargetApp(app);
+                                setReportDialogOpen(true);
+                              }}
+                            >
+                              <Flag className="h-4 w-4 mr-1" />
+                              Report Issue
                             </Button>
-                          </Link>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="text-destructive"
-                            onClick={() => {
-                              setReportTargetApp(app);
-                              setReportDialogOpen(true);
-                            }}
-                          >
-                            <Flag className="h-4 w-4 mr-1" />
-                            Report Issue
-                          </Button>
+                          </div>
                         </div>
                       )}
                     </div>
