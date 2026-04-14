@@ -742,6 +742,8 @@ export default function AdminDashboard() {
   const [selectedUser, setSelectedUser] = useState<UserRow | null>(null);
   const [adminNotes, setAdminNotes] = useState('');
   const [processing, setProcessing] = useState(false);
+  const [editingJob, setEditingJob] = useState<any | null>(null);
+  const [editJobForm, setEditJobForm] = useState({ title: '', description: '', status: '', teaching_mode: '', budget_min: 0, budget_max: 0 });
 
   useEffect(() => {
     if (!loading) {
