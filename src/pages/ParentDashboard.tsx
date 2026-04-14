@@ -619,6 +619,7 @@ export default function ParentDashboard() {
     );
   }
 
+  const pendingApprovalJobs = jobs.filter(j => j.status === 'pending_approval');
   const openJobs = jobs.filter(j => j.status === 'open');
   const activeJobs = jobs.filter(j => j.status === 'in_progress');
   const completedJobs = jobs.filter(j => j.status === 'completed');
