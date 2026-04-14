@@ -12,7 +12,6 @@ Deno.serve(async (req) => {
   }
 
   try {
-    // Validate admin caller
     const authHeader = req.headers.get("Authorization");
     if (!authHeader?.startsWith("Bearer ")) {
       return new Response(
@@ -25,21 +24,20 @@ Deno.serve(async (req) => {
     const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
-    // Verify caller is admin using their JWT
+    // Verify caller using getUser (not getClaims)
     const callerClient = createClient(supabaseUrl, supabaseAnonKey, {
       global: { headers: { Authorization: authHeader } },
     });
 
-    const token = authHeader.replace("Bearer ", "");
-    const { data: claimsData, error: claimsError } = await callerClient.auth.getClaims(token);
-    if (claimsError || !claimsData?.claims) {
+    const { data: userData, error: userError } = await callerClient.auth.getUser();
+    if (userError || !userData?.user) {
       return new Response(
         JSON.stringify({ error: "Invalid token" }),
         { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    const adminUserId = claimsData.claims.sub;
+    const adminUserId = userData.user.id;
 
     // Check admin role using service role client
     const adminClient = createClient(supabaseUrl, serviceRoleKey);
@@ -82,23 +80,16 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Generate a magic link / session for the target user using admin API
-    // We use generateLink to create a magic link token, then exchange it
-    const { data: linkData, error: linkError } = await adminClient.auth.admin.generateLink({
-      type: "magiclink",
-      email: "", // We'll get email first
-    });
-
     // Get target user's email
-    const { data: targetUser, error: userError } = await adminClient.auth.admin.getUserById(targetUserId);
-    if (userError || !targetUser?.user) {
+    const { data: targetUser, error: targetUserError } = await adminClient.auth.admin.getUserById(targetUserId);
+    if (targetUserError || !targetUser?.user) {
       return new Response(
         JSON.stringify({ error: "Target user not found" }),
         { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    // Generate a session for the target user
+    // Generate a magic link for the target user
     const { data: generatedLink, error: genError } = await adminClient.auth.admin.generateLink({
       type: "magiclink",
       email: targetUser.user.email!,
