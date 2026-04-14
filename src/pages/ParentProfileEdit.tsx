@@ -11,7 +11,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { PhoneInput, isValidBDPhone } from '@/components/PhoneInput';
-import { ArrowLeft, Save, Upload, User, MapPin, Phone } from 'lucide-react';
+import { ArrowLeft, Save, Upload, User, MapPin, Phone, Mail } from 'lucide-react';
 
 interface District { id: string; name_en: string; name_bn: string; }
 interface Area { id: string; name_en: string; name_bn: string; district_id: string; }
@@ -34,6 +34,7 @@ export default function ParentProfileEdit() {
     full_name: '',
     full_name_bn: '',
     phone: '',
+    email: '',
     district_id: '',
     area_id: '',
     avatar_url: '',
@@ -53,7 +54,7 @@ export default function ParentProfileEdit() {
 
   const fetchData = async () => {
     const [profileRes, districtsRes, areasRes] = await Promise.all([
-      supabase.from('profiles').select('full_name, full_name_bn, phone, district_id, area_id, avatar_url').eq('id', targetUserId).single(),
+      supabase.from('profiles').select('full_name, full_name_bn, phone, email, district_id, area_id, avatar_url').eq('id', targetUserId).single(),
       supabase.from('districts').select('*').order('name_en'),
       supabase.from('areas').select('*').order('name_en'),
     ]);
@@ -62,6 +63,7 @@ export default function ParentProfileEdit() {
         full_name: profileRes.data.full_name || '',
         full_name_bn: profileRes.data.full_name_bn || '',
         phone: profileRes.data.phone || '',
+        email: profileRes.data.email || user?.email || '',
         district_id: profileRes.data.district_id || '',
         area_id: profileRes.data.area_id || '',
         avatar_url: profileRes.data.avatar_url || '',
@@ -192,6 +194,11 @@ export default function ParentProfileEdit() {
               <div>
                 <Label className="flex items-center gap-1"><Phone className="h-3 w-3" /> Phone Number</Label>
                 <PhoneInput value={form.phone} onChange={(v) => setForm({ ...form, phone: v })} />
+              </div>
+              <div>
+                <Label className="flex items-center gap-1"><Mail className="h-3 w-3" /> Email Address</Label>
+                <Input value={form.email} disabled className="bg-muted/50" />
+                <p className="text-xs text-muted-foreground mt-1">Email is linked to your account and cannot be changed here.</p>
               </div>
               <div>
                 <Label className="flex items-center gap-1"><MapPin className="h-3 w-3" /> District</Label>

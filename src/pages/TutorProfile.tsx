@@ -114,6 +114,7 @@ export default function TutorProfile() {
   const [userProfile, setUserProfile] = useState({
     full_name: '',
     phone: '',
+    email: '',
     district_id: '',
   });
 
@@ -147,6 +148,7 @@ export default function TutorProfile() {
       setUserProfile({
         full_name: profileRes.data.full_name || '',
         phone: profileRes.data.phone || '',
+        email: profileRes.data.email || user?.email || '',
         district_id: profileRes.data.district_id || '',
       });
     }
@@ -525,6 +527,11 @@ export default function TutorProfile() {
                   <Label>Phone Number</Label>
                   <PhoneInput value={userProfile.phone} onChange={(v) => setUserProfile({ ...userProfile, phone: v })} />
                 </div>
+              </div>
+              <div>
+                <Label>Email Address</Label>
+                <Input value={userProfile.email} disabled className="bg-muted/50" />
+                <p className="text-xs text-muted-foreground mt-1">Email is linked to your account and cannot be changed here.</p>
               </div>
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
