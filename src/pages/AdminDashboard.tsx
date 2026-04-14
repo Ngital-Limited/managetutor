@@ -765,7 +765,17 @@ export default function AdminDashboard() {
   const [adminNotes, setAdminNotes] = useState('');
   const [processing, setProcessing] = useState(false);
   const [editingJob, setEditingJob] = useState<any | null>(null);
-  const [editJobForm, setEditJobForm] = useState({ title: '', description: '', status: '', teaching_mode: '', budget_min: 0, budget_max: 0 });
+  const [editJobForm, setEditJobForm] = useState({
+    title: '', description: '', status: '', teaching_mode: '',
+    budget_min: 0, budget_max: 0, district_id: '', area_id: '',
+    class_level: '', subject_id: '', days_per_week: 0, duration_hours: 0,
+    preferred_time: '', preferred_tutor_gender: 'any', student_gender: '',
+    student_age: '', number_of_students: 1, location_details: '',
+    special_requirements: '', start_date: '',
+  });
+  const [editJobDistricts, setEditJobDistricts] = useState<{ id: string; name_en: string }[]>([]);
+  const [editJobAreas, setEditJobAreas] = useState<{ id: string; name_en: string; district_id: string }[]>([]);
+  const [editJobSubjects, setEditJobSubjects] = useState<{ id: string; name_en: string }[]>([]);
 
   useEffect(() => {
     if (!loading) {
@@ -1062,7 +1072,15 @@ export default function AdminDashboard() {
   };
 
   const openEditJob = async (jobId: string) => {
-    const { data } = await supabase.from('jobs').select('*').eq('id', jobId).single();
+    const [{ data }, { data: dists }, { data: ars }, { data: subs }] = await Promise.all([
+      supabase.from('jobs').select('*').eq('id', jobId).single(),
+      supabase.from('districts').select('id, name_en').order('name_en'),
+      supabase.from('areas').select('id, name_en, district_id').order('name_en'),
+      supabase.from('subjects').select('id, name_en').order('name_en'),
+    ]);
+    if (dists) setEditJobDistricts(dists);
+    if (ars) setEditJobAreas(ars);
+    if (subs) setEditJobSubjects(subs);
     if (data) {
       setEditingJob(data);
       setEditJobForm({
@@ -1072,6 +1090,20 @@ export default function AdminDashboard() {
         teaching_mode: data.teaching_mode || 'in_person',
         budget_min: data.budget_min || 0,
         budget_max: data.budget_max || 0,
+        district_id: data.district_id || '',
+        area_id: data.area_id || '',
+        class_level: data.class_level || '',
+        subject_id: data.subject_id || '',
+        days_per_week: data.days_per_week || 0,
+        duration_hours: data.duration_hours || 0,
+        preferred_time: data.preferred_time || '',
+        preferred_tutor_gender: data.preferred_tutor_gender || 'any',
+        student_gender: data.student_gender || '',
+        student_age: data.student_age || '',
+        number_of_students: data.number_of_students || 1,
+        location_details: data.location_details || '',
+        special_requirements: data.special_requirements || '',
+        start_date: data.start_date || '',
       });
     }
   };
@@ -1086,6 +1118,20 @@ export default function AdminDashboard() {
       teaching_mode: editJobForm.teaching_mode as any,
       budget_min: editJobForm.budget_min || null,
       budget_max: editJobForm.budget_max || null,
+      district_id: editJobForm.district_id || null,
+      area_id: editJobForm.area_id || null,
+      class_level: editJobForm.class_level || null,
+      subject_id: editJobForm.subject_id || null,
+      days_per_week: editJobForm.days_per_week || null,
+      duration_hours: editJobForm.duration_hours || null,
+      preferred_time: editJobForm.preferred_time || null,
+      preferred_tutor_gender: (editJobForm.preferred_tutor_gender as any) || null,
+      student_gender: (editJobForm.student_gender as any) || null,
+      student_age: editJobForm.student_age || null,
+      number_of_students: editJobForm.number_of_students || 1,
+      location_details: editJobForm.location_details || null,
+      special_requirements: editJobForm.special_requirements || null,
+      start_date: editJobForm.start_date || null,
     }).eq('id', editingJob.id);
     if (error) toast({ title: 'Error', description: error.message, variant: 'destructive' });
     else { toast({ title: 'Job updated successfully' }); setEditingJob(null); fetchJobs(); fetchStats(); }
@@ -1374,13 +1420,16 @@ export default function AdminDashboard() {
                                       <LogIn className="h-4 w-4 text-primary" />
                                     </Button>
                                   )}
-                                  {u.role === 'tutor' && (
+                                   {u.role === 'tutor' && (
                                     <>
                                       <Button variant="ghost" size="sm" asChild><Link to={`/tutor/${u.id}`}><Eye className="h-4 w-4" /></Link></Button>
                                       <Button variant="ghost" size="sm" asChild title="Edit Tutor Profile"><Link to={`/admin/tutor/${u.id}`}><Pencil className="h-4 w-4" /></Link></Button>
                                     </>
-                                  )}
-                                  {!u.is_approved && (
+                                   )}
+                                   {u.role === 'parent' && (
+                                    <Button variant="ghost" size="sm" asChild title="Edit Parent Profile"><Link to={`/admin/parent/${u.id}`}><Pencil className="h-4 w-4" /></Link></Button>
+                                   )}
+                                   {!u.is_approved && (
                                     <Button variant="ghost" size="sm" onClick={() => handleApproveUser(u.id)} title="Approve User">
                                       <UserCheck className="h-4 w-4 text-success" />
                                     </Button>
@@ -1935,7 +1984,7 @@ export default function AdminDashboard() {
       </Dialog>
       {/* Edit Job Dialog */}
       <Dialog open={!!editingJob} onOpenChange={() => setEditingJob(null)}>
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
           <DialogHeader><DialogTitle>Edit Job</DialogTitle></DialogHeader>
           <div className="space-y-4">
             <div>
@@ -1974,6 +2023,41 @@ export default function AdminDashboard() {
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
+                <label className="text-sm font-medium">District</label>
+                <Select value={editJobForm.district_id} onValueChange={(v) => setEditJobForm(f => ({ ...f, district_id: v, area_id: '' }))}>
+                  <SelectTrigger className="mt-1"><SelectValue placeholder="Select district" /></SelectTrigger>
+                  <SelectContent>
+                    {editJobDistricts.map(d => <SelectItem key={d.id} value={d.id}>{d.name_en}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="text-sm font-medium">Area</label>
+                <Select value={editJobForm.area_id} onValueChange={(v) => setEditJobForm(f => ({ ...f, area_id: v }))}>
+                  <SelectTrigger className="mt-1"><SelectValue placeholder="Select area" /></SelectTrigger>
+                  <SelectContent>
+                    {editJobAreas.filter(a => a.district_id === editJobForm.district_id).map(a => <SelectItem key={a.id} value={a.id}>{a.name_en}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-medium">Subject</label>
+                <Select value={editJobForm.subject_id} onValueChange={(v) => setEditJobForm(f => ({ ...f, subject_id: v }))}>
+                  <SelectTrigger className="mt-1"><SelectValue placeholder="Select subject" /></SelectTrigger>
+                  <SelectContent>
+                    {editJobSubjects.map(s => <SelectItem key={s.id} value={s.id}>{s.name_en}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="text-sm font-medium">Class Level</label>
+                <Input value={editJobForm.class_level} onChange={(e) => setEditJobForm(f => ({ ...f, class_level: e.target.value }))} className="mt-1" placeholder="e.g. Class 8" />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
                 <label className="text-sm font-medium">Budget Min (৳)</label>
                 <Input type="number" value={editJobForm.budget_min} onChange={(e) => setEditJobForm(f => ({ ...f, budget_min: Number(e.target.value) }))} className="mt-1" />
               </div>
@@ -1981,6 +2065,66 @@ export default function AdminDashboard() {
                 <label className="text-sm font-medium">Budget Max (৳)</label>
                 <Input type="number" value={editJobForm.budget_max} onChange={(e) => setEditJobForm(f => ({ ...f, budget_max: Number(e.target.value) }))} className="mt-1" />
               </div>
+            </div>
+            <div className="grid grid-cols-3 gap-4">
+              <div>
+                <label className="text-sm font-medium">Days/Week</label>
+                <Input type="number" value={editJobForm.days_per_week} onChange={(e) => setEditJobForm(f => ({ ...f, days_per_week: Number(e.target.value) }))} className="mt-1" min={1} max={7} />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Duration (hrs)</label>
+                <Input type="number" value={editJobForm.duration_hours} onChange={(e) => setEditJobForm(f => ({ ...f, duration_hours: Number(e.target.value) }))} className="mt-1" step={0.5} />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Students</label>
+                <Input type="number" value={editJobForm.number_of_students} onChange={(e) => setEditJobForm(f => ({ ...f, number_of_students: Number(e.target.value) }))} className="mt-1" min={1} />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-medium">Preferred Time</label>
+                <Input value={editJobForm.preferred_time} onChange={(e) => setEditJobForm(f => ({ ...f, preferred_time: e.target.value }))} className="mt-1" placeholder="e.g. Evening 5-7 PM" />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Start Date</label>
+                <Input type="date" value={editJobForm.start_date} onChange={(e) => setEditJobForm(f => ({ ...f, start_date: e.target.value }))} className="mt-1" />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-medium">Preferred Tutor Gender</label>
+                <Select value={editJobForm.preferred_tutor_gender} onValueChange={(v) => setEditJobForm(f => ({ ...f, preferred_tutor_gender: v }))}>
+                  <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="any">Any</SelectItem>
+                    <SelectItem value="male">Male</SelectItem>
+                    <SelectItem value="female">Female</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="text-sm font-medium">Student Gender</label>
+                <Select value={editJobForm.student_gender || 'any'} onValueChange={(v) => setEditJobForm(f => ({ ...f, student_gender: v }))}>
+                  <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="any">Any</SelectItem>
+                    <SelectItem value="male">Male</SelectItem>
+                    <SelectItem value="female">Female</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div>
+              <label className="text-sm font-medium">Student Age</label>
+              <Input value={editJobForm.student_age} onChange={(e) => setEditJobForm(f => ({ ...f, student_age: e.target.value }))} className="mt-1" placeholder="e.g. 12" />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Location Details</label>
+              <Textarea value={editJobForm.location_details} onChange={(e) => setEditJobForm(f => ({ ...f, location_details: e.target.value }))} className="mt-1" rows={2} placeholder="Specific address or directions" />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Special Requirements</label>
+              <Textarea value={editJobForm.special_requirements} onChange={(e) => setEditJobForm(f => ({ ...f, special_requirements: e.target.value }))} className="mt-1" rows={2} placeholder="Any special needs or requirements" />
             </div>
           </div>
           <DialogFooter>
