@@ -528,6 +528,11 @@ export default function TutorProfile() {
                   <PhoneInput value={userProfile.phone} onChange={(v) => setUserProfile({ ...userProfile, phone: v })} />
                 </div>
               </div>
+              <div>
+                <Label>Email Address</Label>
+                <Input value={userProfile.email} disabled className="bg-muted/50" />
+                <p className="text-xs text-muted-foreground mt-1">Email is linked to your account and cannot be changed here.</p>
+              </div>
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
                   <Label>Gender</Label>
