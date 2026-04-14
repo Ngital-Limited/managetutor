@@ -34,6 +34,7 @@ import { RevenuePayoutTab } from '@/components/admin/RevenuePayoutTab';
 import { SupportTicketsTab } from '@/components/admin/SupportTicketsTab';
 import { GeographicHeatmapTab } from '@/components/admin/GeographicHeatmapTab';
 import { SubAdminRBACTab } from '@/components/admin/SubAdminRBACTab';
+import { PlatformDataTab } from '@/components/admin/PlatformDataTab';
 
 // ──────────── Types ────────────
 interface Stats {
