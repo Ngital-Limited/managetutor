@@ -1416,12 +1416,13 @@ export default function AdminDashboard() {
                 </div>
 
                 {/* Key metrics — compact grid */}
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-3">
                   {[
                     { label: 'Users', value: stats.totalUsers, icon: Users },
                     { label: 'Tutors', value: stats.totalTutors, icon: GraduationCap },
                     { label: 'Parents', value: stats.totalParents, icon: Users },
                     { label: 'Active Jobs', value: stats.activeJobs, icon: Briefcase },
+                    { label: 'Accepted', value: stats.acceptedJobs, icon: CheckCircle2 },
                     { label: 'Total Jobs', value: stats.totalJobs, icon: FileText },
                     { label: 'Revenue', value: `৳${stats.totalRevenue.toLocaleString()}`, icon: DollarSign },
                   ].map((stat, i) => (
