@@ -175,7 +175,7 @@ function BroadcastTab({ toast }: { toast: ReturnType<typeof useToast>['toast'] }
 
   return (
     <div className="space-y-6">
-      <h1 className="text-3xl font-extrabold">Broadcast Notifications</h1>
+      <h1 className="text-xl font-semibold">Broadcast Notifications</h1>
       <div className="grid md:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
@@ -286,7 +286,7 @@ function ContactMessagesTab({ toast }: { toast: ReturnType<typeof useToast>['toa
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-extrabold">Contact Messages</h1>
+        <h1 className="text-xl font-semibold">Contact Messages</h1>
         {unreadCount > 0 && <Badge variant="destructive">{unreadCount} unread</Badge>}
       </div>
       <Card>
@@ -444,7 +444,7 @@ function DemoRequestsTab({ toast }: { toast: ReturnType<typeof useToast>['toast'
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-extrabold">Demo Class Requests</h1>
+        <h1 className="text-xl font-semibold">Demo Class Requests</h1>
         {pendingCount > 0 && (
           <Badge className="bg-warning text-warning-foreground">{pendingCount} pending</Badge>
         )}
@@ -590,7 +590,7 @@ function SubscriptionPlansTab({ toast }: { toast: ReturnType<typeof useToast>['t
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-extrabold">Subscription Plans</h1>
+        <h1 className="text-xl font-semibold">Subscription Plans</h1>
         <Button onClick={openCreate}><Plus className="h-4 w-4 mr-2" /> Create Plan</Button>
       </div>
 
@@ -1237,7 +1237,7 @@ export default function AdminDashboard() {
             {/* ═══════ USERS TAB ═══════ */}
             {activeTab === 'users' && (
               <div className="space-y-6">
-                <h1 className="text-3xl font-extrabold">User Management</h1>
+                <h1 className="text-xl font-semibold">User Management</h1>
                 <div className="flex flex-col sm:flex-row gap-3">
                   <div className="relative flex-1">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -1335,7 +1335,7 @@ export default function AdminDashboard() {
             {activeTab === 'verifications' && (
               <div className="space-y-6">
                 <div className="flex items-center justify-between">
-                  <h1 className="text-3xl font-extrabold">Tutor Verifications</h1>
+                  <h1 className="text-xl font-semibold">Tutor Verifications</h1>
                   <Select value={verificationFilter} onValueChange={(v) => setVerificationFilter(v)}>
                     <SelectTrigger className="w-44"><SelectValue /></SelectTrigger>
                     <SelectContent>
@@ -1473,7 +1473,7 @@ export default function AdminDashboard() {
             {activeTab === 'jobs' && (
               <div className="space-y-6">
                 <div className="flex items-center justify-between">
-                  <h1 className="text-3xl font-extrabold">Job Management</h1>
+                  <h1 className="text-xl font-semibold">Job Management</h1>
                   <Select value={jobStatusFilter} onValueChange={setJobStatusFilter}>
                     <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
                     <SelectContent>
@@ -1553,7 +1553,7 @@ export default function AdminDashboard() {
             {/* ═══════ REPORTS TAB ═══════ */}
             {activeTab === 'reports' && (
               <div className="space-y-6">
-                <h1 className="text-3xl font-extrabold">User Reports</h1>
+                <h1 className="text-xl font-semibold">User Reports</h1>
                 {reports.length === 0 ? (
                   <Card><CardContent className="py-16 text-center">
                     <Shield className="h-12 w-12 text-success mx-auto mb-4" />
@@ -1598,7 +1598,7 @@ export default function AdminDashboard() {
             {/* ═══════ REVIEWS TAB ═══════ */}
             {activeTab === 'reviews' && (
               <div className="space-y-6">
-                <h1 className="text-3xl font-extrabold">Review Moderation</h1>
+                <h1 className="text-xl font-semibold">Review Moderation</h1>
                 <Card>
                   <CardContent className="p-0">
                     <ScrollArea className="w-full">
@@ -1652,7 +1652,7 @@ export default function AdminDashboard() {
             {/* ═══════ PAYMENTS TAB ═══════ */}
             {activeTab === 'payments' && (
               <div className="space-y-6">
-                <h1 className="text-3xl font-extrabold">Payment Transactions</h1>
+                <h1 className="text-xl font-semibold">Payment Transactions</h1>
                 <Card>
                   <CardContent className="p-0">
                     <ScrollArea className="w-full">
@@ -1715,7 +1715,7 @@ export default function AdminDashboard() {
             {/* ═══════ SETTINGS TAB ═══════ */}
             {activeTab === 'settings' && (
               <div className="space-y-6">
-                <h1 className="text-3xl font-extrabold">Platform Settings</h1>
+                <h1 className="text-xl font-semibold">Platform Settings</h1>
                 <div className="grid md:grid-cols-2 gap-6">
                   <Card>
                     <CardHeader>
