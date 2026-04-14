@@ -1128,8 +1128,10 @@ export default function AdminDashboard() {
                   <CardContent>
                     <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
                       {[
+                        { label: 'Approve Jobs', icon: FileCheck, action: () => { setJobStatusFilter('pending_approval'); setActiveTab('jobs'); }, count: stats.pendingJobs },
                         { label: 'Review Verifications', icon: UserCheck, action: () => setActiveTab('verifications'), count: stats.pendingVerifications },
                         { label: 'Handle Reports', icon: AlertTriangle, action: () => setActiveTab('reports'), count: stats.pendingReports },
+                        { label: 'Approve Users', icon: Users, action: () => setActiveTab('users'), count: stats.pendingUsers },
                         { label: 'Manage Users', icon: Users, action: () => setActiveTab('users') },
                         { label: 'View Payments', icon: CreditCard, action: () => setActiveTab('payments') },
                       ].map((a, i) => (
