@@ -1023,6 +1023,92 @@ export default function ParentDashboard() {
     </Dialog>
   );
 
+  // ─── Interview Scheduling Dialog ───
+  const interviewDialog = (
+    <Dialog open={interviewDialogOpen} onOpenChange={setInterviewDialogOpen}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Calendar className="h-5 w-5 text-primary" />
+            Schedule Interview / Demo Class
+          </DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4">
+          {interviewApp && (
+            <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
+              <Avatar className="h-10 w-10">
+                <AvatarImage src={interviewApp.tutor_profiles?.profiles?.avatar_url} />
+                <AvatarFallback>{interviewApp.tutor_profiles?.profiles?.full_name?.charAt(0)}</AvatarFallback>
+              </Avatar>
+              <div>
+                <p className="font-medium text-sm">{interviewApp.tutor_profiles?.profiles?.full_name}</p>
+                <p className="text-xs text-muted-foreground">For: {selectedJob?.title}</p>
+              </div>
+            </div>
+          )}
+          <div>
+            <Label className="mb-2 block">Select Date</Label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !interviewDate && "text-muted-foreground")}>
+                  <Calendar className="mr-2 h-4 w-4" />
+                  {interviewDate ? format(interviewDate, 'PPP') : 'Pick a date'}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <CalendarComponent
+                  mode="single"
+                  selected={interviewDate}
+                  onSelect={setInterviewDate}
+                  disabled={(date) => date < new Date()}
+                  initialFocus
+                  className={cn("p-3 pointer-events-auto")}
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+          <div>
+            <Label className="mb-2 block">Select Time</Label>
+            <Select value={interviewTime} onValueChange={setInterviewTime}>
+              <SelectTrigger><SelectValue placeholder="Choose a time slot" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="8:00 AM">8:00 AM</SelectItem>
+                <SelectItem value="9:00 AM">9:00 AM</SelectItem>
+                <SelectItem value="10:00 AM">10:00 AM</SelectItem>
+                <SelectItem value="11:00 AM">11:00 AM</SelectItem>
+                <SelectItem value="12:00 PM">12:00 PM</SelectItem>
+                <SelectItem value="2:00 PM">2:00 PM</SelectItem>
+                <SelectItem value="3:00 PM">3:00 PM</SelectItem>
+                <SelectItem value="4:00 PM">4:00 PM</SelectItem>
+                <SelectItem value="5:00 PM">5:00 PM</SelectItem>
+                <SelectItem value="6:00 PM">6:00 PM</SelectItem>
+                <SelectItem value="7:00 PM">7:00 PM</SelectItem>
+                <SelectItem value="8:00 PM">8:00 PM</SelectItem>
+                <SelectItem value="9:00 PM">9:00 PM</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <Label className="mb-2 block">Notes (optional)</Label>
+            <Textarea
+              value={interviewNotes}
+              onChange={(e) => setInterviewNotes(e.target.value)}
+              placeholder="Any specific topics to cover, location details, etc."
+              rows={3}
+            />
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => setInterviewDialogOpen(false)}>Cancel</Button>
+          <Button onClick={handleScheduleInterview} disabled={schedulingInterview || !interviewDate || !interviewTime}>
+            <Send className="h-4 w-4 mr-2" />
+            {schedulingInterview ? 'Scheduling...' : 'Schedule & Notify Tutor'}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+
   // ─── Render section content ───
   const renderOverview = () => (
     <>
