@@ -1466,6 +1466,16 @@ export default function AdminDashboard() {
                               <TableCell className="text-right">
                                 <div className="flex gap-1 justify-end">
                                   <Button variant="ghost" size="sm" asChild><Link to={`/jobs/${job.id}`}><Eye className="h-4 w-4" /></Link></Button>
+                                  {job.status === 'pending_approval' && (
+                                    <>
+                                      <Button variant="ghost" size="sm" onClick={() => handleUpdateJobStatus(job.id, 'open')} title="Approve">
+                                        <CheckCircle2 className="h-4 w-4 text-success" />
+                                      </Button>
+                                      <Button variant="ghost" size="sm" onClick={() => handleUpdateJobStatus(job.id, 'cancelled')} title="Reject">
+                                        <XCircle className="h-4 w-4 text-destructive" />
+                                      </Button>
+                                    </>
+                                  )}
                                   {job.status === 'open' && (
                                     <Button variant="ghost" size="sm" onClick={() => handleUpdateJobStatus(job.id, 'cancelled')}>
                                       <XCircle className="h-4 w-4 text-destructive" />
