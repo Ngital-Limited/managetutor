@@ -1259,8 +1259,10 @@ export default function AdminDashboard() {
                               <TableCell>
                                 {u.is_banned ? (
                                   <Badge variant="destructive" className="text-xs">Banned</Badge>
+                                ) : !u.is_approved ? (
+                                  <Badge className="bg-warning/10 text-warning border-warning/20 text-xs">Pending Approval</Badge>
                                 ) : (
-                                  <Badge className="bg-success/10 text-success border-success/20 text-xs">Active</Badge>
+                                  <Badge className="bg-success/10 text-success border-success/20 text-xs">Approved</Badge>
                                 )}
                               </TableCell>
                               <TableCell className="text-xs text-muted-foreground">{formatDistanceToNow(new Date(u.created_at), { addSuffix: true })}</TableCell>
@@ -1268,6 +1270,11 @@ export default function AdminDashboard() {
                                 <div className="flex gap-1 justify-end">
                                   {u.role === 'tutor' && (
                                     <Button variant="ghost" size="sm" asChild><Link to={`/tutor/${u.id}`}><Eye className="h-4 w-4" /></Link></Button>
+                                  )}
+                                  {!u.is_approved && (
+                                    <Button variant="ghost" size="sm" onClick={() => handleApproveUser(u.id)} title="Approve User">
+                                      <UserCheck className="h-4 w-4 text-success" />
+                                    </Button>
                                   )}
                                   <Button variant="ghost" size="sm" onClick={() => { setSelectedUser(u); setAdminNotes(''); }}>
                                     {u.is_banned ? <CheckCircle2 className="h-4 w-4 text-success" /> : <Ban className="h-4 w-4 text-destructive" />}
