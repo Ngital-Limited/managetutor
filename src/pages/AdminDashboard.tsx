@@ -1024,7 +1024,20 @@ export default function AdminDashboard() {
     setProcessing(false);
   };
 
-  if (loading || role !== 'admin') {
+  const handleImpersonate = async (userId: string) => {
+    await impersonateUser(userId);
+    const { data } = await supabase.from('user_roles').select('role').eq('user_id', userId);
+    if (data && data.length > 0) {
+      const targetRole = data[0].role;
+      if (targetRole === 'tutor') {
+        navigate('/tutor/dashboard');
+      } else if (targetRole === 'parent') {
+        navigate('/parent/dashboard');
+      }
+      toast({ title: 'Impersonation Active', description: `You are now viewing as this user. Click "Stop Impersonation" banner to return.` });
+    }
+  };
+
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
