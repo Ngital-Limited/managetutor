@@ -1855,6 +1855,7 @@ export default function ParentDashboard() {
 
       {postJobDialog}
       {reportDialog}
+      {interviewDialog}
     </SidebarProvider>
   );
 }
