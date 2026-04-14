@@ -1025,17 +1025,21 @@ export default function AdminDashboard() {
   };
 
   const handleImpersonate = async (userId: string) => {
-    await impersonateUser(userId);
+    setProcessing(true);
+    const { error } = await impersonateUser(userId);
+    setProcessing(false);
+    if (error) {
+      toast({ title: 'Impersonation Failed', description: error, variant: 'destructive' });
+      return;
+    }
+    // The auth context now has the impersonated user's session, navigate to their dashboard
     const { data } = await supabase.from('user_roles').select('role').eq('user_id', userId);
     if (data && data.length > 0) {
       const targetRole = data[0].role;
-      if (targetRole === 'tutor') {
-        navigate('/tutor/dashboard');
-      } else if (targetRole === 'parent') {
-        navigate('/parent/dashboard');
-      }
-      toast({ title: 'Impersonation Active', description: `You are now viewing as this user. Click "Stop Impersonation" banner to return.` });
+      if (targetRole === 'tutor') navigate('/tutor/dashboard');
+      else if (targetRole === 'parent') navigate('/parent/dashboard');
     }
+    toast({ title: 'Impersonation Active', description: 'You are now operating as this user. All actions use their real permissions.' });
   };
 
   if (loading || role !== 'admin') {
