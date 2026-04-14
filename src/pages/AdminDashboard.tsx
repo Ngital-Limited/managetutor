@@ -1277,7 +1277,10 @@ export default function AdminDashboard() {
                               <TableCell className="text-right">
                                 <div className="flex gap-1 justify-end">
                                   {u.role === 'tutor' && (
-                                    <Button variant="ghost" size="sm" asChild><Link to={`/tutor/${u.id}`}><Eye className="h-4 w-4" /></Link></Button>
+                                    <>
+                                      <Button variant="ghost" size="sm" asChild><Link to={`/tutor/${u.id}`}><Eye className="h-4 w-4" /></Link></Button>
+                                      <Button variant="ghost" size="sm" asChild title="Edit Tutor Profile"><Link to={`/admin/tutor/${u.id}`}><Pencil className="h-4 w-4" /></Link></Button>
+                                    </>
                                   )}
                                   {!u.is_approved && (
                                     <Button variant="ghost" size="sm" onClick={() => handleApproveUser(u.id)} title="Approve User">
