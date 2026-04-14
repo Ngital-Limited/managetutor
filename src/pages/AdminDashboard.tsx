@@ -1865,6 +1865,62 @@ export default function AdminDashboard() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      {/* Edit Job Dialog */}
+      <Dialog open={!!editingJob} onOpenChange={() => setEditingJob(null)}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader><DialogTitle>Edit Job</DialogTitle></DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <label className="text-sm font-medium">Title</label>
+              <Input value={editJobForm.title} onChange={(e) => setEditJobForm(f => ({ ...f, title: e.target.value }))} className="mt-1" />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Description</label>
+              <Textarea value={editJobForm.description} onChange={(e) => setEditJobForm(f => ({ ...f, description: e.target.value }))} className="mt-1" rows={4} />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-medium">Status</label>
+                <Select value={editJobForm.status} onValueChange={(v) => setEditJobForm(f => ({ ...f, status: v }))}>
+                  <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="pending_approval">Pending Approval</SelectItem>
+                    <SelectItem value="open">Open</SelectItem>
+                    <SelectItem value="in_progress">In Progress</SelectItem>
+                    <SelectItem value="completed">Completed</SelectItem>
+                    <SelectItem value="cancelled">Cancelled</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="text-sm font-medium">Teaching Mode</label>
+                <Select value={editJobForm.teaching_mode} onValueChange={(v) => setEditJobForm(f => ({ ...f, teaching_mode: v }))}>
+                  <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="online">Online</SelectItem>
+                    <SelectItem value="in_person">In Person</SelectItem>
+                    <SelectItem value="hybrid">Hybrid</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-medium">Budget Min (৳)</label>
+                <Input type="number" value={editJobForm.budget_min} onChange={(e) => setEditJobForm(f => ({ ...f, budget_min: Number(e.target.value) }))} className="mt-1" />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Budget Max (৳)</label>
+                <Input type="number" value={editJobForm.budget_max} onChange={(e) => setEditJobForm(f => ({ ...f, budget_max: Number(e.target.value) }))} className="mt-1" />
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditingJob(null)}>Cancel</Button>
+            <Button onClick={handleSaveJob} disabled={processing}>{processing ? 'Saving...' : 'Save Changes'}</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </SidebarProvider>
   );
 }
