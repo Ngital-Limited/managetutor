@@ -83,12 +83,21 @@ export default function TutorPublicProfile() {
   }, [id, user]);
 
   const fetchTutorData = async () => {
-    // Fetch tutor profile
-    const { data: tutorData } = await supabase
+    // Try fetching by tutor_profiles.id first, then by user_id
+    let { data: tutorData } = await supabase
       .from('tutor_profiles')
       .select('*')
       .eq('id', id)
-      .single();
+      .maybeSingle();
+
+    if (!tutorData) {
+      const { data: byUserId } = await supabase
+        .from('tutor_profiles')
+        .select('*')
+        .eq('user_id', id)
+        .maybeSingle();
+      tutorData = byUserId;
+    }
 
     if (!tutorData) {
       setLoading(false);
