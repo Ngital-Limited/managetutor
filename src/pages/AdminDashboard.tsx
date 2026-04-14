@@ -1984,7 +1984,7 @@ export default function AdminDashboard() {
       </Dialog>
       {/* Edit Job Dialog */}
       <Dialog open={!!editingJob} onOpenChange={() => setEditingJob(null)}>
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
           <DialogHeader><DialogTitle>Edit Job</DialogTitle></DialogHeader>
           <div className="space-y-4">
             <div>
@@ -2023,6 +2023,41 @@ export default function AdminDashboard() {
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
+                <label className="text-sm font-medium">District</label>
+                <Select value={editJobForm.district_id} onValueChange={(v) => setEditJobForm(f => ({ ...f, district_id: v, area_id: '' }))}>
+                  <SelectTrigger className="mt-1"><SelectValue placeholder="Select district" /></SelectTrigger>
+                  <SelectContent>
+                    {editJobDistricts.map(d => <SelectItem key={d.id} value={d.id}>{d.name_en}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="text-sm font-medium">Area</label>
+                <Select value={editJobForm.area_id} onValueChange={(v) => setEditJobForm(f => ({ ...f, area_id: v }))}>
+                  <SelectTrigger className="mt-1"><SelectValue placeholder="Select area" /></SelectTrigger>
+                  <SelectContent>
+                    {editJobAreas.filter(a => a.district_id === editJobForm.district_id).map(a => <SelectItem key={a.id} value={a.id}>{a.name_en}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-medium">Subject</label>
+                <Select value={editJobForm.subject_id} onValueChange={(v) => setEditJobForm(f => ({ ...f, subject_id: v }))}>
+                  <SelectTrigger className="mt-1"><SelectValue placeholder="Select subject" /></SelectTrigger>
+                  <SelectContent>
+                    {editJobSubjects.map(s => <SelectItem key={s.id} value={s.id}>{s.name_en}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="text-sm font-medium">Class Level</label>
+                <Input value={editJobForm.class_level} onChange={(e) => setEditJobForm(f => ({ ...f, class_level: e.target.value }))} className="mt-1" placeholder="e.g. Class 8" />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
                 <label className="text-sm font-medium">Budget Min (৳)</label>
                 <Input type="number" value={editJobForm.budget_min} onChange={(e) => setEditJobForm(f => ({ ...f, budget_min: Number(e.target.value) }))} className="mt-1" />
               </div>
@@ -2030,6 +2065,66 @@ export default function AdminDashboard() {
                 <label className="text-sm font-medium">Budget Max (৳)</label>
                 <Input type="number" value={editJobForm.budget_max} onChange={(e) => setEditJobForm(f => ({ ...f, budget_max: Number(e.target.value) }))} className="mt-1" />
               </div>
+            </div>
+            <div className="grid grid-cols-3 gap-4">
+              <div>
+                <label className="text-sm font-medium">Days/Week</label>
+                <Input type="number" value={editJobForm.days_per_week} onChange={(e) => setEditJobForm(f => ({ ...f, days_per_week: Number(e.target.value) }))} className="mt-1" min={1} max={7} />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Duration (hrs)</label>
+                <Input type="number" value={editJobForm.duration_hours} onChange={(e) => setEditJobForm(f => ({ ...f, duration_hours: Number(e.target.value) }))} className="mt-1" step={0.5} />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Students</label>
+                <Input type="number" value={editJobForm.number_of_students} onChange={(e) => setEditJobForm(f => ({ ...f, number_of_students: Number(e.target.value) }))} className="mt-1" min={1} />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-medium">Preferred Time</label>
+                <Input value={editJobForm.preferred_time} onChange={(e) => setEditJobForm(f => ({ ...f, preferred_time: e.target.value }))} className="mt-1" placeholder="e.g. Evening 5-7 PM" />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Start Date</label>
+                <Input type="date" value={editJobForm.start_date} onChange={(e) => setEditJobForm(f => ({ ...f, start_date: e.target.value }))} className="mt-1" />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-medium">Preferred Tutor Gender</label>
+                <Select value={editJobForm.preferred_tutor_gender} onValueChange={(v) => setEditJobForm(f => ({ ...f, preferred_tutor_gender: v }))}>
+                  <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="any">Any</SelectItem>
+                    <SelectItem value="male">Male</SelectItem>
+                    <SelectItem value="female">Female</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="text-sm font-medium">Student Gender</label>
+                <Select value={editJobForm.student_gender || 'any'} onValueChange={(v) => setEditJobForm(f => ({ ...f, student_gender: v }))}>
+                  <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="any">Any</SelectItem>
+                    <SelectItem value="male">Male</SelectItem>
+                    <SelectItem value="female">Female</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div>
+              <label className="text-sm font-medium">Student Age</label>
+              <Input value={editJobForm.student_age} onChange={(e) => setEditJobForm(f => ({ ...f, student_age: e.target.value }))} className="mt-1" placeholder="e.g. 12" />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Location Details</label>
+              <Textarea value={editJobForm.location_details} onChange={(e) => setEditJobForm(f => ({ ...f, location_details: e.target.value }))} className="mt-1" rows={2} placeholder="Specific address or directions" />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Special Requirements</label>
+              <Textarea value={editJobForm.special_requirements} onChange={(e) => setEditJobForm(f => ({ ...f, special_requirements: e.target.value }))} className="mt-1" rows={2} placeholder="Any special needs or requirements" />
             </div>
           </div>
           <DialogFooter>
