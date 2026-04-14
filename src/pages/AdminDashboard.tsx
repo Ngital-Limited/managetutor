@@ -851,56 +851,103 @@ export default function AdminDashboard() {
   const fetchVerifications = useCallback(async () => {
     let query = supabase
       .from('tutor_profiles')
-      .select('id, user_id, verification_status, education, experience_years, gender, created_at, profiles:user_id (full_name, email, phone), verification_documents (id, document_type, document_url, status)')
+      .select('id, user_id, verification_status, education, experience_years, gender, created_at, verification_documents (id, document_type, document_url, status)')
       .order('created_at', { ascending: false }).limit(100);
     if (verificationFilter !== 'all') {
       query = query.eq('verification_status', verificationFilter as 'pending' | 'approved' | 'rejected');
     }
     const { data } = await query;
-    if (data) setPendingTutors(data as unknown as TutorVerification[]);
+    if (data) {
+      const userIds = [...new Set(data.map(t => t.user_id))];
+      const { data: profilesData } = await supabase.from('profiles').select('id, full_name, email, phone').in('id', userIds);
+      const profileMap = new Map(profilesData?.map(p => [p.id, p]) || []);
+      setPendingTutors(data.map(t => ({ ...t, profiles: profileMap.get(t.user_id) || { full_name: 'Unknown', email: '', phone: null } })) as unknown as TutorVerification[]);
+    }
 
     // Fetch verification badge payments
     const { data: vPayments } = await supabase
       .from('payment_transactions')
-      .select('id, amount, currency, status, transaction_id, created_at, completed_at, listing_type, profiles:user_id (full_name, email)')
+      .select('id, amount, currency, status, transaction_id, created_at, completed_at, listing_type, user_id')
       .eq('listing_type', 'verification_badge')
       .order('created_at', { ascending: false })
       .limit(50);
-    if (vPayments) setVerificationPayments(vPayments as unknown as PaymentRow[]);
+    if (vPayments) {
+      const uids = [...new Set(vPayments.map(p => p.user_id))];
+      const { data: profs } = await supabase.from('profiles').select('id, full_name, email').in('id', uids);
+      const pMap = new Map(profs?.map(p => [p.id, p]) || []);
+      setVerificationPayments(vPayments.map(p => ({ ...p, profiles: pMap.get(p.user_id) || { full_name: 'Unknown', email: '' } })) as unknown as PaymentRow[]);
+    }
   }, [verificationFilter]);
 
   const fetchJobs = useCallback(async () => {
     let query = supabase
       .from('jobs')
-      .select('id, title, job_reference, status, teaching_mode, total_applications, created_at, districts (name_en), subjects (name_en), profiles:parent_id (full_name)')
+      .select('id, title, job_reference, status, teaching_mode, total_applications, created_at, parent_id, districts (name_en), subjects (name_en)')
       .order('created_at', { ascending: false }).limit(100);
     if (jobStatusFilter !== 'all') query = query.eq('status', jobStatusFilter as any);
     const { data } = await query;
-    if (data) setJobs(data as unknown as JobRow[]);
+    if (data) {
+      const parentIds = [...new Set(data.map(j => j.parent_id))];
+      const { data: profs } = await supabase.from('profiles').select('id, full_name').in('id', parentIds);
+      const pMap = new Map(profs?.map(p => [p.id, p]) || []);
+      setJobs(data.map(j => ({ ...j, profiles: pMap.get(j.parent_id) || { full_name: 'Unknown' } })) as unknown as JobRow[]);
+    }
   }, [jobStatusFilter]);
 
   const fetchReports = useCallback(async () => {
     const { data } = await supabase
       .from('reports')
-      .select('id, report_type, description, status, created_at, reporter_id, reported_user_id, reporter:profiles!reports_reporter_id_fkey (full_name), reported:profiles!reports_reported_user_id_fkey (full_name, email)')
+      .select('id, report_type, description, status, created_at, reporter_id, reported_user_id')
       .order('created_at', { ascending: false }).limit(50);
-    if (data) setReports(data as unknown as Report[]);
+    if (data) {
+      const allIds = [...new Set([...data.map(r => r.reporter_id), ...data.map(r => r.reported_user_id)])];
+      const { data: profs } = await supabase.from('profiles').select('id, full_name, email').in('id', allIds);
+      const pMap = new Map(profs?.map(p => [p.id, p]) || []);
+      setReports(data.map(r => ({
+        ...r,
+        reporter: pMap.get(r.reporter_id) || { full_name: 'Unknown' },
+        reported: pMap.get(r.reported_user_id) || { full_name: 'Unknown', email: '' },
+      })) as unknown as Report[]);
+    }
   }, []);
 
   const fetchReviews = useCallback(async () => {
     const { data } = await supabase
       .from('reviews')
-      .select('id, rating, comment, is_approved, created_at, parent:profiles!reviews_parent_id_fkey (full_name), tutor_profiles (profiles:user_id (full_name))')
+      .select('id, rating, comment, is_approved, created_at, parent_id, tutor_id')
       .order('created_at', { ascending: false }).limit(50);
-    if (data) setReviews(data as unknown as ReviewRow[]);
+    if (data) {
+      const parentIds = [...new Set(data.map(r => r.parent_id))];
+      const tutorIds = [...new Set(data.map(r => r.tutor_id))];
+      const [{ data: parentProfs }, { data: tutorData }] = await Promise.all([
+        supabase.from('profiles').select('id, full_name').in('id', parentIds),
+        supabase.from('tutor_profiles').select('id, user_id').in('id', tutorIds),
+      ]);
+      const parentMap = new Map(parentProfs?.map(p => [p.id, p]) || []);
+      const tutorUserIds = [...new Set(tutorData?.map(t => t.user_id) || [])];
+      const { data: tutorProfs } = await supabase.from('profiles').select('id, full_name').in('id', tutorUserIds);
+      const tutorProfMap = new Map(tutorProfs?.map(p => [p.id, p]) || []);
+      const tutorMap = new Map(tutorData?.map(t => [t.id, tutorProfMap.get(t.user_id)]) || []);
+      
+      setReviews(data.map(r => ({
+        ...r,
+        parent: parentMap.get(r.parent_id) || { full_name: 'Unknown' },
+        tutor_profiles: { profiles: tutorMap.get(r.tutor_id) || { full_name: 'Unknown' } },
+      })) as unknown as ReviewRow[]);
+    }
   }, []);
 
   const fetchPayments = useCallback(async () => {
     const { data } = await supabase
       .from('payment_transactions')
-      .select('id, amount, currency, status, transaction_id, created_at, completed_at, listing_type, profiles:user_id (full_name, email)')
+      .select('id, amount, currency, status, transaction_id, created_at, completed_at, listing_type, user_id')
       .order('created_at', { ascending: false }).limit(50);
-    if (data) setPayments(data as unknown as PaymentRow[]);
+    if (data) {
+      const uids = [...new Set(data.map(p => p.user_id))];
+      const { data: profs } = await supabase.from('profiles').select('id, full_name, email').in('id', uids);
+      const pMap = new Map(profs?.map(p => [p.id, p]) || []);
+      setPayments(data.map(p => ({ ...p, profiles: pMap.get(p.user_id) || { full_name: 'Unknown', email: '' } })) as unknown as PaymentRow[]);
+    }
   }, []);
 
   // Load data when tab changes
