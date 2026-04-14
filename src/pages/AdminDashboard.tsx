@@ -1072,7 +1072,15 @@ export default function AdminDashboard() {
   };
 
   const openEditJob = async (jobId: string) => {
-    const { data } = await supabase.from('jobs').select('*').eq('id', jobId).single();
+    const [{ data }, { data: dists }, { data: ars }, { data: subs }] = await Promise.all([
+      supabase.from('jobs').select('*').eq('id', jobId).single(),
+      supabase.from('districts').select('id, name_en').order('name_en'),
+      supabase.from('areas').select('id, name_en, district_id').order('name_en'),
+      supabase.from('subjects').select('id, name_en').order('name_en'),
+    ]);
+    if (dists) setEditJobDistricts(dists);
+    if (ars) setEditJobAreas(ars);
+    if (subs) setEditJobSubjects(subs);
     if (data) {
       setEditingJob(data);
       setEditJobForm({
@@ -1082,6 +1090,20 @@ export default function AdminDashboard() {
         teaching_mode: data.teaching_mode || 'in_person',
         budget_min: data.budget_min || 0,
         budget_max: data.budget_max || 0,
+        district_id: data.district_id || '',
+        area_id: data.area_id || '',
+        class_level: data.class_level || '',
+        subject_id: data.subject_id || '',
+        days_per_week: data.days_per_week || 0,
+        duration_hours: data.duration_hours || 0,
+        preferred_time: data.preferred_time || '',
+        preferred_tutor_gender: data.preferred_tutor_gender || 'any',
+        student_gender: data.student_gender || '',
+        student_age: data.student_age || '',
+        number_of_students: data.number_of_students || 1,
+        location_details: data.location_details || '',
+        special_requirements: data.special_requirements || '',
+        start_date: data.start_date || '',
       });
     }
   };
@@ -1096,6 +1118,20 @@ export default function AdminDashboard() {
       teaching_mode: editJobForm.teaching_mode as any,
       budget_min: editJobForm.budget_min || null,
       budget_max: editJobForm.budget_max || null,
+      district_id: editJobForm.district_id || null,
+      area_id: editJobForm.area_id || null,
+      class_level: editJobForm.class_level || null,
+      subject_id: editJobForm.subject_id || null,
+      days_per_week: editJobForm.days_per_week || null,
+      duration_hours: editJobForm.duration_hours || null,
+      preferred_time: editJobForm.preferred_time || null,
+      preferred_tutor_gender: (editJobForm.preferred_tutor_gender as any) || null,
+      student_gender: (editJobForm.student_gender as any) || null,
+      student_age: editJobForm.student_age || null,
+      number_of_students: editJobForm.number_of_students || 1,
+      location_details: editJobForm.location_details || null,
+      special_requirements: editJobForm.special_requirements || null,
+      start_date: editJobForm.start_date || null,
     }).eq('id', editingJob.id);
     if (error) toast({ title: 'Error', description: error.message, variant: 'destructive' });
     else { toast({ title: 'Job updated successfully' }); setEditingJob(null); fetchJobs(); fetchStats(); }
