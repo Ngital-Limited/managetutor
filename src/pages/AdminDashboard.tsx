@@ -27,7 +27,8 @@ import {
   Clock, AlertTriangle, BarChart3, FileText, Settings, Search,
   Eye, Ban, UserCheck, FileCheck,
   LogOut, Home, Star, DollarSign, Trash2, CreditCard, Megaphone, Send, Mail,
-  Package, Plus, Pencil, ToggleLeft, ToggleRight, Wallet, MapPin, LifeBuoy, ShieldCheck
+  Package, Plus, Pencil, ToggleLeft, ToggleRight, Wallet, MapPin, LifeBuoy, ShieldCheck,
+  LogIn
 } from 'lucide-react';
 import { RevenuePayoutTab } from '@/components/admin/RevenuePayoutTab';
 import { SupportTicketsTab } from '@/components/admin/SupportTicketsTab';
@@ -1309,6 +1310,11 @@ export default function AdminDashboard() {
                               <TableCell className="text-xs text-muted-foreground">{formatDistanceToNow(new Date(u.created_at), { addSuffix: true })}</TableCell>
                               <TableCell className="text-right">
                                 <div className="flex gap-1 justify-end">
+                                  {(u.role === 'tutor' || u.role === 'parent') && (
+                                    <Button variant="ghost" size="sm" onClick={() => handleImpersonate(u.id)} title={`Login as ${u.full_name}`}>
+                                      <LogIn className="h-4 w-4 text-primary" />
+                                    </Button>
+                                  )}
                                   {u.role === 'tutor' && (
                                     <>
                                       <Button variant="ghost" size="sm" asChild><Link to={`/tutor/${u.id}`}><Eye className="h-4 w-4" /></Link></Button>
