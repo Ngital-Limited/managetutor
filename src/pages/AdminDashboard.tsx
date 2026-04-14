@@ -19,6 +19,7 @@ import {
 } from '@/components/ui/sidebar';
 
 import { useAuth } from '@/contexts/AuthContext';
+const navigate_fn = () => { /* placeholder */ };
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { formatDistanceToNow, format } from 'date-fns';
