@@ -46,6 +46,8 @@ interface Stats {
   pendingReports: number;
   totalReviews: number;
   totalRevenue: number;
+  pendingJobs: number;
+  pendingUsers: number;
 }
 
 interface UserRow {
