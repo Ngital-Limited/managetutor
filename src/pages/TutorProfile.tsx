@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Logo } from '@/components/Logo';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { CLASS_LEVELS } from '@/constants/classLevels';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -56,6 +56,9 @@ export default function TutorProfile() {
   const { t } = useLanguage();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { userId: adminEditUserId } = useParams<{ userId: string }>();
+  const isAdminEdit = role === 'admin' && !!adminEditUserId;
+  const targetUserId = isAdminEdit ? adminEditUserId : user?.id;
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -118,22 +121,24 @@ export default function TutorProfile() {
     if (!authLoading) {
       if (!user) {
         navigate('/auth');
-      } else if (role !== 'tutor') {
+      } else if (role !== 'tutor' && role !== 'admin') {
         navigate('/dashboard');
-      } else {
+      } else if (role === 'tutor' || isAdminEdit) {
         fetchData();
+      } else {
+        navigate('/dashboard');
       }
     }
-  }, [user, role, authLoading]);
+  }, [user, role, authLoading, adminEditUserId]);
 
   const fetchData = async () => {
     const [subjectsRes, districtsRes, profileRes, tutorRes, docsRes, tutorSubjectsRes] = await Promise.all([
       supabase.from('subjects').select('*').order('name_en'),
       supabase.from('districts').select('*').order('name_en'),
-      supabase.from('profiles').select('*').eq('id', user?.id).single(),
-      supabase.from('tutor_profiles').select('*').eq('user_id', user?.id).single(),
-      supabase.from('verification_documents').select('*').eq('tutor_id', user?.id),
-      supabase.from('tutor_subjects').select('subject_id').eq('tutor_profile_id', user?.id),
+      supabase.from('profiles').select('*').eq('id', targetUserId).single(),
+      supabase.from('tutor_profiles').select('*').eq('user_id', targetUserId).single(),
+      supabase.from('verification_documents').select('*').eq('tutor_id', targetUserId),
+      supabase.from('tutor_subjects').select('subject_id').eq('tutor_profile_id', targetUserId),
     ]);
 
     if (subjectsRes.data) setSubjects(subjectsRes.data);
@@ -240,7 +245,7 @@ export default function TutorProfile() {
       full_name: userProfile.full_name,
       phone: userProfile.phone,
       district_id: userProfile.district_id || null,
-    }).eq('id', user?.id);
+    }).eq('id', targetUserId);
 
     if (profileError) {
       const msg = profileError.message?.includes('idx_profiles_phone_unique')
@@ -254,7 +259,7 @@ export default function TutorProfile() {
     const { data: tutorData } = await supabase
       .from('tutor_profiles')
       .select('id')
-      .eq('user_id', user?.id)
+      .eq('user_id', targetUserId)
       .single();
 
     if (tutorData) {
