@@ -258,6 +258,7 @@ export default function TutorProfile() {
       full_name: userProfile.full_name,
       phone: userProfile.phone,
       district_id: userProfile.district_id || null,
+      area_id: userProfile.area_id || null,
     }).eq('id', targetUserId);
 
     if (profileError) {
