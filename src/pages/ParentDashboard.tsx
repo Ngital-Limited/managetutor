@@ -148,7 +148,7 @@ function ParentSidebar({ activeSection, setActiveSection, onPostJob }: { activeS
     : user?.email?.[0]?.toUpperCase() || '?';
 
   return (
-    <Sidebar collapsible="icon">
+    <Sidebar collapsible="none">
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel>

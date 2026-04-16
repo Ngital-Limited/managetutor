@@ -62,7 +62,7 @@ function TutorAppSidebar() {
     : user?.email?.[0]?.toUpperCase() || '?';
 
   return (
-    <Sidebar collapsible="icon">
+    <Sidebar collapsible="none">
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel>{!collapsed && <Logo size="sm" />}</SidebarGroupLabel>
