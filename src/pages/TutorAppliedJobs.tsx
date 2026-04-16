@@ -21,6 +21,7 @@ import {
   Briefcase, Clock, CheckCircle2, XCircle, MapPin, BookOpen,
   Eye, ArrowRight, User, Phone, Mail, LogOut, Globe,
   Home, Search, CreditCard, FileText, Calendar, GraduationCap,
+  Star, Hourglass,
 } from 'lucide-react';
 
 interface Application {
