@@ -174,16 +174,18 @@ export default function TutorAppliedJobs() {
 
           <main className="flex-1 p-4 md:p-6 max-w-5xl mx-auto w-full">
             {/* Stats */}
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6">
+            <div className="grid grid-cols-2 md:grid-cols-7 gap-3 mb-6">
               {[
                 { label: 'Total', value: stats.total, color: 'text-foreground' },
                 { label: 'Pending', value: stats.pending, color: 'text-warning' },
+                { label: 'Shortlisted', value: stats.shortlisted, color: 'text-primary' },
+                { label: 'Waiting', value: stats.waiting, color: 'text-orange-500' },
                 { label: 'Accepted', value: stats.accepted, color: 'text-success' },
                 { label: 'Rejected', value: stats.rejected, color: 'text-destructive' },
                 { label: 'Withdrawn', value: stats.withdrawn, color: 'text-muted-foreground' },
               ].map(s => (
                 <Card key={s.label}>
-                  <CardContent className="p-4 text-center">
+                  <CardContent className="p-3 text-center">
                     <p className={`text-2xl font-bold ${s.color}`}>{s.value}</p>
                     <p className="text-xs text-muted-foreground">{s.label}</p>
                   </CardContent>
