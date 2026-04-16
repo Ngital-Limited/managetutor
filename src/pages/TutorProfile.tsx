@@ -25,7 +25,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { formatDistanceToNow } from 'date-fns';
 
 interface Subject { id: string; name_en: string; name_bn: string; }
-interface District { id: string; name_en: string; name_bn: string; }
+interface District { id: string; name_en: string; name_bn: string; division_en: string; }
 interface EducationEntry {
   id?: string;
   institution: string;
@@ -64,6 +64,8 @@ export default function TutorProfile() {
   const [saving, setSaving] = useState(false);
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [districts, setDistricts] = useState<District[]>([]);
+  const [areas, setAreas] = useState<{ id: string; name_en: string; name_bn: string; district_id: string }[]>([]);
+  const [selectedDivision, setSelectedDivision] = useState('');
   const [selectedSubjects, setSelectedSubjects] = useState<string[]>([]);
   const [documents, setDocuments] = useState<VerificationDoc[]>([]);
   const [uploading, setUploading] = useState(false);
@@ -116,6 +118,7 @@ export default function TutorProfile() {
     phone: '',
     email: '',
     district_id: '',
+    area_id: '',
   });
 
   useEffect(() => {
