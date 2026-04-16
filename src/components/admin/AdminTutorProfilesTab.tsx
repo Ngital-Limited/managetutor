@@ -18,7 +18,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Link } from 'react-router-dom';
 import {
   Search, GraduationCap, Send, Filter, Eye, Pencil,
-  Loader2, Bell, X, LogIn, Ban, CheckCircle2, ShieldOff, ShieldCheck
+  Loader2, Bell, X, LogIn, Ban, CheckCircle2, ShieldOff, ShieldCheck, Download
 } from 'lucide-react';
 import {
   DropdownMenu as DropdownMenuRoot,
@@ -396,6 +396,29 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
     [availableJobs]
   );
 
+  // ─── CSV Export ───
+  const handleExportCSV = () => {
+    if (tutors.length === 0) { toast({ title: 'No data to export', variant: 'destructive' }); return; }
+    const headers = ['Reference', 'Name', 'Email', 'Phone', 'Gender', 'District', 'Area/Thana', 'Education', 'Experience (yrs)', 'Teaching Mode', 'Verification', 'Available', 'Rating', 'Class Levels', 'Approved', 'Banned', 'Joined'];
+    const esc = (v: string) => `"${(v || '').replace(/"/g, '""')}"`;
+    const rows = tutors.map(t => [
+      esc(t.user_reference || ''), esc(t.name), esc(t.email), esc(t.phone || ''),
+      esc(t.gender), esc(t.district_name || ''), esc(t.area_name || ''),
+      esc(t.education || ''), String(t.experience_years), esc(t.teaching_mode || ''),
+      esc(t.verification_status), t.is_available ? 'Yes' : 'No',
+      String(t.average_rating ?? ''), esc((t.class_levels || []).join(', ')),
+      t.is_approved ? 'Yes' : 'No', t.is_banned ? 'Yes' : 'No',
+      esc(t.created_at ? new Date(t.created_at).toLocaleDateString() : ''),
+    ].join(','));
+    const csv = [headers.join(','), ...rows].join('\n');
+    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = `tutors_export_${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click(); URL.revokeObjectURL(url);
+    toast({ title: 'CSV Exported', description: `${tutors.length} tutors exported` });
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between flex-wrap gap-3">
@@ -413,6 +436,9 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
           )}
           <Button size="sm" variant="outline" onClick={() => { setNotifyMode('filtered'); setNotifyDialogOpen(true); }} className="gap-1.5">
             <Bell className="h-3.5 w-3.5" /> Notify All Filtered ({totalCount})
+          </Button>
+          <Button size="sm" variant="outline" onClick={handleExportCSV} className="gap-1.5">
+            <Download className="h-3.5 w-3.5" /> Export CSV
           </Button>
         </div>
       </div>
