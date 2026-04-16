@@ -1596,7 +1596,7 @@ export default function ParentDashboard() {
                         <Clock className="h-3 w-3" />
                         {booking.preferred_time} ({booking.duration_minutes} min)
                       </span>
-                      <span className="font-medium text-primary">৳{booking.class_fee}</span>
+                      <span className="font-medium text-success">Free</span>
                     </div>
                   </div>
                   <Badge className={
