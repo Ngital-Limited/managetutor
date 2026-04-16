@@ -363,6 +363,13 @@ export function AdminPostJobTab({ toast }: Props) {
               </div>
             )}
 
+            {prefilled && (
+              <div className="flex items-center gap-2 p-3 rounded-md bg-accent/50 border border-accent text-sm">
+                <CheckCircle2 className="h-4 w-4 text-primary shrink-0" />
+                <span>Previous job data loaded — update as needed</span>
+              </div>
+            )}
+
             {/* Section: Basic Info */}
             <div className="space-y-1">
               <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Basic Information</p>
