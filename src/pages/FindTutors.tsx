@@ -536,7 +536,7 @@ export default function FindTutors() {
               </div>
 
               {/* Location Row */}
-              <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
+              <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-4">
                 {/* Country */}
                 <div>
                   <Label className="text-sm font-medium mb-2 block">Country</Label>
@@ -546,7 +546,7 @@ export default function FindTutors() {
                 {/* Division */}
                 <div>
                   <Label className="text-sm font-medium mb-2 block">Division</Label>
-                  <Select value={selectedDivision} onValueChange={(v) => { setSelectedDivision(v === 'all' ? '' : v); setSelectedCity(''); }}>
+                  <Select value={selectedDivision} onValueChange={(v) => { setSelectedDivision(v === 'all' ? '' : v); setSelectedDistrict(''); setSelectedArea(''); setDistrictSearch(''); setAreaSearch(''); }}>
                     <SelectTrigger className="rounded-xl">
                       <SelectValue placeholder="All Divisions" />
                     </SelectTrigger>
@@ -561,28 +561,56 @@ export default function FindTutors() {
                   </Select>
                 </div>
 
-                {/* City with search */}
+                {/* District with search */}
                 <div>
-                  <Label className="text-sm font-medium mb-2 block">City</Label>
-                  <Select value={selectedCity} onValueChange={setSelectedCity}>
+                  <Label className="text-sm font-medium mb-2 block">District</Label>
+                  <Select value={selectedDistrict} onValueChange={(v) => { setSelectedDistrict(v === 'all' ? '' : v); setSelectedArea(''); setAreaSearch(''); }}>
                     <SelectTrigger className="rounded-xl">
                       <MapPin className="h-4 w-4 mr-2 text-muted-foreground" />
-                      <SelectValue placeholder="All Cities" />
+                      <SelectValue placeholder="All Districts" />
                     </SelectTrigger>
                     <SelectContent>
                       <div className="px-2 pb-2">
                         <Input
-                          placeholder="Search city (A-Z)..."
-                          value={citySearch}
-                          onChange={(e) => setCitySearch(e.target.value)}
+                          placeholder="Search district (A-Z)..."
+                          value={districtSearch}
+                          onChange={(e) => setDistrictSearch(e.target.value)}
                           className="h-8 text-sm rounded-lg"
                           onClick={(e) => e.stopPropagation()}
                         />
                       </div>
-                      <SelectItem value="all">All Cities</SelectItem>
-                      {filteredCities.map(d => (
+                      <SelectItem value="all">All Districts</SelectItem>
+                      {filteredDistricts.map(d => (
                         <SelectItem key={d.id} value={d.id}>
                           {language === 'en' ? d.name_en : d.name_bn}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Thana/Upazila with search */}
+                <div>
+                  <Label className="text-sm font-medium mb-2 block">Thana/Upazila</Label>
+                  <Select value={selectedArea} onValueChange={(v) => setSelectedArea(v === 'all' ? '' : v)} disabled={!selectedDistrict}>
+                    <SelectTrigger className="rounded-xl">
+                      <MapPin className="h-4 w-4 mr-2 text-muted-foreground" />
+                      <SelectValue placeholder={selectedDistrict ? "All Areas" : "Select district first"} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <div className="px-2 pb-2">
+                        <Input
+                          placeholder="Search thana/upazila..."
+                          value={areaSearch}
+                          onChange={(e) => setAreaSearch(e.target.value)}
+                          className="h-8 text-sm rounded-lg"
+                          onClick={(e) => e.stopPropagation()}
+                        />
+                      </div>
+                      <SelectItem value="all">All Areas</SelectItem>
+                      {filteredAreas.map(a => (
+                        <SelectItem key={a.id} value={a.id}>
+                          {language === 'en' ? a.name_en : a.name_bn}
                         </SelectItem>
                       ))}
                     </SelectContent>
