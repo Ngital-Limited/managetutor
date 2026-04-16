@@ -96,6 +96,21 @@ export function AdminTutorEditTab({ toast }: Props) {
     setSearching(false);
   }, []);
 
+  const loadAdminNotes = useCallback(async (tutorId: string) => {
+    const { data } = await supabase.from('tutor_admin_notes')
+      .select('id, category, note, created_at, admin_id')
+      .eq('tutor_id', tutorId)
+      .order('created_at', { ascending: false });
+    if (data && data.length > 0) {
+      const adminIds = [...new Set(data.map(n => n.admin_id))];
+      const { data: admins } = await supabase.from('profiles').select('id, full_name').in('id', adminIds);
+      const adminMap = new Map(admins?.map(a => [a.id, a.full_name]) || []);
+      setAdminNotes(data.map(n => ({ ...n, admin_name: adminMap.get(n.admin_id) || 'Admin' })));
+    } else {
+      setAdminNotes([]);
+    }
+  }, []);
+
   const loadTutorData = useCallback(async (tutorId: string) => {
     const [{ data: tsData }, { data: eduData }, { data: expData }] = await Promise.all([
       supabase.from('tutor_subjects').select('subject_id').eq('tutor_profile_id', tutorId),
@@ -105,7 +120,37 @@ export function AdminTutorEditTab({ toast }: Props) {
     setTutorSubjectIds(tsData?.map(s => s.subject_id) || []);
     setEducations(eduData?.map(e => ({ ...e, is_current: e.is_current || false })) || []);
     setExperiences(expData?.map(e => ({ ...e, is_current: e.is_current || false })) || []);
-  }, []);
+    loadAdminNotes(tutorId);
+  }, [loadAdminNotes]);
+
+  const handleAddNote = async () => {
+    if (!selectedTutor || !user || !newNoteText.trim()) {
+      toast({ title: 'Note Required', description: 'Please enter a note.', variant: 'destructive' });
+      return;
+    }
+    setSavingNote(true);
+    const { error } = await supabase.from('tutor_admin_notes').insert({
+      tutor_id: selectedTutor.tutor_id,
+      admin_id: user.id,
+      category: newNoteCategory,
+      note: newNoteText.trim(),
+    });
+    if (error) {
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+    } else {
+      toast({ title: 'Note Added' });
+      setNewNoteText('');
+      loadAdminNotes(selectedTutor.tutor_id);
+    }
+    setSavingNote(false);
+  };
+
+  const handleDeleteNote = async (noteId: string) => {
+    if (!selectedTutor) return;
+    await supabase.from('tutor_admin_notes').delete().eq('id', noteId);
+    toast({ title: 'Note Deleted' });
+    loadAdminNotes(selectedTutor.tutor_id);
+  };
 
   const handleSelectTutor = (t: TutorResult) => {
     setSelectedTutor(t);
