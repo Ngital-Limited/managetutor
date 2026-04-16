@@ -746,6 +746,30 @@ export default function ParentDashboard() {
           </div>
           <div className="grid md:grid-cols-2 gap-4">
             <div>
+              <Label>Category</Label>
+              <Select value={jobForm.category} onValueChange={(v) => setJobForm({ ...jobForm, category: v })}>
+                <SelectTrigger><SelectValue placeholder="Select category" /></SelectTrigger>
+                <SelectContent>
+                  {JOB_CATEGORIES.map(cat => (
+                    <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Background</Label>
+              <Select value={jobForm.background} onValueChange={(v) => setJobForm({ ...jobForm, background: v })}>
+                <SelectTrigger><SelectValue placeholder="Select background" /></SelectTrigger>
+                <SelectContent>
+                  {STUDENT_BACKGROUNDS.map(bg => (
+                    <SelectItem key={bg} value={bg}>{bg}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <div className="grid md:grid-cols-2 gap-4">
+            <div>
               <Label>Subjects *</Label>
               <MultiSearchableSelect
                 options={subjectOptions}
@@ -757,12 +781,12 @@ export default function ParentDashboard() {
               />
             </div>
             <div>
-              <Label>Class Level</Label>
-              <SearchableSelect
+              <Label>Class Level(s)</Label>
+              <MultiSearchableSelect
                 options={classLevelOptions}
-                value={jobForm.class_level}
-                onValueChange={(v) => setJobForm({ ...jobForm, class_level: v })}
-                placeholder="Search class level..."
+                values={jobForm.class_levels}
+                onValuesChange={(v) => setJobForm({ ...jobForm, class_levels: v })}
+                placeholder="Select class levels..."
                 searchPlaceholder="Type to search..."
                 emptyText="No class levels found."
                 grouped
