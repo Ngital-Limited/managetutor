@@ -1062,9 +1062,10 @@ export default function AdminDashboard() {
     const roleMap = new Map(roles?.map(r => [r.user_id, r.role]) || []);
 
     let result = data.map(u => ({ ...u, role: roleMap.get(u.id) || 'unknown' })) as UserRow[];
-    if (userRoleFilter !== 'all') result = result.filter(u => u.role === userRoleFilter);
+    // Filter to show only parents/guardians
+    result = result.filter(u => u.role === 'parent');
     setUsers(result);
-  }, [userSearch, userRoleFilter]);
+  }, [userSearch]);
 
   const fetchVerifications = useCallback(async () => {
     let query = supabase
