@@ -638,10 +638,21 @@ export default function ParentDashboard() {
     return { percent: complete, missing };
   };
 
-  const districtOptions = useMemo(() => districts.map(d => ({
-    value: d.id,
-    label: d.name_en,
-  })), [districts]);
+  const jobDivisions = useMemo(() => {
+    const divSet = new Map<string, string>();
+    districts.forEach(d => {
+      if (!divSet.has(d.division_en)) divSet.set(d.division_en, d.division_bn);
+    });
+    return Array.from(divSet.entries()).map(([en, bn]) => ({ en, bn })).sort((a, b) => a.en.localeCompare(b.en));
+  }, [districts]);
+
+  const districtOptions = useMemo(() => {
+    const filtered = selectedJobDivision ? districts.filter(d => d.division_en === selectedJobDivision) : districts;
+    return filtered.map(d => ({
+      value: d.id,
+      label: d.name_en,
+    })).sort((a, b) => a.label.localeCompare(b.label));
+  }, [districts, selectedJobDivision]);
 
   const subjectOptions = useMemo(() => subjects.map(s => ({
     value: s.id,
@@ -653,7 +664,7 @@ export default function ParentDashboard() {
     return filtered.map(a => ({
       value: a.id,
       label: a.name_en,
-    }));
+    })).sort((a, b) => a.label.localeCompare(b.label));
   }, [areas, jobForm.district_id]);
 
   const classLevelOptions = useMemo(() => CLASS_LEVELS.flatMap(group =>
