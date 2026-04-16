@@ -125,9 +125,6 @@ export function AdminPostJobTab({ toast }: Props) {
     setSelectedParent(null);
     setParentSearch('');
     setParentResults([]);
-    setManualPhone('');
-    setManualEmail('');
-    setManualName('');
     setJobForm({
       title: '', description: '', subject_ids: [], district_id: '', area_id: '', class_levels: [],
       category: '', background: '', days_per_week: 3, duration_hours: 1.5, budget_min: 3000, budget_max: 8000,
