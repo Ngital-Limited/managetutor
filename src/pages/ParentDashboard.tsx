@@ -251,6 +251,7 @@ export default function ParentDashboard() {
   const [interviewNotes, setInterviewNotes] = useState('');
   const [schedulingInterview, setSchedulingInterview] = useState(false);
 
+  const [selectedJobDivision, setSelectedJobDivision] = useState('');
   const [jobForm, setJobForm] = useState({
     title: '',
     description: '',
