@@ -1146,7 +1146,35 @@ export default function TutorProfile() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
-      </main>
-    </div>
+      </div>
+  );
+
+  if (isAdminEdit) {
+    return (
+      <div className="min-h-screen bg-background">
+        <nav className="sticky top-0 z-50 bg-card/80 backdrop-blur-xl border-b border-border">
+          <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+            <Link to="/" className="flex items-center gap-3">
+              <Logo size="md" />
+            </Link>
+            <div className="flex items-center gap-3">
+              <Link to="/admin">
+                <Button variant="outline">
+                  <ArrowLeft className="h-4 w-4 mr-2" />
+                  Back to Admin
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </nav>
+        <main className="container mx-auto">{profileContent}</main>
+      </div>
+    );
+  }
+
+  return (
+    <TutorSidebarLayout title="Edit Profile">
+      {profileContent}
+    </TutorSidebarLayout>
   );
 }
