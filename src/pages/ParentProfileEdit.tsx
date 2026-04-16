@@ -30,6 +30,7 @@ export default function ParentProfileEdit() {
   const [uploading, setUploading] = useState(false);
   const [districts, setDistricts] = useState<District[]>([]);
   const [areas, setAreas] = useState<Area[]>([]);
+  const [selectedDivisionState, setSelectedDivisionState] = useState('');
   const [form, setForm] = useState({
     full_name: '',
     full_name_bn: '',
