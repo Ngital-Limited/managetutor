@@ -2035,6 +2035,9 @@ export default function AdminDashboard() {
             {/* ═══════ POST JOB TAB ═══════ */}
             {activeTab === 'post_job' && <AdminPostJobTab toast={toast} />}
 
+            {/* ═══════ TUTOR PROFILES TAB ═══════ */}
+            {activeTab === 'tutor_profiles' && <AdminTutorProfilesTab toast={toast} onImpersonate={handleImpersonate} />}
+
             {/* ═══════ TUTOR EDITOR TAB ═══════ */}
             {activeTab === 'tutor_editor' && <AdminTutorEditTab toast={toast} />}
 
