@@ -136,24 +136,32 @@ export default function TutorProfile() {
   }, [user, role, authLoading, adminEditUserId]);
 
   const fetchData = async () => {
-    const [subjectsRes, districtsRes, profileRes, tutorRes, docsRes, tutorSubjectsRes] = await Promise.all([
+    const [subjectsRes, districtsRes, profileRes, tutorRes, docsRes, tutorSubjectsRes, areasRes] = await Promise.all([
       supabase.from('subjects').select('*').order('name_en'),
-      supabase.from('districts').select('*').order('name_en'),
+      supabase.from('districts').select('id, name_en, name_bn, division_en').order('name_en'),
       supabase.from('profiles').select('*').eq('id', targetUserId).single(),
       supabase.from('tutor_profiles').select('*').eq('user_id', targetUserId).single(),
       supabase.from('verification_documents').select('*').eq('tutor_id', targetUserId),
       supabase.from('tutor_subjects').select('subject_id').eq('tutor_profile_id', targetUserId),
+      supabase.from('areas').select('*').order('name_en'),
     ]);
 
     if (subjectsRes.data) setSubjects(subjectsRes.data);
     if (districtsRes.data) setDistricts(districtsRes.data);
+    if (areasRes.data) setAreas(areasRes.data);
     if (profileRes.data) {
       setUserProfile({
         full_name: profileRes.data.full_name || '',
         phone: profileRes.data.phone || '',
         email: profileRes.data.email || user?.email || '',
         district_id: profileRes.data.district_id || '',
+        area_id: profileRes.data.area_id || '',
       });
+      // Set initial division
+      if (profileRes.data.district_id && districtsRes.data) {
+        const dist = districtsRes.data.find(d => d.id === profileRes.data.district_id);
+        if (dist) setSelectedDivision(dist.division_en);
+      }
     }
     if (tutorRes.data) {
       const td = tutorRes.data as any;
