@@ -135,6 +135,8 @@ export default function TutorAppliedJobs() {
         accepted: apps.filter(a => a.status === 'accepted').length,
         rejected: apps.filter(a => a.status === 'rejected').length,
         withdrawn: apps.filter(a => a.status === 'withdrawn').length,
+        shortlisted: apps.filter(a => a.status === 'shortlisted').length,
+        waiting: apps.filter(a => a.status === 'waiting').length,
       });
     }
     setLoading(false);
