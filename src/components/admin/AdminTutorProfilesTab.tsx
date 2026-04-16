@@ -50,14 +50,14 @@ interface TutorRow {
   is_banned: boolean;
 }
 
-interface AreaOption { id: string; name_en: string; district_name: string; }
+interface AreaRow { id: string; name_en: string; district_id: string; district_name?: string; }
 
 export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
-  const { user } = useAuth();
+  const { user: _user } = useAuth();
 
   // ─── Filters ───
   const [search, setSearch] = useState('');
-  const [filterDistrict, setFilterDistrict] = useState('all');
+  const [filterArea, setFilterArea] = useState('all');
   const [filterGender, setFilterGender] = useState('all');
   const [filterMedium, setFilterMedium] = useState('all');
   const [filterEducation, setFilterEducation] = useState('');
@@ -68,7 +68,8 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
 
   // ─── Data ───
   const [tutors, setTutors] = useState<TutorRow[]>([]);
-  const [districts, setDistricts] = useState<District[]>([]);
+  const [areas, setAreas] = useState<AreaRow[]>([]);
+  const [districts, setDistricts] = useState<{ id: string; name_en: string }[]>([]);
   const [loading, setLoading] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
 
@@ -88,7 +89,10 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
   const [universityOptions, setUniversityOptions] = useState<string[]>([]);
 
   useEffect(() => {
-    supabase.from('districts').select('id, name_en, division_en').order('name_en').then(({ data }) => setDistricts(data || []));
+    // Fetch districts for area grouping
+    supabase.from('districts').select('id, name_en').order('name_en').then(({ data }) => setDistricts(data || []));
+    // Fetch areas (thanas/cities)
+    supabase.from('areas').select('id, name_en, district_id').order('name_en').then(({ data }) => setAreas(data || []));
     // Fetch unique education values
     supabase.from('tutor_education').select('degree, institution').limit(500).then(({ data }) => {
       if (data) {
@@ -100,7 +104,13 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
     });
   }, []);
 
-  const divisions = useMemo(() => [...new Set(districts.map(d => d.division_en))].sort(), [districts]);
+  // Areas grouped by district for dropdown
+  const districtMap = useMemo(() => new Map(districts.map(d => [d.id, d.name_en])), [districts]);
+  const areasWithDistrict = useMemo(() =>
+    areas.map(a => ({ ...a, district_name: districtMap.get(a.district_id) || '' })),
+    [areas, districtMap]
+  );
+  const areaMap = useMemo(() => new Map(areas.map(a => [a.id, a.name_en])), [areas]);
 
   const fetchTutors = useCallback(async () => {
     setLoading(true);
