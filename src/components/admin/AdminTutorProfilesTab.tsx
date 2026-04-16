@@ -100,6 +100,13 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
   const [availableJobs, setAvailableJobs] = useState<JobRow[]>([]);
   const [jobsLoading, setJobsLoading] = useState(false);
 
+  // ─── Ban Confirmation Dialog ───
+  const [banDialogOpen, setBanDialogOpen] = useState(false);
+  const [banTargetUserId, setBanTargetUserId] = useState<string | null>(null);
+  const [banTargetName, setBanTargetName] = useState('');
+  const [banReason, setBanReason] = useState('');
+  const [banProcessing, setBanProcessing] = useState(false);
+
   // ─── Education & subject data ───
   const [educationOptions, setEducationOptions] = useState<string[]>([]);
   const [universityOptions, setUniversityOptions] = useState<string[]>([]);
