@@ -366,7 +366,7 @@ export default function ParentDashboard() {
       subject_id: jobForm.subject_ids.length > 0 ? jobForm.subject_ids[0] : null,
       district_id: jobForm.district_id,
       area_id: jobForm.area_id || null,
-      class_level: jobForm.class_level,
+      class_level: jobForm.class_levels.length > 0 ? jobForm.class_levels.join(', ') : null,
       days_per_week: jobForm.days_per_week,
       duration_hours: jobForm.duration_hours,
       budget_min: jobForm.budget_min,
@@ -401,7 +401,8 @@ export default function ParentDashboard() {
 
   const resetJobForm = () => {
     setJobForm({
-      title: '', description: '', subject_ids: [] as string[], district_id: '', area_id: '', class_level: '',
+      title: '', description: '', subject_ids: [] as string[], district_id: '', area_id: '', class_levels: [] as string[],
+      category: '', background: '',
       days_per_week: 3, duration_hours: 1.5, budget_min: 3000, budget_max: 8000,
       teaching_mode: 'in_person', preferred_tutor_gender: 'any', student_gender: 'any',
       special_requirements: [] as string[], preferred_time: '',
