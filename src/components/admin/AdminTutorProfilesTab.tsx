@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { CLASS_LEVELS } from '@/constants/classLevels';
+import { JOB_CATEGORIES } from '@/constants/jobCategories';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -12,12 +13,21 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Label } from '@/components/ui/label';
+import { MultiSearchableSelect } from '@/components/MultiSearchableSelect';
 import { supabase } from '@/integrations/supabase/client';
 import { Link } from 'react-router-dom';
 import {
   Search, GraduationCap, Send, Filter, Eye, Pencil,
-  Loader2, Bell, X, LogIn
+  Loader2, Bell, X, LogIn, Ban, CheckCircle2, ShieldOff, ShieldCheck
 } from 'lucide-react';
+import {
+  DropdownMenu as DropdownMenuRoot,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from '@/components/ui/dropdown-menu';
+import { MoreHorizontal } from 'lucide-react';
 
 interface Props {
   toast: (opts: { title: string; description?: string; variant?: 'default' | 'destructive' }) => void;
@@ -51,11 +61,12 @@ interface TutorRow {
 
 interface AreaRow { id: string; name_en: string; district_id: string; }
 interface DistrictRow { id: string; name_en: string; }
+interface JobRow { id: string; title: string; job_reference: string | null; status: string | null; }
 
 export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
   // ─── Filters ───
   const [search, setSearch] = useState('');
-  const [filterArea, setFilterArea] = useState('all');
+  const [filterAreas, setFilterAreas] = useState<string[]>([]);
   const [filterGender, setFilterGender] = useState('all');
   const [filterMedium, setFilterMedium] = useState('all');
   const [filterEducation, setFilterEducation] = useState('');
@@ -84,8 +95,12 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
   const [notifyMessage, setNotifyMessage] = useState('');
   const [notifySending, setNotifySending] = useState(false);
   const [notifyMode, setNotifyMode] = useState<'selected' | 'filtered'>('selected');
+  const [notifyJobCategory, setNotifyJobCategory] = useState('all');
+  const [notifySelectedJobs, setNotifySelectedJobs] = useState<string[]>([]);
+  const [availableJobs, setAvailableJobs] = useState<JobRow[]>([]);
+  const [jobsLoading, setJobsLoading] = useState(false);
 
-  // ─── Education data for filter suggestions ───
+  // ─── Education & subject data ───
   const [educationOptions, setEducationOptions] = useState<string[]>([]);
   const [universityOptions, setUniversityOptions] = useState<string[]>([]);
   const [subjects, setSubjects] = useState<{ id: string; name_en: string; category_en: string | null }[]>([]);
@@ -110,19 +125,32 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
     [subjects, filterCategory]
   );
 
-  // Group areas by district for the dropdown
-  const areasGrouped = useMemo(() => {
-    const grouped: Record<string, { districtName: string; areas: AreaRow[] }> = {};
-    areas.forEach(a => {
-      const dName = districtMap.get(a.district_id) || 'Unknown';
-      if (!grouped[a.district_id]) grouped[a.district_id] = { districtName: dName, areas: [] };
-      grouped[a.district_id].areas.push(a);
-    });
-    return Object.values(grouped).sort((a, b) => a.districtName.localeCompare(b.districtName));
-  }, [areas, districtMap]);
+  // Area options for MultiSearchableSelect
+  const areaOptions = useMemo(() =>
+    areas.map(a => ({
+      value: a.id,
+      label: a.name_en,
+      group: districtMap.get(a.district_id) || 'Unknown',
+    })),
+    [areas, districtMap]
+  );
 
-  // Find which district_ids match a selected area (for DB query filtering)
-  // tutor_profiles stores district_id, not area_id directly. So we do client-side area matching via profiles.area_id
+  // ─── Fetch jobs for notification dialog ───
+  const fetchJobsForNotify = useCallback(async () => {
+    setJobsLoading(true);
+    let query = supabase.from('jobs').select('id, title, job_reference, status').order('created_at', { ascending: false }).limit(100);
+    if (notifyJobCategory !== 'all') {
+      query = query.eq('class_level', notifyJobCategory);
+    }
+    const { data } = await query;
+    setAvailableJobs(data || []);
+    setJobsLoading(false);
+  }, [notifyJobCategory]);
+
+  useEffect(() => {
+    if (notifyDialogOpen) fetchJobsForNotify();
+  }, [notifyDialogOpen, fetchJobsForNotify]);
+
   const fetchTutors = useCallback(async () => {
     setLoading(true);
     setSelectedIds(new Set());
@@ -139,10 +167,10 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
     if (filterAvailability !== 'all') query = query.eq('is_available', filterAvailability === 'available');
     if (filterMedium !== 'all') query = query.eq('teaching_mode', filterMedium as any);
 
-    // If area filter, narrow by the area's district_id server-side
-    if (filterArea !== 'all') {
-      const matchedArea = areas.find(a => a.id === filterArea);
-      if (matchedArea) query = query.eq('district_id', matchedArea.district_id);
+    // Multi-area filter: narrow by district_ids server-side
+    if (filterAreas.length > 0) {
+      const districtIds = [...new Set(filterAreas.map(aId => areas.find(a => a.id === aId)?.district_id).filter(Boolean))] as string[];
+      if (districtIds.length > 0) query = query.in('district_id', districtIds);
     }
 
     const { data: tutorData } = await query;
@@ -167,7 +195,7 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
       tutorIdsByEdu = new Set(eduData?.map(e => e.tutor_id) || []);
     }
 
-    // Subject filter — fetch tutor_subjects to match
+    // Subject filter
     let tutorIdsBySubject = new Set<string>();
     let hasSubjectFilter = false;
     if (filterSubject !== 'all') {
@@ -175,7 +203,6 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
       const { data: tsData } = await supabase.from('tutor_subjects').select('tutor_profile_id').eq('subject_id', filterSubject);
       tutorIdsBySubject = new Set(tsData?.map(s => s.tutor_profile_id) || []);
     } else if (filterCategory !== 'all') {
-      // If only category set, find all subjects in that category
       hasSubjectFilter = true;
       const catSubjectIds = subjects.filter(s => s.category_en === filterCategory).map(s => s.id);
       if (catSubjectIds.length > 0) {
@@ -215,14 +242,14 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
     if (hasEduFilter) result = result.filter(t => tutorIdsByEdu.has(t.tutor_id));
     if (hasSubjectFilter) result = result.filter(t => tutorIdsBySubject.has(t.tutor_id));
 
-    // Class level filter (client-side, tutor_profiles.class_levels is string[])
+    // Class level filter
     if (filterClassLevel !== 'all') {
       result = result.filter(t => t.class_levels?.includes(filterClassLevel));
     }
 
-    // Client-side area filter
-    if (filterArea !== 'all') {
-      result = result.filter(t => t.area_id === filterArea);
+    // Multi-area filter client-side
+    if (filterAreas.length > 0) {
+      result = result.filter(t => t.area_id && filterAreas.includes(t.area_id));
     }
 
     if (search.trim()) {
@@ -238,7 +265,7 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
     setTutors(result);
     setTotalCount(result.length);
     setLoading(false);
-  }, [search, filterArea, filterGender, filterMedium, filterEducation, filterUniversity, filterVerification, filterAvailability, filterClassLevel, filterSubject, filterCategory, areas, districts, districtMap, areaMap, subjects]);
+  }, [search, filterAreas, filterGender, filterMedium, filterEducation, filterUniversity, filterVerification, filterAvailability, filterClassLevel, filterSubject, filterCategory, areas, districts, districtMap, areaMap, subjects]);
 
   useEffect(() => { fetchTutors(); }, [fetchTutors]);
 
@@ -256,6 +283,37 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
     setSelectAll(!selectAll);
   };
 
+  // ─── Quick Actions ───
+  const handleBanToggle = async (userId: string, currentlyBanned: boolean) => {
+    const { error } = await supabase.from('profiles').update({
+      is_banned: !currentlyBanned,
+      banned_at: !currentlyBanned ? new Date().toISOString() : null,
+      banned_reason: !currentlyBanned ? 'Banned by admin' : null,
+    }).eq('id', userId);
+    if (error) { toast({ title: 'Error', description: error.message, variant: 'destructive' }); return; }
+    toast({ title: currentlyBanned ? 'User Unbanned' : 'User Banned' });
+    fetchTutors();
+  };
+
+  const handleApproveToggle = async (userId: string, currentlyApproved: boolean) => {
+    const { error } = await supabase.from('profiles').update({ is_approved: !currentlyApproved }).eq('id', userId);
+    if (error) { toast({ title: 'Error', description: error.message, variant: 'destructive' }); return; }
+    toast({ title: currentlyApproved ? 'Approval Revoked' : 'User Approved' });
+    fetchTutors();
+  };
+
+  const handleVerifyToggle = async (tutorId: string, currentStatus: string) => {
+    const newStatus = currentStatus === 'approved' ? 'pending' : 'approved';
+    const { error } = await supabase.from('tutor_profiles').update({
+      verification_status: newStatus as any,
+      verified_at: newStatus === 'approved' ? new Date().toISOString() : null,
+    }).eq('id', tutorId);
+    if (error) { toast({ title: 'Error', description: error.message, variant: 'destructive' }); return; }
+    toast({ title: newStatus === 'approved' ? 'Tutor Verified' : 'Verification Revoked' });
+    fetchTutors();
+  };
+
+  // ─── Send Notification ───
   const handleSendNotification = async () => {
     if (!notifyTitle.trim() || !notifyMessage.trim()) {
       toast({ title: 'Missing fields', description: 'Title and message are required', variant: 'destructive' });
@@ -269,10 +327,22 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
         setNotifySending(false);
         return;
       }
+
+      // Build message with job references if selected
+      let finalMessage = notifyMessage.trim();
+      if (notifySelectedJobs.length > 0) {
+        const jobRefs = availableJobs.filter(j => notifySelectedJobs.includes(j.id)).map(j => `${j.job_reference || ''} - ${j.title}`).join('\n');
+        finalMessage += '\n\nRelated Jobs:\n' + jobRefs;
+      }
+
       const batchSize = 500;
       for (let i = 0; i < targetUserIds.length; i += batchSize) {
         const batch = targetUserIds.slice(i, i + batchSize).map(uid => ({
-          user_id: uid, title: notifyTitle.trim(), message: notifyMessage.trim(), type: 'admin_notification',
+          user_id: uid,
+          title: notifyTitle.trim(),
+          message: finalMessage,
+          type: 'admin_notification',
+          reference_id: notifySelectedJobs.length === 1 ? notifySelectedJobs[0] : null,
         }));
         const { error } = await supabase.from('notifications').insert(batch);
         if (error) throw error;
@@ -281,6 +351,8 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
       setNotifyDialogOpen(false);
       setNotifyTitle('');
       setNotifyMessage('');
+      setNotifySelectedJobs([]);
+      setNotifyJobCategory('all');
     } catch (err: any) {
       toast({ title: 'Error', description: err.message, variant: 'destructive' });
     } finally {
@@ -290,7 +362,7 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
 
   const resetFilters = () => {
     setSearch('');
-    setFilterArea('all');
+    setFilterAreas([]);
     setFilterGender('all');
     setFilterMedium('all');
     setFilterEducation('');
@@ -303,7 +375,7 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
   };
 
   const activeFilterCount = [
-    filterArea !== 'all', filterGender !== 'all', filterMedium !== 'all',
+    filterAreas.length > 0, filterGender !== 'all', filterMedium !== 'all',
     filterEducation !== '', filterUniversity !== '',
     filterVerification !== 'all', filterAvailability !== 'all',
     filterClassLevel !== 'all', filterSubject !== 'all', filterCategory !== 'all',
@@ -317,6 +389,12 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
       default: return 'bg-muted text-muted-foreground';
     }
   };
+
+  // Job options for notification multi-select
+  const notifyJobOptions = useMemo(() =>
+    availableJobs.map(j => ({ value: j.id, label: `${j.job_reference || '—'} · ${j.title}` })),
+    [availableJobs]
+  );
 
   return (
     <div className="space-y-4">
@@ -359,22 +437,17 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
         <Card>
           <CardContent className="p-4">
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-              <div>
-                <Label className="text-xs font-medium text-muted-foreground">City / Thana</Label>
-                <Select value={filterArea} onValueChange={setFilterArea}>
-                  <SelectTrigger className="mt-1 h-9"><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Areas</SelectItem>
-                    {areasGrouped.map(group => (
-                      <div key={group.districtName}>
-                        <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground bg-muted/50">{group.districtName}</div>
-                        {group.areas.map(a => (
-                          <SelectItem key={a.id} value={a.id}>{a.name_en}</SelectItem>
-                        ))}
-                      </div>
-                    ))}
-                  </SelectContent>
-                </Select>
+              <div className="col-span-2 sm:col-span-1">
+                <Label className="text-xs font-medium text-muted-foreground">City / Thana (multi)</Label>
+                <MultiSearchableSelect
+                  options={areaOptions}
+                  values={filterAreas}
+                  onValuesChange={setFilterAreas}
+                  placeholder="Select areas..."
+                  searchPlaceholder="Search thana..."
+                  grouped
+                  className="mt-1"
+                />
               </div>
 
               <div>
@@ -500,8 +573,6 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
                   <TableHead>Location</TableHead>
                   <TableHead>Gender</TableHead>
                   <TableHead>Mode</TableHead>
-                  <TableHead>Education</TableHead>
-                  <TableHead>Exp</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Rating</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
@@ -509,11 +580,11 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
               </TableHeader>
               <TableBody>
                 {loading ? (
-                  <TableRow><TableCell colSpan={11} className="text-center py-12"><Loader2 className="h-6 w-6 animate-spin mx-auto text-muted-foreground" /></TableCell></TableRow>
+                  <TableRow><TableCell colSpan={9} className="text-center py-12"><Loader2 className="h-6 w-6 animate-spin mx-auto text-muted-foreground" /></TableCell></TableRow>
                 ) : tutors.length === 0 ? (
-                  <TableRow><TableCell colSpan={11} className="text-center py-12 text-muted-foreground">No tutors match the current filters</TableCell></TableRow>
+                  <TableRow><TableCell colSpan={9} className="text-center py-12 text-muted-foreground">No tutors match the current filters</TableCell></TableRow>
                 ) : tutors.map(t => (
-                  <TableRow key={t.tutor_id} className={selectedIds.has(t.user_id) ? 'bg-primary/5' : ''}>
+                  <TableRow key={t.tutor_id} className={`${selectedIds.has(t.user_id) ? 'bg-primary/5' : ''} ${t.is_banned ? 'opacity-60' : ''}`}>
                     <TableCell><Checkbox checked={selectedIds.has(t.user_id)} onCheckedChange={() => toggleSelect(t.user_id)} /></TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
@@ -522,7 +593,10 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
                           <AvatarFallback className="text-xs">{t.name.charAt(0)}</AvatarFallback>
                         </Avatar>
                         <div className="min-w-0">
-                          <p className="font-medium text-sm truncate">{t.name}</p>
+                          <p className="font-medium text-sm truncate flex items-center gap-1">
+                            {t.name}
+                            {t.is_banned && <Badge variant="destructive" className="text-[9px] py-0 px-1">Banned</Badge>}
+                          </p>
                           {t.user_reference && <p className="text-[10px] font-mono text-muted-foreground">{t.user_reference}</p>}
                         </div>
                       </div>
@@ -539,26 +613,61 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
                     </TableCell>
                     <TableCell><Badge variant="outline" className="text-[10px] capitalize">{t.gender}</Badge></TableCell>
                     <TableCell className="text-xs capitalize">{t.teaching_mode?.replace('_', ' ') || '—'}</TableCell>
-                    <TableCell className="text-xs max-w-[120px] truncate">{t.education || '—'}</TableCell>
-                    <TableCell className="text-xs">{t.experience_years} yrs</TableCell>
                     <TableCell>
-                      <Badge className={`text-[10px] capitalize ${statusColor(t.verification_status)}`}>{t.verification_status}</Badge>
+                      <div className="flex flex-col gap-0.5">
+                        <Badge className={`text-[10px] capitalize ${statusColor(t.verification_status)}`}>{t.verification_status}</Badge>
+                        {!t.is_approved && <Badge variant="outline" className="text-[9px] border-warning/30 text-warning">Unapproved</Badge>}
+                      </div>
                     </TableCell>
                     <TableCell className="text-xs">{t.average_rating ? `★ ${t.average_rating}` : '—'}</TableCell>
                     <TableCell className="text-right">
-                      <div className="flex gap-0.5 justify-end">
-                        <Button variant="ghost" size="sm" asChild title="View Public Profile">
-                          <Link to={`/tutor/${t.user_id}`}><Eye className="h-3.5 w-3.5" /></Link>
-                        </Button>
-                        <Button variant="ghost" size="sm" asChild title="Edit Profile">
-                          <Link to={`/admin/tutor/${t.user_id}`}><Pencil className="h-3.5 w-3.5" /></Link>
-                        </Button>
-                        {onImpersonate && (
-                          <Button variant="ghost" size="sm" onClick={() => onImpersonate(t.user_id)} title="Login as this tutor">
-                            <LogIn className="h-3.5 w-3.5 text-primary" />
+                      <DropdownMenuRoot>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                            <MoreHorizontal className="h-4 w-4" />
                           </Button>
-                        )}
-                      </div>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-48">
+                          <DropdownMenuItem asChild>
+                            <Link to={`/tutor/${t.user_id}`} className="flex items-center gap-2">
+                              <Eye className="h-3.5 w-3.5" /> View Profile
+                            </Link>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem asChild>
+                            <Link to={`/admin/tutor/${t.user_id}`} className="flex items-center gap-2">
+                              <Pencil className="h-3.5 w-3.5" /> Edit Profile
+                            </Link>
+                          </DropdownMenuItem>
+                          {onImpersonate && (
+                            <DropdownMenuItem onClick={() => onImpersonate(t.user_id)} className="flex items-center gap-2">
+                              <LogIn className="h-3.5 w-3.5 text-primary" /> Login as Tutor
+                            </DropdownMenuItem>
+                          )}
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem onClick={() => handleApproveToggle(t.user_id, t.is_approved)} className="flex items-center gap-2">
+                            {t.is_approved
+                              ? <><ShieldOff className="h-3.5 w-3.5 text-warning" /> Revoke Approval</>
+                              : <><ShieldCheck className="h-3.5 w-3.5 text-success" /> Approve User</>
+                            }
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleVerifyToggle(t.tutor_id, t.verification_status)} className="flex items-center gap-2">
+                            {t.verification_status === 'approved'
+                              ? <><X className="h-3.5 w-3.5 text-warning" /> Revoke Verification</>
+                              : <><CheckCircle2 className="h-3.5 w-3.5 text-success" /> Verify Tutor</>
+                            }
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem
+                            onClick={() => handleBanToggle(t.user_id, t.is_banned)}
+                            className={`flex items-center gap-2 ${!t.is_banned ? 'text-destructive focus:text-destructive' : ''}`}
+                          >
+                            {t.is_banned
+                              ? <><CheckCircle2 className="h-3.5 w-3.5" /> Unban User</>
+                              : <><Ban className="h-3.5 w-3.5" /> Ban User</>
+                            }
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenuRoot>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -570,7 +679,7 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
 
       {/* Send Notification Dialog */}
       <Dialog open={notifyDialogOpen} onOpenChange={setNotifyDialogOpen}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-lg">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Send className="h-5 w-5 text-primary" /> Send Notification
@@ -588,9 +697,44 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
             </div>
             <div>
               <Label className="text-sm font-medium">Message</Label>
-              <Textarea value={notifyMessage} onChange={e => setNotifyMessage(e.target.value)} placeholder="Write your message..." className="mt-1" rows={4} maxLength={500} />
+              <Textarea value={notifyMessage} onChange={e => setNotifyMessage(e.target.value)} placeholder="Write your message..." className="mt-1" rows={3} maxLength={500} />
               <p className="text-xs text-muted-foreground mt-1">{notifyMessage.length}/500</p>
             </div>
+
+            {/* Job Category filter */}
+            <div>
+              <Label className="text-sm font-medium">Attach Jobs (optional)</Label>
+              <div className="grid grid-cols-2 gap-2 mt-1">
+                <Select value={notifyJobCategory} onValueChange={v => { setNotifyJobCategory(v); setNotifySelectedJobs([]); }}>
+                  <SelectTrigger className="h-9"><SelectValue placeholder="Job Category" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Categories</SelectItem>
+                    {JOB_CATEGORIES.map(c => (
+                      <SelectItem key={c} value={c}>{c}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <div className="text-xs text-muted-foreground flex items-center">
+                  {jobsLoading ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : null}
+                  {availableJobs.length} jobs available
+                </div>
+              </div>
+            </div>
+
+            {/* Multi-select jobs */}
+            {availableJobs.length > 0 && (
+              <div>
+                <Label className="text-xs font-medium text-muted-foreground">Select Jobs to Include</Label>
+                <MultiSearchableSelect
+                  options={notifyJobOptions}
+                  values={notifySelectedJobs}
+                  onValuesChange={setNotifySelectedJobs}
+                  placeholder="Select jobs..."
+                  searchPlaceholder="Search by reference or title..."
+                  className="mt-1"
+                />
+              </div>
+            )}
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setNotifyDialogOpen(false)}>Cancel</Button>
