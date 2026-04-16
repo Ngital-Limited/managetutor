@@ -28,6 +28,13 @@ interface District {
   division_bn: string;
 }
 
+interface Area {
+  id: string;
+  name_en: string;
+  name_bn: string;
+  district_id: string;
+}
+
 interface Subject {
   id: string;
   name_en: string;
@@ -70,6 +77,7 @@ export default function FindTutors() {
   const { toast } = useToast();
   
   const [districts, setDistricts] = useState<District[]>([]);
+  const [areas, setAreas] = useState<Area[]>([]);
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [allTutors, setAllTutors] = useState<TutorProfile[]>([]);
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
@@ -86,8 +94,10 @@ export default function FindTutors() {
   const [selectedGender, setSelectedGender] = useState<string>(searchParams.get('gender') || '');
   const [priceRange, setPriceRange] = useState<number[]>([0, 10000]);
   const [selectedDivision, setSelectedDivision] = useState<string>('');
-  const [selectedCity, setSelectedCity] = useState<string>('');
-  const [citySearch, setCitySearch] = useState('');
+  const [selectedDistrict, setSelectedDistrict] = useState<string>('');
+  const [selectedArea, setSelectedArea] = useState<string>('');
+  const [districtSearch, setDistrictSearch] = useState('');
+  const [areaSearch, setAreaSearch] = useState('');
   const [verifiedOnly, setVerifiedOnly] = useState<boolean>(searchParams.get('verified') === 'true');
 
   // Derived: unique divisions
