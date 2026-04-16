@@ -172,6 +172,7 @@ export function AdminPostJobTab({ toast }: Props) {
     }
   };
 
+  const resolveOrCreateParent = async (): Promise<string | null> => {
     // If an existing parent is selected, use their ID
     if (selectedParent) return selectedParent.id;
 
