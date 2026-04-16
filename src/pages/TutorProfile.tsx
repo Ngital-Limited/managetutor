@@ -176,6 +176,7 @@ export default function TutorProfile() {
         gender: td.gender || 'male',
         is_available: td.is_available ?? true,
         is_student: td.is_student || false,
+        verification_status: td.verification_status || 'pending',
         father_phone: td.father_phone || '',
         mother_phone: td.mother_phone || '',
         emergency_contact_name: td.emergency_contact_name || '',
