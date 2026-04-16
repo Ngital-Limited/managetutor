@@ -59,6 +59,7 @@ export function AdminPostJobTab({ toast }: Props) {
     preferred_time: '',
     number_of_students: 1,
     student_age: '',
+    student_school_name: '',
     start_date: '',
     location_details: '',
   });
@@ -122,7 +123,7 @@ export function AdminPostJobTab({ toast }: Props) {
       title: '', description: '', subject_ids: [], district_id: '', area_id: '', class_levels: [],
       category: '', background: '', days_per_week: 3, duration_hours: 1.5, budget_min: 3000, budget_max: 8000,
       teaching_mode: 'in_person', preferred_tutor_gender: 'any', student_gender: 'any',
-      special_requirements: [], preferred_time: '', number_of_students: 1, student_age: '', start_date: '', location_details: '',
+      special_requirements: [], preferred_time: '', number_of_students: 1, student_age: '', student_school_name: '', start_date: '', location_details: '',
     });
   };
 
@@ -158,6 +159,7 @@ export function AdminPostJobTab({ toast }: Props) {
         special_requirements: jobForm.special_requirements.length > 0 ? jobForm.special_requirements.join(', ') : null,
         number_of_students: jobForm.number_of_students || 1,
         student_age: jobForm.student_age || null,
+        student_school_name: jobForm.student_school_name || null,
         start_date: jobForm.start_date || null,
         location_details: jobForm.location_details || null,
         status: 'open',
@@ -377,6 +379,15 @@ export function AdminPostJobTab({ toast }: Props) {
                   placeholder="e.g., 12 years"
                   value={jobForm.student_age}
                   onChange={(e) => setJobForm({ ...jobForm, student_age: e.target.value })}
+                />
+              </div>
+              <div>
+                <Label>Student School Name <span className="text-destructive">*</span></Label>
+                <Input
+                  placeholder="e.g., Dhaka Residential Model College"
+                  value={jobForm.student_school_name}
+                  onChange={(e) => setJobForm({ ...jobForm, student_school_name: e.target.value })}
+                  required
                 />
               </div>
               <div>
