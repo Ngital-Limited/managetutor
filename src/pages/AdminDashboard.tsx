@@ -874,19 +874,49 @@ export default function AdminDashboard() {
     setAssignTutorSearch(query);
     if (query.length < 2) { setAssignTutorResults([]); return; }
     setSearchingTutors(true);
-    const { data: profs } = await supabase.from('profiles').select('id, full_name').ilike('full_name', `%${query}%`).limit(10);
-    if (profs && profs.length > 0) {
-      const profIds = profs.map(p => p.id);
-      const { data: tutors } = await supabase.from('tutor_profiles').select('id, user_id, gender, experience_years').in('user_id', profIds);
-      const profMap = new Map(profs.map(p => [p.id, p]));
-      setAssignTutorResults(tutors?.map(t => ({
-        tutor_id: t.id,
-        user_id: t.user_id,
-        name: profMap.get(t.user_id)?.full_name || 'Unknown',
-        gender: t.gender,
-        experience: t.experience_years || 0,
-      })) || []);
-    } else {
+    try {
+      // Search profiles by name, email, phone, or user_reference
+      const { data: profs } = await supabase.from('profiles').select('id, full_name, email, phone, user_reference, district_id')
+        .or(`full_name.ilike.%${query}%,email.ilike.%${query}%,phone.ilike.%${query}%,user_reference.ilike.%${query}%`)
+        .limit(20);
+      if (profs && profs.length > 0) {
+        const profIds = profs.map(p => p.id);
+        const { data: tutors } = await supabase.from('tutor_profiles')
+          .select('id, user_id, gender, experience_years, average_rating, verification_status, district_id')
+          .in('user_id', profIds);
+        if (tutors && tutors.length > 0) {
+          const profMap = new Map(profs.map(p => [p.id, p]));
+          // Get district names
+          const districtIds = [...new Set([...tutors.map(t => t.district_id), ...profs.map(p => p.district_id)].filter(Boolean))] as string[];
+          let districtMap = new Map<string, string>();
+          if (districtIds.length > 0) {
+            const { data: dists } = await supabase.from('districts').select('id, name_en').in('id', districtIds);
+            districtMap = new Map(dists?.map(d => [d.id, d.name_en]) || []);
+          }
+          setAssignTutorResults(tutors.map(t => {
+            const prof = profMap.get(t.user_id);
+            const distId = t.district_id || prof?.district_id;
+            return {
+              tutor_id: t.id,
+              user_id: t.user_id,
+              name: prof?.full_name || 'Unknown',
+              gender: t.gender,
+              experience: t.experience_years || 0,
+              phone: prof?.phone || null,
+              email: prof?.email || '',
+              district: distId ? (districtMap.get(distId) || null) : null,
+              rating: t.average_rating,
+              verification: t.verification_status,
+              reference: prof?.user_reference || null,
+            };
+          }));
+        } else {
+          setAssignTutorResults([]);
+        }
+      } else {
+        setAssignTutorResults([]);
+      }
+    } catch {
       setAssignTutorResults([]);
     }
     setSearchingTutors(false);
