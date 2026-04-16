@@ -48,7 +48,7 @@ interface TutorRow {
   is_banned: boolean;
 }
 
-interface District { id: string; name_en: string; division_en: string; }
+interface AreaOption { id: string; name_en: string; district_name: string; }
 
 export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
   const { user } = useAuth();
