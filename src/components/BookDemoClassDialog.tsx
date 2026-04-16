@@ -8,9 +8,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { Calendar, Clock, BookOpen, Phone } from 'lucide-react';
-
-const COMMISSION_RATE = 0.15; // 15% platform commission
+import { Calendar, Clock, BookOpen, Phone, Gift } from 'lucide-react';
 
 interface Subject {
   id: string;
@@ -30,8 +28,6 @@ interface BookDemoClassDialogProps {
 export default function BookDemoClassDialog({
   tutorId,
   tutorName,
-  hourlyRateMin,
-  hourlyRateMax,
   subjects,
   onBooked,
 }: BookDemoClassDialogProps) {
@@ -48,10 +44,6 @@ export default function BookDemoClassDialog({
   const [parentPhone, setParentPhone] = useState('');
 
   const durationMinutes = parseInt(duration);
-  const avgRate = Math.round((hourlyRateMin + hourlyRateMax) / 2);
-  const classFee = Math.round(avgRate * (durationMinutes / 60));
-  const commission = Math.round(classFee * COMMISSION_RATE);
-  const tutorPayout = classFee - commission;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -71,9 +63,9 @@ export default function BookDemoClassDialog({
         preferred_date: preferredDate,
         preferred_time: preferredTime,
         duration_minutes: durationMinutes,
-        class_fee: classFee,
-        platform_commission: commission,
-        tutor_payout: tutorPayout,
+        class_fee: 0,
+        platform_commission: 0,
+        tutor_payout: 0,
         notes: notes || null,
         parent_phone: parentPhone || null,
         status: 'pending',
@@ -81,7 +73,7 @@ export default function BookDemoClassDialog({
 
       if (error) throw error;
 
-      toast({ title: 'Demo Class Requested!', description: 'Your request has been submitted for admin approval. You will be notified once approved.' });
+      toast({ title: 'Demo Class Requested!', description: 'Your free demo class request has been submitted for admin approval.' });
       setOpen(false);
       resetForm();
       onBooked?.();
@@ -110,19 +102,24 @@ export default function BookDemoClassDialog({
       <DialogTrigger asChild>
         <Button className="w-full" variant="secondary" size="lg">
           <Calendar className="h-4 w-4 mr-2" />
-          Book Demo Class
+          Book Free Demo Class
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <BookOpen className="h-5 w-5 text-primary" />
-            Book a Demo Class
+            Book a Free Demo Class
           </DialogTitle>
           <DialogDescription>
-            Try a trial lesson with {tutorName} before committing
+            Try a free trial lesson with {tutorName} before committing
           </DialogDescription>
         </DialogHeader>
+
+        <div className="bg-success/10 border border-success/20 rounded-lg p-3 flex items-center gap-2 text-sm text-success">
+          <Gift className="h-4 w-4 shrink-0" />
+          <span className="font-medium">Demo classes are completely free!</span>
+        </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {subjects.length > 0 && (
@@ -203,24 +200,8 @@ export default function BookDemoClassDialog({
             />
           </div>
 
-          {/* Fee Breakdown */}
-          <div className="bg-muted/50 rounded-lg p-4 space-y-2 text-sm">
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Class Fee ({durationMinutes} min)</span>
-              <span className="font-medium">৳{classFee}</span>
-            </div>
-            <div className="flex justify-between text-xs text-muted-foreground">
-              <span>Platform fee (15%)</span>
-              <span>৳{commission}</span>
-            </div>
-            <div className="border-t border-border pt-2 flex justify-between font-bold">
-              <span>Total</span>
-              <span className="text-primary">৳{classFee}</span>
-            </div>
-          </div>
-
           <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? 'Booking...' : `Book Demo Class — ৳${classFee}`}
+            {loading ? 'Booking...' : 'Book Free Demo Class'}
           </Button>
         </form>
       </DialogContent>
