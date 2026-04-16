@@ -278,6 +278,85 @@ export function AdminCreateUserTab({ toast }: Props) {
           </CardContent>
         </Card>
       </div>
+
+      {/* ─── Admin Password Reset Section ─── */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2"><KeyRound className="h-5 w-5 text-primary" /> Reset User Password</CardTitle>
+          <CardDescription>Search for a user and reset their password directly.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex gap-2">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search by name, email, or phone..."
+                value={resetSearch}
+                onChange={e => setResetSearch(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && searchUsersForReset()}
+                className="pl-10"
+              />
+            </div>
+            <Button onClick={searchUsersForReset} disabled={resetSearching} size="sm">
+              {resetSearching ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Search'}
+            </Button>
+          </div>
+
+          {resetResults.length > 0 && (
+            <div className="space-y-2">
+              {resetResults.map(u => (
+                <div key={u.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                  <div className="min-w-0">
+                    <p className="font-medium text-sm truncate">{u.full_name}</p>
+                    <p className="text-xs text-muted-foreground truncate">{u.email}</p>
+                  </div>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => { setResetTarget(u); setNewPassword(''); setResetDialogOpen(true); }}
+                  >
+                    <KeyRound className="h-3.5 w-3.5 mr-1" /> Reset
+                  </Button>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Reset Password Dialog */}
+      <Dialog open={resetDialogOpen} onOpenChange={setResetDialogOpen}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Reset Password</DialogTitle>
+          </DialogHeader>
+          {resetTarget && (
+            <div className="space-y-4">
+              <div className="p-3 rounded-lg bg-muted/50">
+                <p className="font-medium text-sm">{resetTarget.full_name}</p>
+                <p className="text-xs text-muted-foreground">{resetTarget.email}</p>
+              </div>
+              <div>
+                <Label className="text-sm font-medium">New Password</Label>
+                <Input
+                  type="password"
+                  value={newPassword}
+                  onChange={e => setNewPassword(e.target.value)}
+                  placeholder="Min 6 characters"
+                  className="mt-1"
+                />
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setResetDialogOpen(false)}>Cancel</Button>
+            <Button onClick={handleAdminResetPassword} disabled={resetting}>
+              {resetting ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <KeyRound className="h-4 w-4 mr-1" />}
+              Reset Password
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
