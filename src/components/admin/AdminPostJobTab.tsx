@@ -123,6 +123,7 @@ export function AdminPostJobTab({ toast }: Props) {
 
   const resetAll = () => {
     setSelectedJobDivision('');
+    setPrefilled(false);
     setSelectedParent(null);
     setParentSearch('');
     setParentResults([]);
