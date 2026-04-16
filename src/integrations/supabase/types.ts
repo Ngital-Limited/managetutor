@@ -1554,6 +1554,7 @@ export type Database = {
           total_students: number | null
           updated_at: string | null
           user_id: string
+          verification_paid: boolean
           verification_status:
             | Database["public"]["Enums"]["verification_status"]
             | null
@@ -1601,6 +1602,7 @@ export type Database = {
           total_students?: number | null
           updated_at?: string | null
           user_id: string
+          verification_paid?: boolean
           verification_status?:
             | Database["public"]["Enums"]["verification_status"]
             | null
@@ -1648,6 +1650,7 @@ export type Database = {
           total_students?: number | null
           updated_at?: string | null
           user_id?: string
+          verification_paid?: boolean
           verification_status?:
             | Database["public"]["Enums"]["verification_status"]
             | null
