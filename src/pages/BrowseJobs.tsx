@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { Link, useNavigate } from 'react-router-dom';
@@ -10,13 +10,13 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { 
-  GraduationCap, Search, MapPin, Globe, Briefcase, 
-  BookOpen, Users, Calendar, ArrowRight, ChevronLeft, ChevronRight, Send, Loader2, Monitor
+  Search, MapPin, Briefcase, 
+  BookOpen, Users, Calendar, ArrowRight, ChevronLeft, ChevronRight, Send, Loader2, Monitor,
+  Clock, DollarSign, Filter, X, Sparkles
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 
@@ -24,6 +24,7 @@ interface District {
   id: string;
   name_en: string;
   name_bn: string;
+  division_en: string;
 }
 
 interface Subject {
@@ -51,6 +52,7 @@ interface Job {
   start_date: string | null;
   location_details: string | null;
   job_reference: string | null;
+  is_featured: boolean;
   districts: { name_en: string; name_bn: string } | null;
   subjects: { name_en: string; name_bn: string } | null;
   job_subjects?: { subjects: { name_en: string; name_bn: string } }[];
@@ -59,7 +61,6 @@ interface Job {
 const JOBS_PER_PAGE = 10;
 
 export default function BrowseJobs() {
-  const { t } = useLanguage();
   const { user, role } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -69,9 +70,11 @@ export default function BrowseJobs() {
   const [loading, setLoading] = useState(true);
   const [totalCount, setTotalCount] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
+  const [showFilters, setShowFilters] = useState(false);
 
   // Filters
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedDivision, setSelectedDivision] = useState<string>('all');
   const [selectedDistrict, setSelectedDistrict] = useState<string>('all');
   const [selectedSubject, setSelectedSubject] = useState<string>('all');
   const [selectedMode, setSelectedMode] = useState<string>('all');
@@ -84,6 +87,28 @@ export default function BrowseJobs() {
   const [applying, setApplying] = useState(false);
   const [tutorProfileId, setTutorProfileId] = useState<string | null>(null);
   const [tutorProfileCompleteness, setTutorProfileCompleteness] = useState(0);
+
+  const divisions = useMemo(() => {
+    const divs = [...new Set(districts.map(d => d.division_en))].sort();
+    return divs;
+  }, [districts]);
+
+  const filteredDistricts = useMemo(() => {
+    let list = districts;
+    if (selectedDivision && selectedDivision !== 'all') {
+      list = list.filter(d => d.division_en === selectedDivision);
+    }
+    return list.sort((a, b) => a.name_en.localeCompare(b.name_en));
+  }, [districts, selectedDivision]);
+
+  const activeFilterCount = useMemo(() => {
+    let count = 0;
+    if (selectedDivision !== 'all') count++;
+    if (selectedDistrict !== 'all') count++;
+    if (selectedSubject !== 'all') count++;
+    if (selectedMode !== 'all') count++;
+    return count;
+  }, [selectedDivision, selectedDistrict, selectedSubject, selectedMode]);
 
   useEffect(() => {
     fetchData();
@@ -108,7 +133,6 @@ export default function BrowseJobs() {
       .single();
     if (data) {
       setTutorProfileId(data.id);
-      // Calculate completeness (10 fields, each worth 10%)
       let complete = 0;
       if (data.bio) complete += 10;
       if (data.education) complete += 10;
@@ -119,7 +143,6 @@ export default function BrowseJobs() {
       if (data.teaching_mode) complete += 10;
       if (data.class_levels && data.class_levels.length > 0) complete += 10;
       if (data.verification_status === 'approved') complete += 10;
-      // Check if tutor has subjects
       const { count } = await supabase.from('tutor_subjects').select('*', { count: 'exact', head: true }).eq('tutor_profile_id', data.id);
       if (count && count > 0) complete += 10;
       setTutorProfileCompleteness(complete);
@@ -128,7 +151,7 @@ export default function BrowseJobs() {
 
   const fetchData = async () => {
     const [districtsRes, subjectsRes] = await Promise.all([
-      supabase.from('districts').select('*').order('name_en'),
+      supabase.from('districts').select('id, name_en, name_bn, division_en').order('name_en'),
       supabase.from('subjects').select('*').order('name_en'),
     ]);
     
@@ -141,7 +164,6 @@ export default function BrowseJobs() {
   const fetchJobs = async () => {
     setLoading(true);
     
-    // If filtering by subject, first get matching job IDs from job_subjects
     let subjectJobIds: string[] | null = null;
     if (selectedSubject && selectedSubject !== 'all') {
       const { data: jsData } = await supabase
@@ -151,7 +173,6 @@ export default function BrowseJobs() {
       subjectJobIds = jsData?.map(js => js.job_id) || [];
     }
 
-    // Build count query
     let countQuery = supabase
       .from('jobs')
       .select('*', { count: 'exact', head: true })
@@ -176,7 +197,6 @@ export default function BrowseJobs() {
     const { count } = await countQuery;
     setTotalCount(count || 0);
 
-    // Build data query
     const from = (currentPage - 1) * JOBS_PER_PAGE;
     const to = from + JOBS_PER_PAGE - 1;
 
@@ -189,22 +209,21 @@ export default function BrowseJobs() {
         job_subjects (subjects (name_en, name_bn))
       `)
       .eq('status', 'open')
+      .order('is_featured', { ascending: false })
       .order('created_at', { ascending: false })
       .range(from, to);
 
     if (selectedDistrict && selectedDistrict !== 'all') {
       query = query.eq('district_id', selectedDistrict);
     }
-
     if (subjectJobIds !== null) {
       query = query.in('id', subjectJobIds);
     }
-
     if (selectedMode && selectedMode !== 'all') {
       query = query.eq('teaching_mode', selectedMode as 'online' | 'in_person' | 'hybrid');
     }
 
-    const { data, error } = await query;
+    const { data } = await query;
     
     if (data) {
       let filtered = data as unknown as Job[];
@@ -231,7 +250,7 @@ export default function BrowseJobs() {
     if (role !== 'tutor') {
       toast({
         title: "Tutor Account Required",
-        description: "You need to register as a tutor to apply for jobs. Please create a tutor account first.",
+        description: "You need to register as a tutor to apply for jobs.",
         variant: "destructive"
       });
       navigate('/auth');
@@ -249,7 +268,7 @@ export default function BrowseJobs() {
     if (tutorProfileCompleteness < 70) {
       toast({
         title: "Profile Incomplete",
-        description: `Your profile is ${tutorProfileCompleteness}% complete. You need at least 70% to apply for jobs.`,
+        description: `Your profile is ${tutorProfileCompleteness}% complete. You need at least 70% to apply.`,
         variant: "destructive"
       });
       navigate('/tutor/profile');
@@ -263,11 +282,7 @@ export default function BrowseJobs() {
 
   const submitApplication = async () => {
     if (!selectedJob || !tutorProfileId) {
-      toast({
-        title: "Error",
-        description: "Unable to submit application. Please complete your tutor profile first.",
-        variant: "destructive"
-      });
+      toast({ title: "Error", description: "Unable to submit application.", variant: "destructive" });
       return;
     }
 
@@ -285,28 +300,25 @@ export default function BrowseJobs() {
 
     if (error) {
       if (error.code === '23505') {
-        toast({
-          title: "Already Applied",
-          description: "You have already applied for this job",
-          variant: "destructive"
-        });
+        toast({ title: "Already Applied", description: "You have already applied for this job", variant: "destructive" });
       } else {
-        toast({
-          title: "Error",
-          description: "Failed to submit application. Please try again.",
-          variant: "destructive"
-        });
+        toast({ title: "Error", description: "Failed to submit application.", variant: "destructive" });
       }
       return;
     }
 
-    toast({
-      title: "Application Submitted!",
-      description: "Your application has been sent to the parent. Good luck!",
-    });
-    
+    toast({ title: "Application Submitted!", description: "Your application has been sent. Good luck!" });
     setShowApplyModal(false);
-    fetchJobs(); // Refresh to update application count
+    fetchJobs();
+  };
+
+  const getTeachingModeIcon = (mode: string) => {
+    switch (mode) {
+      case 'online': return '🌐';
+      case 'in_person': return '🏠';
+      case 'hybrid': return '🔄';
+      default: return '📚';
+    }
   };
 
   const getTeachingModeLabel = (mode: string) => {
@@ -333,89 +345,164 @@ export default function BrowseJobs() {
     fetchJobs();
   };
 
+  const clearFilters = () => {
+    setSelectedDivision('all');
+    setSelectedDistrict('all');
+    setSelectedSubject('all');
+    setSelectedMode('all');
+    setSearchQuery('');
+    setCurrentPage(1);
+  };
+
   return (
     <div className="min-h-screen bg-background">
-      {/* Navigation */}
       <Header />
 
-      {/* Header */}
-      <section className="bg-gradient-to-r from-tutor to-primary text-primary-foreground py-12">
-        <div className="container mx-auto px-4">
-          <h1 className="text-3xl md:text-4xl font-extrabold mb-4">Browse Tuition Jobs</h1>
-          <p className="text-lg opacity-90 max-w-2xl">Find tuition opportunities that match your expertise and start teaching today</p>
+      {/* Hero Section */}
+      <section className="relative overflow-hidden bg-gradient-to-br from-primary via-primary/90 to-blue-700 text-primary-foreground">
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute top-10 left-10 w-72 h-72 bg-white rounded-full blur-3xl" />
+          <div className="absolute bottom-10 right-10 w-96 h-96 bg-blue-300 rounded-full blur-3xl" />
+        </div>
+        <div className="container mx-auto px-4 py-14 relative z-10">
+          <div className="max-w-3xl">
+            <div className="inline-flex items-center gap-2 bg-white/15 backdrop-blur-sm rounded-full px-4 py-1.5 text-sm font-medium mb-5">
+              <Sparkles className="h-4 w-4" />
+              {totalCount} Active Opportunities
+            </div>
+            <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight mb-4 leading-tight">
+              Find Your Perfect<br />Tuition Job
+            </h1>
+            <p className="text-lg opacity-85 max-w-xl leading-relaxed">
+              Discover tuition opportunities across Bangladesh. Apply instantly and start teaching today.
+            </p>
+          </div>
         </div>
       </section>
 
-      <div className="container mx-auto px-4 py-8">
-        {/* Search & Filter Bar */}
-        <div className="bg-card rounded-2xl p-4 shadow-lg border border-border mb-8">
-          <div className="flex flex-col md:flex-row gap-4">
+      {/* Search Bar - Floating */}
+      <div className="container mx-auto px-4 -mt-7 relative z-20">
+        <div className="bg-card rounded-2xl shadow-xl border border-border p-4">
+          <div className="flex flex-col md:flex-row gap-3">
             <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
               <Input
-                placeholder="Search jobs by title or description..."
+                placeholder="Search by title, subject, or keyword..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                className="pl-10 h-12 rounded-xl"
+                className="pl-11 h-12 rounded-xl border-0 bg-muted/50 text-base"
               />
             </div>
-            <Select value={selectedDistrict} onValueChange={(v) => { setSelectedDistrict(v); setCurrentPage(1); }}>
-              <SelectTrigger className="w-full md:w-48 h-12 rounded-xl">
-                <MapPin className="h-4 w-4 mr-2 text-muted-foreground" />
-                <SelectValue placeholder="Location" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Locations</SelectItem>
-                {districts.map(d => (
-                  <SelectItem key={d.id} value={d.id}>
-                    {d.name_en}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Select value={selectedSubject} onValueChange={(v) => { setSelectedSubject(v); setCurrentPage(1); }}>
-              <SelectTrigger className="w-full md:w-48 h-12 rounded-xl">
-                <BookOpen className="h-4 w-4 mr-2 text-muted-foreground" />
-                <SelectValue placeholder="Subject" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Subjects</SelectItem>
-                {subjects.map(s => (
-                  <SelectItem key={s.id} value={s.id}>
-                    {s.name_en}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Select value={selectedMode} onValueChange={(v) => { setSelectedMode(v); setCurrentPage(1); }}>
-              <SelectTrigger className="w-full md:w-40 h-12 rounded-xl">
-                <Monitor className="h-4 w-4 mr-2 text-muted-foreground" />
-                <SelectValue placeholder="Mode" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Modes</SelectItem>
-                <SelectItem value="online">Online</SelectItem>
-                <SelectItem value="in_person">In-Person</SelectItem>
-                <SelectItem value="hybrid">Hybrid</SelectItem>
-              </SelectContent>
-            </Select>
-            <Button className="h-12 rounded-xl px-8" onClick={handleSearch}>
+            <Button 
+              variant="outline" 
+              className="h-12 rounded-xl px-5 relative"
+              onClick={() => setShowFilters(!showFilters)}
+            >
+              <Filter className="h-4 w-4 mr-2" />
+              Filters
+              {activeFilterCount > 0 && (
+                <span className="absolute -top-2 -right-2 bg-primary text-primary-foreground text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold">
+                  {activeFilterCount}
+                </span>
+              )}
+            </Button>
+            <Button className="h-12 rounded-xl px-8 font-semibold" onClick={handleSearch}>
               <Search className="h-4 w-4 mr-2" />
               Search
             </Button>
           </div>
-        </div>
 
-        {/* Results */}
-        <div className="mb-6 flex items-center justify-between">
-          <p className="text-muted-foreground">
-            {totalCount} jobs available
-            {totalPages > 1 && ` • Page ${currentPage} of ${totalPages}`}
-          </p>
+          {/* Expandable Filters */}
+          {showFilters && (
+            <div className="mt-4 pt-4 border-t border-border">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Division</label>
+                  <Select value={selectedDivision} onValueChange={(v) => { setSelectedDivision(v); setSelectedDistrict('all'); setCurrentPage(1); }}>
+                    <SelectTrigger className="h-10 rounded-lg">
+                      <SelectValue placeholder="All Divisions" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Divisions</SelectItem>
+                      {divisions.map(div => (
+                        <SelectItem key={div} value={div}>{div}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground mb-1.5 block">District</label>
+                  <Select value={selectedDistrict} onValueChange={(v) => { setSelectedDistrict(v); setCurrentPage(1); }}>
+                    <SelectTrigger className="h-10 rounded-lg">
+                      <MapPin className="h-3.5 w-3.5 mr-1.5 text-muted-foreground" />
+                      <SelectValue placeholder="All Districts" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Districts</SelectItem>
+                      {filteredDistricts.map(d => (
+                        <SelectItem key={d.id} value={d.id}>{d.name_en}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Subject</label>
+                  <Select value={selectedSubject} onValueChange={(v) => { setSelectedSubject(v); setCurrentPage(1); }}>
+                    <SelectTrigger className="h-10 rounded-lg">
+                      <BookOpen className="h-3.5 w-3.5 mr-1.5 text-muted-foreground" />
+                      <SelectValue placeholder="All Subjects" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Subjects</SelectItem>
+                      {subjects.map(s => (
+                        <SelectItem key={s.id} value={s.id}>{s.name_en}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Teaching Mode</label>
+                  <Select value={selectedMode} onValueChange={(v) => { setSelectedMode(v); setCurrentPage(1); }}>
+                    <SelectTrigger className="h-10 rounded-lg">
+                      <Monitor className="h-3.5 w-3.5 mr-1.5 text-muted-foreground" />
+                      <SelectValue placeholder="All Modes" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Modes</SelectItem>
+                      <SelectItem value="online">Online</SelectItem>
+                      <SelectItem value="in_person">In-Person</SelectItem>
+                      <SelectItem value="hybrid">Hybrid</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              {activeFilterCount > 0 && (
+                <div className="mt-3 flex items-center gap-2">
+                  <span className="text-xs text-muted-foreground">Active filters:</span>
+                  <Button variant="ghost" size="sm" className="h-7 text-xs text-destructive hover:text-destructive" onClick={clearFilters}>
+                    <X className="h-3 w-3 mr-1" />
+                    Clear all
+                  </Button>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className="container mx-auto px-4 py-8">
+        {/* Results Header */}
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <p className="text-sm text-muted-foreground">
+              <span className="font-semibold text-foreground">{totalCount}</span> jobs available
+              {totalPages > 1 && <span> · Page {currentPage} of {totalPages}</span>}
+            </p>
+          </div>
           {role === 'parent' && (
             <Link to="/dashboard">
-              <Button>
+              <Button size="sm" className="rounded-xl">
                 <Briefcase className="h-4 w-4 mr-2" />
                 Post a Job
               </Button>
@@ -423,122 +510,145 @@ export default function BrowseJobs() {
           )}
         </div>
 
+        {/* Job Cards */}
         {loading ? (
           <div className="space-y-4">
-            {[1, 2, 3, 4].map(i => (
-              <Card key={i} className="animate-pulse">
-                <CardContent className="p-6">
-                  <div className="h-6 bg-muted rounded w-1/3 mb-3" />
-                  <div className="h-4 bg-muted rounded w-2/3 mb-4" />
-                  <div className="flex gap-2">
-                    <div className="h-6 bg-muted rounded w-20" />
-                    <div className="h-6 bg-muted rounded w-24" />
+            {[1, 2, 3].map(i => (
+              <div key={i} className="bg-card rounded-2xl border border-border p-6 animate-pulse">
+                <div className="flex gap-4">
+                  <div className="w-14 h-14 bg-muted rounded-xl flex-shrink-0" />
+                  <div className="flex-1 space-y-3">
+                    <div className="h-5 bg-muted rounded w-2/5" />
+                    <div className="h-4 bg-muted rounded w-1/3" />
+                    <div className="flex gap-2">
+                      <div className="h-6 bg-muted rounded-full w-20" />
+                      <div className="h-6 bg-muted rounded-full w-24" />
+                    </div>
                   </div>
-                </CardContent>
-              </Card>
+                  <div className="space-y-2">
+                    <div className="h-7 bg-muted rounded w-28" />
+                    <div className="h-9 bg-muted rounded-xl w-28" />
+                  </div>
+                </div>
+              </div>
             ))}
           </div>
         ) : jobs.length > 0 ? (
           <>
             <div className="space-y-4">
               {jobs.map((job) => (
-                <Card key={job.id} className="hover-lift group">
-                  <CardContent className="p-6">
-                    <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
-                      <div className="flex-1">
-                        <div className="flex items-start gap-3 mb-3">
-                          <div className="w-12 h-12 rounded-xl bg-tutor/10 flex items-center justify-center flex-shrink-0">
-                            <Briefcase className="h-6 w-6 text-tutor" />
-                          </div>
-                          <div>
-                            <div className="flex items-center gap-2">
-                              <h3 className="font-bold text-lg text-foreground group-hover:text-primary transition-colors">
-                                {job.title}
-                              </h3>
-                              {(job as any).job_reference && (
-                                <Badge variant="outline" className="text-xs font-mono">{(job as any).job_reference}</Badge>
-                              )}
-                            </div>
-                            <p className="text-sm text-muted-foreground flex items-center gap-2">
-                              <MapPin className="h-3 w-3" />
-                              {job.districts ? (job.districts.name_en) : 'Location N/A'}
-                              <span className="text-border">•</span>
-                              Posted {formatDistanceToNow(new Date(job.created_at), { addSuffix: true })}
-                            </p>
-                          </div>
+                <Card 
+                  key={job.id} 
+                  className={`group rounded-2xl border transition-all duration-300 hover:shadow-lg hover:border-primary/20 ${
+                    job.is_featured ? 'border-amber-300/50 bg-gradient-to-r from-amber-50/50 to-card ring-1 ring-amber-200/30' : ''
+                  }`}
+                >
+                  <CardContent className="p-5 md:p-6">
+                    <div className="flex flex-col md:flex-row gap-4">
+                      {/* Left: Icon */}
+                      <div className={`w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0 text-2xl ${
+                        job.is_featured ? 'bg-amber-100' : 'bg-primary/5'
+                      }`}>
+                        {getTeachingModeIcon(job.teaching_mode)}
+                      </div>
+
+                      {/* Center: Details */}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-start gap-2 flex-wrap mb-1">
+                          {job.is_featured && (
+                            <Badge className="bg-amber-500 hover:bg-amber-600 text-white text-[10px] px-2 py-0">
+                              <Sparkles className="h-3 w-3 mr-0.5" />
+                              Featured
+                            </Badge>
+                          )}
+                          {job.job_reference && (
+                            <Badge variant="outline" className="text-[10px] font-mono px-2 py-0 rounded-md">
+                              {job.job_reference}
+                            </Badge>
+                          )}
                         </div>
 
-                        <p className="text-muted-foreground text-sm line-clamp-2 mb-4 ml-15">
+                        <h3 className="font-bold text-lg text-foreground group-hover:text-primary transition-colors line-clamp-1 mb-1">
+                          {job.title}
+                        </h3>
+
+                        <div className="flex items-center gap-3 text-sm text-muted-foreground mb-3">
+                          <span className="flex items-center gap-1">
+                            <MapPin className="h-3.5 w-3.5" />
+                            {job.districts?.name_en || 'N/A'}
+                          </span>
+                          <span className="text-border">·</span>
+                          <span className="flex items-center gap-1">
+                            <Clock className="h-3.5 w-3.5" />
+                            {formatDistanceToNow(new Date(job.created_at), { addSuffix: true })}
+                          </span>
+                        </div>
+
+                        <p className="text-muted-foreground text-sm line-clamp-1 mb-3">
                           {job.description}
                         </p>
 
-                        <div className="flex flex-wrap gap-2 ml-15">
+                        {/* Tags */}
+                        <div className="flex flex-wrap gap-1.5">
                           {job.job_subjects && job.job_subjects.length > 0 ? (
-                            job.job_subjects.map((js, idx) => (
-                              <Badge key={idx} variant="secondary">
-                                <BookOpen className="h-3 w-3 mr-1" />
+                            job.job_subjects.slice(0, 3).map((js, idx) => (
+                              <Badge key={idx} className="bg-blue-50 text-blue-700 hover:bg-blue-100 border-0 text-xs font-medium rounded-lg px-2.5">
                                 {js.subjects.name_en}
                               </Badge>
                             ))
                           ) : job.subjects ? (
-                            <Badge variant="secondary">
-                              <BookOpen className="h-3 w-3 mr-1" />
+                            <Badge className="bg-blue-50 text-blue-700 hover:bg-blue-100 border-0 text-xs font-medium rounded-lg px-2.5">
                               {job.subjects.name_en}
                             </Badge>
                           ) : null}
-                          {job.class_level && (
-                            <Badge variant="outline">{job.class_level}</Badge>
+                          {job.job_subjects && job.job_subjects.length > 3 && (
+                            <Badge variant="outline" className="text-xs rounded-lg">+{job.job_subjects.length - 3}</Badge>
                           )}
-                          <Badge variant="outline">
+                          {job.class_level && (
+                            <Badge variant="outline" className="text-xs rounded-lg">{job.class_level}</Badge>
+                          )}
+                          <Badge variant="outline" className="text-xs rounded-lg">
                             {getTeachingModeLabel(job.teaching_mode)}
                           </Badge>
-                          <Badge variant="outline">
-                            <Users className="h-3 w-3 mr-1" />
-                            {getGenderLabel(job.preferred_tutor_gender)}
-                          </Badge>
+                          {job.preferred_tutor_gender !== 'any' && (
+                            <Badge variant="outline" className="text-xs rounded-lg">
+                              {getGenderLabel(job.preferred_tutor_gender)}
+                            </Badge>
+                          )}
                           {job.days_per_week && (
-                            <Badge variant="outline">
-                              <Calendar className="h-3 w-3 mr-1" />
-                              {job.days_per_week}d/wk{job.duration_hours ? ` • ${job.duration_hours}hr` : ''}
-                            </Badge>
-                          )}
-                          {job.number_of_students > 1 && (
-                            <Badge variant="outline">
-                              <Users className="h-3 w-3 mr-1" />
-                              {job.number_of_students} students
-                            </Badge>
-                          )}
-                          {job.start_date && (
-                            <Badge variant="outline">
-                              <Calendar className="h-3 w-3 mr-1" />
-                              Starts {new Date(job.start_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
+                            <Badge variant="outline" className="text-xs rounded-lg">
+                              {job.days_per_week}d/wk
+                              {job.duration_hours ? ` · ${job.duration_hours}hr` : ''}
                             </Badge>
                           )}
                         </div>
                       </div>
 
-                      <div className="flex flex-col items-end gap-3">
+                      {/* Right: Price & Actions */}
+                      <div className="flex md:flex-col items-center md:items-end justify-between md:justify-start gap-3 md:min-w-[140px]">
                         <div className="text-right">
-                          <div className="text-2xl font-bold text-primary">
-                            ৳{job.budget_min || 0}-{job.budget_max || 0}
+                          <div className="text-xl md:text-2xl font-bold text-primary tabular-nums">
+                            ৳{(job.budget_min || 0).toLocaleString()}-{(job.budget_max || 0).toLocaleString()}
                           </div>
-                          <p className="text-xs text-muted-foreground">per month</p>
+                          <p className="text-[11px] text-muted-foreground font-medium">per month</p>
                         </div>
                         
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                          <Users className="h-4 w-4" />
-                          {job.total_applications} applications
+                        <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                          <Users className="h-3.5 w-3.5" />
+                          {job.total_applications} applied
                         </div>
 
-                        <Button className="rounded-xl" onClick={() => handleApply(job)}>
-                          Apply Now
-                          <ArrowRight className="h-4 w-4 ml-2" />
-                        </Button>
-                        <Link to={`/jobs/${job.id}`}>
-                          <Button variant="outline" className="rounded-xl">
-                            View Details
+                        <div className="flex gap-2">
+                          <Link to={`/jobs/${job.id}`}>
+                            <Button variant="outline" size="sm" className="rounded-xl text-xs h-9">
+                              Details
+                            </Button>
+                          </Link>
+                          <Button size="sm" className="rounded-xl text-xs h-9" onClick={() => handleApply(job)}>
+                            Apply
+                            <ArrowRight className="h-3.5 w-3.5 ml-1" />
                           </Button>
-                        </Link>
+                        </div>
                       </div>
                     </div>
                   </CardContent>
@@ -548,15 +658,16 @@ export default function BrowseJobs() {
 
             {/* Pagination */}
             {totalPages > 1 && (
-              <div className="flex items-center justify-center gap-2 mt-8">
+              <div className="flex items-center justify-center gap-2 mt-10">
                 <Button
                   variant="outline"
                   size="sm"
+                  className="rounded-xl"
                   onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                   disabled={currentPage === 1}
                 >
-                  <ChevronLeft className="h-4 w-4" />
-                  Previous
+                  <ChevronLeft className="h-4 w-4 mr-1" />
+                  Prev
                 </Button>
                 
                 <div className="flex items-center gap-1">
@@ -574,10 +685,10 @@ export default function BrowseJobs() {
                     return (
                       <Button
                         key={pageNum}
-                        variant={currentPage === pageNum ? "default" : "outline"}
+                        variant={currentPage === pageNum ? "default" : "ghost"}
                         size="sm"
                         onClick={() => setCurrentPage(pageNum)}
-                        className="w-10"
+                        className="w-9 h-9 rounded-xl"
                       >
                         {pageNum}
                       </Button>
@@ -588,25 +699,34 @@ export default function BrowseJobs() {
                 <Button
                   variant="outline"
                   size="sm"
+                  className="rounded-xl"
                   onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                   disabled={currentPage === totalPages}
                 >
                   Next
-                  <ChevronRight className="h-4 w-4" />
+                  <ChevronRight className="h-4 w-4 ml-1" />
                 </Button>
               </div>
             )}
           </>
         ) : (
-          <div className="text-center py-16">
-            <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
-              <Briefcase className="h-10 w-10 text-muted-foreground" />
+          <div className="text-center py-20">
+            <div className="w-20 h-20 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-5">
+              <Search className="h-10 w-10 text-muted-foreground/50" />
             </div>
             <h3 className="text-xl font-bold mb-2">No jobs found</h3>
-            <p className="text-muted-foreground mb-6">Check back later or try different filters</p>
+            <p className="text-muted-foreground mb-6 max-w-sm mx-auto">
+              Try adjusting your filters or check back later for new opportunities
+            </p>
+            {activeFilterCount > 0 && (
+              <Button variant="outline" className="rounded-xl" onClick={clearFilters}>
+                <X className="h-4 w-4 mr-2" />
+                Clear Filters
+              </Button>
+            )}
             {role === 'parent' && (
               <Link to="/dashboard">
-                <Button>Post a Tuition Job</Button>
+                <Button className="rounded-xl ml-2">Post a Tuition Job</Button>
               </Link>
             )}
           </div>
@@ -615,12 +735,10 @@ export default function BrowseJobs() {
 
       {/* Application Modal */}
       <Dialog open={showApplyModal} onOpenChange={setShowApplyModal}>
-        <DialogContent className="sm:max-w-[500px]">
+        <DialogContent className="sm:max-w-[500px] rounded-2xl">
           <DialogHeader>
-            <DialogTitle>Apply for Tuition Job</DialogTitle>
-            <DialogDescription>
-              {selectedJob?.title}
-            </DialogDescription>
+            <DialogTitle className="text-xl">Apply for Tuition Job</DialogTitle>
+            <DialogDescription>{selectedJob?.title}</DialogDescription>
           </DialogHeader>
           
           <div className="space-y-4 py-4">
@@ -628,10 +746,11 @@ export default function BrowseJobs() {
               <Label htmlFor="coverMessage">Cover Message</Label>
               <Textarea
                 id="coverMessage"
-                placeholder="Introduce yourself and explain why you're a great fit for this job..."
+                placeholder="Introduce yourself and explain why you're a great fit..."
                 value={coverMessage}
                 onChange={(e) => setCoverMessage(e.target.value)}
                 rows={4}
+                className="rounded-xl"
               />
             </div>
             
@@ -643,20 +762,21 @@ export default function BrowseJobs() {
                 placeholder="Enter your proposed rate"
                 value={proposedRate}
                 onChange={(e) => setProposedRate(e.target.value)}
+                className="rounded-xl"
               />
               {selectedJob && (
                 <p className="text-xs text-muted-foreground">
-                  Parent's budget: ৳{selectedJob.budget_min} - ৳{selectedJob.budget_max}
+                  Parent's budget: ৳{selectedJob.budget_min?.toLocaleString()} - ৳{selectedJob.budget_max?.toLocaleString()}
                 </p>
               )}
             </div>
           </div>
           
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowApplyModal(false)}>
+            <Button variant="outline" onClick={() => setShowApplyModal(false)} className="rounded-xl">
               Cancel
             </Button>
-            <Button onClick={submitApplication} disabled={applying}>
+            <Button onClick={submitApplication} disabled={applying} className="rounded-xl">
               {applying ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
