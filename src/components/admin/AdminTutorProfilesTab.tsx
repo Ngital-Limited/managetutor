@@ -124,6 +124,14 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
       .order('created_at', { ascending: false })
       .limit(200);
 
+    // If area filter is set, find the district_id for that area and filter by it
+    if (filterArea !== 'all') {
+      const matchedArea = areas.find(a => a.id === filterArea);
+      if (matchedArea) {
+        query = query.eq('district_id', matchedArea.district_id);
+      }
+    }
+
     if (filterGender !== 'all') query = query.eq('gender', filterGender as any);
     if (filterDistrict !== 'all') query = query.eq('district_id', filterDistrict);
     if (filterVerification !== 'all') query = query.eq('verification_status', filterVerification as any);
