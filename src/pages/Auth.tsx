@@ -121,6 +121,7 @@ export default function Auth() {
   };
 
 
+  const roles = [
     { id: 'parent' as AppRole, icon: Users, label: t('auth.parent'), desc: 'Find tutors for your child' },
     { id: 'tutor' as AppRole, icon: GraduationCap, label: t('auth.tutor'), desc: 'Teach students & earn' },
     { id: 'agency' as AppRole, icon: Building2, label: t('auth.agency'), desc: 'Manage multiple tutors' },
