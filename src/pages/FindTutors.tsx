@@ -17,7 +17,7 @@ import { useToast } from '@/hooks/use-toast';
 import { JOB_CATEGORIES, STUDENT_BACKGROUNDS } from '@/constants/jobCategories';
 import { 
   Search, MapPin, Star, Filter, 
-  User, Clock, BookOpen, CheckCircle2, X, ChevronDown, Heart, Award, ArrowRight, ChevronLeft, ChevronRight
+  User, Clock, CheckCircle2, X, ChevronDown, Heart, Award, ArrowRight, ChevronLeft, ChevronRight
 } from 'lucide-react';
 
 interface District {
