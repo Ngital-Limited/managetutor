@@ -70,14 +70,20 @@ export default function ParentProfileEdit() {
         avatar_url: profileRes.data.avatar_url || '',
       });
     }
-    if (districtsRes.data) setDistricts(districtsRes.data);
+    if (districtsRes.data) {
+      setDistricts(districtsRes.data);
+      // Set initial division from existing district
+      if (profileRes.data?.district_id) {
+        const dist = districtsRes.data.find(d => d.id === profileRes.data.district_id);
+        if (dist) setSelectedDivisionState(dist.division_en);
+      }
+    }
     if (areasRes.data) setAreas(areasRes.data);
     setLoading(false);
   };
 
   const divisions = [...new Set(districts.map(d => d.division_en))].sort();
-  const selectedDivision = districts.find(d => d.id === form.district_id)?.division_en || '';
-  const filteredDistricts = selectedDivision ? districts.filter(d => d.division_en === selectedDivision) : districts;
+  const filteredDistricts = selectedDivisionState ? districts.filter(d => d.division_en === selectedDivisionState) : districts;
   const filteredAreas = areas.filter(a => a.district_id === form.district_id);
 
   const handleSave = async () => {
