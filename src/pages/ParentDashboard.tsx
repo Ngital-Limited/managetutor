@@ -419,6 +419,40 @@ export default function ParentDashboard() {
     });
   };
 
+  const prefillFromLastJob = async () => {
+    if (!user) return;
+    const { data: lastJob } = await supabase.from('jobs')
+      .select('district_id, area_id, location_details, student_school_name, student_age, student_gender, number_of_students, teaching_mode, preferred_tutor_gender, days_per_week, duration_hours, budget_min, budget_max, preferred_time, special_requirements, class_level')
+      .eq('parent_id', user.id)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (lastJob) {
+      const district = districts.find(d => d.id === lastJob.district_id);
+      if (district) setSelectedJobDivision(district.division_en);
+      setJobForm(prev => ({
+        ...prev,
+        district_id: lastJob.district_id || '',
+        area_id: lastJob.area_id || '',
+        location_details: lastJob.location_details || '',
+        student_school_name: lastJob.student_school_name || '',
+        student_age: lastJob.student_age || '',
+        student_gender: lastJob.student_gender || 'any',
+        number_of_students: lastJob.number_of_students || 1,
+        teaching_mode: lastJob.teaching_mode || 'in_person',
+        preferred_tutor_gender: lastJob.preferred_tutor_gender || 'any',
+        days_per_week: lastJob.days_per_week || 3,
+        duration_hours: lastJob.duration_hours ? Number(lastJob.duration_hours) : 1.5,
+        budget_min: lastJob.budget_min || 3000,
+        budget_max: lastJob.budget_max || 8000,
+        preferred_time: lastJob.preferred_time || '',
+        special_requirements: lastJob.special_requirements ? lastJob.special_requirements.split(', ') : [],
+        class_levels: lastJob.class_level ? lastJob.class_level.split(', ') : [],
+      }));
+    }
+  };
+
   const deleteJob = async (jobId: string) => {
     const { error } = await supabase.from('jobs').delete().eq('id', jobId);
     if (error) {
@@ -1316,7 +1350,7 @@ export default function ParentDashboard() {
               <Briefcase className="h-5 w-5" />
               My Tuition Jobs
             </CardTitle>
-            <Button size="sm" onClick={() => setShowPostJob(true)}>
+            <Button size="sm" onClick={() => { resetJobForm(); prefillFromLastJob(); setShowPostJob(true); }}>
               <Plus className="h-4 w-4 mr-1" />
               Post Job
             </Button>
@@ -1443,7 +1477,7 @@ export default function ParentDashboard() {
               <Briefcase className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
               <h3 className="font-bold mb-2">No jobs posted yet</h3>
               <p className="text-muted-foreground mb-4">Post your first tuition job to find the perfect tutor</p>
-              <Button onClick={() => setShowPostJob(true)}>
+              <Button onClick={() => { resetJobForm(); prefillFromLastJob(); setShowPostJob(true); }}>
                 <Plus className="h-4 w-4 mr-2" />
                 Post a Job
               </Button>
@@ -1824,7 +1858,7 @@ export default function ParentDashboard() {
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-background">
-        <ParentSidebar activeSection={activeSection} setActiveSection={setActiveSection} onPostJob={() => setShowPostJob(true)} />
+        <ParentSidebar activeSection={activeSection} setActiveSection={setActiveSection} onPostJob={() => { resetJobForm(); prefillFromLastJob(); setShowPostJob(true); }} />
 
         <div className="flex-1 flex flex-col min-w-0">
           {/* Top Bar */}

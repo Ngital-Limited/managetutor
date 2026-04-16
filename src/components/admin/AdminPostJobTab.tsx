@@ -139,6 +139,39 @@ export function AdminPostJobTab({ toast }: Props) {
     });
   };
 
+  const prefillFromParentLastJob = async (parentId: string) => {
+    const { data: lastJob } = await supabase.from('jobs')
+      .select('district_id, area_id, location_details, student_school_name, student_age, student_gender, number_of_students, teaching_mode, preferred_tutor_gender, days_per_week, duration_hours, budget_min, budget_max, preferred_time, special_requirements, class_level')
+      .eq('parent_id', parentId)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (lastJob) {
+      const district = districts.find(d => d.id === lastJob.district_id);
+      if (district) setSelectedJobDivision(district.division_en);
+      setJobForm(prev => ({
+        ...prev,
+        district_id: lastJob.district_id || '',
+        area_id: lastJob.area_id || '',
+        location_details: lastJob.location_details || '',
+        student_school_name: lastJob.student_school_name || '',
+        student_age: lastJob.student_age || '',
+        student_gender: lastJob.student_gender || 'any',
+        number_of_students: lastJob.number_of_students || 1,
+        teaching_mode: lastJob.teaching_mode || 'in_person',
+        preferred_tutor_gender: lastJob.preferred_tutor_gender || 'any',
+        days_per_week: lastJob.days_per_week || 3,
+        duration_hours: lastJob.duration_hours ? Number(lastJob.duration_hours) : 1.5,
+        budget_min: lastJob.budget_min || 3000,
+        budget_max: lastJob.budget_max || 8000,
+        preferred_time: lastJob.preferred_time || '',
+        special_requirements: lastJob.special_requirements ? lastJob.special_requirements.split(', ') : [],
+        class_levels: lastJob.class_level ? lastJob.class_level.split(', ') : [],
+      }));
+    }
+  };
+
   const resolveOrCreateParent = async (): Promise<string | null> => {
     // If an existing parent is selected, use their ID
     if (selectedParent) return selectedParent.id;
@@ -324,7 +357,7 @@ export function AdminPostJobTab({ toast }: Props) {
                 {parentResults.length > 0 && (
                   <div className="space-y-1 max-h-32 overflow-y-auto border rounded-md p-1">
                     {parentResults.map(p => (
-                      <button type="button" key={p.id} onClick={() => { setSelectedParent(p); setParentResults([]); setParentSearch(''); }}
+                      <button type="button" key={p.id} onClick={() => { setSelectedParent(p); setParentResults([]); setParentSearch(''); prefillFromParentLastJob(p.id); }}
                         className="w-full flex items-center justify-between p-2 rounded hover:bg-muted/50 transition-colors text-left">
                         <div>
                           <span className="font-medium text-sm">{p.full_name}</span>
@@ -349,6 +382,18 @@ export function AdminPostJobTab({ toast }: Props) {
                         placeholder="+880 1XXX-XXXXXX"
                         value={manualPhone}
                         onChange={e => setManualPhone(e.target.value)}
+                        onBlur={async () => {
+                          const phone = manualPhone.trim();
+                          if (phone.length < 5) return;
+                          const { data } = await supabase.from('profiles').select('id, full_name, email, phone').eq('phone', phone).maybeSingle();
+                          if (data) {
+                            setSelectedParent({ id: data.id, full_name: data.full_name, email: data.email, phone: data.phone });
+                            setManualPhone('');
+                            setManualName('');
+                            setManualEmail('');
+                            prefillFromParentLastJob(data.id);
+                          }
+                        }}
                       />
                     </div>
                     <div>
