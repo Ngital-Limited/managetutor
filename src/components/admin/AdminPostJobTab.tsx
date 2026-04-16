@@ -209,8 +209,8 @@ export function AdminPostJobTab({ toast }: Props) {
     e.preventDefault();
 
     // Validate phone is present (either from selected parent or manual)
-    if (!selectedParent && !manualPhone.trim()) {
-      toast({ title: 'Phone Required', description: 'Guardian phone number is mandatory.', variant: 'destructive' });
+    if (!selectedParent && !parentSearch.trim()) {
+      toast({ title: 'Guardian Required', description: 'Search a guardian by phone number or select an existing one.', variant: 'destructive' });
       return;
     }
 
