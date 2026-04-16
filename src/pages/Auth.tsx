@@ -7,7 +7,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useToast } from '@/hooks/use-toast';
 import { Logo } from '@/components/Logo';
-import { GraduationCap, Users, Building2, Loader2, Mail, Lock, User, ArrowRight, Phone } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { GraduationCap, Users, Building2, Loader2, Mail, Lock, User, ArrowRight, Phone, ArrowLeft } from 'lucide-react';
 import { PhoneInput, isValidBDPhone } from '@/components/PhoneInput';
 import { z } from 'zod';
 
@@ -33,6 +34,10 @@ export default function Auth() {
   );
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [resetEmail, setResetEmail] = useState('');
+  const [resetLoading, setResetLoading] = useState(false);
+  const [resetSent, setResetSent] = useState(false);
 
   const { role: userRole } = useAuth();
 
