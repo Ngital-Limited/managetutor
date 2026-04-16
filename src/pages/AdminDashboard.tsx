@@ -1541,8 +1541,8 @@ export default function AdminDashboard() {
               </div>
             )}
 
-            {/* ═══════ USERS TAB ═══════ */}
-            {activeTab === 'users' && (
+            {/* ═══════ GUARDIANS / PARENTS TAB ═══════ */}
+            {activeTab === 'guardians' && (
               <div className="space-y-6">
                 <h1 className="text-xl font-semibold">User Management</h1>
                 <div className="flex flex-col sm:flex-row gap-3">
