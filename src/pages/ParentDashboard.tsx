@@ -1479,7 +1479,7 @@ export default function ParentDashboard() {
                               <span className="font-semibold">{tutor?.profiles?.full_name}</span>
                               <span className="text-xs text-muted-foreground">
                                 {tutor?.experience_years || 0} yrs exp · ⭐ {tutor?.average_rating || 0}
-                                {tutor?.verification_status === 'approved' && ' · ✓ Verified'}
+                                {tutor?.verification_status === 'approved' && tutor?.verification_paid && ' · ✓ Verified'}
                               </span>
                             </div>
                           </td>

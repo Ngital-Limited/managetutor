@@ -328,7 +328,7 @@ export default function FindTutors() {
                     {tutor.display_name || tutor.profiles?.full_name || 'Tutor'}
                   </h3>
                   {isFeatured && <Badge className="bg-accent text-accent-foreground text-[10px] px-1.5 py-0"><Award className="h-2.5 w-2.5 mr-0.5" />Featured</Badge>}
-                  {tutor.verification_status === 'approved' && <CheckCircle2 className="h-4 w-4 text-success flex-shrink-0" />}
+                  {tutor.verification_status === 'approved' && tutor.verification_paid && <CheckCircle2 className="h-4 w-4 text-success flex-shrink-0" />}
                 </div>
                 <div className="flex items-center gap-3 text-xs text-muted-foreground">
                   {(tutor.districts || tutor.profiles?.districts) && (
@@ -403,7 +403,7 @@ export default function FindTutors() {
                     )}
                   </div>
                   <div className="flex items-center gap-1 flex-shrink-0">
-                    {tutor.verification_status === 'approved' && (
+                    {tutor.verification_status === 'approved' && tutor.verification_paid && (
                       <CheckCircle2 className="h-4.5 w-4.5 text-success" />
                     )}
                     {role === 'parent' && (

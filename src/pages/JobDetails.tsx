@@ -454,7 +454,7 @@ export default function JobDetails() {
                                 <div className="flex-1">
                                   <div className="flex items-center gap-2 mb-1">
                                     <h4 className="font-bold">{app.tutor_profiles?.profiles?.full_name}</h4>
-                                    {app.tutor_profiles?.verification_status === 'approved' && (
+                                    {app.tutor_profiles?.verification_status === 'approved' && app.tutor_profiles?.verification_paid && (
                                       <Badge className="bg-success"><CheckCircle2 className="h-3 w-3 mr-1" />Verified</Badge>
                                     )}
                                   </div>
