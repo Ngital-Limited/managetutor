@@ -240,8 +240,19 @@ export default function TutorProfile() {
   };
 
   const handleSave = async () => {
+    if (!userProfile.phone) {
+      toast({ title: 'Phone Required', description: 'Phone number is mandatory. Please enter your phone number.', variant: 'destructive' });
+      return;
+    }
+    if (!isValidBDPhone(userProfile.phone)) {
+      toast({ title: 'Invalid Phone', description: 'Phone number is not a valid Bangladesh phone number.', variant: 'destructive' });
+      return;
+    }
+    if (!userProfile.full_name.trim()) {
+      toast({ title: 'Name Required', description: 'Full name is mandatory.', variant: 'destructive' });
+      return;
+    }
     const phoneFields = [
-      { value: userProfile.phone, label: 'Phone Number' },
       { value: profile.father_phone, label: "Father's Phone" },
       { value: profile.mother_phone, label: "Mother's Phone" },
       { value: profile.emergency_contact_phone, label: 'Emergency Contact Phone' },

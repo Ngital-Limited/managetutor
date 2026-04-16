@@ -87,8 +87,16 @@ export default function ParentProfileEdit() {
   const filteredAreas = areas.filter(a => a.district_id === form.district_id);
 
   const handleSave = async () => {
-    if (form.phone && !isValidBDPhone(form.phone)) {
+    if (!form.phone) {
+      toast({ title: 'Phone Required', description: 'Phone number is mandatory. Please enter your phone number.', variant: 'destructive' });
+      return;
+    }
+    if (!isValidBDPhone(form.phone)) {
       toast({ title: 'Invalid Phone', description: 'Please enter a valid Bangladesh phone number.', variant: 'destructive' });
+      return;
+    }
+    if (!form.full_name.trim()) {
+      toast({ title: 'Name Required', description: 'Full name is mandatory.', variant: 'destructive' });
       return;
     }
     setSaving(true);
