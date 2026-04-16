@@ -51,6 +51,7 @@ const App = () => (
               <Route path="/jobs" element={<BrowseJobs />} />
               <Route path="/jobs/:id" element={<JobDetails />} />
               <Route path="/auth" element={<Auth />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/parent/dashboard" element={<ParentDashboard />} />
               <Route path="/parent/profile" element={<ParentProfileEdit />} />
