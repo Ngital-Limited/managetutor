@@ -25,7 +25,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { formatDistanceToNow } from 'date-fns';
 
 interface Subject { id: string; name_en: string; name_bn: string; }
-interface District { id: string; name_en: string; name_bn: string; }
+interface District { id: string; name_en: string; name_bn: string; division_en: string; }
 interface EducationEntry {
   id?: string;
   institution: string;
@@ -64,6 +64,8 @@ export default function TutorProfile() {
   const [saving, setSaving] = useState(false);
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [districts, setDistricts] = useState<District[]>([]);
+  const [areas, setAreas] = useState<{ id: string; name_en: string; name_bn: string; district_id: string }[]>([]);
+  const [selectedDivision, setSelectedDivision] = useState('');
   const [selectedSubjects, setSelectedSubjects] = useState<string[]>([]);
   const [documents, setDocuments] = useState<VerificationDoc[]>([]);
   const [uploading, setUploading] = useState(false);
@@ -116,6 +118,7 @@ export default function TutorProfile() {
     phone: '',
     email: '',
     district_id: '',
+    area_id: '',
   });
 
   useEffect(() => {
@@ -133,24 +136,32 @@ export default function TutorProfile() {
   }, [user, role, authLoading, adminEditUserId]);
 
   const fetchData = async () => {
-    const [subjectsRes, districtsRes, profileRes, tutorRes, docsRes, tutorSubjectsRes] = await Promise.all([
+    const [subjectsRes, districtsRes, profileRes, tutorRes, docsRes, tutorSubjectsRes, areasRes] = await Promise.all([
       supabase.from('subjects').select('*').order('name_en'),
-      supabase.from('districts').select('*').order('name_en'),
+      supabase.from('districts').select('id, name_en, name_bn, division_en').order('name_en'),
       supabase.from('profiles').select('*').eq('id', targetUserId).single(),
       supabase.from('tutor_profiles').select('*').eq('user_id', targetUserId).single(),
       supabase.from('verification_documents').select('*').eq('tutor_id', targetUserId),
       supabase.from('tutor_subjects').select('subject_id').eq('tutor_profile_id', targetUserId),
+      supabase.from('areas').select('*').order('name_en'),
     ]);
 
     if (subjectsRes.data) setSubjects(subjectsRes.data);
     if (districtsRes.data) setDistricts(districtsRes.data);
+    if (areasRes.data) setAreas(areasRes.data);
     if (profileRes.data) {
       setUserProfile({
         full_name: profileRes.data.full_name || '',
         phone: profileRes.data.phone || '',
         email: profileRes.data.email || user?.email || '',
         district_id: profileRes.data.district_id || '',
+        area_id: profileRes.data.area_id || '',
       });
+      // Set initial division
+      if (profileRes.data.district_id && districtsRes.data) {
+        const dist = districtsRes.data.find(d => d.id === profileRes.data.district_id);
+        if (dist) setSelectedDivision(dist.division_en);
+      }
     }
     if (tutorRes.data) {
       const td = tutorRes.data as any;
@@ -247,6 +258,7 @@ export default function TutorProfile() {
       full_name: userProfile.full_name,
       phone: userProfile.phone,
       district_id: userProfile.district_id || null,
+      area_id: userProfile.area_id || null,
     }).eq('id', targetUserId);
 
     if (profileError) {
@@ -545,16 +557,43 @@ export default function TutorProfile() {
                   </Select>
                 </div>
                 <div>
-                  <Label>Location</Label>
-                  <Select value={userProfile.district_id} onValueChange={(v) => setUserProfile({ ...userProfile, district_id: v })}>
+                  <Label>Division</Label>
+                  <Select value={selectedDivision} onValueChange={(v) => {
+                    setSelectedDivision(v);
+                    setUserProfile({ ...userProfile, district_id: '', area_id: '' });
+                  }}>
+                    <SelectTrigger><SelectValue placeholder="Select division" /></SelectTrigger>
+                    <SelectContent>
+                      {[...new Set(districts.map(d => d.division_en))].sort().map(div => (
+                        <SelectItem key={div} value={div}>{div}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label>District</Label>
+                  <Select value={userProfile.district_id} onValueChange={(v) => setUserProfile({ ...userProfile, district_id: v, area_id: '' })}>
                     <SelectTrigger><SelectValue placeholder="Select district" /></SelectTrigger>
                     <SelectContent>
-                      {districts.map(d => (
+                      {(selectedDivision ? districts.filter(d => d.division_en === selectedDivision) : districts).map(d => (
                         <SelectItem key={d.id} value={d.id}>{d.name_en}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
+                {userProfile.district_id && areas.filter(a => a.district_id === userProfile.district_id).length > 0 && (
+                  <div>
+                    <Label>Thana / Area</Label>
+                    <Select value={userProfile.area_id} onValueChange={(v) => setUserProfile({ ...userProfile, area_id: v })}>
+                      <SelectTrigger><SelectValue placeholder="Select thana/area" /></SelectTrigger>
+                      <SelectContent>
+                        {areas.filter(a => a.district_id === userProfile.district_id).map(a => (
+                          <SelectItem key={a.id} value={a.id}>{a.name_en}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
               </div>
               <div>
                 <Label>Bio / About You</Label>

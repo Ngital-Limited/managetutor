@@ -13,7 +13,7 @@ import { useToast } from '@/hooks/use-toast';
 import { PhoneInput, isValidBDPhone } from '@/components/PhoneInput';
 import { ArrowLeft, Save, Upload, User, MapPin, Phone, Mail } from 'lucide-react';
 
-interface District { id: string; name_en: string; name_bn: string; }
+interface District { id: string; name_en: string; name_bn: string; division_en: string; }
 interface Area { id: string; name_en: string; name_bn: string; district_id: string; }
 
 export default function ParentProfileEdit() {
@@ -30,6 +30,7 @@ export default function ParentProfileEdit() {
   const [uploading, setUploading] = useState(false);
   const [districts, setDistricts] = useState<District[]>([]);
   const [areas, setAreas] = useState<Area[]>([]);
+  const [selectedDivisionState, setSelectedDivisionState] = useState('');
   const [form, setForm] = useState({
     full_name: '',
     full_name_bn: '',
@@ -55,7 +56,7 @@ export default function ParentProfileEdit() {
   const fetchData = async () => {
     const [profileRes, districtsRes, areasRes] = await Promise.all([
       supabase.from('profiles').select('full_name, full_name_bn, phone, email, district_id, area_id, avatar_url').eq('id', targetUserId).single(),
-      supabase.from('districts').select('*').order('name_en'),
+      supabase.from('districts').select('id, name_en, name_bn, division_en').order('name_en'),
       supabase.from('areas').select('*').order('name_en'),
     ]);
     if (profileRes.data) {
@@ -69,11 +70,20 @@ export default function ParentProfileEdit() {
         avatar_url: profileRes.data.avatar_url || '',
       });
     }
-    if (districtsRes.data) setDistricts(districtsRes.data);
+    if (districtsRes.data) {
+      setDistricts(districtsRes.data);
+      // Set initial division from existing district
+      if (profileRes.data?.district_id) {
+        const dist = districtsRes.data.find(d => d.id === profileRes.data.district_id);
+        if (dist) setSelectedDivisionState(dist.division_en);
+      }
+    }
     if (areasRes.data) setAreas(areasRes.data);
     setLoading(false);
   };
 
+  const divisions = [...new Set(districts.map(d => d.division_en))].sort();
+  const filteredDistricts = selectedDivisionState ? districts.filter(d => d.division_en === selectedDivisionState) : districts;
   const filteredAreas = areas.filter(a => a.district_id === form.district_id);
 
   const handleSave = async () => {
@@ -201,11 +211,25 @@ export default function ParentProfileEdit() {
                 <p className="text-xs text-muted-foreground mt-1">Email is linked to your account and cannot be changed here.</p>
               </div>
               <div>
+                <Label className="flex items-center gap-1"><MapPin className="h-3 w-3" /> Division</Label>
+                <Select value={selectedDivisionState} onValueChange={(v) => {
+                  setSelectedDivisionState(v);
+                  setForm({ ...form, district_id: '', area_id: '' });
+                }}>
+                  <SelectTrigger><SelectValue placeholder="Select division" /></SelectTrigger>
+                  <SelectContent>
+                    {divisions.map(div => (
+                      <SelectItem key={div} value={div}>{div}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
                 <Label className="flex items-center gap-1"><MapPin className="h-3 w-3" /> District</Label>
                 <Select value={form.district_id} onValueChange={(v) => setForm({ ...form, district_id: v, area_id: '' })}>
                   <SelectTrigger><SelectValue placeholder="Select district" /></SelectTrigger>
                   <SelectContent>
-                    {districts.map(d => (
+                    {(selectedDivisionState ? filteredDistricts : districts).map(d => (
                       <SelectItem key={d.id} value={d.id}>{d.name_en}</SelectItem>
                     ))}
                   </SelectContent>
@@ -213,9 +237,9 @@ export default function ParentProfileEdit() {
               </div>
               {filteredAreas.length > 0 && (
                 <div>
-                  <Label className="flex items-center gap-1"><MapPin className="h-3 w-3" /> Area</Label>
+                  <Label className="flex items-center gap-1"><MapPin className="h-3 w-3" /> Thana / Area</Label>
                   <Select value={form.area_id} onValueChange={(v) => setForm({ ...form, area_id: v })}>
-                    <SelectTrigger><SelectValue placeholder="Select area" /></SelectTrigger>
+                    <SelectTrigger><SelectValue placeholder="Select thana/area" /></SelectTrigger>
                     <SelectContent>
                       {filteredAreas.map(a => (
                         <SelectItem key={a.id} value={a.id}>{a.name_en}</SelectItem>
