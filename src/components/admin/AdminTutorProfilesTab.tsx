@@ -18,8 +18,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Link } from 'react-router-dom';
 import {
   Search, GraduationCap, Send, Filter, Eye, Pencil,
-  Loader2, Bell, X, LogIn, Ban, CheckCircle2, ShieldOff, ShieldCheck,
-  DropdownMenu
+  Loader2, Bell, X, LogIn, Ban, CheckCircle2, ShieldOff, ShieldCheck
 } from 'lucide-react';
 import {
   DropdownMenu as DropdownMenuRoot,
