@@ -101,7 +101,26 @@ export default function Auth() {
     setLoading(false);
   };
 
-  const roles = [
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!resetEmail.trim()) {
+      toast({ title: 'Error', description: 'Please enter your email', variant: 'destructive' });
+      return;
+    }
+    setResetLoading(true);
+    const { error } = await supabase.auth.resetPasswordForEmail(resetEmail.trim(), {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    if (error) {
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+    } else {
+      setResetSent(true);
+      toast({ title: 'Email Sent', description: 'Check your inbox for the password reset link' });
+    }
+    setResetLoading(false);
+  };
+
+
     { id: 'parent' as AppRole, icon: Users, label: t('auth.parent'), desc: 'Find tutors for your child' },
     { id: 'tutor' as AppRole, icon: GraduationCap, label: t('auth.tutor'), desc: 'Teach students & earn' },
     { id: 'agency' as AppRole, icon: Building2, label: t('auth.agency'), desc: 'Manage multiple tutors' },
