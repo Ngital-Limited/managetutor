@@ -570,44 +570,6 @@ export default function TutorProfile() {
                     </SelectContent>
                   </Select>
                 </div>
-                <div>
-                  <Label>Division</Label>
-                  <Select value={selectedDivision} onValueChange={(v) => {
-                    setSelectedDivision(v);
-                    setUserProfile({ ...userProfile, district_id: '', area_id: '' });
-                  }}>
-                    <SelectTrigger><SelectValue placeholder="Select division" /></SelectTrigger>
-                    <SelectContent>
-                      {[...new Set(districts.map(d => d.division_en))].sort().map(div => (
-                        <SelectItem key={div} value={div}>{div}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label>District</Label>
-                  <Select value={userProfile.district_id} onValueChange={(v) => setUserProfile({ ...userProfile, district_id: v, area_id: '' })}>
-                    <SelectTrigger><SelectValue placeholder="Select district" /></SelectTrigger>
-                    <SelectContent>
-                      {(selectedDivision ? districts.filter(d => d.division_en === selectedDivision) : districts).map(d => (
-                        <SelectItem key={d.id} value={d.id}>{d.name_en}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                {userProfile.district_id && areas.filter(a => a.district_id === userProfile.district_id).length > 0 && (
-                  <div>
-                    <Label>Thana / Area</Label>
-                    <Select value={userProfile.area_id} onValueChange={(v) => setUserProfile({ ...userProfile, area_id: v })}>
-                      <SelectTrigger><SelectValue placeholder="Select thana/area" /></SelectTrigger>
-                      <SelectContent>
-                        {areas.filter(a => a.district_id === userProfile.district_id).map(a => (
-                          <SelectItem key={a.id} value={a.id}>{a.name_en}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                )}
               </div>
               <div>
                 <Label>Bio / About You</Label>
@@ -720,13 +682,56 @@ export default function TutorProfile() {
                   <PhoneInput value={profile.emergency_contact_phone} onChange={(v) => setProfile({ ...profile, emergency_contact_phone: v })} />
                 </div>
               </div>
-              <div>
-                <Label>Present Address</Label>
-                <Textarea value={profile.present_address} onChange={(e) => setProfile({ ...profile, present_address: e.target.value })} placeholder="Your current address..." rows={2} />
+              {/* Present Address with Division/District/Area */}
+              <div className="space-y-3">
+                <Label className="font-semibold">Present Address</Label>
+                <div className="grid md:grid-cols-3 gap-4">
+                  <div>
+                    <Label>Division</Label>
+                    <Select value={selectedDivision} onValueChange={(v) => {
+                      setSelectedDivision(v);
+                      setUserProfile({ ...userProfile, district_id: '', area_id: '' });
+                    }}>
+                      <SelectTrigger><SelectValue placeholder="Select division" /></SelectTrigger>
+                      <SelectContent>
+                        {[...new Set(districts.map(d => d.division_en))].sort().map(div => (
+                          <SelectItem key={div} value={div}>{div}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label>District</Label>
+                    <Select value={userProfile.district_id} onValueChange={(v) => setUserProfile({ ...userProfile, district_id: v, area_id: '' })}>
+                      <SelectTrigger><SelectValue placeholder="Select district" /></SelectTrigger>
+                      <SelectContent>
+                        {(selectedDivision ? districts.filter(d => d.division_en === selectedDivision) : districts).map(d => (
+                          <SelectItem key={d.id} value={d.id}>{d.name_en}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  {userProfile.district_id && areas.filter(a => a.district_id === userProfile.district_id).length > 0 && (
+                    <div>
+                      <Label>Thana / Area</Label>
+                      <Select value={userProfile.area_id} onValueChange={(v) => setUserProfile({ ...userProfile, area_id: v })}>
+                        <SelectTrigger><SelectValue placeholder="Select thana/area" /></SelectTrigger>
+                        <SelectContent>
+                          {areas.filter(a => a.district_id === userProfile.district_id).map(a => (
+                            <SelectItem key={a.id} value={a.id}>{a.name_en}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+                </div>
+                <Textarea value={profile.present_address} onChange={(e) => setProfile({ ...profile, present_address: e.target.value })} placeholder="House/Road/Village details..." rows={2} />
               </div>
-              <div>
-                <Label>Permanent Address</Label>
-                <Textarea value={profile.permanent_address} onChange={(e) => setProfile({ ...profile, permanent_address: e.target.value })} placeholder="Your permanent address..." rows={2} />
+
+              {/* Permanent Address */}
+              <div className="space-y-3">
+                <Label className="font-semibold">Permanent Address</Label>
+                <Textarea value={profile.permanent_address} onChange={(e) => setProfile({ ...profile, permanent_address: e.target.value })} placeholder="Your permanent address details..." rows={2} />
               </div>
             </CardContent>
           </Card>
@@ -1040,33 +1045,6 @@ export default function TutorProfile() {
             </CardContent>
           </Card>
 
-          {/* Teaching Philosophy */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Lightbulb className="h-5 w-5" />
-                Teaching Philosophy
-              </CardTitle>
-              <CardDescription>Describe your approach to teaching and what makes your style unique</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Textarea value={profile.teaching_philosophy} onChange={(e) => setProfile({ ...profile, teaching_philosophy: e.target.value })} placeholder="I believe every student learns differently. My approach focuses on..." rows={5} />
-            </CardContent>
-          </Card>
-
-          {/* Success Stories */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Trophy className="h-5 w-5" />
-                Success Stories
-              </CardTitle>
-              <CardDescription>Share achievements of your students or memorable teaching moments</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Textarea value={profile.success_stories} onChange={(e) => setProfile({ ...profile, success_stories: e.target.value })} placeholder="One of my students improved from C grade to A+ in just 3 months..." rows={5} />
-            </CardContent>
-          </Card>
 
           {/* Parent Reviews & Feedback */}
           <Card>
