@@ -100,6 +100,13 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
   const [availableJobs, setAvailableJobs] = useState<JobRow[]>([]);
   const [jobsLoading, setJobsLoading] = useState(false);
 
+  // ─── Ban Confirmation Dialog ───
+  const [banDialogOpen, setBanDialogOpen] = useState(false);
+  const [banTargetUserId, setBanTargetUserId] = useState<string | null>(null);
+  const [banTargetName, setBanTargetName] = useState('');
+  const [banReason, setBanReason] = useState('');
+  const [banProcessing, setBanProcessing] = useState(false);
+
   // ─── Education & subject data ───
   const [educationOptions, setEducationOptions] = useState<string[]>([]);
   const [universityOptions, setUniversityOptions] = useState<string[]>([]);
@@ -284,15 +291,35 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
   };
 
   // ─── Quick Actions ───
-  const handleBanToggle = async (userId: string, currentlyBanned: boolean) => {
+  const handleBanToggle = async (userId: string, currentlyBanned: boolean, reason?: string) => {
     const { error } = await supabase.from('profiles').update({
       is_banned: !currentlyBanned,
       banned_at: !currentlyBanned ? new Date().toISOString() : null,
-      banned_reason: !currentlyBanned ? 'Banned by admin' : null,
+      banned_reason: !currentlyBanned ? (reason || 'Banned by admin') : null,
     }).eq('id', userId);
     if (error) { toast({ title: 'Error', description: error.message, variant: 'destructive' }); return; }
     toast({ title: currentlyBanned ? 'User Unbanned' : 'User Banned' });
     fetchTutors();
+  };
+
+  const openBanDialog = (userId: string, name: string) => {
+    setBanTargetUserId(userId);
+    setBanTargetName(name);
+    setBanReason('');
+    setBanDialogOpen(true);
+  };
+
+  const confirmBan = async () => {
+    if (!banTargetUserId || !banReason.trim()) {
+      toast({ title: 'Ban reason is required', variant: 'destructive' });
+      return;
+    }
+    setBanProcessing(true);
+    await handleBanToggle(banTargetUserId, false, banReason.trim());
+    setBanProcessing(false);
+    setBanDialogOpen(false);
+    setBanTargetUserId(null);
+    setBanReason('');
   };
 
   const handleApproveToggle = async (userId: string, currentlyApproved: boolean) => {
@@ -684,7 +711,7 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
                           </DropdownMenuItem>
                           <DropdownMenuSeparator />
                           <DropdownMenuItem
-                            onClick={() => handleBanToggle(t.user_id, t.is_banned)}
+                            onClick={() => t.is_banned ? handleBanToggle(t.user_id, true) : openBanDialog(t.user_id, t.name)}
                             className={`flex items-center gap-2 ${!t.is_banned ? 'text-destructive focus:text-destructive' : ''}`}
                           >
                             {t.is_banned
@@ -767,6 +794,43 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
             <Button onClick={handleSendNotification} disabled={notifySending || !notifyTitle.trim() || !notifyMessage.trim()}>
               {notifySending ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Send className="h-4 w-4 mr-1" />}
               Send
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Ban Confirmation Dialog */}
+      <Dialog open={banDialogOpen} onOpenChange={(open) => { if (!open) { setBanDialogOpen(false); setBanTargetUserId(null); setBanReason(''); } }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-destructive">
+              <Ban className="h-5 w-5" /> Ban User
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Are you sure you want to ban <strong>{banTargetName}</strong>? This user will no longer be able to access the platform.
+            </p>
+            <div>
+              <Label className="text-sm font-medium">Ban Reason <span className="text-destructive">*</span></Label>
+              <Textarea
+                value={banReason}
+                onChange={(e) => setBanReason(e.target.value)}
+                placeholder="Enter the reason for banning this user..."
+                className="mt-1.5"
+                rows={3}
+                maxLength={500}
+              />
+              <p className="text-xs text-muted-foreground mt-1">{banReason.length}/500</p>
+            </div>
+          </div>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => { setBanDialogOpen(false); setBanTargetUserId(null); setBanReason(''); }}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={confirmBan} disabled={banProcessing || !banReason.trim()}>
+              {banProcessing ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Ban className="h-4 w-4 mr-1" />}
+              Confirm Ban
             </Button>
           </DialogFooter>
         </DialogContent>
