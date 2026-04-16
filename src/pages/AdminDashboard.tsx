@@ -1991,6 +1991,12 @@ export default function AdminDashboard() {
             {/* ═══════ SUB-ADMIN RBAC TAB ═══════ */}
             {activeTab === 'rbac' && <SubAdminRBACTab toast={toast} />}
 
+            {/* ═══════ CREATE USER TAB ═══════ */}
+            {activeTab === 'create_user' && <AdminCreateUserTab toast={toast} />}
+
+            {/* ═══════ POST JOB TAB ═══════ */}
+            {activeTab === 'post_job' && <AdminPostJobTab toast={toast} />}
+
             {/* ═══════ PLATFORM DATA TAB ═══════ */}
             {activeTab === 'platform_data' && <PlatformDataTab toast={toast} />}
 
