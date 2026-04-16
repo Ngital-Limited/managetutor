@@ -28,13 +28,15 @@ import {
   Eye, Ban, UserCheck, FileCheck,
   LogOut, Home, Star, DollarSign, Trash2, CreditCard, Megaphone, Send, Mail,
   Package, Plus, Pencil, ToggleLeft, ToggleRight, Wallet, MapPin, LifeBuoy, ShieldCheck,
-  LogIn, BookOpen
+  LogIn, BookOpen, UserPlus
 } from 'lucide-react';
 import { RevenuePayoutTab } from '@/components/admin/RevenuePayoutTab';
 import { SupportTicketsTab } from '@/components/admin/SupportTicketsTab';
 import { GeographicHeatmapTab } from '@/components/admin/GeographicHeatmapTab';
 import { SubAdminRBACTab } from '@/components/admin/SubAdminRBACTab';
 import { PlatformDataTab } from '@/components/admin/PlatformDataTab';
+import { AdminCreateUserTab } from '@/components/admin/AdminCreateUserTab';
+import { AdminPostJobTab } from '@/components/admin/AdminPostJobTab';
 
 // ──────────── Types ────────────
 interface Stats {
@@ -1315,6 +1317,8 @@ export default function AdminDashboard() {
 
   const sidebarItems = [
     { title: 'Overview', value: 'overview', icon: BarChart3 },
+    { title: 'Create User', value: 'create_user', icon: UserPlus },
+    { title: 'Post Job', value: 'post_job', icon: Briefcase },
     { title: 'Users', value: 'users', icon: Users },
     { title: 'Verifications', value: 'verifications', icon: UserCheck, badge: stats.pendingVerifications },
     { title: 'Jobs', value: 'jobs', icon: Briefcase },
@@ -1986,6 +1990,12 @@ export default function AdminDashboard() {
 
             {/* ═══════ SUB-ADMIN RBAC TAB ═══════ */}
             {activeTab === 'rbac' && <SubAdminRBACTab toast={toast} />}
+
+            {/* ═══════ CREATE USER TAB ═══════ */}
+            {activeTab === 'create_user' && <AdminCreateUserTab toast={toast} />}
+
+            {/* ═══════ POST JOB TAB ═══════ */}
+            {activeTab === 'post_job' && <AdminPostJobTab toast={toast} />}
 
             {/* ═══════ PLATFORM DATA TAB ═══════ */}
             {activeTab === 'platform_data' && <PlatformDataTab toast={toast} />}
