@@ -711,7 +711,7 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
                           </DropdownMenuItem>
                           <DropdownMenuSeparator />
                           <DropdownMenuItem
-                            onClick={() => handleBanToggle(t.user_id, t.is_banned)}
+                            onClick={() => t.is_banned ? handleBanToggle(t.user_id, true) : openBanDialog(t.user_id, t.name)}
                             className={`flex items-center gap-2 ${!t.is_banned ? 'text-destructive focus:text-destructive' : ''}`}
                           >
                             {t.is_banned
