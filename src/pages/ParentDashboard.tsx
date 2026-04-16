@@ -865,16 +865,12 @@ export default function ParentDashboard() {
             </div>
             <div>
               <Label>Preferred Time</Label>
-              <Select value={jobForm.preferred_time} onValueChange={(v) => setJobForm({ ...jobForm, preferred_time: v })}>
-                <SelectTrigger><SelectValue placeholder="Select time" /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="morning">Morning (6AM - 12PM)</SelectItem>
-                  <SelectItem value="afternoon">Afternoon (12PM - 4PM)</SelectItem>
-                  <SelectItem value="evening">Evening (4PM - 8PM)</SelectItem>
-                  <SelectItem value="night">Night (8PM - 10PM)</SelectItem>
-                  <SelectItem value="flexible">Flexible</SelectItem>
-                </SelectContent>
-              </Select>
+              <Input
+                type="time"
+                value={jobForm.preferred_time}
+                onChange={(e) => setJobForm({ ...jobForm, preferred_time: e.target.value })}
+                className="w-full"
+              />
             </div>
           </div>
           <div className="grid md:grid-cols-3 gap-4">
