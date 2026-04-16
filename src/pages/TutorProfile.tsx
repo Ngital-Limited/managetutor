@@ -543,16 +543,16 @@ export default function TutorProfile() {
             <CardContent className="space-y-4">
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
-                  <Label>Full Name</Label>
+                  <Label>Full Name <span className="text-destructive">*</span></Label>
                   <Input value={userProfile.full_name} onChange={(e) => setUserProfile({ ...userProfile, full_name: e.target.value })} />
                 </div>
                 <div>
-                  <Label>Phone Number</Label>
+                  <Label>Phone Number <span className="text-destructive">*</span></Label>
                   <PhoneInput value={userProfile.phone} onChange={(v) => setUserProfile({ ...userProfile, phone: v })} />
                 </div>
               </div>
               <div>
-                <Label>Email Address</Label>
+                <Label>Email Address <span className="text-destructive">*</span></Label>
                 <Input value={userProfile.email} disabled className="bg-muted/50" />
                 <p className="text-xs text-muted-foreground mt-1">Email is linked to your account and cannot be changed here.</p>
               </div>
