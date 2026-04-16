@@ -167,6 +167,22 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
       tutorIdsByEdu = new Set(eduData?.map(e => e.tutor_id) || []);
     }
 
+    // Subject filter — fetch tutor_subjects to match
+    let tutorIdsBySubject = new Set<string>();
+    let hasSubjectFilter = false;
+    if (filterSubject !== 'all') {
+      hasSubjectFilter = true;
+      const { data: tsData } = await supabase.from('tutor_subjects').select('tutor_profile_id').eq('subject_id', filterSubject);
+      tutorIdsBySubject = new Set(tsData?.map(s => s.tutor_profile_id) || []);
+    } else if (filterCategory !== 'all') {
+      // If only category set, find all subjects in that category
+      hasSubjectFilter = true;
+      const catSubjectIds = subjects.filter(s => s.category_en === filterCategory).map(s => s.id);
+      if (catSubjectIds.length > 0) {
+        const { data: tsData } = await supabase.from('tutor_subjects').select('tutor_profile_id').in('subject_id', catSubjectIds);
+        tutorIdsBySubject = new Set(tsData?.map(s => s.tutor_profile_id) || []);
+      }
+
     let result: TutorRow[] = tutorData.map(t => {
       const prof = profMap.get(t.user_id);
       return {
