@@ -1533,12 +1533,13 @@ export type Database = {
           father_phone: string | null
           gender: Database["public"]["Enums"]["gender"]
           height: string | null
-          hourly_rate_max: number | null
-          hourly_rate_min: number | null
           id: string
           is_available: boolean | null
           is_featured: boolean | null
+          is_student: boolean
           marital_status: string | null
+          monthly_salary_max: number | null
+          monthly_salary_min: number | null
           mother_name: string | null
           mother_phone: string | null
           national_id_no: string | null
@@ -1579,12 +1580,13 @@ export type Database = {
           father_phone?: string | null
           gender: Database["public"]["Enums"]["gender"]
           height?: string | null
-          hourly_rate_max?: number | null
-          hourly_rate_min?: number | null
           id?: string
           is_available?: boolean | null
           is_featured?: boolean | null
+          is_student?: boolean
           marital_status?: string | null
+          monthly_salary_max?: number | null
+          monthly_salary_min?: number | null
           mother_name?: string | null
           mother_phone?: string | null
           national_id_no?: string | null
@@ -1625,12 +1627,13 @@ export type Database = {
           father_phone?: string | null
           gender?: Database["public"]["Enums"]["gender"]
           height?: string | null
-          hourly_rate_max?: number | null
-          hourly_rate_min?: number | null
           id?: string
           is_available?: boolean | null
           is_featured?: boolean | null
+          is_student?: boolean
           marital_status?: string | null
+          monthly_salary_max?: number | null
+          monthly_salary_min?: number | null
           mother_name?: string | null
           mother_phone?: string | null
           national_id_no?: string | null
