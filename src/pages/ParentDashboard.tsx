@@ -410,6 +410,7 @@ export default function ParentDashboard() {
 
   const resetJobForm = () => {
     setSelectedJobDivision('');
+    setPrefilled(false);
     setJobForm({
       title: '', description: '', subject_ids: [] as string[], district_id: '', area_id: '', class_levels: [] as string[],
       category: '', background: '',
@@ -451,6 +452,7 @@ export default function ParentDashboard() {
         special_requirements: lastJob.special_requirements ? lastJob.special_requirements.split(', ') : [],
         class_levels: lastJob.class_level ? lastJob.class_level.split(', ') : [],
       }));
+      setPrefilled(true);
     }
   };
 
