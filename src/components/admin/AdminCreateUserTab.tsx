@@ -5,8 +5,10 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
-import { UserPlus, Users, CheckCircle2 } from 'lucide-react';
+import { UserPlus, Users, CheckCircle2, KeyRound, Search, Loader2 } from 'lucide-react';
 import { PhoneInput } from '@/components/PhoneInput';
 
 interface Props {
@@ -107,6 +109,50 @@ export function AdminCreateUserTab({ toast }: Props) {
       toast({ title: 'Error', description: err.message, variant: 'destructive' });
     } finally {
       setCreating(false);
+    }
+  };
+
+  // ─── Admin Password Reset ───
+  const [resetSearch, setResetSearch] = useState('');
+  const [resetResults, setResetResults] = useState<{ id: string; full_name: string; email: string; phone: string | null }[]>([]);
+  const [resetSearching, setResetSearching] = useState(false);
+  const [resetDialogOpen, setResetDialogOpen] = useState(false);
+  const [resetTarget, setResetTarget] = useState<{ id: string; full_name: string; email: string } | null>(null);
+  const [newPassword, setNewPassword] = useState('');
+  const [resetting, setResetting] = useState(false);
+
+  const searchUsersForReset = async () => {
+    if (!resetSearch.trim()) return;
+    setResetSearching(true);
+    const { data } = await supabase
+      .from('profiles')
+      .select('id, full_name, email, phone')
+      .or(`full_name.ilike.%${resetSearch}%,email.ilike.%${resetSearch}%,phone.ilike.%${resetSearch}%`)
+      .limit(10);
+    setResetResults(data || []);
+    setResetSearching(false);
+  };
+
+  const handleAdminResetPassword = async () => {
+    if (!resetTarget || !newPassword || newPassword.length < 6) {
+      toast({ title: 'Error', description: 'Password must be at least 6 characters', variant: 'destructive' });
+      return;
+    }
+    setResetting(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('admin-reset-password', {
+        body: { targetUserId: resetTarget.id, newPassword },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      toast({ title: 'Password Reset', description: `Password updated for ${resetTarget.full_name}` });
+      setResetDialogOpen(false);
+      setNewPassword('');
+      setResetTarget(null);
+    } catch (err: any) {
+      toast({ title: 'Error', description: err.message, variant: 'destructive' });
+    } finally {
+      setResetting(false);
     }
   };
 
