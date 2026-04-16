@@ -1317,6 +1317,8 @@ export default function AdminDashboard() {
 
   const sidebarItems = [
     { title: 'Overview', value: 'overview', icon: BarChart3 },
+    { title: 'Create User', value: 'create_user', icon: UserPlus },
+    { title: 'Post Job', value: 'post_job', icon: Briefcase },
     { title: 'Users', value: 'users', icon: Users },
     { title: 'Verifications', value: 'verifications', icon: UserCheck, badge: stats.pendingVerifications },
     { title: 'Jobs', value: 'jobs', icon: Briefcase },
