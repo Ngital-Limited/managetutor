@@ -433,6 +433,70 @@ export function AdminTutorEditTab({ toast }: Props) {
               )}
             </CardContent>
           </Card>
+
+          {/* Admin Notes */}
+          <Card className="md:col-span-2">
+            <CardHeader>
+              <CardTitle className="text-base flex items-center gap-2"><FileText className="h-4 w-4 text-primary" /> Admin Notes</CardTitle>
+              <CardDescription>Record tutor behavior, character observations, and internal remarks</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {/* Add new note */}
+              <div className="flex flex-col sm:flex-row gap-3">
+                <Select value={newNoteCategory} onValueChange={setNewNoteCategory}>
+                  <SelectTrigger className="w-full sm:w-40">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="behavior">Behavior</SelectItem>
+                    <SelectItem value="performance">Performance</SelectItem>
+                    <SelectItem value="complaint">Complaint</SelectItem>
+                    <SelectItem value="positive">Positive</SelectItem>
+                    <SelectItem value="warning">Warning</SelectItem>
+                    <SelectItem value="general">General</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Textarea
+                  placeholder="Write a note about this tutor..."
+                  value={newNoteText}
+                  onChange={e => setNewNoteText(e.target.value)}
+                  rows={2}
+                  className="flex-1"
+                />
+                <Button onClick={handleAddNote} disabled={savingNote || !newNoteText.trim()} className="self-end">
+                  <Plus className="h-3.5 w-3.5 mr-1" /> Add Note
+                </Button>
+              </div>
+
+              {/* Notes list */}
+              {adminNotes.length === 0 ? (
+                <p className="text-sm text-muted-foreground text-center py-4">No notes recorded for this tutor</p>
+              ) : (
+                <div className="space-y-3 max-h-64 overflow-y-auto">
+                  {adminNotes.map(n => (
+                    <div key={n.id} className="flex items-start gap-3 p-3 bg-muted/50 rounded-lg">
+                      <FileText className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <Badge variant="outline" className={`text-xs capitalize ${
+                            n.category === 'complaint' || n.category === 'warning' ? 'border-destructive text-destructive' :
+                            n.category === 'positive' ? 'border-success text-success' :
+                            n.category === 'behavior' ? 'border-warning text-warning' : ''
+                          }`}>{n.category}</Badge>
+                          <span className="text-xs text-muted-foreground">by {n.admin_name}</span>
+                          <span className="text-xs text-muted-foreground">· {formatDistanceToNow(new Date(n.created_at), { addSuffix: true })}</span>
+                        </div>
+                        <p className="text-sm">{n.note}</p>
+                      </div>
+                      <Button variant="ghost" size="sm" onClick={() => handleDeleteNote(n.id)}>
+                        <Trash2 className="h-3 w-3 text-destructive" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </div>
       )}
 
