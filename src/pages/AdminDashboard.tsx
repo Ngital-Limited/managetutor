@@ -35,6 +35,8 @@ import { SupportTicketsTab } from '@/components/admin/SupportTicketsTab';
 import { GeographicHeatmapTab } from '@/components/admin/GeographicHeatmapTab';
 import { SubAdminRBACTab } from '@/components/admin/SubAdminRBACTab';
 import { PlatformDataTab } from '@/components/admin/PlatformDataTab';
+import { AdminCreateUserTab } from '@/components/admin/AdminCreateUserTab';
+import { AdminPostJobTab } from '@/components/admin/AdminPostJobTab';
 
 // ──────────── Types ────────────
 interface Stats {
