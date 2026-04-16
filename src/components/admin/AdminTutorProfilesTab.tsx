@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
+import { CLASS_LEVELS } from '@/constants/classLevels';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -61,6 +62,9 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
   const [filterUniversity, setFilterUniversity] = useState('');
   const [filterVerification, setFilterVerification] = useState('all');
   const [filterAvailability, setFilterAvailability] = useState('all');
+  const [filterClassLevel, setFilterClassLevel] = useState('all');
+  const [filterSubject, setFilterSubject] = useState('all');
+  const [filterCategory, setFilterCategory] = useState('all');
   const [showFilters, setShowFilters] = useState(false);
 
   // ─── Data ───
@@ -84,10 +88,12 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
   // ─── Education data for filter suggestions ───
   const [educationOptions, setEducationOptions] = useState<string[]>([]);
   const [universityOptions, setUniversityOptions] = useState<string[]>([]);
+  const [subjects, setSubjects] = useState<{ id: string; name_en: string; category_en: string | null }[]>([]);
 
   useEffect(() => {
     supabase.from('districts').select('id, name_en').order('name_en').then(({ data }) => setDistricts(data || []));
     supabase.from('areas').select('id, name_en, district_id').order('name_en').then(({ data }) => setAreas(data || []));
+    supabase.from('subjects').select('id, name_en, category_en').order('name_en').then(({ data }) => setSubjects(data || []));
     supabase.from('tutor_education').select('degree, institution').limit(500).then(({ data }) => {
       if (data) {
         setEducationOptions([...new Set(data.map(d => d.degree).filter(Boolean))].sort());
@@ -98,6 +104,11 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
 
   const districtMap = useMemo(() => new Map(districts.map(d => [d.id, d.name_en])), [districts]);
   const areaMap = useMemo(() => new Map(areas.map(a => [a.id, a.name_en])), [areas]);
+  const subjectCategories = useMemo(() => [...new Set(subjects.map(s => s.category_en).filter(Boolean))] as string[], [subjects]);
+  const filteredSubjects = useMemo(() =>
+    filterCategory !== 'all' ? subjects.filter(s => s.category_en === filterCategory) : subjects,
+    [subjects, filterCategory]
+  );
 
   // Group areas by district for the dropdown
   const areasGrouped = useMemo(() => {
@@ -156,6 +167,23 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
       tutorIdsByEdu = new Set(eduData?.map(e => e.tutor_id) || []);
     }
 
+    // Subject filter — fetch tutor_subjects to match
+    let tutorIdsBySubject = new Set<string>();
+    let hasSubjectFilter = false;
+    if (filterSubject !== 'all') {
+      hasSubjectFilter = true;
+      const { data: tsData } = await supabase.from('tutor_subjects').select('tutor_profile_id').eq('subject_id', filterSubject);
+      tutorIdsBySubject = new Set(tsData?.map(s => s.tutor_profile_id) || []);
+    } else if (filterCategory !== 'all') {
+      // If only category set, find all subjects in that category
+      hasSubjectFilter = true;
+      const catSubjectIds = subjects.filter(s => s.category_en === filterCategory).map(s => s.id);
+      if (catSubjectIds.length > 0) {
+        const { data: tsData } = await supabase.from('tutor_subjects').select('tutor_profile_id').in('subject_id', catSubjectIds);
+        tutorIdsBySubject = new Set(tsData?.map(s => s.tutor_profile_id) || []);
+      }
+    }
+
     let result: TutorRow[] = tutorData.map(t => {
       const prof = profMap.get(t.user_id);
       return {
@@ -185,8 +213,14 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
     });
 
     if (hasEduFilter) result = result.filter(t => tutorIdsByEdu.has(t.tutor_id));
+    if (hasSubjectFilter) result = result.filter(t => tutorIdsBySubject.has(t.tutor_id));
 
-    // Client-side area filter (exact match on profile area_id)
+    // Class level filter (client-side, tutor_profiles.class_levels is string[])
+    if (filterClassLevel !== 'all') {
+      result = result.filter(t => t.class_levels?.includes(filterClassLevel));
+    }
+
+    // Client-side area filter
     if (filterArea !== 'all') {
       result = result.filter(t => t.area_id === filterArea);
     }
@@ -204,7 +238,7 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
     setTutors(result);
     setTotalCount(result.length);
     setLoading(false);
-  }, [search, filterArea, filterGender, filterMedium, filterEducation, filterUniversity, filterVerification, filterAvailability, areas, districts, districtMap, areaMap]);
+  }, [search, filterArea, filterGender, filterMedium, filterEducation, filterUniversity, filterVerification, filterAvailability, filterClassLevel, filterSubject, filterCategory, areas, districts, districtMap, areaMap, subjects]);
 
   useEffect(() => { fetchTutors(); }, [fetchTutors]);
 
@@ -263,12 +297,16 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
     setFilterUniversity('');
     setFilterVerification('all');
     setFilterAvailability('all');
+    setFilterClassLevel('all');
+    setFilterSubject('all');
+    setFilterCategory('all');
   };
 
   const activeFilterCount = [
     filterArea !== 'all', filterGender !== 'all', filterMedium !== 'all',
     filterEducation !== '', filterUniversity !== '',
     filterVerification !== 'all', filterAvailability !== 'all',
+    filterClassLevel !== 'all', filterSubject !== 'all', filterCategory !== 'all',
   ].filter(Boolean).length;
 
   const statusColor = (s: string) => {
@@ -397,6 +435,50 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
                     <SelectItem value="all">All</SelectItem>
                     <SelectItem value="available">Available</SelectItem>
                     <SelectItem value="unavailable">Unavailable</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label className="text-xs font-medium text-muted-foreground">Class Level</Label>
+                <Select value={filterClassLevel} onValueChange={setFilterClassLevel}>
+                  <SelectTrigger className="mt-1 h-9"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Levels</SelectItem>
+                    {CLASS_LEVELS.map(group => (
+                      <div key={group.group}>
+                        <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground bg-muted/50">{group.group}</div>
+                        {group.items.map(item => (
+                          <SelectItem key={item} value={item}>{item}</SelectItem>
+                        ))}
+                      </div>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label className="text-xs font-medium text-muted-foreground">Subject Category</Label>
+                <Select value={filterCategory} onValueChange={v => { setFilterCategory(v); if (v !== filterCategory) setFilterSubject('all'); }}>
+                  <SelectTrigger className="mt-1 h-9"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Categories</SelectItem>
+                    {subjectCategories.map(c => (
+                      <SelectItem key={c} value={c}>{c}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label className="text-xs font-medium text-muted-foreground">Subject</Label>
+                <Select value={filterSubject} onValueChange={setFilterSubject}>
+                  <SelectTrigger className="mt-1 h-9"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Subjects</SelectItem>
+                    {filteredSubjects.map(s => (
+                      <SelectItem key={s.id} value={s.id}>{s.name_en}</SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
