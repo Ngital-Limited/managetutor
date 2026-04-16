@@ -170,7 +170,7 @@ export function AdminPostJobTab({ toast }: Props) {
   };
 
   const normalizeBDPhone = (raw: string): string | null => {
-    const digits = raw.replace(/[\s\-\(\)]/g, '');
+    const digits = raw.replace(/[\s\-()]/g, '');
     // +8801XXXXXXXXX or 8801XXXXXXXXX or 01XXXXXXXXX
     const match = digits.match(/^(?:\+?880)?(1[3-9]\d{8})$/);
     return match ? `+880${match[1]}` : null;
@@ -186,7 +186,7 @@ export function AdminPostJobTab({ toast }: Props) {
     }
 
     // Check if input looks like a phone number (starts with 0, +, or 8)
-    const looksLikePhone = /^[\+0-9]/.test(raw);
+    const looksLikePhone = /^[+0-9]/.test(raw);
     if (!looksLikePhone) {
       toast({ title: 'Invalid Input', description: 'Enter a valid Bangladesh phone number (01XXX-XXXXXX) to auto-create a guardian.', variant: 'destructive' });
       return null;
