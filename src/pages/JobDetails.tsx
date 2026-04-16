@@ -65,6 +65,7 @@ interface Application {
     average_rating: number;
     total_reviews: number;
     verification_status: string;
+    verification_paid: boolean;
     profiles: { full_name: string; avatar_url: string; phone: string };
   };
 }

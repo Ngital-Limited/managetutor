@@ -99,6 +99,7 @@ interface Application {
     total_reviews: number;
     total_students: number;
     verification_status: string;
+    verification_paid: boolean;
     teaching_mode: string;
     gender: string;
     monthly_salary_min: number | null;
@@ -342,7 +343,7 @@ export default function ParentDashboard() {
         *,
         tutor_profiles (
           id, user_id, bio, education, education_detail, experience_years, 
-          average_rating, total_reviews, total_students, verification_status,
+          average_rating, total_reviews, total_students, verification_status, verification_paid,
           teaching_mode, gender, monthly_salary_min, monthly_salary_max, is_available,
           district_id, districts (name_en, name_bn),
           profiles:user_id (full_name, avatar_url),
