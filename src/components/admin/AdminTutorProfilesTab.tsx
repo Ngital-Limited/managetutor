@@ -297,6 +297,9 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
     setFilterUniversity('');
     setFilterVerification('all');
     setFilterAvailability('all');
+    setFilterClassLevel('all');
+    setFilterSubject('all');
+    setFilterCategory('all');
   };
 
   const activeFilterCount = [
