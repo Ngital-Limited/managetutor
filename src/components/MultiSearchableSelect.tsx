@@ -88,16 +88,12 @@ export function MultiSearchableSelect({
         >
           <div className="flex flex-wrap gap-1 flex-1 text-left">
             {selectedLabels.length > 0 ? (
-              selectedLabels.length <= 2 ? (
-                selectedLabels.map((label, i) => (
-                  <Badge key={i} variant="secondary" className="text-xs">
-                    {label}
-                    <X className="h-3 w-3 ml-1 cursor-pointer" onClick={(e) => removeValue(values[i], e)} />
-                  </Badge>
-                ))
-              ) : (
-                <span className="text-sm">{selectedLabels.length} subjects selected</span>
-              )
+              selectedLabels.map((label, i) => (
+                <Badge key={i} variant="secondary" className="text-xs">
+                  {label}
+                  <X className="h-3 w-3 ml-1 cursor-pointer" onClick={(e) => removeValue(values[i], e)} />
+                </Badge>
+              ))
             ) : (
               <span className="text-muted-foreground">{placeholder}</span>
             )}
