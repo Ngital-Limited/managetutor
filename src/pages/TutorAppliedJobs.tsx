@@ -104,7 +104,7 @@ export default function TutorAppliedJobs() {
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [applications, setApplications] = useState<Application[]>([]);
-  const [stats, setStats] = useState({ total: 0, pending: 0, accepted: 0, rejected: 0, withdrawn: 0 });
+  const [stats, setStats] = useState({ total: 0, pending: 0, accepted: 0, rejected: 0, withdrawn: 0, shortlisted: 0, waiting: 0 });
 
   useEffect(() => {
     if (!authLoading && !user) { navigate('/auth'); return; }
