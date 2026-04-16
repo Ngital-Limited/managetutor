@@ -88,6 +88,7 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
   // ─── Education data for filter suggestions ───
   const [educationOptions, setEducationOptions] = useState<string[]>([]);
   const [universityOptions, setUniversityOptions] = useState<string[]>([]);
+  const [subjects, setSubjects] = useState<{ id: string; name_en: string; category_en: string | null }[]>([]);
 
   useEffect(() => {
     supabase.from('districts').select('id, name_en').order('name_en').then(({ data }) => setDistricts(data || []));
