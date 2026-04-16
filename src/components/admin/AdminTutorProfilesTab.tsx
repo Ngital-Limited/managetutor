@@ -62,6 +62,9 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
   const [filterUniversity, setFilterUniversity] = useState('');
   const [filterVerification, setFilterVerification] = useState('all');
   const [filterAvailability, setFilterAvailability] = useState('all');
+  const [filterClassLevel, setFilterClassLevel] = useState('all');
+  const [filterSubject, setFilterSubject] = useState('all');
+  const [filterCategory, setFilterCategory] = useState('all');
   const [showFilters, setShowFilters] = useState(false);
 
   // ─── Data ───
