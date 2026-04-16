@@ -120,7 +120,7 @@ export default function JobDetails() {
           .select(`
             *,
             tutor_profiles (
-              id, user_id, bio, education, experience_years, average_rating, total_reviews, verification_status,
+              id, user_id, bio, education, experience_years, average_rating, total_reviews, verification_status, verification_paid,
               profiles:user_id (full_name, avatar_url, phone)
             )
           `)
