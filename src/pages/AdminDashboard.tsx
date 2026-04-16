@@ -1356,7 +1356,7 @@ export default function AdminDashboard() {
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-background">
         {/* Sidebar */}
-        <Sidebar collapsible="icon" className="border-r border-border/50">
+        <Sidebar collapsible="none" className="border-r border-border/50">
           <SidebarContent>
             <SidebarGroup>
               <SidebarGroupLabel className="px-4 py-3">
