@@ -1596,7 +1596,7 @@ export default function ParentDashboard() {
                         <Clock className="h-3 w-3" />
                         {booking.preferred_time} ({booking.duration_minutes} min)
                       </span>
-                      <span className="font-medium text-primary">৳{booking.class_fee}</span>
+                      <span className="font-medium text-success">Free</span>
                     </div>
                   </div>
                   <Badge className={
@@ -1631,7 +1631,7 @@ export default function ParentDashboard() {
           <CreditCard className="h-5 w-5" />
           Payment Details
         </CardTitle>
-        <CardDescription>Transaction history, demo class fees, and subscription status</CardDescription>
+        <CardDescription>Transaction history and subscription status</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Subscription Status */}
@@ -1667,19 +1667,19 @@ export default function ParentDashboard() {
           )}
         </div>
 
-        {/* Demo Class Fees Summary */}
+        {/* Demo Class Summary */}
         {demoBookings.length > 0 && (
           <div>
             <h4 className="text-sm font-bold mb-3 flex items-center gap-2">
-              <DollarSign className="h-4 w-4" />
-              Demo Class Fees
+              <Calendar className="h-4 w-4" />
+              Demo Classes
             </h4>
             <div className="grid grid-cols-3 gap-3">
               <div className="p-3 border rounded-lg text-center">
                 <p className="text-xl font-bold text-primary">
-                  ৳{demoBookings.reduce((sum: number, b: any) => sum + (b.class_fee || 0), 0)}
+                  {demoBookings.length}
                 </p>
-                <p className="text-xs text-muted-foreground">Total Fees</p>
+                <p className="text-xs text-muted-foreground">Total Bookings</p>
               </div>
               <div className="p-3 border rounded-lg text-center">
                 <p className="text-xl font-bold text-success">

@@ -526,7 +526,7 @@ function DemoRequestsTab({ toast }: { toast: ReturnType<typeof useToast>['toast'
                       <p className="text-sm">{r.preferred_date}</p>
                       <p className="text-xs text-muted-foreground">{r.preferred_time} · {r.duration_minutes}min</p>
                     </TableCell>
-                    <TableCell className="text-sm font-medium">৳{r.class_fee}</TableCell>
+                    <TableCell className="text-sm font-medium text-success">Free</TableCell>
                     <TableCell>{statusBadge(r.status)}</TableCell>
                     <TableCell>
                       {r.status === 'pending' ? (
