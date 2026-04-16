@@ -240,8 +240,19 @@ export default function TutorProfile() {
   };
 
   const handleSave = async () => {
+    if (!userProfile.phone) {
+      toast({ title: 'Phone Required', description: 'Phone number is mandatory. Please enter your phone number.', variant: 'destructive' });
+      return;
+    }
+    if (!isValidBDPhone(userProfile.phone)) {
+      toast({ title: 'Invalid Phone', description: 'Phone number is not a valid Bangladesh phone number.', variant: 'destructive' });
+      return;
+    }
+    if (!userProfile.full_name.trim()) {
+      toast({ title: 'Name Required', description: 'Full name is mandatory.', variant: 'destructive' });
+      return;
+    }
     const phoneFields = [
-      { value: userProfile.phone, label: 'Phone Number' },
       { value: profile.father_phone, label: "Father's Phone" },
       { value: profile.mother_phone, label: "Mother's Phone" },
       { value: profile.emergency_contact_phone, label: 'Emergency Contact Phone' },
@@ -532,16 +543,16 @@ export default function TutorProfile() {
             <CardContent className="space-y-4">
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
-                  <Label>Full Name</Label>
+                  <Label>Full Name <span className="text-destructive">*</span></Label>
                   <Input value={userProfile.full_name} onChange={(e) => setUserProfile({ ...userProfile, full_name: e.target.value })} />
                 </div>
                 <div>
-                  <Label>Phone Number</Label>
+                  <Label>Phone Number <span className="text-destructive">*</span></Label>
                   <PhoneInput value={userProfile.phone} onChange={(v) => setUserProfile({ ...userProfile, phone: v })} />
                 </div>
               </div>
               <div>
-                <Label>Email Address</Label>
+                <Label>Email Address <span className="text-destructive">*</span></Label>
                 <Input value={userProfile.email} disabled className="bg-muted/50" />
                 <p className="text-xs text-muted-foreground mt-1">Email is linked to your account and cannot be changed here.</p>
               </div>

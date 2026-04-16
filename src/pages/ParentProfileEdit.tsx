@@ -87,8 +87,16 @@ export default function ParentProfileEdit() {
   const filteredAreas = areas.filter(a => a.district_id === form.district_id);
 
   const handleSave = async () => {
-    if (form.phone && !isValidBDPhone(form.phone)) {
+    if (!form.phone) {
+      toast({ title: 'Phone Required', description: 'Phone number is mandatory. Please enter your phone number.', variant: 'destructive' });
+      return;
+    }
+    if (!isValidBDPhone(form.phone)) {
       toast({ title: 'Invalid Phone', description: 'Please enter a valid Bangladesh phone number.', variant: 'destructive' });
+      return;
+    }
+    if (!form.full_name.trim()) {
+      toast({ title: 'Name Required', description: 'Full name is mandatory.', variant: 'destructive' });
       return;
     }
     setSaving(true);
@@ -194,7 +202,7 @@ export default function ParentProfileEdit() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <Label>Full Name (English)</Label>
+                <Label>Full Name (English) <span className="text-destructive">*</span></Label>
                 <Input value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} />
               </div>
               <div>
@@ -202,11 +210,11 @@ export default function ParentProfileEdit() {
                 <Input value={form.full_name_bn} onChange={(e) => setForm({ ...form, full_name_bn: e.target.value })} placeholder="বাংলা নাম" />
               </div>
               <div>
-                <Label className="flex items-center gap-1"><Phone className="h-3 w-3" /> Phone Number</Label>
+                <Label className="flex items-center gap-1"><Phone className="h-3 w-3" /> Phone Number <span className="text-destructive">*</span></Label>
                 <PhoneInput value={form.phone} onChange={(v) => setForm({ ...form, phone: v })} />
               </div>
               <div>
-                <Label className="flex items-center gap-1"><Mail className="h-3 w-3" /> Email Address</Label>
+                <Label className="flex items-center gap-1"><Mail className="h-3 w-3" /> Email Address <span className="text-destructive">*</span></Label>
                 <Input value={form.email} disabled className="bg-muted/50" />
                 <p className="text-xs text-muted-foreground mt-1">Email is linked to your account and cannot be changed here.</p>
               </div>
