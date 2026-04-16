@@ -845,6 +845,15 @@ export default function ParentDashboard() {
               />
             </div>
             <div>
+              <Label>Student School Name <span className="text-destructive">*</span></Label>
+              <Input
+                placeholder="e.g., Dhaka Residential Model College"
+                value={jobForm.student_school_name}
+                onChange={(e) => setJobForm({ ...jobForm, student_school_name: e.target.value })}
+                required
+              />
+            </div>
+            <div>
               <Label>Student Gender</Label>
               <Select value={jobForm.student_gender} onValueChange={(v) => setJobForm({ ...jobForm, student_gender: v })}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
