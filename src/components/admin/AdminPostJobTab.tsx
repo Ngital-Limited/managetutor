@@ -9,7 +9,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { supabase } from '@/integrations/supabase/client';
-import { Search, CheckCircle2, Clock, Plus, UserPlus } from 'lucide-react';
+import { Search, CheckCircle2, Clock, Plus } from 'lucide-react';
 import { MultiSearchableSelect } from '@/components/MultiSearchableSelect';
 import { SearchableSelect } from '@/components/SearchableSelect';
 import { CLASS_LEVELS } from '@/constants/classLevels';
