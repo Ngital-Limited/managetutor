@@ -257,7 +257,7 @@ export function AdminPostJobTab({ toast }: Props) {
         );
       }
 
-      const parentLabel = selectedParent?.full_name || manualName.trim() || manualPhone.trim();
+      const parentLabel = selectedParent?.full_name || parentSearch.trim();
       toast({ title: 'Job Posted!', description: `Job "${jobForm.title}" posted. Ref: ${data.job_reference}` });
       setPostedJobs(prev => [{ title: jobForm.title, parent: parentLabel, ref: data.job_reference || '', date: new Date().toISOString() }, ...prev]);
       resetAll();
