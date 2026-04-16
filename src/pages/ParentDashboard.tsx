@@ -401,6 +401,7 @@ export default function ParentDashboard() {
   };
 
   const resetJobForm = () => {
+    setSelectedJobDivision('');
     setJobForm({
       title: '', description: '', subject_ids: [] as string[], district_id: '', area_id: '', class_levels: [] as string[],
       category: '', background: '',
