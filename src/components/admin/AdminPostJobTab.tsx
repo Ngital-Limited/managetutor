@@ -132,10 +132,72 @@ export function AdminPostJobTab({ toast }: Props) {
     });
   };
 
+  const createManualParent = async (): Promise<ParentResult | null> => {
+    if (!manualParent.full_name.trim()) {
+      toast({ title: 'Required', description: 'Parent name is required.', variant: 'destructive' });
+      return null;
+    }
+    if (!manualParent.email.trim() && !manualParent.phone.trim()) {
+      toast({ title: 'Required', description: 'Provide at least an email or phone number.', variant: 'destructive' });
+      return null;
+    }
+
+    setCreatingParent(true);
+    try {
+      // Check if profile already exists by email or phone
+      let existingId: string | null = null;
+      if (manualParent.email.trim()) {
+        const { data } = await supabase.from('profiles').select('id').eq('email', manualParent.email.trim()).maybeSingle();
+        if (data) existingId = data.id;
+      }
+      if (!existingId && manualParent.phone.trim()) {
+        const { data } = await supabase.from('profiles').select('id').eq('phone', manualParent.phone.trim()).maybeSingle();
+        if (data) existingId = data.id;
+      }
+
+      if (existingId) {
+        // Ensure parent role exists
+        await supabase.from('user_roles').upsert({ user_id: existingId, role: 'parent' }, { onConflict: 'user_id,role' });
+        const result: ParentResult = { id: existingId, full_name: manualParent.full_name, email: manualParent.email, phone: manualParent.phone || null };
+        return result;
+      }
+
+      // Create a new profile entry (admin-created, no auth account)
+      const newId = crypto.randomUUID();
+      const { error: profileErr } = await supabase.from('profiles').insert({
+        id: newId,
+        full_name: manualParent.full_name.trim(),
+        email: manualParent.email.trim() || `manual-${newId.slice(0, 8)}@placeholder.local`,
+        phone: manualParent.phone.trim() || null,
+      });
+      if (profileErr) throw profileErr;
+
+      const { error: roleErr } = await supabase.from('user_roles').insert({ user_id: newId, role: 'parent' });
+      if (roleErr) throw roleErr;
+
+      return { id: newId, full_name: manualParent.full_name, email: manualParent.email, phone: manualParent.phone || null };
+    } catch (err: any) {
+      toast({ title: 'Error creating parent', description: err.message, variant: 'destructive' });
+      return null;
+    } finally {
+      setCreatingParent(false);
+    }
+  };
+
   const handlePost = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedParent) {
-      toast({ title: 'Select Parent', description: 'Search and select a parent first.', variant: 'destructive' });
+
+    let parentForJob = selectedParent;
+
+    // If using manual parent, create/find the parent first
+    if (useManualParent && !selectedParent) {
+      parentForJob = await createManualParent();
+      if (!parentForJob) return;
+      setSelectedParent(parentForJob);
+    }
+
+    if (!parentForJob) {
+      toast({ title: 'Select Parent', description: 'Search and select a parent, or enter parent details manually.', variant: 'destructive' });
       return;
     }
     if (!jobForm.title.trim() || !jobForm.description.trim() || !jobForm.district_id) {
@@ -146,7 +208,7 @@ export function AdminPostJobTab({ toast }: Props) {
     setSubmitting(true);
     try {
       const { data, error } = await supabase.from('jobs').insert({
-        parent_id: selectedParent.id,
+        parent_id: parentForJob.id,
         title: jobForm.title.trim(),
         description: jobForm.description.trim(),
         district_id: jobForm.district_id,
@@ -178,10 +240,12 @@ export function AdminPostJobTab({ toast }: Props) {
         );
       }
 
-      toast({ title: 'Job Posted!', description: `Job "${jobForm.title}" posted for ${selectedParent.full_name}. Ref: ${data.job_reference}` });
-      setPostedJobs(prev => [{ title: jobForm.title, parent: selectedParent.full_name, ref: data.job_reference || '', date: new Date().toISOString() }, ...prev]);
+      toast({ title: 'Job Posted!', description: `Job "${jobForm.title}" posted for ${parentForJob.full_name}. Ref: ${data.job_reference}` });
+      setPostedJobs(prev => [{ title: jobForm.title, parent: parentForJob!.full_name, ref: data.job_reference || '', date: new Date().toISOString() }, ...prev]);
       resetForm();
       setShowPostJob(false);
+      setUseManualParent(false);
+      setManualParent({ full_name: '', email: '', phone: '' });
     } catch (err: any) {
       toast({ title: 'Error', description: err.message, variant: 'destructive' });
     } finally {
