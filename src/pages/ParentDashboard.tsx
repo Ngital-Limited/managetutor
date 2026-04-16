@@ -1631,7 +1631,7 @@ export default function ParentDashboard() {
           <CreditCard className="h-5 w-5" />
           Payment Details
         </CardTitle>
-        <CardDescription>Transaction history, demo class fees, and subscription status</CardDescription>
+        <CardDescription>Transaction history and subscription status</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Subscription Status */}
