@@ -38,7 +38,7 @@ interface Application {
     parent_id: string;
     districts: { name_en: string };
     subjects: { name_en: string } | null;
-    profiles: { full_name: string; phone: string; email: string } | null;
+    profiles: { full_name: string } | null;
   };
 }
 
@@ -122,7 +122,7 @@ export default function TutorAppliedJobs() {
 
     const { data: apps } = await supabase
       .from('applications')
-      .select(`*, jobs(*, districts(name_en), subjects(name_en), profiles:parent_id(full_name, phone, email))`)
+      .select(`*, jobs(*, districts(name_en), subjects(name_en), profiles:parent_id(full_name))`)
       .eq('tutor_id', tp.id)
       .order('created_at', { ascending: false });
 
