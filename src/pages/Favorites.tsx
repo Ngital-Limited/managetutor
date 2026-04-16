@@ -23,8 +23,8 @@ interface Favorite {
     average_rating: number;
     total_reviews: number;
     experience_years: number;
-    hourly_rate_min: number;
-    hourly_rate_max: number;
+    monthly_salary_min: number;
+    monthly_salary_max: number;
     verification_status: string;
     profiles: { full_name: string; avatar_url: string; districts: { name_en: string } | null };
     tutor_subjects: { subjects: { name_en: string } }[];
@@ -55,7 +55,7 @@ export default function Favorites() {
       .select(`
         *,
         tutor_profiles (
-          id, user_id, average_rating, total_reviews, experience_years, hourly_rate_min, hourly_rate_max, verification_status,
+          id, user_id, average_rating, total_reviews, experience_years, monthly_salary_min, monthly_salary_max, verification_status,
           profiles:user_id (full_name, avatar_url, districts (name_en)),
           tutor_subjects (subjects (name_en))
         )
@@ -137,7 +137,7 @@ export default function Favorites() {
 
                     <div className="text-right">
                       <div className="font-bold text-primary mb-2">
-                        ৳{fav.tutor_profiles?.hourly_rate_min}-{fav.tutor_profiles?.hourly_rate_max}/hr
+                        ৳{fav.tutor_profiles?.monthly_salary_min}-{fav.tutor_profiles?.monthly_salary_max}/mo
                       </div>
                       <div className="flex items-center gap-2">
                         <Button 

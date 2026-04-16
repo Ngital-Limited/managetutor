@@ -25,8 +25,8 @@ interface TutorProfile {
   bio: string;
   education: string;
   experience_years: number;
-  hourly_rate_min: number;
-  hourly_rate_max: number;
+  monthly_salary_min: number;
+  monthly_salary_max: number;
   average_rating: number;
   total_reviews: number;
   total_students: number;
@@ -104,7 +104,7 @@ export default function TutorPublicProfile() {
       return;
     }
 
-    setTutor(tutorData as TutorProfile);
+    setTutor(tutorData as unknown as TutorProfile);
 
     // Fetch user profile with district
     const { data: profileData } = await supabase
@@ -449,9 +449,9 @@ export default function TutorPublicProfile() {
               <CardContent className="p-6">
                 <div className="text-center mb-6">
                   <div className="text-3xl font-bold text-primary">
-                    ৳{tutor.hourly_rate_min || 0} - {tutor.hourly_rate_max || 0}
+                    ৳{tutor.monthly_salary_min || 0} - {tutor.monthly_salary_max || 0}
                   </div>
-                  <p className="text-muted-foreground text-sm">per hour</p>
+                  <p className="text-muted-foreground text-sm">per month</p>
                 </div>
 
                 <div className="space-y-3">
@@ -463,8 +463,8 @@ export default function TutorPublicProfile() {
                           <BookDemoClassDialog
                             tutorId={tutor.id}
                             tutorName={profile.full_name}
-                            hourlyRateMin={tutor.hourly_rate_min}
-                            hourlyRateMax={tutor.hourly_rate_max}
+                            hourlyRateMin={tutor.monthly_salary_min}
+                            hourlyRateMax={tutor.monthly_salary_max}
                             subjects={subjects}
                           />
                           <Button

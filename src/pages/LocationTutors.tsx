@@ -21,8 +21,8 @@ interface TutorProfile {
   id: string;
   bio: string;
   experience_years: number;
-  hourly_rate_min: number;
-  hourly_rate_max: number;
+  monthly_salary_min: number;
+  monthly_salary_max: number;
   average_rating: number;
   total_reviews: number;
   verification_status: string;
@@ -200,7 +200,7 @@ export default function LocationTutors() {
                       </div>
 
                       <div className="font-bold text-primary">
-                        ৳{tutor.hourly_rate_min}-{tutor.hourly_rate_max}/hr
+                        ৳{tutor.monthly_salary_min}-{tutor.monthly_salary_max}/mo
                       </div>
                     </CardContent>
                   </Card>

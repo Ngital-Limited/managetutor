@@ -79,11 +79,12 @@ export default function TutorProfile() {
     bio: '',
     education: '',
     experience_years: 0,
-    hourly_rate_min: 500,
-    hourly_rate_max: 1500,
+    monthly_salary_min: 500,
+    monthly_salary_max: 1500,
     teaching_mode: 'in_person',
     gender: 'male',
     is_available: true,
+    is_student: false,
     verification_status: 'pending',
     father_phone: '',
     mother_phone: '',
@@ -169,11 +170,12 @@ export default function TutorProfile() {
         bio: td.bio || '',
         education: td.education || '',
         experience_years: td.experience_years || 0,
-        hourly_rate_min: td.hourly_rate_min || 500,
-        hourly_rate_max: td.hourly_rate_max || 1500,
+        monthly_salary_min: td.monthly_salary_min || 500,
+        monthly_salary_max: td.monthly_salary_max || 1500,
         teaching_mode: td.teaching_mode || 'in_person',
         gender: td.gender || 'male',
         is_available: td.is_available ?? true,
+        is_student: td.is_student || false,
         verification_status: td.verification_status || 'pending',
         father_phone: td.father_phone || '',
         mother_phone: td.mother_phone || '',
@@ -292,11 +294,12 @@ export default function TutorProfile() {
         bio: profile.bio,
         education: profile.education,
         experience_years: profile.experience_years,
-        hourly_rate_min: profile.hourly_rate_min,
-        hourly_rate_max: profile.hourly_rate_max,
+        monthly_salary_min: profile.monthly_salary_min,
+        monthly_salary_max: profile.monthly_salary_max,
         teaching_mode: profile.teaching_mode as 'online' | 'in_person' | 'hybrid',
         gender: profile.gender as 'male' | 'female',
         is_available: profile.is_available,
+        is_student: profile.is_student,
         father_phone: profile.father_phone || null,
         mother_phone: profile.mother_phone || null,
         emergency_contact_name: profile.emergency_contact_name || null,
@@ -864,12 +867,12 @@ export default function TutorProfile() {
                   <Input type="number" value={profile.experience_years} onChange={(e) => setProfile({ ...profile, experience_years: parseInt(e.target.value) || 0 })} />
                 </div>
                 <div>
-                  <Label>Min Rate (৳/hr)</Label>
-                  <Input type="number" value={profile.hourly_rate_min} onChange={(e) => setProfile({ ...profile, hourly_rate_min: parseInt(e.target.value) || 0 })} />
+                  <Label>Min Salary (৳/month)</Label>
+                  <Input type="number" value={profile.monthly_salary_min} onChange={(e) => setProfile({ ...profile, monthly_salary_min: parseInt(e.target.value) || 0 })} />
                 </div>
                 <div>
-                  <Label>Max Rate (৳/hr)</Label>
-                  <Input type="number" value={profile.hourly_rate_max} onChange={(e) => setProfile({ ...profile, hourly_rate_max: parseInt(e.target.value) || 0 })} />
+                  <Label>Max Salary (৳/month)</Label>
+                  <Input type="number" value={profile.monthly_salary_max} onChange={(e) => setProfile({ ...profile, monthly_salary_max: parseInt(e.target.value) || 0 })} />
                 </div>
               </div>
               <div className="grid md:grid-cols-2 gap-4">
@@ -887,6 +890,10 @@ export default function TutorProfile() {
                 <div className="flex items-center gap-3 pt-6">
                   <Checkbox id="available" checked={profile.is_available} onCheckedChange={(checked) => setProfile({ ...profile, is_available: !!checked })} />
                   <Label htmlFor="available">Available for new students</Label>
+                </div>
+                <div className="flex items-center gap-3 pt-6">
+                  <Checkbox id="is-student" checked={profile.is_student} onCheckedChange={(checked) => setProfile({ ...profile, is_student: !!checked })} />
+                  <Label htmlFor="is-student">I am currently a student</Label>
                 </div>
               </div>
 
@@ -970,12 +977,16 @@ export default function TutorProfile() {
               )}
 
               <div className="grid md:grid-cols-2 gap-4">
-                {['national_id', 'education_certificate', 'experience_certificate'].map((docType) => {
+                {(profile.is_student
+                  ? ['university_id_card', 'university_payslip']
+                  : ['national_id', 'education_certificate', 'experience_certificate']
+                ).map((docType) => {
                   const exists = documents.some(d => d.document_type === docType);
+                  const label = docType.replace(/_/g, ' ');
                   return (
                     <div key={docType} className={`border-2 border-dashed rounded-xl p-4 text-center ${exists ? 'border-success/50 bg-success/5' : 'border-border'}`}>
                       <Upload className={`h-8 w-8 mx-auto mb-2 ${exists ? 'text-success' : 'text-muted-foreground'}`} />
-                      <p className="font-medium capitalize">{docType.replace('_', ' ')}</p>
+                      <p className="font-medium capitalize">{label}</p>
                       <p className="text-xs text-muted-foreground mb-3">
                         {exists ? 'Uploaded' : 'PDF, JPG, PNG (max 5MB)'}
                       </p>
@@ -993,8 +1004,12 @@ export default function TutorProfile() {
               <div className="flex items-start gap-2 p-4 bg-info/10 rounded-xl text-info">
                 <AlertCircle className="h-5 w-5 flex-shrink-0 mt-0.5" />
                 <div className="text-sm">
-                  <p className="font-medium">Why verify?</p>
-                  <p className="opacity-80">Verified tutors get a badge on their profile and appear higher in search results. Parents trust verified tutors more!</p>
+                  <p className="font-medium">{profile.is_student ? 'Student Document Requirements' : 'Document Requirements'}</p>
+                  <p className="opacity-80">
+                    {profile.is_student
+                      ? 'As a student, please upload your University ID Card or University Payment Slip for verification.'
+                      : 'Please upload your National ID and at least your highest/last educational certificate for verification. Experience certificates are optional but recommended.'}
+                  </p>
                 </div>
               </div>
             </CardContent>

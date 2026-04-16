@@ -101,8 +101,8 @@ interface Application {
     verification_status: string;
     teaching_mode: string;
     gender: string;
-    hourly_rate_min: number | null;
-    hourly_rate_max: number | null;
+    monthly_salary_min: number | null;
+    monthly_salary_max: number | null;
     is_available: boolean;
     district_id: string | null;
     districts: { name_en: string; name_bn: string } | null;
@@ -343,7 +343,7 @@ export default function ParentDashboard() {
         tutor_profiles (
           id, user_id, bio, education, education_detail, experience_years, 
           average_rating, total_reviews, total_students, verification_status,
-          teaching_mode, gender, hourly_rate_min, hourly_rate_max, is_available,
+          teaching_mode, gender, monthly_salary_min, monthly_salary_max, is_available,
           district_id, districts (name_en, name_bn),
           profiles:user_id (full_name, avatar_url),
           tutor_subjects (subjects (name_en, name_bn))
