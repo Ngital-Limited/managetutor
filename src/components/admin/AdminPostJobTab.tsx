@@ -682,8 +682,8 @@ export function AdminPostJobTab({ toast }: Props) {
               ))}
             </div>
 
-            <Button type="submit" className="w-full" disabled={submitting || !selectedParent}>
-              {submitting ? <><Clock className="h-4 w-4 mr-2 animate-spin" /> Posting...</> : 'Post Job'}
+            <Button type="submit" className="w-full" disabled={submitting || (!selectedParent && !(useManualParent && manualParent.full_name.trim()))}>
+              {submitting ? <><Clock className="h-4 w-4 mr-2 animate-spin" /> Posting...</> : creatingParent ? 'Creating Parent & Posting...' : 'Post Job'}
             </Button>
           </form>
         </DialogContent>
