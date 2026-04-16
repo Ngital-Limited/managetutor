@@ -801,7 +801,7 @@ export default function AdminDashboard() {
   const [jobApplications, setJobApplications] = useState<JobApplication[]>([]);
   const [loadingApps, setLoadingApps] = useState(false);
   const [assignTutorSearch, setAssignTutorSearch] = useState('');
-  const [assignTutorResults, setAssignTutorResults] = useState<{ tutor_id: string; user_id: string; name: string; gender: string; experience: number }[]>([]);
+  const [assignTutorResults, setAssignTutorResults] = useState<{ tutor_id: string; user_id: string; name: string; gender: string; experience: number; phone: string | null; email: string; district: string | null; rating: number | null; verification: string | null; reference: string | null }[]>([]);
   const [searchingTutors, setSearchingTutors] = useState(false);
 
   const fetchJobApplications = async (jobId: string) => {
@@ -874,19 +874,49 @@ export default function AdminDashboard() {
     setAssignTutorSearch(query);
     if (query.length < 2) { setAssignTutorResults([]); return; }
     setSearchingTutors(true);
-    const { data: profs } = await supabase.from('profiles').select('id, full_name').ilike('full_name', `%${query}%`).limit(10);
-    if (profs && profs.length > 0) {
-      const profIds = profs.map(p => p.id);
-      const { data: tutors } = await supabase.from('tutor_profiles').select('id, user_id, gender, experience_years').in('user_id', profIds);
-      const profMap = new Map(profs.map(p => [p.id, p]));
-      setAssignTutorResults(tutors?.map(t => ({
-        tutor_id: t.id,
-        user_id: t.user_id,
-        name: profMap.get(t.user_id)?.full_name || 'Unknown',
-        gender: t.gender,
-        experience: t.experience_years || 0,
-      })) || []);
-    } else {
+    try {
+      // Search profiles by name, email, phone, or user_reference
+      const { data: profs } = await supabase.from('profiles').select('id, full_name, email, phone, user_reference, district_id')
+        .or(`full_name.ilike.%${query}%,email.ilike.%${query}%,phone.ilike.%${query}%,user_reference.ilike.%${query}%`)
+        .limit(20);
+      if (profs && profs.length > 0) {
+        const profIds = profs.map(p => p.id);
+        const { data: tutors } = await supabase.from('tutor_profiles')
+          .select('id, user_id, gender, experience_years, average_rating, verification_status, district_id')
+          .in('user_id', profIds);
+        if (tutors && tutors.length > 0) {
+          const profMap = new Map(profs.map(p => [p.id, p]));
+          // Get district names
+          const districtIds = [...new Set([...tutors.map(t => t.district_id), ...profs.map(p => p.district_id)].filter(Boolean))] as string[];
+          let districtMap = new Map<string, string>();
+          if (districtIds.length > 0) {
+            const { data: dists } = await supabase.from('districts').select('id, name_en').in('id', districtIds);
+            districtMap = new Map(dists?.map(d => [d.id, d.name_en]) || []);
+          }
+          setAssignTutorResults(tutors.map(t => {
+            const prof = profMap.get(t.user_id);
+            const distId = t.district_id || prof?.district_id;
+            return {
+              tutor_id: t.id,
+              user_id: t.user_id,
+              name: prof?.full_name || 'Unknown',
+              gender: t.gender,
+              experience: t.experience_years || 0,
+              phone: prof?.phone || null,
+              email: prof?.email || '',
+              district: distId ? (districtMap.get(distId) || null) : null,
+              rating: t.average_rating,
+              verification: t.verification_status,
+              reference: prof?.user_reference || null,
+            };
+          }));
+        } else {
+          setAssignTutorResults([]);
+        }
+      } else {
+        setAssignTutorResults([]);
+      }
+    } catch {
       setAssignTutorResults([]);
     }
     setSearchingTutors(false);
@@ -2326,27 +2356,44 @@ export default function AdminDashboard() {
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Search tutor by name..."
+                placeholder="Search by name, phone, email, or tutor ID (e.g. TT-00001)..."
                 value={assignTutorSearch}
                 onChange={(e) => handleSearchTutors(e.target.value)}
                 className="pl-9"
               />
             </div>
-            {searchingTutors && <p className="text-xs text-muted-foreground">Searching...</p>}
+            {searchingTutors && <p className="text-xs text-muted-foreground">Searching tutors...</p>}
             {assignTutorResults.length > 0 && (
-              <div className="space-y-2 max-h-40 overflow-y-auto">
+              <div className="space-y-2 max-h-60 overflow-y-auto">
                 {assignTutorResults.map((t) => (
-                  <div key={t.tutor_id} className="flex items-center justify-between p-2 rounded-md border bg-background">
-                    <div>
-                      <span className="font-medium text-sm">{t.name}</span>
-                      <span className="text-xs text-muted-foreground ml-2 capitalize">{t.gender} · {t.experience} yrs exp</span>
+                  <div key={t.tutor_id} className="flex items-center justify-between p-3 rounded-md border bg-background gap-3">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="font-medium text-sm">{t.name}</span>
+                        {t.reference && <Badge variant="outline" className="text-[10px] font-mono">{t.reference}</Badge>}
+                        {t.verification === 'approved' && <Badge className="text-[10px] bg-green-100 text-green-700 border-green-300">Verified</Badge>}
+                      </div>
+                      <div className="flex items-center gap-2 flex-wrap mt-1">
+                        {t.phone && <span className="text-xs text-muted-foreground">{t.phone}</span>}
+                        {t.phone && t.email && <span className="text-xs text-muted-foreground">·</span>}
+                        <span className="text-xs text-muted-foreground truncate">{t.email}</span>
+                      </div>
+                      <div className="flex items-center gap-2 flex-wrap mt-1">
+                        <Badge variant="secondary" className="text-[10px] capitalize">{t.gender}</Badge>
+                        <Badge variant="secondary" className="text-[10px]">{t.experience} yrs</Badge>
+                        {t.rating && <Badge variant="secondary" className="text-[10px]">★ {t.rating}</Badge>}
+                        {t.district && <Badge variant="outline" className="text-[10px]">{t.district}</Badge>}
+                      </div>
                     </div>
-                    <Button size="sm" onClick={() => handleAssignTutor(t.tutor_id, t.user_id, t.name)} disabled={processing}>
+                    <Button size="sm" onClick={() => handleAssignTutor(t.tutor_id, t.user_id, t.name)} disabled={processing} className="shrink-0">
                       <Plus className="h-3 w-3 mr-1" /> Assign
                     </Button>
                   </div>
                 ))}
               </div>
+            )}
+            {assignTutorSearch.length >= 2 && !searchingTutors && assignTutorResults.length === 0 && (
+              <p className="text-xs text-muted-foreground text-center py-2">No tutors found. Try a different search term.</p>
             )}
           </div>
 
