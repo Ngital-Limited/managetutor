@@ -291,15 +291,35 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
   };
 
   // ─── Quick Actions ───
-  const handleBanToggle = async (userId: string, currentlyBanned: boolean) => {
+  const handleBanToggle = async (userId: string, currentlyBanned: boolean, reason?: string) => {
     const { error } = await supabase.from('profiles').update({
       is_banned: !currentlyBanned,
       banned_at: !currentlyBanned ? new Date().toISOString() : null,
-      banned_reason: !currentlyBanned ? 'Banned by admin' : null,
+      banned_reason: !currentlyBanned ? (reason || 'Banned by admin') : null,
     }).eq('id', userId);
     if (error) { toast({ title: 'Error', description: error.message, variant: 'destructive' }); return; }
     toast({ title: currentlyBanned ? 'User Unbanned' : 'User Banned' });
     fetchTutors();
+  };
+
+  const openBanDialog = (userId: string, name: string) => {
+    setBanTargetUserId(userId);
+    setBanTargetName(name);
+    setBanReason('');
+    setBanDialogOpen(true);
+  };
+
+  const confirmBan = async () => {
+    if (!banTargetUserId || !banReason.trim()) {
+      toast({ title: 'Ban reason is required', variant: 'destructive' });
+      return;
+    }
+    setBanProcessing(true);
+    await handleBanToggle(banTargetUserId, false, banReason.trim());
+    setBanProcessing(false);
+    setBanDialogOpen(false);
+    setBanTargetUserId(null);
+    setBanReason('');
   };
 
   const handleApproveToggle = async (userId: string, currentlyApproved: boolean) => {
