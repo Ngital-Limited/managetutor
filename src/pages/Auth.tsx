@@ -7,7 +7,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useToast } from '@/hooks/use-toast';
 import { Logo } from '@/components/Logo';
-import { GraduationCap, Users, Building2, Loader2, Mail, Lock, User, ArrowRight } from 'lucide-react';
+import { GraduationCap, Users, Building2, Loader2, Mail, Lock, User, ArrowRight, Phone } from 'lucide-react';
+import { PhoneInput, isValidBDPhone } from '@/components/PhoneInput';
 import { z } from 'zod';
 
 type AppRole = 'parent' | 'tutor' | 'agency';
@@ -26,6 +27,7 @@ export default function Auth() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
+  const [phone, setPhone] = useState('');
   const [selectedRole, setSelectedRole] = useState<AppRole>(
     (searchParams.get('role') as AppRole) || 'parent'
   );
@@ -74,7 +76,17 @@ export default function Auth() {
         setLoading(false);
         return;
       }
-      const { error } = await signUp(email, password, fullName, selectedRole);
+      if (!phone) {
+        toast({ title: 'Validation Error', description: 'Phone number is required', variant: 'destructive' });
+        setLoading(false);
+        return;
+      }
+      if (!isValidBDPhone(phone)) {
+        toast({ title: 'Validation Error', description: 'Please enter a valid Bangladesh phone number (+880 1XXX-XXXXXX)', variant: 'destructive' });
+        setLoading(false);
+        return;
+      }
+      const { error } = await signUp(email, password, fullName, selectedRole, phone);
       if (error) {
         toast({ title: 'Sign Up Failed', description: error.message, variant: 'destructive' });
       } else {
