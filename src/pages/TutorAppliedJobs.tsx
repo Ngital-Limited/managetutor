@@ -208,12 +208,14 @@ export default function TutorAppliedJobs() {
                     <TabsList className="mb-4 flex-wrap">
                       <TabsTrigger value="all">All ({stats.total})</TabsTrigger>
                       <TabsTrigger value="pending">Pending ({stats.pending})</TabsTrigger>
+                      <TabsTrigger value="shortlisted">Shortlisted ({stats.shortlisted})</TabsTrigger>
+                      <TabsTrigger value="waiting">Waiting ({stats.waiting})</TabsTrigger>
                       <TabsTrigger value="accepted">Accepted ({stats.accepted})</TabsTrigger>
                       <TabsTrigger value="rejected">Rejected ({stats.rejected})</TabsTrigger>
                       <TabsTrigger value="withdrawn">Withdrawn ({stats.withdrawn})</TabsTrigger>
                     </TabsList>
 
-                    {['all', 'pending', 'accepted', 'rejected', 'withdrawn'].map(tab => (
+                    {['all', 'pending', 'shortlisted', 'waiting', 'accepted', 'rejected', 'withdrawn'].map(tab => (
                       <TabsContent key={tab} value={tab} className="space-y-3">
                         {applications
                           .filter(a => tab === 'all' || a.status === tab)
