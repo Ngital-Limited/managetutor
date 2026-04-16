@@ -204,6 +204,7 @@ export default function Auth() {
                   </div>
                 </div>
               </>
+            )}
 
             <div>
               <Label htmlFor="email" className="text-sm font-medium text-muted-foreground">{t('auth.email')}</Label>
