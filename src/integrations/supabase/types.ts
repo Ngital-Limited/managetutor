@@ -1850,7 +1850,13 @@ export type Database = {
     }
     Enums: {
       app_role: "parent" | "tutor" | "agency" | "admin"
-      application_status: "pending" | "accepted" | "rejected" | "withdrawn"
+      application_status:
+        | "pending"
+        | "accepted"
+        | "rejected"
+        | "withdrawn"
+        | "shortlisted"
+        | "waiting"
       gender: "male" | "female" | "any"
       job_status:
         | "pending_approval"
@@ -1988,7 +1994,14 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["parent", "tutor", "agency", "admin"],
-      application_status: ["pending", "accepted", "rejected", "withdrawn"],
+      application_status: [
+        "pending",
+        "accepted",
+        "rejected",
+        "withdrawn",
+        "shortlisted",
+        "waiting",
+      ],
       gender: ["male", "female", "any"],
       job_status: [
         "pending_approval",

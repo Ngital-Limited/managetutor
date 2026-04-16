@@ -836,7 +836,7 @@ export default function AdminDashboard() {
     setLoadingApps(false);
   };
 
-  const handleAdminUpdateAppStatus = async (appId: string, status: 'accepted' | 'rejected', jobId: string) => {
+  const handleAdminUpdateAppStatus = async (appId: string, status: string, jobId: string) => {
     setProcessing(true);
     const { error } = await supabase.from('applications').update({ status: status as any }).eq('id', appId);
     if (error) {
@@ -846,13 +846,17 @@ export default function AdminDashboard() {
       if (status === 'accepted') {
         await supabase.from('jobs').update({ status: 'in_progress' as any }).eq('id', jobId);
       }
-      // Notify the tutor
+      // Notify the tutor for accept/reject
       const app = jobApplications.find(a => a.id === appId);
-      if (app?.tutor_user_id) {
-        const statusLabel = status === 'accepted' ? 'Congratulations! You have been assigned' : 'Your application was not selected';
+      if (app?.tutor_user_id && (status === 'accepted' || status === 'rejected' || status === 'shortlisted')) {
+        const statusLabels: Record<string, string> = {
+          accepted: 'Congratulations! You have been assigned',
+          rejected: 'Your application was not selected',
+          shortlisted: 'You have been shortlisted!',
+        };
         await supabase.from('notifications').insert({
           user_id: app.tutor_user_id,
-          title: statusLabel,
+          title: statusLabels[status] || `Application ${status}`,
           message: `For the job: ${viewingJobApps?.jobTitle || ''}`,
           type: `application_${status}`,
           reference_id: jobId,
@@ -2355,7 +2359,7 @@ export default function AdminDashboard() {
               <div className="text-center py-8 text-muted-foreground">No applications yet. Use the search above to assign a tutor.</div>
             ) : (
               jobApplications.map((app) => (
-                <div key={app.id} className="border rounded-lg p-4 space-y-3">
+                <div key={app.id} className={`border rounded-lg p-4 space-y-3 ${app.status === 'shortlisted' ? 'border-primary/50 bg-primary/5' : app.status === 'rejected' ? 'border-destructive/30 bg-destructive/5' : app.status === 'waiting' ? 'border-warning/30 bg-warning/5' : ''}`}>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <Avatar className="h-10 w-10">
@@ -2366,7 +2370,14 @@ export default function AdminDashboard() {
                         <p className="text-xs text-muted-foreground">{app.tutor_email}</p>
                       </div>
                     </div>
-                    <Badge className={`text-xs capitalize ${statusColor(app.status)}`}>{app.status}</Badge>
+                    <div className="flex items-center gap-2">
+                      <Badge className={`text-xs capitalize ${statusColor(app.status)}`}>{app.status}</Badge>
+                      <Button variant="outline" size="sm" className="text-xs" asChild>
+                        <Link to={`/tutor/${app.tutor_user_id}`} target="_blank">
+                          <Eye className="h-3 w-3 mr-1" /> Full Profile
+                        </Link>
+                      </Button>
+                    </div>
                   </div>
                   <div className="flex flex-wrap gap-2">
                     <Badge variant="outline" className="text-xs capitalize">{app.tutor_gender}</Badge>
@@ -2380,13 +2391,60 @@ export default function AdminDashboard() {
                     <p className="text-sm bg-muted/50 p-2 rounded text-muted-foreground">{app.cover_message}</p>
                   )}
                   <div className="text-xs text-muted-foreground">Applied {formatDistanceToNow(new Date(app.created_at), { addSuffix: true })}</div>
+                  
+                  {/* Action Buttons based on status */}
                   {app.status === 'pending' && (
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 flex-wrap">
+                      <Button size="sm" variant="outline" className="border-primary text-primary hover:bg-primary/10" onClick={() => handleAdminUpdateAppStatus(app.id, 'shortlisted' as any, viewingJobApps!.jobId)} disabled={processing}>
+                        <Star className="h-3.5 w-3.5 mr-1" /> Shortlist
+                      </Button>
+                      <Button size="sm" variant="outline" className="border-warning text-warning hover:bg-warning/10" onClick={() => handleAdminUpdateAppStatus(app.id, 'waiting' as any, viewingJobApps!.jobId)} disabled={processing}>
+                        <Clock className="h-3.5 w-3.5 mr-1" /> Waiting
+                      </Button>
                       <Button size="sm" className="bg-success hover:bg-success/90" onClick={() => handleAdminUpdateAppStatus(app.id, 'accepted', viewingJobApps!.jobId)} disabled={processing}>
                         <CheckCircle2 className="h-3.5 w-3.5 mr-1" /> Accept
                       </Button>
                       <Button size="sm" variant="destructive" onClick={() => handleAdminUpdateAppStatus(app.id, 'rejected', viewingJobApps!.jobId)} disabled={processing}>
                         <XCircle className="h-3.5 w-3.5 mr-1" /> Reject
+                      </Button>
+                    </div>
+                  )}
+                  {app.status === 'shortlisted' && (
+                    <div className="flex gap-2 flex-wrap">
+                      <Button size="sm" className="bg-success hover:bg-success/90" onClick={() => handleAdminUpdateAppStatus(app.id, 'accepted', viewingJobApps!.jobId)} disabled={processing}>
+                        <CheckCircle2 className="h-3.5 w-3.5 mr-1" /> Accept
+                      </Button>
+                      <Button size="sm" variant="outline" className="border-warning text-warning hover:bg-warning/10" onClick={() => handleAdminUpdateAppStatus(app.id, 'waiting' as any, viewingJobApps!.jobId)} disabled={processing}>
+                        <Clock className="h-3.5 w-3.5 mr-1" /> Waiting
+                      </Button>
+                      <Button size="sm" variant="destructive" onClick={() => handleAdminUpdateAppStatus(app.id, 'rejected', viewingJobApps!.jobId)} disabled={processing}>
+                        <XCircle className="h-3.5 w-3.5 mr-1" /> Reject
+                      </Button>
+                      <Button size="sm" variant="ghost" onClick={() => handleAdminUpdateAppStatus(app.id, 'pending', viewingJobApps!.jobId)} disabled={processing}>
+                        Undo
+                      </Button>
+                    </div>
+                  )}
+                  {app.status === 'waiting' && (
+                    <div className="flex gap-2 flex-wrap">
+                      <Button size="sm" variant="outline" className="border-primary text-primary hover:bg-primary/10" onClick={() => handleAdminUpdateAppStatus(app.id, 'shortlisted' as any, viewingJobApps!.jobId)} disabled={processing}>
+                        <Star className="h-3.5 w-3.5 mr-1" /> Shortlist
+                      </Button>
+                      <Button size="sm" className="bg-success hover:bg-success/90" onClick={() => handleAdminUpdateAppStatus(app.id, 'accepted', viewingJobApps!.jobId)} disabled={processing}>
+                        <CheckCircle2 className="h-3.5 w-3.5 mr-1" /> Accept
+                      </Button>
+                      <Button size="sm" variant="destructive" onClick={() => handleAdminUpdateAppStatus(app.id, 'rejected', viewingJobApps!.jobId)} disabled={processing}>
+                        <XCircle className="h-3.5 w-3.5 mr-1" /> Reject
+                      </Button>
+                      <Button size="sm" variant="ghost" onClick={() => handleAdminUpdateAppStatus(app.id, 'pending', viewingJobApps!.jobId)} disabled={processing}>
+                        Undo
+                      </Button>
+                    </div>
+                  )}
+                  {app.status === 'rejected' && (
+                    <div className="flex gap-2">
+                      <Button size="sm" variant="outline" onClick={() => handleAdminUpdateAppStatus(app.id, 'pending', viewingJobApps!.jobId)} disabled={processing}>
+                        Undo Rejection
                       </Button>
                     </div>
                   )}
