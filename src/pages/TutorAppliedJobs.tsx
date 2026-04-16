@@ -21,6 +21,7 @@ import {
   Briefcase, Clock, CheckCircle2, XCircle, MapPin, BookOpen,
   Eye, ArrowRight, User, Phone, Mail, LogOut, Globe,
   Home, Search, CreditCard, FileText, Calendar, GraduationCap,
+  Star, Hourglass,
 } from 'lucide-react';
 
 interface Application {
@@ -103,7 +104,7 @@ export default function TutorAppliedJobs() {
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [applications, setApplications] = useState<Application[]>([]);
-  const [stats, setStats] = useState({ total: 0, pending: 0, accepted: 0, rejected: 0, withdrawn: 0 });
+  const [stats, setStats] = useState({ total: 0, pending: 0, accepted: 0, rejected: 0, withdrawn: 0, shortlisted: 0, waiting: 0 });
 
   useEffect(() => {
     if (!authLoading && !user) { navigate('/auth'); return; }
@@ -134,6 +135,8 @@ export default function TutorAppliedJobs() {
         accepted: apps.filter(a => a.status === 'accepted').length,
         rejected: apps.filter(a => a.status === 'rejected').length,
         withdrawn: apps.filter(a => a.status === 'withdrawn').length,
+        shortlisted: apps.filter(a => a.status === 'shortlisted').length,
+        waiting: apps.filter(a => a.status === 'waiting').length,
       });
     }
     setLoading(false);
@@ -171,16 +174,18 @@ export default function TutorAppliedJobs() {
 
           <main className="flex-1 p-4 md:p-6 max-w-5xl mx-auto w-full">
             {/* Stats */}
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6">
+            <div className="grid grid-cols-2 md:grid-cols-7 gap-3 mb-6">
               {[
                 { label: 'Total', value: stats.total, color: 'text-foreground' },
                 { label: 'Pending', value: stats.pending, color: 'text-warning' },
+                { label: 'Shortlisted', value: stats.shortlisted, color: 'text-primary' },
+                { label: 'Waiting', value: stats.waiting, color: 'text-orange-500' },
                 { label: 'Accepted', value: stats.accepted, color: 'text-success' },
                 { label: 'Rejected', value: stats.rejected, color: 'text-destructive' },
                 { label: 'Withdrawn', value: stats.withdrawn, color: 'text-muted-foreground' },
               ].map(s => (
                 <Card key={s.label}>
-                  <CardContent className="p-4 text-center">
+                  <CardContent className="p-3 text-center">
                     <p className={`text-2xl font-bold ${s.color}`}>{s.value}</p>
                     <p className="text-xs text-muted-foreground">{s.label}</p>
                   </CardContent>
@@ -203,12 +208,14 @@ export default function TutorAppliedJobs() {
                     <TabsList className="mb-4 flex-wrap">
                       <TabsTrigger value="all">All ({stats.total})</TabsTrigger>
                       <TabsTrigger value="pending">Pending ({stats.pending})</TabsTrigger>
+                      <TabsTrigger value="shortlisted">Shortlisted ({stats.shortlisted})</TabsTrigger>
+                      <TabsTrigger value="waiting">Waiting ({stats.waiting})</TabsTrigger>
                       <TabsTrigger value="accepted">Accepted ({stats.accepted})</TabsTrigger>
                       <TabsTrigger value="rejected">Rejected ({stats.rejected})</TabsTrigger>
                       <TabsTrigger value="withdrawn">Withdrawn ({stats.withdrawn})</TabsTrigger>
                     </TabsList>
 
-                    {['all', 'pending', 'accepted', 'rejected', 'withdrawn'].map(tab => (
+                    {['all', 'pending', 'shortlisted', 'waiting', 'accepted', 'rejected', 'withdrawn'].map(tab => (
                       <TabsContent key={tab} value={tab} className="space-y-3">
                         {applications
                           .filter(a => tab === 'all' || a.status === tab)
@@ -239,6 +246,22 @@ export default function TutorAppliedJobs() {
                                     </span>
                                   </div>
 
+                                   {app.status === 'shortlisted' && (
+                                    <div className="mt-3 p-3 bg-primary/10 rounded-lg border border-primary/20">
+                                      <p className="text-sm font-medium text-primary">
+                                        <Star className="h-3.5 w-3.5 inline mr-1" />
+                                        You have been shortlisted for this job! The admin will review and finalize soon.
+                                      </p>
+                                    </div>
+                                  )}
+                                  {app.status === 'waiting' && (
+                                    <div className="mt-3 p-3 bg-orange-500/10 rounded-lg border border-orange-500/20">
+                                      <p className="text-sm font-medium text-orange-600">
+                                        <Hourglass className="h-3.5 w-3.5 inline mr-1" />
+                                        Your application is in the waiting list. You will be notified of any updates.
+                                      </p>
+                                    </div>
+                                  )}
                                   {app.status === 'accepted' && (
                                     <div className="mt-3 p-3 bg-success/10 rounded-lg border border-success/20">
                                       <p className="text-sm font-medium text-success">
@@ -252,9 +275,13 @@ export default function TutorAppliedJobs() {
                                   <Badge className={
                                     app.status === 'accepted' ? 'bg-success' :
                                     app.status === 'rejected' ? 'bg-destructive' :
+                                    app.status === 'shortlisted' ? 'bg-primary' :
+                                    app.status === 'waiting' ? 'bg-orange-500' :
                                     app.status === 'pending' ? 'bg-warning text-warning-foreground' : ''
                                   }>
                                     {app.status === 'pending' && <Clock className="h-3 w-3 mr-1" />}
+                                    {app.status === 'shortlisted' && <Star className="h-3 w-3 mr-1" />}
+                                    {app.status === 'waiting' && <Hourglass className="h-3 w-3 mr-1" />}
                                     {app.status === 'accepted' && <CheckCircle2 className="h-3 w-3 mr-1" />}
                                     {app.status === 'rejected' && <XCircle className="h-3 w-3 mr-1" />}
                                     {app.status.charAt(0).toUpperCase() + app.status.slice(1)}
