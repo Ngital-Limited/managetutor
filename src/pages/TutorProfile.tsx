@@ -17,7 +17,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { 
   GraduationCap, ArrowLeft, Save, Upload, FileText, CheckCircle2,
-  Clock, XCircle, AlertCircle, Globe, User, MapPin, Video, Lightbulb, Trophy, Star, MessageSquare, Send,
+  Clock, XCircle, AlertCircle, Globe, User, MapPin, Video, Star, MessageSquare, Send,
   Plus, Trash2, Briefcase, Heart
 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
