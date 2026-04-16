@@ -306,6 +306,7 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
     filterArea !== 'all', filterGender !== 'all', filterMedium !== 'all',
     filterEducation !== '', filterUniversity !== '',
     filterVerification !== 'all', filterAvailability !== 'all',
+    filterClassLevel !== 'all', filterSubject !== 'all', filterCategory !== 'all',
   ].filter(Boolean).length;
 
   const statusColor = (s: string) => {
