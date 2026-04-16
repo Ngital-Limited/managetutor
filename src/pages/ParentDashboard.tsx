@@ -236,6 +236,7 @@ export default function ParentDashboard() {
   const [transactions, setTransactions] = useState<any[]>([]);
   const [subscription, setSubscription] = useState<any>(null);
   const [showPostJob, setShowPostJob] = useState(false);
+  const [prefilled, setPrefilled] = useState(false);
   const [editingJob, setEditingJob] = useState<Job | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [jobStatusFilter, setJobStatusFilter] = useState('all');
