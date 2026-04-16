@@ -798,6 +798,43 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Ban Confirmation Dialog */}
+      <Dialog open={banDialogOpen} onOpenChange={(open) => { if (!open) { setBanDialogOpen(false); setBanTargetUserId(null); setBanReason(''); } }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-destructive">
+              <Ban className="h-5 w-5" /> Ban User
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Are you sure you want to ban <strong>{banTargetName}</strong>? This user will no longer be able to access the platform.
+            </p>
+            <div>
+              <Label className="text-sm font-medium">Ban Reason <span className="text-destructive">*</span></Label>
+              <Textarea
+                value={banReason}
+                onChange={(e) => setBanReason(e.target.value)}
+                placeholder="Enter the reason for banning this user..."
+                className="mt-1.5"
+                rows={3}
+                maxLength={500}
+              />
+              <p className="text-xs text-muted-foreground mt-1">{banReason.length}/500</p>
+            </div>
+          </div>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => { setBanDialogOpen(false); setBanTargetUserId(null); setBanReason(''); }}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={confirmBan} disabled={banProcessing || !banReason.trim()}>
+              {banProcessing ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Ban className="h-4 w-4 mr-1" />}
+              Confirm Ban
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
