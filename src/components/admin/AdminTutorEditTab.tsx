@@ -35,6 +35,7 @@ interface TutorResult {
 }
 
 export function AdminTutorEditTab({ toast }: Props) {
+  const { user } = useAuth();
   const [search, setSearch] = useState('');
   const [results, setResults] = useState<TutorResult[]>([]);
   const [searching, setSearching] = useState(false);
@@ -46,6 +47,12 @@ export function AdminTutorEditTab({ toast }: Props) {
   const [educations, setEducations] = useState<Education[]>([]);
   const [experiences, setExperiences] = useState<Experience[]>([]);
   const [saving, setSaving] = useState(false);
+
+  // Admin notes
+  const [adminNotes, setAdminNotes] = useState<{ id: string; category: string; note: string; created_at: string; admin_name: string }[]>([]);
+  const [newNoteCategory, setNewNoteCategory] = useState('behavior');
+  const [newNoteText, setNewNoteText] = useState('');
+  const [savingNote, setSavingNote] = useState(false);
 
   // Edit dialogs
   const [eduDialog, setEduDialog] = useState<Partial<Education> | null>(null);
