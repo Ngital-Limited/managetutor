@@ -212,8 +212,14 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
     });
 
     if (hasEduFilter) result = result.filter(t => tutorIdsByEdu.has(t.tutor_id));
+    if (hasSubjectFilter) result = result.filter(t => tutorIdsBySubject.has(t.tutor_id));
 
-    // Client-side area filter (exact match on profile area_id)
+    // Class level filter (client-side, tutor_profiles.class_levels is string[])
+    if (filterClassLevel !== 'all') {
+      result = result.filter(t => t.class_levels?.includes(filterClassLevel));
+    }
+
+    // Client-side area filter
     if (filterArea !== 'all') {
       result = result.filter(t => t.area_id === filterArea);
     }
@@ -231,7 +237,7 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
     setTutors(result);
     setTotalCount(result.length);
     setLoading(false);
-  }, [search, filterArea, filterGender, filterMedium, filterEducation, filterUniversity, filterVerification, filterAvailability, areas, districts, districtMap, areaMap]);
+  }, [search, filterArea, filterGender, filterMedium, filterEducation, filterUniversity, filterVerification, filterAvailability, filterClassLevel, filterSubject, filterCategory, areas, districts, districtMap, areaMap, subjects]);
 
   useEffect(() => { fetchTutors(); }, [fetchTutors]);
 
