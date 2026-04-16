@@ -111,18 +111,31 @@ export default function FindTutors() {
     return Array.from(divSet.entries()).map(([en, bn]) => ({ en, bn })).sort((a, b) => a.en.localeCompare(b.en));
   }, [districts]);
 
-  // Derived: cities filtered by division + search
-  const filteredCities = useMemo(() => {
-    let cities = districts;
+  // Derived: districts filtered by division + search
+  const filteredDistricts = useMemo(() => {
+    let list = districts;
     if (selectedDivision) {
-      cities = cities.filter(d => d.division_en === selectedDivision);
+      list = list.filter(d => d.division_en === selectedDivision);
     }
-    if (citySearch) {
-      const q = citySearch.toLowerCase();
-      cities = cities.filter(d => d.name_en.toLowerCase().includes(q) || d.name_bn.includes(q));
+    if (districtSearch) {
+      const q = districtSearch.toLowerCase();
+      list = list.filter(d => d.name_en.toLowerCase().includes(q) || d.name_bn.includes(q));
     }
-    return cities.sort((a, b) => a.name_en.localeCompare(b.name_en));
-  }, [districts, selectedDivision, citySearch]);
+    return list.sort((a, b) => a.name_en.localeCompare(b.name_en));
+  }, [districts, selectedDivision, districtSearch]);
+
+  // Derived: areas filtered by selected district + search
+  const filteredAreas = useMemo(() => {
+    let list = areas;
+    if (selectedDistrict) {
+      list = list.filter(a => a.district_id === selectedDistrict);
+    }
+    if (areaSearch) {
+      const q = areaSearch.toLowerCase();
+      list = list.filter(a => a.name_en.toLowerCase().includes(q) || a.name_bn.includes(q));
+    }
+    return list.sort((a, b) => a.name_en.localeCompare(b.name_en));
+  }, [areas, selectedDistrict, areaSearch]);
 
   useEffect(() => {
     fetchData();
