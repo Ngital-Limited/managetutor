@@ -1428,6 +1428,51 @@ export type Database = {
           },
         ]
       }
+      tutor_admin_notes: {
+        Row: {
+          admin_id: string
+          category: string
+          created_at: string
+          id: string
+          note: string
+          tutor_id: string
+          updated_at: string
+        }
+        Insert: {
+          admin_id: string
+          category?: string
+          created_at?: string
+          id?: string
+          note: string
+          tutor_id: string
+          updated_at?: string
+        }
+        Update: {
+          admin_id?: string
+          category?: string
+          created_at?: string
+          id?: string
+          note?: string
+          tutor_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tutor_admin_notes_admin_id_fkey"
+            columns: ["admin_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tutor_admin_notes_tutor_id_fkey"
+            columns: ["tutor_id"]
+            isOneToOne: false
+            referencedRelation: "tutor_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tutor_education: {
         Row: {
           created_at: string

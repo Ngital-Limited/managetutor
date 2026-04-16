@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
@@ -9,8 +10,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { supabase } from '@/integrations/supabase/client';
-import { Search, GraduationCap, Briefcase, Plus, Trash2, Pencil, CheckCircle2, BookOpen, X } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+import { Search, GraduationCap, Briefcase, Plus, Trash2, Pencil, CheckCircle2, BookOpen, X, FileText } from 'lucide-react';
 import { MultiSearchableSelect } from '@/components/MultiSearchableSelect';
+import { formatDistanceToNow } from 'date-fns';
 
 interface Props {
   toast: (opts: { title: string; description?: string; variant?: 'default' | 'destructive' }) => void;
@@ -32,6 +35,7 @@ interface TutorResult {
 }
 
 export function AdminTutorEditTab({ toast }: Props) {
+  const { user } = useAuth();
   const [search, setSearch] = useState('');
   const [results, setResults] = useState<TutorResult[]>([]);
   const [searching, setSearching] = useState(false);
@@ -43,6 +47,12 @@ export function AdminTutorEditTab({ toast }: Props) {
   const [educations, setEducations] = useState<Education[]>([]);
   const [experiences, setExperiences] = useState<Experience[]>([]);
   const [saving, setSaving] = useState(false);
+
+  // Admin notes
+  const [adminNotes, setAdminNotes] = useState<{ id: string; category: string; note: string; created_at: string; admin_name: string }[]>([]);
+  const [newNoteCategory, setNewNoteCategory] = useState('behavior');
+  const [newNoteText, setNewNoteText] = useState('');
+  const [savingNote, setSavingNote] = useState(false);
 
   // Edit dialogs
   const [eduDialog, setEduDialog] = useState<Partial<Education> | null>(null);
@@ -86,6 +96,21 @@ export function AdminTutorEditTab({ toast }: Props) {
     setSearching(false);
   }, []);
 
+  const loadAdminNotes = useCallback(async (tutorId: string) => {
+    const { data } = await supabase.from('tutor_admin_notes')
+      .select('id, category, note, created_at, admin_id')
+      .eq('tutor_id', tutorId)
+      .order('created_at', { ascending: false });
+    if (data && data.length > 0) {
+      const adminIds = [...new Set(data.map(n => n.admin_id))];
+      const { data: admins } = await supabase.from('profiles').select('id, full_name').in('id', adminIds);
+      const adminMap = new Map(admins?.map(a => [a.id, a.full_name]) || []);
+      setAdminNotes(data.map(n => ({ ...n, admin_name: adminMap.get(n.admin_id) || 'Admin' })));
+    } else {
+      setAdminNotes([]);
+    }
+  }, []);
+
   const loadTutorData = useCallback(async (tutorId: string) => {
     const [{ data: tsData }, { data: eduData }, { data: expData }] = await Promise.all([
       supabase.from('tutor_subjects').select('subject_id').eq('tutor_profile_id', tutorId),
@@ -95,7 +120,37 @@ export function AdminTutorEditTab({ toast }: Props) {
     setTutorSubjectIds(tsData?.map(s => s.subject_id) || []);
     setEducations(eduData?.map(e => ({ ...e, is_current: e.is_current || false })) || []);
     setExperiences(expData?.map(e => ({ ...e, is_current: e.is_current || false })) || []);
-  }, []);
+    loadAdminNotes(tutorId);
+  }, [loadAdminNotes]);
+
+  const handleAddNote = async () => {
+    if (!selectedTutor || !user || !newNoteText.trim()) {
+      toast({ title: 'Note Required', description: 'Please enter a note.', variant: 'destructive' });
+      return;
+    }
+    setSavingNote(true);
+    const { error } = await supabase.from('tutor_admin_notes').insert({
+      tutor_id: selectedTutor.tutor_id,
+      admin_id: user.id,
+      category: newNoteCategory,
+      note: newNoteText.trim(),
+    });
+    if (error) {
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+    } else {
+      toast({ title: 'Note Added' });
+      setNewNoteText('');
+      loadAdminNotes(selectedTutor.tutor_id);
+    }
+    setSavingNote(false);
+  };
+
+  const handleDeleteNote = async (noteId: string) => {
+    if (!selectedTutor) return;
+    await supabase.from('tutor_admin_notes').delete().eq('id', noteId);
+    toast({ title: 'Note Deleted' });
+    loadAdminNotes(selectedTutor.tutor_id);
+  };
 
   const handleSelectTutor = (t: TutorResult) => {
     setSelectedTutor(t);
@@ -375,6 +430,70 @@ export function AdminTutorEditTab({ toast }: Props) {
                     </TableBody>
                   </Table>
                 </ScrollArea>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Admin Notes */}
+          <Card className="md:col-span-2">
+            <CardHeader>
+              <CardTitle className="text-base flex items-center gap-2"><FileText className="h-4 w-4 text-primary" /> Admin Notes</CardTitle>
+              <CardDescription>Record tutor behavior, character observations, and internal remarks</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {/* Add new note */}
+              <div className="flex flex-col sm:flex-row gap-3">
+                <Select value={newNoteCategory} onValueChange={setNewNoteCategory}>
+                  <SelectTrigger className="w-full sm:w-40">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="behavior">Behavior</SelectItem>
+                    <SelectItem value="performance">Performance</SelectItem>
+                    <SelectItem value="complaint">Complaint</SelectItem>
+                    <SelectItem value="positive">Positive</SelectItem>
+                    <SelectItem value="warning">Warning</SelectItem>
+                    <SelectItem value="general">General</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Textarea
+                  placeholder="Write a note about this tutor..."
+                  value={newNoteText}
+                  onChange={e => setNewNoteText(e.target.value)}
+                  rows={2}
+                  className="flex-1"
+                />
+                <Button onClick={handleAddNote} disabled={savingNote || !newNoteText.trim()} className="self-end">
+                  <Plus className="h-3.5 w-3.5 mr-1" /> Add Note
+                </Button>
+              </div>
+
+              {/* Notes list */}
+              {adminNotes.length === 0 ? (
+                <p className="text-sm text-muted-foreground text-center py-4">No notes recorded for this tutor</p>
+              ) : (
+                <div className="space-y-3 max-h-64 overflow-y-auto">
+                  {adminNotes.map(n => (
+                    <div key={n.id} className="flex items-start gap-3 p-3 bg-muted/50 rounded-lg">
+                      <FileText className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <Badge variant="outline" className={`text-xs capitalize ${
+                            n.category === 'complaint' || n.category === 'warning' ? 'border-destructive text-destructive' :
+                            n.category === 'positive' ? 'border-success text-success' :
+                            n.category === 'behavior' ? 'border-warning text-warning' : ''
+                          }`}>{n.category}</Badge>
+                          <span className="text-xs text-muted-foreground">by {n.admin_name}</span>
+                          <span className="text-xs text-muted-foreground">· {formatDistanceToNow(new Date(n.created_at), { addSuffix: true })}</span>
+                        </div>
+                        <p className="text-sm">{n.note}</p>
+                      </div>
+                      <Button variant="ghost" size="sm" onClick={() => handleDeleteNote(n.id)}>
+                        <Trash2 className="h-3 w-3 text-destructive" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
               )}
             </CardContent>
           </Card>
