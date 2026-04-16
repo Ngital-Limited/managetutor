@@ -415,7 +415,7 @@ export default function ParentDashboard() {
       days_per_week: 3, duration_hours: 1.5, budget_min: 3000, budget_max: 8000,
       teaching_mode: 'in_person', preferred_tutor_gender: 'any', student_gender: 'any',
       special_requirements: [] as string[], preferred_time: '',
-      number_of_students: 1, student_age: '', start_date: '', location_details: '',
+      number_of_students: 1, student_age: '', student_school_name: '', start_date: '', location_details: '',
     });
   };
 
