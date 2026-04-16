@@ -442,6 +442,9 @@ export default function ParentDashboard() {
   const startEditJob = async (job: Job) => {
     // Fetch subject IDs from job_subjects
     const { data: jsData } = await supabase.from('job_subjects').select('subject_id').eq('job_id', job.id);
+    // Set division from district
+    const district = districts.find(d => d.id === job.district_id);
+    if (district) setSelectedJobDivision(district.division_en);
     setJobForm({
       title: job.title,
       description: job.description,
