@@ -866,12 +866,12 @@ export default function TutorProfile() {
                   <Input type="number" value={profile.experience_years} onChange={(e) => setProfile({ ...profile, experience_years: parseInt(e.target.value) || 0 })} />
                 </div>
                 <div>
-                  <Label>Min Rate (৳/hr)</Label>
-                  <Input type="number" value={profile.hourly_rate_min} onChange={(e) => setProfile({ ...profile, hourly_rate_min: parseInt(e.target.value) || 0 })} />
+                  <Label>Min Salary (৳/month)</Label>
+                  <Input type="number" value={profile.monthly_salary_min} onChange={(e) => setProfile({ ...profile, monthly_salary_min: parseInt(e.target.value) || 0 })} />
                 </div>
                 <div>
-                  <Label>Max Rate (৳/hr)</Label>
-                  <Input type="number" value={profile.hourly_rate_max} onChange={(e) => setProfile({ ...profile, hourly_rate_max: parseInt(e.target.value) || 0 })} />
+                  <Label>Max Salary (৳/month)</Label>
+                  <Input type="number" value={profile.monthly_salary_max} onChange={(e) => setProfile({ ...profile, monthly_salary_max: parseInt(e.target.value) || 0 })} />
                 </div>
               </div>
               <div className="grid md:grid-cols-2 gap-4">
