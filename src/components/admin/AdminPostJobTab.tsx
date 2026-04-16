@@ -164,6 +164,7 @@ export function AdminPostJobTab({ toast }: Props) {
         special_requirements: lastJob.special_requirements ? lastJob.special_requirements.split(', ') : [],
         class_levels: lastJob.class_level ? lastJob.class_level.split(', ') : [],
       }));
+      setPrefilled(true);
     }
   };
 
