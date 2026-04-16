@@ -27,6 +27,7 @@ interface ParentResult { id: string; full_name: string; email: string; phone: st
 
 export function AdminPostJobTab({ toast }: Props) {
   const [showPostJob, setShowPostJob] = useState(false);
+  const [prefilled, setPrefilled] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [postedJobs, setPostedJobs] = useState<{ title: string; parent: string; ref: string; date: string }[]>([]);
 
@@ -122,6 +123,7 @@ export function AdminPostJobTab({ toast }: Props) {
 
   const resetAll = () => {
     setSelectedJobDivision('');
+    setPrefilled(false);
     setSelectedParent(null);
     setParentSearch('');
     setParentResults([]);
@@ -163,6 +165,7 @@ export function AdminPostJobTab({ toast }: Props) {
         special_requirements: lastJob.special_requirements ? lastJob.special_requirements.split(', ') : [],
         class_levels: lastJob.class_level ? lastJob.class_level.split(', ') : [],
       }));
+      setPrefilled(true);
     }
   };
 
@@ -357,6 +360,13 @@ export function AdminPostJobTab({ toast }: Props) {
                   <p className="font-medium text-sm">{selectedParent.full_name} · {selectedParent.phone || selectedParent.email}</p>
                 </div>
                 <Button type="button" size="sm" variant="outline" onClick={() => { setSelectedParent(null); setParentSearch(''); }}>Change</Button>
+              </div>
+            )}
+
+            {prefilled && (
+              <div className="flex items-center gap-2 p-3 rounded-md bg-accent/50 border border-accent text-sm">
+                <CheckCircle2 className="h-4 w-4 text-primary shrink-0" />
+                <span>Previous job data loaded — update as needed</span>
               </div>
             )}
 

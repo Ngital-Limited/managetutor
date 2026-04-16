@@ -236,6 +236,7 @@ export default function ParentDashboard() {
   const [transactions, setTransactions] = useState<any[]>([]);
   const [subscription, setSubscription] = useState<any>(null);
   const [showPostJob, setShowPostJob] = useState(false);
+  const [prefilled, setPrefilled] = useState(false);
   const [editingJob, setEditingJob] = useState<Job | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [jobStatusFilter, setJobStatusFilter] = useState('all');
@@ -409,6 +410,7 @@ export default function ParentDashboard() {
 
   const resetJobForm = () => {
     setSelectedJobDivision('');
+    setPrefilled(false);
     setJobForm({
       title: '', description: '', subject_ids: [] as string[], district_id: '', area_id: '', class_levels: [] as string[],
       category: '', background: '',
@@ -450,6 +452,7 @@ export default function ParentDashboard() {
         special_requirements: lastJob.special_requirements ? lastJob.special_requirements.split(', ') : [],
         class_levels: lastJob.class_level ? lastJob.class_level.split(', ') : [],
       }));
+      setPrefilled(true);
     }
   };
 
@@ -779,6 +782,12 @@ export default function ParentDashboard() {
           <DialogTitle>{editingJob ? 'Edit Tuition Job' : 'Post a Tuition Job'}</DialogTitle>
         </DialogHeader>
         <form onSubmit={editingJob ? handleUpdateJob : handlePostJob} className="space-y-5 mt-4">
+          {prefilled && !editingJob && (
+            <div className="flex items-center gap-2 p-3 rounded-md bg-accent/50 border border-accent text-sm">
+              <CheckCircle2 className="h-4 w-4 text-primary shrink-0" />
+              <span>Previous job data loaded — update as needed</span>
+            </div>
+          )}
           {/* Section: Basic Info */}
           <div className="space-y-1">
             <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Basic Information</p>
