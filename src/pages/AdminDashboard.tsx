@@ -1999,6 +1999,9 @@ export default function AdminDashboard() {
             {/* ═══════ POST JOB TAB ═══════ */}
             {activeTab === 'post_job' && <AdminPostJobTab toast={toast} />}
 
+            {/* ═══════ TUTOR EDITOR TAB ═══════ */}
+            {activeTab === 'tutor_editor' && <AdminTutorEditTab toast={toast} />}
+
             {/* ═══════ PLATFORM DATA TAB ═══════ */}
             {activeTab === 'platform_data' && <PlatformDataTab toast={toast} />}
 
