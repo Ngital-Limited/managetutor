@@ -15,8 +15,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { 
   Search, MapPin, Briefcase, 
-  BookOpen, Users, Calendar, ArrowRight, ChevronLeft, ChevronRight, Send, Loader2, Monitor,
-  Clock, DollarSign, Filter, X, Sparkles
+  BookOpen, Users, ArrowRight, ChevronLeft, ChevronRight, Send, Loader2, Monitor,
+  Clock, Filter, X, Sparkles
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 
