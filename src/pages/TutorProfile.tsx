@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Logo } from '@/components/Logo';
+import { TutorSidebarLayout } from '@/components/TutorSidebarLayout';
 import { useNavigate, Link, useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { CLASS_LEVELS } from '@/constants/classLevels';
