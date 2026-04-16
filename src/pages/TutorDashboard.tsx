@@ -79,6 +79,7 @@ interface TutorProfile {
   is_available: boolean;
   is_featured: boolean;
   verification_status: string;
+  verification_paid: boolean;
 }
 
 interface FeaturedListing {
@@ -497,7 +498,7 @@ export default function TutorDashboard() {
                 {userProfile?.user_reference && (
                   <Badge variant="outline" className="font-mono text-xs">{userProfile.user_reference}</Badge>
                 )}
-                {profile?.verification_status === 'approved' && (
+                {profile?.verification_status === 'approved' && profile?.verification_paid && (
                   <Badge className="bg-success"><CheckCircle2 className="h-3 w-3 mr-1" />Verified</Badge>
                 )}
                 {profile?.is_available && (

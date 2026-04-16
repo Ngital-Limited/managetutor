@@ -26,6 +26,7 @@ interface FeaturedTutor {
   average_rating: number;
   total_reviews: number;
   verification_status: string;
+  verification_paid: boolean;
   teaching_mode: string;
   monthly_salary_min: number | null;
   monthly_salary_max: number | null;
@@ -361,7 +362,7 @@ export default function Index() {
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 mb-0.5">
                               <h3 className="font-bold text-base truncate">{tutor.profiles?.full_name}</h3>
-                              {tutor.verification_status === 'approved' && (
+                              {tutor.verification_status === 'approved' && tutor.verification_paid && (
                                 <CheckCircle2 className="h-4 w-4 text-success flex-shrink-0" />
                               )}
                             </div>

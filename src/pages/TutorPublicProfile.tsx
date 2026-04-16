@@ -33,6 +33,7 @@ interface TutorProfile {
   is_available: boolean;
   is_featured: boolean;
   verification_status: string;
+  verification_paid: boolean;
   teaching_mode: string;
   gender: string;
   created_at: string;
@@ -244,7 +245,7 @@ export default function TutorPublicProfile() {
                       {profile.user_reference && (
                         <Badge variant="outline" className="font-mono text-xs">{profile.user_reference}</Badge>
                       )}
-                      {tutor.verification_status === 'approved' && (
+                      {tutor.verification_status === 'approved' && tutor.verification_paid && (
                         <Badge className="bg-success"><CheckCircle2 className="h-3 w-3 mr-1" />Verified</Badge>
                       )}
                       {tutor.is_available ? (

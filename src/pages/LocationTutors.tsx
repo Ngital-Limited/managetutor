@@ -26,6 +26,7 @@ interface TutorProfile {
   average_rating: number;
   total_reviews: number;
   verification_status: string;
+  verification_paid: boolean;
   profiles: {
     full_name: string;
     avatar_url: string;
@@ -184,7 +185,7 @@ export default function LocationTutors() {
                         <span>{tutor.experience_years}y exp</span>
                       </div>
 
-                      {tutor.verification_status === 'approved' && (
+                      {tutor.verification_status === 'approved' && tutor.verification_paid && (
                         <Badge className="bg-success/10 text-success border-0 mb-3">
                           <CheckCircle2 className="h-3 w-3 mr-1" />
                           Verified

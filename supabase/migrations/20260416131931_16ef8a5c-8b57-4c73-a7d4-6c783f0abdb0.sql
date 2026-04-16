@@ -1,0 +1,1 @@
+ALTER TABLE public.tutor_profiles ADD COLUMN verification_paid boolean NOT NULL DEFAULT false;
