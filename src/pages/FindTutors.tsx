@@ -249,9 +249,9 @@ export default function FindTutors() {
       });
     }
 
-    // Filter by city (district)
-    if (selectedCity && selectedCity !== 'all') {
-      result = result.filter(t => t.district_id === selectedCity || t.profiles?.district_id === selectedCity);
+    // Filter by district
+    if (selectedDistrict && selectedDistrict !== 'all') {
+      result = result.filter(t => t.district_id === selectedDistrict || t.profiles?.district_id === selectedDistrict);
     }
 
     // Search query
@@ -274,7 +274,7 @@ export default function FindTutors() {
     });
 
     return result;
-  }, [allTutors, selectedCategory, selectedBackground, selectedDivision, selectedCity, searchQuery]);
+  }, [allTutors, selectedCategory, selectedBackground, selectedDivision, selectedDistrict, searchQuery]);
 
   const totalCount = filteredTutors.length;
   const totalPages = Math.ceil(totalCount / TUTORS_PER_PAGE);
@@ -283,7 +283,7 @@ export default function FindTutors() {
   // Reset page when filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [selectedCategory, selectedBackground, selectedGender, selectedDivision, selectedCity, priceRange, verifiedOnly, searchQuery]);
+  }, [selectedCategory, selectedBackground, selectedGender, selectedDivision, selectedDistrict, selectedArea, priceRange, verifiedOnly, searchQuery]);
 
   // Re-fetch when server-side filters change
   useEffect(() => {
@@ -320,14 +320,16 @@ export default function FindTutors() {
     setSelectedGender('');
     setPriceRange([0, 10000]);
     setSelectedDivision('');
-    setSelectedCity('');
-    setCitySearch('');
+    setSelectedDistrict('');
+    setSelectedArea('');
+    setDistrictSearch('');
+    setAreaSearch('');
     setVerifiedOnly(false);
     setSearchQuery('');
     setCurrentPage(1);
   };
 
-  const hasActiveFilters = !!selectedCategory || !!selectedBackground || (selectedGender && selectedGender !== 'any') || !!selectedDivision || (selectedCity && selectedCity !== 'all') || verifiedOnly || priceRange[0] > 0 || priceRange[1] < 10000;
+  const hasActiveFilters = !!selectedCategory || !!selectedBackground || (selectedGender && selectedGender !== 'any') || !!selectedDivision || !!selectedDistrict || !!selectedArea || verifiedOnly || priceRange[0] > 0 || priceRange[1] < 10000;
 
   const TutorCard = ({ tutor }: { tutor: TutorProfile }) => {
     const isFeatured = tutor.is_featured;
