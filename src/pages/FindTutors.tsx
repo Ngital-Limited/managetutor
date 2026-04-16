@@ -148,13 +148,15 @@ export default function FindTutors() {
   }, [user, role]);
 
   const fetchData = async () => {
-    const [districtsRes, subjectsRes] = await Promise.all([
+    const [districtsRes, subjectsRes, areasRes] = await Promise.all([
       supabase.from('districts').select('*').order('name_en'),
       supabase.from('subjects').select('*').order('name_en'),
+      supabase.from('areas').select('*').order('name_en'),
     ]);
     
     if (districtsRes.data) setDistricts(districtsRes.data);
     if (subjectsRes.data) setSubjects(subjectsRes.data);
+    if (areasRes.data) setAreas(areasRes.data);
     
     await fetchTutors();
   };
