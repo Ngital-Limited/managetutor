@@ -38,6 +38,7 @@ import { PlatformDataTab } from '@/components/admin/PlatformDataTab';
 import { AdminCreateUserTab } from '@/components/admin/AdminCreateUserTab';
 import { AdminPostJobTab } from '@/components/admin/AdminPostJobTab';
 import { AdminTutorEditTab } from '@/components/admin/AdminTutorEditTab';
+import { AdminTutorProfilesTab } from '@/components/admin/AdminTutorProfilesTab';
 
 // ──────────── Types ────────────
 interface Stats {
@@ -1061,9 +1062,10 @@ export default function AdminDashboard() {
     const roleMap = new Map(roles?.map(r => [r.user_id, r.role]) || []);
 
     let result = data.map(u => ({ ...u, role: roleMap.get(u.id) || 'unknown' })) as UserRow[];
-    if (userRoleFilter !== 'all') result = result.filter(u => u.role === userRoleFilter);
+    // Filter to show only parents/guardians
+    result = result.filter(u => u.role === 'parent');
     setUsers(result);
-  }, [userSearch, userRoleFilter]);
+  }, [userSearch]);
 
   const fetchVerifications = useCallback(async () => {
     let query = supabase
@@ -1354,8 +1356,9 @@ export default function AdminDashboard() {
     { title: 'Overview', value: 'overview', icon: BarChart3 },
     { title: 'Create User', value: 'create_user', icon: UserPlus },
     { title: 'Post Job', value: 'post_job', icon: Briefcase },
-    { title: 'Tutor Editor', value: 'tutor_editor', icon: GraduationCap },
-    { title: 'Users', value: 'users', icon: Users },
+    { title: 'Tutor Profiles', value: 'tutor_profiles', icon: GraduationCap },
+    { title: 'Tutor Editor', value: 'tutor_editor', icon: Pencil },
+    { title: 'Guardians / Parents', value: 'guardians', icon: Users },
     { title: 'Verifications', value: 'verifications', icon: UserCheck, badge: stats.pendingVerifications },
     { title: 'Jobs', value: 'jobs', icon: Briefcase },
     { title: 'Reports', value: 'reports', icon: AlertTriangle, badge: stats.pendingReports },
@@ -1539,25 +1542,15 @@ export default function AdminDashboard() {
               </div>
             )}
 
-            {/* ═══════ USERS TAB ═══════ */}
-            {activeTab === 'users' && (
+            {/* ═══════ GUARDIANS / PARENTS TAB ═══════ */}
+            {activeTab === 'guardians' && (
               <div className="space-y-6">
-                <h1 className="text-xl font-semibold">User Management</h1>
+                <h1 className="text-xl font-semibold">Guardians / Parents</h1>
                 <div className="flex flex-col sm:flex-row gap-3">
                   <div className="relative flex-1">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input placeholder="Search by name, email, or phone..." className="pl-10" value={userSearch} onChange={(e) => setUserSearch(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && fetchUsers()} />
                   </div>
-                  <Select value={userRoleFilter} onValueChange={setUserRoleFilter}>
-                    <SelectTrigger className="w-40"><SelectValue placeholder="Role" /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Roles</SelectItem>
-                      <SelectItem value="parent">Parents</SelectItem>
-                      <SelectItem value="tutor">Tutors</SelectItem>
-                      <SelectItem value="agency">Agencies</SelectItem>
-                      <SelectItem value="admin">Admins</SelectItem>
-                    </SelectContent>
-                  </Select>
                   <Button onClick={fetchUsers}><Search className="h-4 w-4 mr-1" /> Search</Button>
                 </div>
 
@@ -2032,6 +2025,9 @@ export default function AdminDashboard() {
 
             {/* ═══════ POST JOB TAB ═══════ */}
             {activeTab === 'post_job' && <AdminPostJobTab toast={toast} />}
+
+            {/* ═══════ TUTOR PROFILES TAB ═══════ */}
+            {activeTab === 'tutor_profiles' && <AdminTutorProfilesTab toast={toast} onImpersonate={handleImpersonate} />}
 
             {/* ═══════ TUTOR EDITOR TAB ═══════ */}
             {activeTab === 'tutor_editor' && <AdminTutorEditTab toast={toast} />}
