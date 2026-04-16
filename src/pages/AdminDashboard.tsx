@@ -1435,25 +1435,40 @@ export default function AdminDashboard() {
                   <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Admin</span>
                 </div>
               </SidebarGroupLabel>
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  {sidebarItems.map((item) => (
-                    <SidebarMenuItem key={item.value}>
-                      <SidebarMenuButton
-                        onClick={() => setActiveTab(item.value)}
-                        className={`w-full justify-start text-sm ${activeTab === item.value ? 'bg-primary/8 text-primary font-medium' : 'text-muted-foreground hover:text-foreground'}`}
-                      >
-                        <item.icon className="h-4 w-4 mr-2.5 shrink-0" />
-                        <span className="flex-1 text-left truncate">{item.title}</span>
-                        {item.badge ? (
-                          <span className="ml-auto text-[10px] font-medium bg-destructive/10 text-destructive px-1.5 py-0.5 rounded-full">{item.badge}</span>
-                        ) : null}
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  ))}
-                </SidebarMenu>
-              </SidebarGroupContent>
             </SidebarGroup>
+            {sidebarGroups.map((group) => {
+              const groupIsActive = group.items.some(i => i.value === activeTab);
+              return (
+                <Collapsible key={group.label} defaultOpen={groupIsActive || group.label === 'Dashboard'}>
+                  <SidebarGroup className="py-0">
+                    <CollapsibleTrigger className="flex items-center justify-between w-full px-4 py-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors group">
+                      <span>{group.label}</span>
+                      <ChevronDown className="h-3.5 w-3.5 transition-transform group-data-[state=closed]:-rotate-90" />
+                    </CollapsibleTrigger>
+                    <CollapsibleContent>
+                      <SidebarGroupContent>
+                        <SidebarMenu>
+                          {group.items.map((item) => (
+                            <SidebarMenuItem key={item.value}>
+                              <SidebarMenuButton
+                                onClick={() => setActiveTab(item.value)}
+                                className={`w-full justify-start text-sm ${activeTab === item.value ? 'bg-primary/8 text-primary font-medium' : 'text-muted-foreground hover:text-foreground'}`}
+                              >
+                                <item.icon className="h-4 w-4 mr-2.5 shrink-0" />
+                                <span className="flex-1 text-left truncate">{item.title}</span>
+                                {'badge' in item && item.badge ? (
+                                  <span className="ml-auto text-[10px] font-medium bg-destructive/10 text-destructive px-1.5 py-0.5 rounded-full">{item.badge}</span>
+                                ) : null}
+                              </SidebarMenuButton>
+                            </SidebarMenuItem>
+                          ))}
+                        </SidebarMenu>
+                      </SidebarGroupContent>
+                    </CollapsibleContent>
+                  </SidebarGroup>
+                </Collapsible>
+              );
+            })}
             <SidebarGroup className="mt-auto">
               <SidebarGroupContent>
                 <SidebarMenu>
