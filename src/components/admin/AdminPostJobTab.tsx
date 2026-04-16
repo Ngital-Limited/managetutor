@@ -173,42 +173,28 @@ export function AdminPostJobTab({ toast }: Props) {
   };
 
   const resolveOrCreateParent = async (): Promise<string | null> => {
-    // If an existing parent is selected, use their ID
     if (selectedParent) return selectedParent.id;
 
-    // Phone is mandatory for manual entry
-    const phone = manualPhone.trim();
+    // Use the search field value as phone number
+    const phone = parentSearch.trim();
     if (!phone) {
-      toast({ title: 'Phone Required', description: 'Guardian phone number is mandatory to post a job.', variant: 'destructive' });
+      toast({ title: 'Phone Required', description: 'Search a guardian by phone number or select an existing one.', variant: 'destructive' });
       return null;
     }
 
     // Try to find existing profile by phone
     const { data: byPhone } = await supabase.from('profiles').select('id').eq('phone', phone).maybeSingle();
     if (byPhone) {
-      // Ensure parent role
       await supabase.from('user_roles').upsert({ user_id: byPhone.id, role: 'parent' }, { onConflict: 'user_id,role' });
       return byPhone.id;
     }
 
-    // Try by email if provided
-    const email = manualEmail.trim();
-    if (email) {
-      const { data: byEmail } = await supabase.from('profiles').select('id').eq('email', email).maybeSingle();
-      if (byEmail) {
-        // Update phone on existing profile & ensure role
-        await supabase.from('profiles').update({ phone }).eq('id', byEmail.id);
-        await supabase.from('user_roles').upsert({ user_id: byEmail.id, role: 'parent' }, { onConflict: 'user_id,role' });
-        return byEmail.id;
-      }
-    }
-
-    // Create new profile
+    // Create new profile with phone
     const newId = crypto.randomUUID();
     const { error: profileErr } = await supabase.from('profiles').insert({
       id: newId,
-      full_name: manualName.trim() || 'Guardian',
-      email: email || `guardian-${newId.slice(0, 8)}@placeholder.local`,
+      full_name: 'Guardian',
+      email: `guardian-${newId.slice(0, 8)}@placeholder.local`,
       phone,
     });
     if (profileErr) {
