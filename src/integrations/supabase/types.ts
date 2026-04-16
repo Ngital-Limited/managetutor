@@ -618,6 +618,7 @@ export type Database = {
           status: Database["public"]["Enums"]["job_status"] | null
           student_age: string | null
           student_gender: Database["public"]["Enums"]["gender"] | null
+          student_school_name: string | null
           subject_id: string | null
           teaching_mode: Database["public"]["Enums"]["teaching_mode"] | null
           title: string
@@ -649,6 +650,7 @@ export type Database = {
           status?: Database["public"]["Enums"]["job_status"] | null
           student_age?: string | null
           student_gender?: Database["public"]["Enums"]["gender"] | null
+          student_school_name?: string | null
           subject_id?: string | null
           teaching_mode?: Database["public"]["Enums"]["teaching_mode"] | null
           title: string
@@ -680,6 +682,7 @@ export type Database = {
           status?: Database["public"]["Enums"]["job_status"] | null
           student_age?: string | null
           student_gender?: Database["public"]["Enums"]["gender"] | null
+          student_school_name?: string | null
           subject_id?: string | null
           teaching_mode?: Database["public"]["Enums"]["teaching_mode"] | null
           title?: string

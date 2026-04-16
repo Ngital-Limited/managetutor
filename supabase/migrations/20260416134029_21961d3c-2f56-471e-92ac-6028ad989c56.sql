@@ -1,0 +1,1 @@
+ALTER TABLE public.jobs ADD COLUMN student_school_name text;
