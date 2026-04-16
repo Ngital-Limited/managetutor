@@ -343,11 +343,10 @@ export function AdminPostJobTab({ toast }: Props) {
 
             {!selectedParent ? (
               <div className="space-y-3">
-                {/* Search existing */}
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
-                    placeholder="Search existing parent by name, email, or phone..."
+                    placeholder="Search by phone, name, or email..."
                     value={parentSearch}
                     onChange={e => searchParents(e.target.value)}
                     className="pl-9"
@@ -367,54 +366,9 @@ export function AdminPostJobTab({ toast }: Props) {
                     ))}
                   </div>
                 )}
-
-                {/* Manual entry fields */}
-                <div className="p-3 rounded-md border border-dashed space-y-3">
-                  <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-                    <UserPlus className="h-4 w-4" />
-                    Or enter guardian details (auto-created on save)
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                    <div>
-                      <Label>Phone <span className="text-destructive">*</span></Label>
-                      <Input
-                        type="tel"
-                        placeholder="+880 1XXX-XXXXXX"
-                        value={manualPhone}
-                        onChange={e => setManualPhone(e.target.value)}
-                        onBlur={async () => {
-                          const phone = manualPhone.trim();
-                          if (phone.length < 5) return;
-                          const { data } = await supabase.from('profiles').select('id, full_name, email, phone').eq('phone', phone).maybeSingle();
-                          if (data) {
-                            setSelectedParent({ id: data.id, full_name: data.full_name, email: data.email, phone: data.phone });
-                            setManualPhone('');
-                            setManualName('');
-                            setManualEmail('');
-                            prefillFromParentLastJob(data.id);
-                          }
-                        }}
-                      />
-                    </div>
-                    <div>
-                      <Label>Name (Optional)</Label>
-                      <Input
-                        placeholder="Guardian name"
-                        value={manualName}
-                        onChange={e => setManualName(e.target.value)}
-                      />
-                    </div>
-                    <div>
-                      <Label>Email (Optional)</Label>
-                      <Input
-                        type="email"
-                        placeholder="email@example.com"
-                        value={manualEmail}
-                        onChange={e => setManualEmail(e.target.value)}
-                      />
-                    </div>
-                  </div>
-                </div>
+                {parentSearch.length >= 2 && !searching && parentResults.length === 0 && (
+                  <p className="text-xs text-muted-foreground">No guardian found. The phone number entered above will be used to auto-create a guardian profile on save.</p>
+                )}
               </div>
             ) : (
               <div className="flex items-center justify-between p-3 rounded-md border border-primary/30 bg-primary/5">
