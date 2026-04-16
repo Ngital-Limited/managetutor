@@ -377,12 +377,19 @@ export function AdminPostJobTab({ toast }: Props) {
               <div className="flex items-center justify-between p-3 rounded-md border border-primary/30 bg-primary/5">
                 <div>
                   <p className="text-xs text-muted-foreground">Posting for:</p>
-                  <p className="font-medium text-sm">{selectedParent.full_name} · {selectedParent.email}</p>
+                  <p className="font-medium text-sm">{selectedParent.full_name} · {selectedParent.email || selectedParent.phone}</p>
+                </div>
+              </div>
+            ) : useManualParent && manualParent.full_name.trim() ? (
+              <div className="flex items-center justify-between p-3 rounded-md border border-amber-500/30 bg-amber-500/5">
+                <div>
+                  <p className="text-xs text-muted-foreground">New parent (will be created):</p>
+                  <p className="font-medium text-sm">{manualParent.full_name} · {manualParent.email || manualParent.phone}</p>
                 </div>
               </div>
             ) : (
               <div className="p-3 rounded-md border border-destructive/30 bg-destructive/5">
-                <p className="text-sm text-destructive">Please select a parent first before posting a job.</p>
+                <p className="text-sm text-destructive">Please select a parent or enter parent details manually.</p>
               </div>
             )}
 
