@@ -15,6 +15,7 @@ import { SearchableSelect } from '@/components/SearchableSelect';
 import { MultiSearchableSelect } from '@/components/MultiSearchableSelect';
 import { CLASS_LEVELS } from '@/constants/classLevels';
 import { SPECIAL_REQUIREMENTS } from '@/constants/specialRequirements';
+import { JOB_CATEGORIES, STUDENT_BACKGROUNDS } from '@/constants/jobCategories';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
@@ -256,7 +257,9 @@ export default function ParentDashboard() {
     subject_ids: [] as string[],
     district_id: '',
     area_id: '',
-    class_level: '',
+    class_levels: [] as string[],
+    category: '',
+    background: '',
     days_per_week: 3,
     duration_hours: 1.5,
     budget_min: 3000,
