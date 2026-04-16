@@ -17,6 +17,8 @@ import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
   SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarTrigger,
 } from '@/components/ui/sidebar';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { ChevronDown } from 'lucide-react';
 
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -1352,28 +1354,63 @@ export default function AdminDashboard() {
     );
   }
 
-  const sidebarItems = [
-    { title: 'Overview', value: 'overview', icon: BarChart3 },
-    { title: 'Create User', value: 'create_user', icon: UserPlus },
-    { title: 'Post Job', value: 'post_job', icon: Briefcase },
-    { title: 'Tutor Profiles', value: 'tutor_profiles', icon: GraduationCap },
-    { title: 'Tutor Editor', value: 'tutor_editor', icon: Pencil },
-    { title: 'Guardians / Parents', value: 'guardians', icon: Users },
-    { title: 'Verifications', value: 'verifications', icon: UserCheck, badge: stats.pendingVerifications },
-    { title: 'Jobs', value: 'jobs', icon: Briefcase },
-    { title: 'Reports', value: 'reports', icon: AlertTriangle, badge: stats.pendingReports },
-    { title: 'Reviews', value: 'reviews', icon: Star },
-    { title: 'Payments', value: 'payments', icon: CreditCard },
-    { title: 'Subscriptions', value: 'subscriptions', icon: Package },
-    { title: 'Demo Requests', value: 'demo_requests', icon: GraduationCap },
-    { title: 'Revenue & Payouts', value: 'revenue', icon: Wallet },
-    { title: 'Support Tickets', value: 'tickets', icon: LifeBuoy },
-    { title: 'Geographic Analytics', value: 'geographic', icon: MapPin },
-    { title: 'Contact Messages', value: 'contacts', icon: Mail },
-    { title: 'Broadcast', value: 'broadcast', icon: Megaphone },
-    { title: 'Sub-Admin Roles', value: 'rbac', icon: ShieldCheck },
-    { title: 'Platform Data', value: 'platform_data', icon: BookOpen },
-    { title: 'Settings', value: 'settings', icon: Settings },
+  const sidebarGroups = [
+    {
+      label: 'Dashboard',
+      items: [
+        { title: 'Overview', value: 'overview', icon: BarChart3 },
+      ],
+    },
+    {
+      label: 'Users',
+      items: [
+        { title: 'Tutor Profiles', value: 'tutor_profiles', icon: GraduationCap },
+        { title: 'Tutor Editor', value: 'tutor_editor', icon: Pencil },
+        { title: 'Guardians / Parents', value: 'guardians', icon: Users },
+        { title: 'Verifications', value: 'verifications', icon: UserCheck, badge: stats.pendingVerifications },
+        { title: 'Create User', value: 'create_user', icon: UserPlus },
+      ],
+    },
+    {
+      label: 'Jobs & Tutoring',
+      items: [
+        { title: 'Jobs', value: 'jobs', icon: Briefcase },
+        { title: 'Post Job', value: 'post_job', icon: Plus },
+        { title: 'Demo Requests', value: 'demo_requests', icon: BookOpen },
+      ],
+    },
+    {
+      label: 'Finance',
+      items: [
+        { title: 'Payments', value: 'payments', icon: CreditCard },
+        { title: 'Revenue & Payouts', value: 'revenue', icon: Wallet },
+        { title: 'Subscriptions', value: 'subscriptions', icon: Package },
+      ],
+    },
+    {
+      label: 'Communication',
+      items: [
+        { title: 'Broadcast', value: 'broadcast', icon: Megaphone },
+        { title: 'Contact Messages', value: 'contacts', icon: Mail },
+        { title: 'Support Tickets', value: 'tickets', icon: LifeBuoy },
+      ],
+    },
+    {
+      label: 'Analytics & Reports',
+      items: [
+        { title: 'Reports', value: 'reports', icon: AlertTriangle, badge: stats.pendingReports },
+        { title: 'Reviews', value: 'reviews', icon: Star },
+        { title: 'Geographic Analytics', value: 'geographic', icon: MapPin },
+      ],
+    },
+    {
+      label: 'System',
+      items: [
+        { title: 'Sub-Admin Roles', value: 'rbac', icon: ShieldCheck },
+        { title: 'Platform Data', value: 'platform_data', icon: BookOpen },
+        { title: 'Settings', value: 'settings', icon: Settings },
+      ],
+    },
   ];
 
   const statusColor = (s: string) => {
@@ -1398,25 +1435,40 @@ export default function AdminDashboard() {
                   <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Admin</span>
                 </div>
               </SidebarGroupLabel>
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  {sidebarItems.map((item) => (
-                    <SidebarMenuItem key={item.value}>
-                      <SidebarMenuButton
-                        onClick={() => setActiveTab(item.value)}
-                        className={`w-full justify-start text-sm ${activeTab === item.value ? 'bg-primary/8 text-primary font-medium' : 'text-muted-foreground hover:text-foreground'}`}
-                      >
-                        <item.icon className="h-4 w-4 mr-2.5 shrink-0" />
-                        <span className="flex-1 text-left truncate">{item.title}</span>
-                        {item.badge ? (
-                          <span className="ml-auto text-[10px] font-medium bg-destructive/10 text-destructive px-1.5 py-0.5 rounded-full">{item.badge}</span>
-                        ) : null}
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  ))}
-                </SidebarMenu>
-              </SidebarGroupContent>
             </SidebarGroup>
+            {sidebarGroups.map((group) => {
+              const groupIsActive = group.items.some(i => i.value === activeTab);
+              return (
+                <Collapsible key={group.label} defaultOpen={groupIsActive || group.label === 'Dashboard'}>
+                  <SidebarGroup className="py-0">
+                    <CollapsibleTrigger className="flex items-center justify-between w-full px-4 py-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors group">
+                      <span>{group.label}</span>
+                      <ChevronDown className="h-3.5 w-3.5 transition-transform group-data-[state=closed]:-rotate-90" />
+                    </CollapsibleTrigger>
+                    <CollapsibleContent>
+                      <SidebarGroupContent>
+                        <SidebarMenu>
+                          {group.items.map((item) => (
+                            <SidebarMenuItem key={item.value}>
+                              <SidebarMenuButton
+                                onClick={() => setActiveTab(item.value)}
+                                className={`w-full justify-start text-sm ${activeTab === item.value ? 'bg-primary/8 text-primary font-medium' : 'text-muted-foreground hover:text-foreground'}`}
+                              >
+                                <item.icon className="h-4 w-4 mr-2.5 shrink-0" />
+                                <span className="flex-1 text-left truncate">{item.title}</span>
+                                {'badge' in item && item.badge ? (
+                                  <span className="ml-auto text-[10px] font-medium bg-destructive/10 text-destructive px-1.5 py-0.5 rounded-full">{item.badge}</span>
+                                ) : null}
+                              </SidebarMenuButton>
+                            </SidebarMenuItem>
+                          ))}
+                        </SidebarMenu>
+                      </SidebarGroupContent>
+                    </CollapsibleContent>
+                  </SidebarGroup>
+                </Collapsible>
+              );
+            })}
             <SidebarGroup className="mt-auto">
               <SidebarGroupContent>
                 <SidebarMenu>
