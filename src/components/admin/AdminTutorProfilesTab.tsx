@@ -93,6 +93,7 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
   useEffect(() => {
     supabase.from('districts').select('id, name_en').order('name_en').then(({ data }) => setDistricts(data || []));
     supabase.from('areas').select('id, name_en, district_id').order('name_en').then(({ data }) => setAreas(data || []));
+    supabase.from('subjects').select('id, name_en, category_en').order('name_en').then(({ data }) => setSubjects(data || []));
     supabase.from('tutor_education').select('degree, institution').limit(500).then(({ data }) => {
       if (data) {
         setEducationOptions([...new Set(data.map(d => d.degree).filter(Boolean))].sort());
@@ -103,6 +104,11 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
 
   const districtMap = useMemo(() => new Map(districts.map(d => [d.id, d.name_en])), [districts]);
   const areaMap = useMemo(() => new Map(areas.map(a => [a.id, a.name_en])), [areas]);
+  const subjectCategories = useMemo(() => [...new Set(subjects.map(s => s.category_en).filter(Boolean))] as string[], [subjects]);
+  const filteredSubjects = useMemo(() =>
+    filterCategory !== 'all' ? subjects.filter(s => s.category_en === filterCategory) : subjects,
+    [subjects, filterCategory]
+  );
 
   // Group areas by district for the dropdown
   const areasGrouped = useMemo(() => {
