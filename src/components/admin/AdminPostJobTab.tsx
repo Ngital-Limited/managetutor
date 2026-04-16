@@ -266,38 +266,73 @@ export function AdminPostJobTab({ toast }: Props) {
       <Card>
         <CardHeader>
           <CardTitle className="text-base">Select Parent</CardTitle>
+          <CardDescription>Search existing parent or enter details manually</CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search parent by name, email, or phone..."
-              value={parentSearch}
-              onChange={e => searchParents(e.target.value)}
-              className="pl-9"
-            />
-          </div>
-          {searching && <p className="text-xs text-muted-foreground">Searching...</p>}
-          {parentResults.length > 0 && !selectedParent && (
-            <div className="space-y-2 max-h-40 overflow-y-auto">
-              {parentResults.map(p => (
-                <button key={p.id} onClick={() => { setSelectedParent(p); setParentResults([]); }}
-                  className="w-full flex items-center justify-between p-2 rounded-md border bg-background hover:bg-muted/50 transition-colors text-left">
-                  <div>
-                    <span className="font-medium text-sm">{p.full_name}</span>
-                    <span className="text-xs text-muted-foreground ml-2">{p.email}</span>
-                  </div>
-                </button>
-              ))}
+          {!useManualParent ? (
+            <>
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search parent by name, email, or phone..."
+                  value={parentSearch}
+                  onChange={e => searchParents(e.target.value)}
+                  className="pl-9"
+                />
+              </div>
+              {searching && <p className="text-xs text-muted-foreground">Searching...</p>}
+              {parentResults.length > 0 && !selectedParent && (
+                <div className="space-y-2 max-h-40 overflow-y-auto">
+                  {parentResults.map(p => (
+                    <button key={p.id} onClick={() => { setSelectedParent(p); setParentResults([]); setUseManualParent(false); }}
+                      className="w-full flex items-center justify-between p-2 rounded-md border bg-background hover:bg-muted/50 transition-colors text-left">
+                      <div>
+                        <span className="font-medium text-sm">{p.full_name}</span>
+                        <span className="text-xs text-muted-foreground ml-2">{p.email}</span>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
+              {!selectedParent && (
+                <Button variant="outline" size="sm" onClick={() => { setUseManualParent(true); setParentResults([]); setParentSearch(''); }}>
+                  <Plus className="h-3 w-3 mr-1" /> Parent not found? Enter details manually
+                </Button>
+              )}
+            </>
+          ) : !selectedParent ? (
+            <div className="space-y-3 p-3 rounded-md border border-dashed">
+              <p className="text-sm font-medium">Enter Parent Details</p>
+              <div>
+                <Label>Full Name <span className="text-destructive">*</span></Label>
+                <Input placeholder="Parent's full name" value={manualParent.full_name} onChange={e => setManualParent({ ...manualParent, full_name: e.target.value })} />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label>Email</Label>
+                  <Input type="email" placeholder="parent@example.com" value={manualParent.email} onChange={e => setManualParent({ ...manualParent, email: e.target.value })} />
+                </div>
+                <div>
+                  <Label>Phone</Label>
+                  <Input type="tel" placeholder="+880 1XXX-XXXXXX" value={manualParent.phone} onChange={e => setManualParent({ ...manualParent, phone: e.target.value })} />
+                </div>
+              </div>
+              <p className="text-xs text-muted-foreground">Provide at least an email or phone number.</p>
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" onClick={() => { setUseManualParent(false); setManualParent({ full_name: '', email: '', phone: '' }); }}>
+                  Back to Search
+                </Button>
+              </div>
             </div>
-          )}
+          ) : null}
+
           {selectedParent && (
             <div className="flex items-center justify-between p-3 rounded-md border border-primary/30 bg-primary/5">
               <div>
                 <p className="font-medium text-sm">{selectedParent.full_name}</p>
                 <p className="text-xs text-muted-foreground">{selectedParent.email} · {selectedParent.phone || 'No phone'}</p>
               </div>
-              <Button size="sm" variant="outline" onClick={() => { setSelectedParent(null); setParentSearch(''); }}>Change</Button>
+              <Button size="sm" variant="outline" onClick={() => { setSelectedParent(null); setParentSearch(''); setUseManualParent(false); setManualParent({ full_name: '', email: '', phone: '' }); }}>Change</Button>
             </div>
           )}
         </CardContent>
