@@ -28,6 +28,13 @@ interface District {
   division_bn: string;
 }
 
+interface Area {
+  id: string;
+  name_en: string;
+  name_bn: string;
+  district_id: string;
+}
+
 interface Subject {
   id: string;
   name_en: string;
@@ -70,6 +77,7 @@ export default function FindTutors() {
   const { toast } = useToast();
   
   const [districts, setDistricts] = useState<District[]>([]);
+  const [areas, setAreas] = useState<Area[]>([]);
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [allTutors, setAllTutors] = useState<TutorProfile[]>([]);
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
@@ -86,8 +94,10 @@ export default function FindTutors() {
   const [selectedGender, setSelectedGender] = useState<string>(searchParams.get('gender') || '');
   const [priceRange, setPriceRange] = useState<number[]>([0, 10000]);
   const [selectedDivision, setSelectedDivision] = useState<string>('');
-  const [selectedCity, setSelectedCity] = useState<string>('');
-  const [citySearch, setCitySearch] = useState('');
+  const [selectedDistrict, setSelectedDistrict] = useState<string>('');
+  const [selectedArea, setSelectedArea] = useState<string>('');
+  const [districtSearch, setDistrictSearch] = useState('');
+  const [areaSearch, setAreaSearch] = useState('');
   const [verifiedOnly, setVerifiedOnly] = useState<boolean>(searchParams.get('verified') === 'true');
 
   // Derived: unique divisions
@@ -101,18 +111,31 @@ export default function FindTutors() {
     return Array.from(divSet.entries()).map(([en, bn]) => ({ en, bn })).sort((a, b) => a.en.localeCompare(b.en));
   }, [districts]);
 
-  // Derived: cities filtered by division + search
-  const filteredCities = useMemo(() => {
-    let cities = districts;
+  // Derived: districts filtered by division + search
+  const filteredDistricts = useMemo(() => {
+    let list = districts;
     if (selectedDivision) {
-      cities = cities.filter(d => d.division_en === selectedDivision);
+      list = list.filter(d => d.division_en === selectedDivision);
     }
-    if (citySearch) {
-      const q = citySearch.toLowerCase();
-      cities = cities.filter(d => d.name_en.toLowerCase().includes(q) || d.name_bn.includes(q));
+    if (districtSearch) {
+      const q = districtSearch.toLowerCase();
+      list = list.filter(d => d.name_en.toLowerCase().includes(q) || d.name_bn.includes(q));
     }
-    return cities.sort((a, b) => a.name_en.localeCompare(b.name_en));
-  }, [districts, selectedDivision, citySearch]);
+    return list.sort((a, b) => a.name_en.localeCompare(b.name_en));
+  }, [districts, selectedDivision, districtSearch]);
+
+  // Derived: areas filtered by selected district + search
+  const filteredAreas = useMemo(() => {
+    let list = areas;
+    if (selectedDistrict) {
+      list = list.filter(a => a.district_id === selectedDistrict);
+    }
+    if (areaSearch) {
+      const q = areaSearch.toLowerCase();
+      list = list.filter(a => a.name_en.toLowerCase().includes(q) || a.name_bn.includes(q));
+    }
+    return list.sort((a, b) => a.name_en.localeCompare(b.name_en));
+  }, [areas, selectedDistrict, areaSearch]);
 
   useEffect(() => {
     fetchData();
@@ -125,13 +148,15 @@ export default function FindTutors() {
   }, [user, role]);
 
   const fetchData = async () => {
-    const [districtsRes, subjectsRes] = await Promise.all([
+    const [districtsRes, subjectsRes, areasRes] = await Promise.all([
       supabase.from('districts').select('*').order('name_en'),
       supabase.from('subjects').select('*').order('name_en'),
+      supabase.from('areas').select('*').order('name_en'),
     ]);
     
     if (districtsRes.data) setDistricts(districtsRes.data);
     if (subjectsRes.data) setSubjects(subjectsRes.data);
+    if (areasRes.data) setAreas(areasRes.data);
     
     await fetchTutors();
   };
@@ -224,9 +249,9 @@ export default function FindTutors() {
       });
     }
 
-    // Filter by city (district)
-    if (selectedCity && selectedCity !== 'all') {
-      result = result.filter(t => t.district_id === selectedCity || t.profiles?.district_id === selectedCity);
+    // Filter by district
+    if (selectedDistrict && selectedDistrict !== 'all') {
+      result = result.filter(t => t.district_id === selectedDistrict || t.profiles?.district_id === selectedDistrict);
     }
 
     // Search query
@@ -249,7 +274,7 @@ export default function FindTutors() {
     });
 
     return result;
-  }, [allTutors, selectedCategory, selectedBackground, selectedDivision, selectedCity, searchQuery]);
+  }, [allTutors, selectedCategory, selectedBackground, selectedDivision, selectedDistrict, searchQuery]);
 
   const totalCount = filteredTutors.length;
   const totalPages = Math.ceil(totalCount / TUTORS_PER_PAGE);
@@ -258,7 +283,7 @@ export default function FindTutors() {
   // Reset page when filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [selectedCategory, selectedBackground, selectedGender, selectedDivision, selectedCity, priceRange, verifiedOnly, searchQuery]);
+  }, [selectedCategory, selectedBackground, selectedGender, selectedDivision, selectedDistrict, selectedArea, priceRange, verifiedOnly, searchQuery]);
 
   // Re-fetch when server-side filters change
   useEffect(() => {
@@ -295,14 +320,16 @@ export default function FindTutors() {
     setSelectedGender('');
     setPriceRange([0, 10000]);
     setSelectedDivision('');
-    setSelectedCity('');
-    setCitySearch('');
+    setSelectedDistrict('');
+    setSelectedArea('');
+    setDistrictSearch('');
+    setAreaSearch('');
     setVerifiedOnly(false);
     setSearchQuery('');
     setCurrentPage(1);
   };
 
-  const hasActiveFilters = !!selectedCategory || !!selectedBackground || (selectedGender && selectedGender !== 'any') || !!selectedDivision || (selectedCity && selectedCity !== 'all') || verifiedOnly || priceRange[0] > 0 || priceRange[1] < 10000;
+  const hasActiveFilters = !!selectedCategory || !!selectedBackground || (selectedGender && selectedGender !== 'any') || !!selectedDivision || !!selectedDistrict || !!selectedArea || verifiedOnly || priceRange[0] > 0 || priceRange[1] < 10000;
 
   const TutorCard = ({ tutor }: { tutor: TutorProfile }) => {
     const isFeatured = tutor.is_featured;
@@ -509,7 +536,7 @@ export default function FindTutors() {
               </div>
 
               {/* Location Row */}
-              <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
+              <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-4">
                 {/* Country */}
                 <div>
                   <Label className="text-sm font-medium mb-2 block">Country</Label>
@@ -519,7 +546,7 @@ export default function FindTutors() {
                 {/* Division */}
                 <div>
                   <Label className="text-sm font-medium mb-2 block">Division</Label>
-                  <Select value={selectedDivision} onValueChange={(v) => { setSelectedDivision(v === 'all' ? '' : v); setSelectedCity(''); }}>
+                  <Select value={selectedDivision} onValueChange={(v) => { setSelectedDivision(v === 'all' ? '' : v); setSelectedDistrict(''); setSelectedArea(''); setDistrictSearch(''); setAreaSearch(''); }}>
                     <SelectTrigger className="rounded-xl">
                       <SelectValue placeholder="All Divisions" />
                     </SelectTrigger>
@@ -534,28 +561,56 @@ export default function FindTutors() {
                   </Select>
                 </div>
 
-                {/* City with search */}
+                {/* District with search */}
                 <div>
-                  <Label className="text-sm font-medium mb-2 block">City</Label>
-                  <Select value={selectedCity} onValueChange={setSelectedCity}>
+                  <Label className="text-sm font-medium mb-2 block">District</Label>
+                  <Select value={selectedDistrict} onValueChange={(v) => { setSelectedDistrict(v === 'all' ? '' : v); setSelectedArea(''); setAreaSearch(''); }}>
                     <SelectTrigger className="rounded-xl">
                       <MapPin className="h-4 w-4 mr-2 text-muted-foreground" />
-                      <SelectValue placeholder="All Cities" />
+                      <SelectValue placeholder="All Districts" />
                     </SelectTrigger>
                     <SelectContent>
                       <div className="px-2 pb-2">
                         <Input
-                          placeholder="Search city (A-Z)..."
-                          value={citySearch}
-                          onChange={(e) => setCitySearch(e.target.value)}
+                          placeholder="Search district (A-Z)..."
+                          value={districtSearch}
+                          onChange={(e) => setDistrictSearch(e.target.value)}
                           className="h-8 text-sm rounded-lg"
                           onClick={(e) => e.stopPropagation()}
                         />
                       </div>
-                      <SelectItem value="all">All Cities</SelectItem>
-                      {filteredCities.map(d => (
+                      <SelectItem value="all">All Districts</SelectItem>
+                      {filteredDistricts.map(d => (
                         <SelectItem key={d.id} value={d.id}>
                           {language === 'en' ? d.name_en : d.name_bn}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Thana/Upazila with search */}
+                <div>
+                  <Label className="text-sm font-medium mb-2 block">Thana/Upazila</Label>
+                  <Select value={selectedArea} onValueChange={(v) => setSelectedArea(v === 'all' ? '' : v)} disabled={!selectedDistrict}>
+                    <SelectTrigger className="rounded-xl">
+                      <MapPin className="h-4 w-4 mr-2 text-muted-foreground" />
+                      <SelectValue placeholder={selectedDistrict ? "All Areas" : "Select district first"} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <div className="px-2 pb-2">
+                        <Input
+                          placeholder="Search thana/upazila..."
+                          value={areaSearch}
+                          onChange={(e) => setAreaSearch(e.target.value)}
+                          className="h-8 text-sm rounded-lg"
+                          onClick={(e) => e.stopPropagation()}
+                        />
+                      </div>
+                      <SelectItem value="all">All Areas</SelectItem>
+                      {filteredAreas.map(a => (
+                        <SelectItem key={a.id} value={a.id}>
+                          {language === 'en' ? a.name_en : a.name_bn}
                         </SelectItem>
                       ))}
                     </SelectContent>
