@@ -1350,7 +1350,7 @@ export default function ParentDashboard() {
               <Briefcase className="h-5 w-5" />
               My Tuition Jobs
             </CardTitle>
-            <Button size="sm" onClick={() => setShowPostJob(true)}>
+            <Button size="sm" onClick={() => { resetJobForm(); prefillFromLastJob(); setShowPostJob(true); }}>
               <Plus className="h-4 w-4 mr-1" />
               Post Job
             </Button>
@@ -1477,7 +1477,7 @@ export default function ParentDashboard() {
               <Briefcase className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
               <h3 className="font-bold mb-2">No jobs posted yet</h3>
               <p className="text-muted-foreground mb-4">Post your first tuition job to find the perfect tutor</p>
-              <Button onClick={() => setShowPostJob(true)}>
+              <Button onClick={() => { resetJobForm(); prefillFromLastJob(); setShowPostJob(true); }}>
                 <Plus className="h-4 w-4 mr-2" />
                 Post a Job
               </Button>
