@@ -48,7 +48,7 @@ import {
   Send, AlertTriangle, Receipt, DollarSign, LayoutDashboard
 } from 'lucide-react';
 
-interface District { id: string; name_en: string; name_bn: string; }
+interface District { id: string; name_en: string; name_bn: string; division_en: string; division_bn: string; }
 interface Subject { id: string; name_en: string; name_bn: string; }
 interface Area { id: string; name_en: string; name_bn: string; district_id: string; }
 
