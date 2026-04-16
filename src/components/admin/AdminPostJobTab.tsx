@@ -169,13 +169,32 @@ export function AdminPostJobTab({ toast }: Props) {
     }
   };
 
+  const normalizeBDPhone = (raw: string): string | null => {
+    const digits = raw.replace(/[\s\-()]/g, '');
+    // +8801XXXXXXXXX or 8801XXXXXXXXX or 01XXXXXXXXX
+    const match = digits.match(/^(?:\+?880)?(1[3-9]\d{8})$/);
+    return match ? `+880${match[1]}` : null;
+  };
+
   const resolveOrCreateParent = async (): Promise<string | null> => {
     if (selectedParent) return selectedParent.id;
 
-    // Use the search field value as phone number
-    const phone = parentSearch.trim();
+    const raw = parentSearch.trim();
+    if (!raw) {
+      toast({ title: 'Guardian Required', description: 'Search a guardian by phone number or select an existing one.', variant: 'destructive' });
+      return null;
+    }
+
+    // Check if input looks like a phone number (starts with 0, +, or 8)
+    const looksLikePhone = /^[+0-9]/.test(raw);
+    if (!looksLikePhone) {
+      toast({ title: 'Invalid Input', description: 'Enter a valid Bangladesh phone number (01XXX-XXXXXX) to auto-create a guardian.', variant: 'destructive' });
+      return null;
+    }
+
+    const phone = normalizeBDPhone(raw);
     if (!phone) {
-      toast({ title: 'Phone Required', description: 'Search a guardian by phone number or select an existing one.', variant: 'destructive' });
+      toast({ title: 'Invalid Phone', description: 'Please enter a valid Bangladesh phone number (01XXX-XXXXXX).', variant: 'destructive' });
       return null;
     }
 
