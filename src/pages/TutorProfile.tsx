@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Logo } from '@/components/Logo';
+import { TutorSidebarLayout } from '@/components/TutorSidebarLayout';
 import { useNavigate, Link, useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { CLASS_LEVELS } from '@/constants/classLevels';
@@ -507,27 +508,10 @@ export default function TutorProfile() {
     );
   }
 
-  return (
-    <div className="min-h-screen bg-background">
-      <nav className="sticky top-0 z-50 bg-card/80 backdrop-blur-xl border-b border-border">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-3">
-            <Logo size="md" />
-          </Link>
-          <div className="flex items-center gap-3">
-            <Link to="/dashboard">
-              <Button variant="outline">
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Back
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </nav>
-
-      <main className="container mx-auto px-4 py-8 max-w-4xl">
-        <div className="flex items-center justify-between mb-8">
-          <div>
+  const profileContent = (
+    <div className="px-4 py-8 max-w-4xl mx-auto">
+      <div className="flex items-center justify-between mb-8">
+        <div>
             <h1 className="text-3xl font-bold">Edit Profile</h1>
             <p className="text-muted-foreground">Update your tutor profile to attract more students</p>
           </div>
@@ -1162,7 +1146,35 @@ export default function TutorProfile() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
-      </main>
-    </div>
+      </div>
+  );
+
+  if (isAdminEdit) {
+    return (
+      <div className="min-h-screen bg-background">
+        <nav className="sticky top-0 z-50 bg-card/80 backdrop-blur-xl border-b border-border">
+          <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+            <Link to="/" className="flex items-center gap-3">
+              <Logo size="md" />
+            </Link>
+            <div className="flex items-center gap-3">
+              <Link to="/admin">
+                <Button variant="outline">
+                  <ArrowLeft className="h-4 w-4 mr-2" />
+                  Back to Admin
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </nav>
+        <main className="container mx-auto">{profileContent}</main>
+      </div>
+    );
+  }
+
+  return (
+    <TutorSidebarLayout title="Edit Profile">
+      {profileContent}
+    </TutorSidebarLayout>
   );
 }
