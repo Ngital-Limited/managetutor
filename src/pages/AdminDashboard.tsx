@@ -1354,28 +1354,63 @@ export default function AdminDashboard() {
     );
   }
 
-  const sidebarItems = [
-    { title: 'Overview', value: 'overview', icon: BarChart3 },
-    { title: 'Create User', value: 'create_user', icon: UserPlus },
-    { title: 'Post Job', value: 'post_job', icon: Briefcase },
-    { title: 'Tutor Profiles', value: 'tutor_profiles', icon: GraduationCap },
-    { title: 'Tutor Editor', value: 'tutor_editor', icon: Pencil },
-    { title: 'Guardians / Parents', value: 'guardians', icon: Users },
-    { title: 'Verifications', value: 'verifications', icon: UserCheck, badge: stats.pendingVerifications },
-    { title: 'Jobs', value: 'jobs', icon: Briefcase },
-    { title: 'Reports', value: 'reports', icon: AlertTriangle, badge: stats.pendingReports },
-    { title: 'Reviews', value: 'reviews', icon: Star },
-    { title: 'Payments', value: 'payments', icon: CreditCard },
-    { title: 'Subscriptions', value: 'subscriptions', icon: Package },
-    { title: 'Demo Requests', value: 'demo_requests', icon: GraduationCap },
-    { title: 'Revenue & Payouts', value: 'revenue', icon: Wallet },
-    { title: 'Support Tickets', value: 'tickets', icon: LifeBuoy },
-    { title: 'Geographic Analytics', value: 'geographic', icon: MapPin },
-    { title: 'Contact Messages', value: 'contacts', icon: Mail },
-    { title: 'Broadcast', value: 'broadcast', icon: Megaphone },
-    { title: 'Sub-Admin Roles', value: 'rbac', icon: ShieldCheck },
-    { title: 'Platform Data', value: 'platform_data', icon: BookOpen },
-    { title: 'Settings', value: 'settings', icon: Settings },
+  const sidebarGroups = [
+    {
+      label: 'Dashboard',
+      items: [
+        { title: 'Overview', value: 'overview', icon: BarChart3 },
+      ],
+    },
+    {
+      label: 'Users',
+      items: [
+        { title: 'Tutor Profiles', value: 'tutor_profiles', icon: GraduationCap },
+        { title: 'Tutor Editor', value: 'tutor_editor', icon: Pencil },
+        { title: 'Guardians / Parents', value: 'guardians', icon: Users },
+        { title: 'Verifications', value: 'verifications', icon: UserCheck, badge: stats.pendingVerifications },
+        { title: 'Create User', value: 'create_user', icon: UserPlus },
+      ],
+    },
+    {
+      label: 'Jobs & Tutoring',
+      items: [
+        { title: 'Jobs', value: 'jobs', icon: Briefcase },
+        { title: 'Post Job', value: 'post_job', icon: Plus },
+        { title: 'Demo Requests', value: 'demo_requests', icon: BookOpen },
+      ],
+    },
+    {
+      label: 'Finance',
+      items: [
+        { title: 'Payments', value: 'payments', icon: CreditCard },
+        { title: 'Revenue & Payouts', value: 'revenue', icon: Wallet },
+        { title: 'Subscriptions', value: 'subscriptions', icon: Package },
+      ],
+    },
+    {
+      label: 'Communication',
+      items: [
+        { title: 'Broadcast', value: 'broadcast', icon: Megaphone },
+        { title: 'Contact Messages', value: 'contacts', icon: Mail },
+        { title: 'Support Tickets', value: 'tickets', icon: LifeBuoy },
+      ],
+    },
+    {
+      label: 'Analytics & Reports',
+      items: [
+        { title: 'Reports', value: 'reports', icon: AlertTriangle, badge: stats.pendingReports },
+        { title: 'Reviews', value: 'reviews', icon: Star },
+        { title: 'Geographic Analytics', value: 'geographic', icon: MapPin },
+      ],
+    },
+    {
+      label: 'System',
+      items: [
+        { title: 'Sub-Admin Roles', value: 'rbac', icon: ShieldCheck },
+        { title: 'Platform Data', value: 'platform_data', icon: BookOpen },
+        { title: 'Settings', value: 'settings', icon: Settings },
+      ],
+    },
   ];
 
   const statusColor = (s: string) => {
