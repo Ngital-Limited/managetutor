@@ -801,7 +801,7 @@ export default function AdminDashboard() {
   const [jobApplications, setJobApplications] = useState<JobApplication[]>([]);
   const [loadingApps, setLoadingApps] = useState(false);
   const [assignTutorSearch, setAssignTutorSearch] = useState('');
-  const [assignTutorResults, setAssignTutorResults] = useState<{ tutor_id: string; user_id: string; name: string; gender: string; experience: number }[]>([]);
+  const [assignTutorResults, setAssignTutorResults] = useState<{ tutor_id: string; user_id: string; name: string; gender: string; experience: number; phone: string | null; email: string; district: string | null; rating: number | null; verification: string | null; reference: string | null }[]>([]);
   const [searchingTutors, setSearchingTutors] = useState(false);
 
   const fetchJobApplications = async (jobId: string) => {
