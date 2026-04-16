@@ -836,7 +836,7 @@ export default function AdminDashboard() {
     setLoadingApps(false);
   };
 
-  const handleAdminUpdateAppStatus = async (appId: string, status: 'accepted' | 'rejected', jobId: string) => {
+  const handleAdminUpdateAppStatus = async (appId: string, status: string, jobId: string) => {
     setProcessing(true);
     const { error } = await supabase.from('applications').update({ status: status as any }).eq('id', appId);
     if (error) {
@@ -846,13 +846,17 @@ export default function AdminDashboard() {
       if (status === 'accepted') {
         await supabase.from('jobs').update({ status: 'in_progress' as any }).eq('id', jobId);
       }
-      // Notify the tutor
+      // Notify the tutor for accept/reject
       const app = jobApplications.find(a => a.id === appId);
-      if (app?.tutor_user_id) {
-        const statusLabel = status === 'accepted' ? 'Congratulations! You have been assigned' : 'Your application was not selected';
+      if (app?.tutor_user_id && (status === 'accepted' || status === 'rejected' || status === 'shortlisted')) {
+        const statusLabels: Record<string, string> = {
+          accepted: 'Congratulations! You have been assigned',
+          rejected: 'Your application was not selected',
+          shortlisted: 'You have been shortlisted!',
+        };
         await supabase.from('notifications').insert({
           user_id: app.tutor_user_id,
-          title: statusLabel,
+          title: statusLabels[status] || `Application ${status}`,
           message: `For the job: ${viewingJobApps?.jobTitle || ''}`,
           type: `application_${status}`,
           reference_id: jobId,
