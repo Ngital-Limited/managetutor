@@ -27,6 +27,7 @@ interface ParentResult { id: string; full_name: string; email: string; phone: st
 
 export function AdminPostJobTab({ toast }: Props) {
   const [showPostJob, setShowPostJob] = useState(false);
+  const [prefilled, setPrefilled] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [postedJobs, setPostedJobs] = useState<{ title: string; parent: string; ref: string; date: string }[]>([]);
 
