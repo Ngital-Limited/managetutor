@@ -382,6 +382,18 @@ export function AdminPostJobTab({ toast }: Props) {
                         placeholder="+880 1XXX-XXXXXX"
                         value={manualPhone}
                         onChange={e => setManualPhone(e.target.value)}
+                        onBlur={async () => {
+                          const phone = manualPhone.trim();
+                          if (phone.length < 5) return;
+                          const { data } = await supabase.from('profiles').select('id, full_name, email, phone').eq('phone', phone).maybeSingle();
+                          if (data) {
+                            setSelectedParent({ id: data.id, full_name: data.full_name, email: data.email, phone: data.phone });
+                            setManualPhone('');
+                            setManualName('');
+                            setManualEmail('');
+                            prefillFromParentLastJob(data.id);
+                          }
+                        }}
                       />
                     </div>
                     <div>
