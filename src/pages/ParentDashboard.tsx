@@ -917,25 +917,36 @@ export default function ParentDashboard() {
             <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Location & Teaching Preferences</p>
             <div className="h-px bg-border" />
           </div>
-          <div className="grid md:grid-cols-2 gap-4">
+          <div className="grid md:grid-cols-3 gap-4">
+            <div>
+              <Label>Division *</Label>
+              <Select value={selectedJobDivision} onValueChange={(v) => { setSelectedJobDivision(v); setJobForm({ ...jobForm, district_id: '', area_id: '' }); }}>
+                <SelectTrigger><SelectValue placeholder="Select Division" /></SelectTrigger>
+                <SelectContent>
+                  {jobDivisions.map(div => (
+                    <SelectItem key={div.en} value={div.en}>{div.en}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
             <div>
               <Label>District *</Label>
               <SearchableSelect
                 options={districtOptions}
                 value={jobForm.district_id}
                 onValueChange={(v) => setJobForm({ ...jobForm, district_id: v, area_id: '' })}
-                placeholder="Search district..."
+                placeholder={selectedJobDivision ? "Search district..." : "Select division first"}
                 searchPlaceholder="Type to search districts..."
                 emptyText="No districts found."
               />
             </div>
             <div>
-              <Label>Area (Optional)</Label>
+              <Label>Thana/Upazila (Optional)</Label>
               <SearchableSelect
                 options={areaOptions}
                 value={jobForm.area_id}
                 onValueChange={(v) => setJobForm({ ...jobForm, area_id: v })}
-                placeholder={jobForm.district_id ? "Search area..." : "Select district first"}
+                placeholder={jobForm.district_id ? "Search thana/upazila..." : "Select district first"}
                 searchPlaceholder="Type to search areas..."
                 emptyText="No areas found."
               />
