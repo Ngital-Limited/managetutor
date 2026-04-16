@@ -1544,22 +1544,12 @@ export default function AdminDashboard() {
             {/* ═══════ GUARDIANS / PARENTS TAB ═══════ */}
             {activeTab === 'guardians' && (
               <div className="space-y-6">
-                <h1 className="text-xl font-semibold">User Management</h1>
+                <h1 className="text-xl font-semibold">Guardians / Parents</h1>
                 <div className="flex flex-col sm:flex-row gap-3">
                   <div className="relative flex-1">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input placeholder="Search by name, email, or phone..." className="pl-10" value={userSearch} onChange={(e) => setUserSearch(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && fetchUsers()} />
                   </div>
-                  <Select value={userRoleFilter} onValueChange={setUserRoleFilter}>
-                    <SelectTrigger className="w-40"><SelectValue placeholder="Role" /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Roles</SelectItem>
-                      <SelectItem value="parent">Parents</SelectItem>
-                      <SelectItem value="tutor">Tutors</SelectItem>
-                      <SelectItem value="agency">Agencies</SelectItem>
-                      <SelectItem value="admin">Admins</SelectItem>
-                    </SelectContent>
-                  </Select>
                   <Button onClick={fetchUsers}><Search className="h-4 w-4 mr-1" /> Search</Button>
                 </div>
 
