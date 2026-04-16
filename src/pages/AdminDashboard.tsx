@@ -38,6 +38,7 @@ import { PlatformDataTab } from '@/components/admin/PlatformDataTab';
 import { AdminCreateUserTab } from '@/components/admin/AdminCreateUserTab';
 import { AdminPostJobTab } from '@/components/admin/AdminPostJobTab';
 import { AdminTutorEditTab } from '@/components/admin/AdminTutorEditTab';
+import { AdminTutorProfilesTab } from '@/components/admin/AdminTutorProfilesTab';
 
 // ──────────── Types ────────────
 interface Stats {
@@ -1354,8 +1355,9 @@ export default function AdminDashboard() {
     { title: 'Overview', value: 'overview', icon: BarChart3 },
     { title: 'Create User', value: 'create_user', icon: UserPlus },
     { title: 'Post Job', value: 'post_job', icon: Briefcase },
-    { title: 'Tutor Editor', value: 'tutor_editor', icon: GraduationCap },
-    { title: 'Users', value: 'users', icon: Users },
+    { title: 'Tutor Profiles', value: 'tutor_profiles', icon: GraduationCap },
+    { title: 'Tutor Editor', value: 'tutor_editor', icon: Pencil },
+    { title: 'Guardians / Parents', value: 'guardians', icon: Users },
     { title: 'Verifications', value: 'verifications', icon: UserCheck, badge: stats.pendingVerifications },
     { title: 'Jobs', value: 'jobs', icon: Briefcase },
     { title: 'Reports', value: 'reports', icon: AlertTriangle, badge: stats.pendingReports },
