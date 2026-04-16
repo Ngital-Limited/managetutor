@@ -246,6 +246,22 @@ export default function TutorAppliedJobs() {
                                     </span>
                                   </div>
 
+                                   {app.status === 'shortlisted' && (
+                                    <div className="mt-3 p-3 bg-primary/10 rounded-lg border border-primary/20">
+                                      <p className="text-sm font-medium text-primary">
+                                        <Star className="h-3.5 w-3.5 inline mr-1" />
+                                        You have been shortlisted for this job! The admin will review and finalize soon.
+                                      </p>
+                                    </div>
+                                  )}
+                                  {app.status === 'waiting' && (
+                                    <div className="mt-3 p-3 bg-orange-500/10 rounded-lg border border-orange-500/20">
+                                      <p className="text-sm font-medium text-orange-600">
+                                        <Hourglass className="h-3.5 w-3.5 inline mr-1" />
+                                        Your application is in the waiting list. You will be notified of any updates.
+                                      </p>
+                                    </div>
+                                  )}
                                   {app.status === 'accepted' && (
                                     <div className="mt-3 p-3 bg-success/10 rounded-lg border border-success/20">
                                       <p className="text-sm font-medium text-success">
@@ -259,9 +275,13 @@ export default function TutorAppliedJobs() {
                                   <Badge className={
                                     app.status === 'accepted' ? 'bg-success' :
                                     app.status === 'rejected' ? 'bg-destructive' :
+                                    app.status === 'shortlisted' ? 'bg-primary' :
+                                    app.status === 'waiting' ? 'bg-orange-500' :
                                     app.status === 'pending' ? 'bg-warning text-warning-foreground' : ''
                                   }>
                                     {app.status === 'pending' && <Clock className="h-3 w-3 mr-1" />}
+                                    {app.status === 'shortlisted' && <Star className="h-3 w-3 mr-1" />}
+                                    {app.status === 'waiting' && <Hourglass className="h-3 w-3 mr-1" />}
                                     {app.status === 'accepted' && <CheckCircle2 className="h-3 w-3 mr-1" />}
                                     {app.status === 'rejected' && <XCircle className="h-3 w-3 mr-1" />}
                                     {app.status.charAt(0).toUpperCase() + app.status.slice(1)}
