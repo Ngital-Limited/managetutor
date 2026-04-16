@@ -2356,27 +2356,44 @@ export default function AdminDashboard() {
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Search tutor by name..."
+                placeholder="Search by name, phone, email, or tutor ID (e.g. TT-00001)..."
                 value={assignTutorSearch}
                 onChange={(e) => handleSearchTutors(e.target.value)}
                 className="pl-9"
               />
             </div>
-            {searchingTutors && <p className="text-xs text-muted-foreground">Searching...</p>}
+            {searchingTutors && <p className="text-xs text-muted-foreground">Searching tutors...</p>}
             {assignTutorResults.length > 0 && (
-              <div className="space-y-2 max-h-40 overflow-y-auto">
+              <div className="space-y-2 max-h-60 overflow-y-auto">
                 {assignTutorResults.map((t) => (
-                  <div key={t.tutor_id} className="flex items-center justify-between p-2 rounded-md border bg-background">
-                    <div>
-                      <span className="font-medium text-sm">{t.name}</span>
-                      <span className="text-xs text-muted-foreground ml-2 capitalize">{t.gender} · {t.experience} yrs exp</span>
+                  <div key={t.tutor_id} className="flex items-center justify-between p-3 rounded-md border bg-background gap-3">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="font-medium text-sm">{t.name}</span>
+                        {t.reference && <Badge variant="outline" className="text-[10px] font-mono">{t.reference}</Badge>}
+                        {t.verification === 'approved' && <Badge className="text-[10px] bg-green-100 text-green-700 border-green-300">Verified</Badge>}
+                      </div>
+                      <div className="flex items-center gap-2 flex-wrap mt-1">
+                        {t.phone && <span className="text-xs text-muted-foreground">{t.phone}</span>}
+                        {t.phone && t.email && <span className="text-xs text-muted-foreground">·</span>}
+                        <span className="text-xs text-muted-foreground truncate">{t.email}</span>
+                      </div>
+                      <div className="flex items-center gap-2 flex-wrap mt-1">
+                        <Badge variant="secondary" className="text-[10px] capitalize">{t.gender}</Badge>
+                        <Badge variant="secondary" className="text-[10px]">{t.experience} yrs</Badge>
+                        {t.rating && <Badge variant="secondary" className="text-[10px]">★ {t.rating}</Badge>}
+                        {t.district && <Badge variant="outline" className="text-[10px]">{t.district}</Badge>}
+                      </div>
                     </div>
-                    <Button size="sm" onClick={() => handleAssignTutor(t.tutor_id, t.user_id, t.name)} disabled={processing}>
+                    <Button size="sm" onClick={() => handleAssignTutor(t.tutor_id, t.user_id, t.name)} disabled={processing} className="shrink-0">
                       <Plus className="h-3 w-3 mr-1" /> Assign
                     </Button>
                   </div>
                 ))}
               </div>
+            )}
+            {assignTutorSearch.length >= 2 && !searchingTutors && assignTutorResults.length === 0 && (
+              <p className="text-xs text-muted-foreground text-center py-2">No tutors found. Try a different search term.</p>
             )}
           </div>
 
