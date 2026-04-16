@@ -196,8 +196,14 @@ export default function Auth() {
                     />
                   </div>
                 </div>
+
+                <div>
+                  <Label htmlFor="phone" className="text-sm font-medium text-muted-foreground">Phone Number <span className="text-destructive">*</span></Label>
+                  <div className="mt-1.5">
+                    <PhoneInput value={phone} onChange={setPhone} />
+                  </div>
+                </div>
               </>
-            )}
 
             <div>
               <Label htmlFor="email" className="text-sm font-medium text-muted-foreground">{t('auth.email')}</Label>
