@@ -9,7 +9,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { supabase } from '@/integrations/supabase/client';
-import { Briefcase, Search, CheckCircle2, Clock, Plus } from 'lucide-react';
+import { Search, CheckCircle2, Clock, Plus } from 'lucide-react';
 import { MultiSearchableSelect } from '@/components/MultiSearchableSelect';
 import { SearchableSelect } from '@/components/SearchableSelect';
 import { CLASS_LEVELS } from '@/constants/classLevels';
@@ -33,6 +33,11 @@ export function AdminPostJobTab({ toast }: Props) {
   const [showPostJob, setShowPostJob] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [postedJobs, setPostedJobs] = useState<{ title: string; parent: string; ref: string; date: string }[]>([]);
+  
+  // Manual parent entry (no existing profile)
+  const [useManualParent, setUseManualParent] = useState(false);
+  const [manualParent, setManualParent] = useState({ full_name: '', email: '', phone: '' });
+  const [creatingParent, setCreatingParent] = useState(false);
 
   const [districts, setDistricts] = useState<District[]>([]);
   const [areas, setAreas] = useState<Area[]>([]);
@@ -127,10 +132,72 @@ export function AdminPostJobTab({ toast }: Props) {
     });
   };
 
+  const createManualParent = async (): Promise<ParentResult | null> => {
+    if (!manualParent.full_name.trim()) {
+      toast({ title: 'Required', description: 'Parent name is required.', variant: 'destructive' });
+      return null;
+    }
+    if (!manualParent.email.trim() && !manualParent.phone.trim()) {
+      toast({ title: 'Required', description: 'Provide at least an email or phone number.', variant: 'destructive' });
+      return null;
+    }
+
+    setCreatingParent(true);
+    try {
+      // Check if profile already exists by email or phone
+      let existingId: string | null = null;
+      if (manualParent.email.trim()) {
+        const { data } = await supabase.from('profiles').select('id').eq('email', manualParent.email.trim()).maybeSingle();
+        if (data) existingId = data.id;
+      }
+      if (!existingId && manualParent.phone.trim()) {
+        const { data } = await supabase.from('profiles').select('id').eq('phone', manualParent.phone.trim()).maybeSingle();
+        if (data) existingId = data.id;
+      }
+
+      if (existingId) {
+        // Ensure parent role exists
+        await supabase.from('user_roles').upsert({ user_id: existingId, role: 'parent' }, { onConflict: 'user_id,role' });
+        const result: ParentResult = { id: existingId, full_name: manualParent.full_name, email: manualParent.email, phone: manualParent.phone || null };
+        return result;
+      }
+
+      // Create a new profile entry (admin-created, no auth account)
+      const newId = crypto.randomUUID();
+      const { error: profileErr } = await supabase.from('profiles').insert({
+        id: newId,
+        full_name: manualParent.full_name.trim(),
+        email: manualParent.email.trim() || `manual-${newId.slice(0, 8)}@placeholder.local`,
+        phone: manualParent.phone.trim() || null,
+      });
+      if (profileErr) throw profileErr;
+
+      const { error: roleErr } = await supabase.from('user_roles').insert({ user_id: newId, role: 'parent' });
+      if (roleErr) throw roleErr;
+
+      return { id: newId, full_name: manualParent.full_name, email: manualParent.email, phone: manualParent.phone || null };
+    } catch (err: any) {
+      toast({ title: 'Error creating parent', description: err.message, variant: 'destructive' });
+      return null;
+    } finally {
+      setCreatingParent(false);
+    }
+  };
+
   const handlePost = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedParent) {
-      toast({ title: 'Select Parent', description: 'Search and select a parent first.', variant: 'destructive' });
+
+    let parentForJob = selectedParent;
+
+    // If using manual parent, create/find the parent first
+    if (useManualParent && !selectedParent) {
+      parentForJob = await createManualParent();
+      if (!parentForJob) return;
+      setSelectedParent(parentForJob);
+    }
+
+    if (!parentForJob) {
+      toast({ title: 'Select Parent', description: 'Search and select a parent, or enter parent details manually.', variant: 'destructive' });
       return;
     }
     if (!jobForm.title.trim() || !jobForm.description.trim() || !jobForm.district_id) {
@@ -141,7 +208,7 @@ export function AdminPostJobTab({ toast }: Props) {
     setSubmitting(true);
     try {
       const { data, error } = await supabase.from('jobs').insert({
-        parent_id: selectedParent.id,
+        parent_id: parentForJob.id,
         title: jobForm.title.trim(),
         description: jobForm.description.trim(),
         district_id: jobForm.district_id,
@@ -173,10 +240,12 @@ export function AdminPostJobTab({ toast }: Props) {
         );
       }
 
-      toast({ title: 'Job Posted!', description: `Job "${jobForm.title}" posted for ${selectedParent.full_name}. Ref: ${data.job_reference}` });
-      setPostedJobs(prev => [{ title: jobForm.title, parent: selectedParent.full_name, ref: data.job_reference || '', date: new Date().toISOString() }, ...prev]);
+      toast({ title: 'Job Posted!', description: `Job "${jobForm.title}" posted for ${parentForJob.full_name}. Ref: ${data.job_reference}` });
+      setPostedJobs(prev => [{ title: jobForm.title, parent: parentForJob!.full_name, ref: data.job_reference || '', date: new Date().toISOString() }, ...prev]);
       resetForm();
       setShowPostJob(false);
+      setUseManualParent(false);
+      setManualParent({ full_name: '', email: '', phone: '' });
     } catch (err: any) {
       toast({ title: 'Error', description: err.message, variant: 'destructive' });
     } finally {
@@ -197,38 +266,73 @@ export function AdminPostJobTab({ toast }: Props) {
       <Card>
         <CardHeader>
           <CardTitle className="text-base">Select Parent</CardTitle>
+          <CardDescription>Search existing parent or enter details manually</CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search parent by name, email, or phone..."
-              value={parentSearch}
-              onChange={e => searchParents(e.target.value)}
-              className="pl-9"
-            />
-          </div>
-          {searching && <p className="text-xs text-muted-foreground">Searching...</p>}
-          {parentResults.length > 0 && !selectedParent && (
-            <div className="space-y-2 max-h-40 overflow-y-auto">
-              {parentResults.map(p => (
-                <button key={p.id} onClick={() => { setSelectedParent(p); setParentResults([]); }}
-                  className="w-full flex items-center justify-between p-2 rounded-md border bg-background hover:bg-muted/50 transition-colors text-left">
-                  <div>
-                    <span className="font-medium text-sm">{p.full_name}</span>
-                    <span className="text-xs text-muted-foreground ml-2">{p.email}</span>
-                  </div>
-                </button>
-              ))}
+          {!useManualParent ? (
+            <>
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search parent by name, email, or phone..."
+                  value={parentSearch}
+                  onChange={e => searchParents(e.target.value)}
+                  className="pl-9"
+                />
+              </div>
+              {searching && <p className="text-xs text-muted-foreground">Searching...</p>}
+              {parentResults.length > 0 && !selectedParent && (
+                <div className="space-y-2 max-h-40 overflow-y-auto">
+                  {parentResults.map(p => (
+                    <button key={p.id} onClick={() => { setSelectedParent(p); setParentResults([]); setUseManualParent(false); }}
+                      className="w-full flex items-center justify-between p-2 rounded-md border bg-background hover:bg-muted/50 transition-colors text-left">
+                      <div>
+                        <span className="font-medium text-sm">{p.full_name}</span>
+                        <span className="text-xs text-muted-foreground ml-2">{p.email}</span>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
+              {!selectedParent && (
+                <Button variant="outline" size="sm" onClick={() => { setUseManualParent(true); setParentResults([]); setParentSearch(''); }}>
+                  <Plus className="h-3 w-3 mr-1" /> Parent not found? Enter details manually
+                </Button>
+              )}
+            </>
+          ) : !selectedParent ? (
+            <div className="space-y-3 p-3 rounded-md border border-dashed">
+              <p className="text-sm font-medium">Enter Parent Details</p>
+              <div>
+                <Label>Full Name <span className="text-destructive">*</span></Label>
+                <Input placeholder="Parent's full name" value={manualParent.full_name} onChange={e => setManualParent({ ...manualParent, full_name: e.target.value })} />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label>Email</Label>
+                  <Input type="email" placeholder="parent@example.com" value={manualParent.email} onChange={e => setManualParent({ ...manualParent, email: e.target.value })} />
+                </div>
+                <div>
+                  <Label>Phone</Label>
+                  <Input type="tel" placeholder="+880 1XXX-XXXXXX" value={manualParent.phone} onChange={e => setManualParent({ ...manualParent, phone: e.target.value })} />
+                </div>
+              </div>
+              <p className="text-xs text-muted-foreground">Provide at least an email or phone number.</p>
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" onClick={() => { setUseManualParent(false); setManualParent({ full_name: '', email: '', phone: '' }); }}>
+                  Back to Search
+                </Button>
+              </div>
             </div>
-          )}
+          ) : null}
+
           {selectedParent && (
             <div className="flex items-center justify-between p-3 rounded-md border border-primary/30 bg-primary/5">
               <div>
                 <p className="font-medium text-sm">{selectedParent.full_name}</p>
                 <p className="text-xs text-muted-foreground">{selectedParent.email} · {selectedParent.phone || 'No phone'}</p>
               </div>
-              <Button size="sm" variant="outline" onClick={() => { setSelectedParent(null); setParentSearch(''); }}>Change</Button>
+              <Button size="sm" variant="outline" onClick={() => { setSelectedParent(null); setParentSearch(''); setUseManualParent(false); setManualParent({ full_name: '', email: '', phone: '' }); }}>Change</Button>
             </div>
           )}
         </CardContent>
@@ -273,12 +377,19 @@ export function AdminPostJobTab({ toast }: Props) {
               <div className="flex items-center justify-between p-3 rounded-md border border-primary/30 bg-primary/5">
                 <div>
                   <p className="text-xs text-muted-foreground">Posting for:</p>
-                  <p className="font-medium text-sm">{selectedParent.full_name} · {selectedParent.email}</p>
+                  <p className="font-medium text-sm">{selectedParent.full_name} · {selectedParent.email || selectedParent.phone}</p>
+                </div>
+              </div>
+            ) : useManualParent && manualParent.full_name.trim() ? (
+              <div className="flex items-center justify-between p-3 rounded-md border border-amber-500/30 bg-amber-500/5">
+                <div>
+                  <p className="text-xs text-muted-foreground">New parent (will be created):</p>
+                  <p className="font-medium text-sm">{manualParent.full_name} · {manualParent.email || manualParent.phone}</p>
                 </div>
               </div>
             ) : (
               <div className="p-3 rounded-md border border-destructive/30 bg-destructive/5">
-                <p className="text-sm text-destructive">Please select a parent first before posting a job.</p>
+                <p className="text-sm text-destructive">Please select a parent or enter parent details manually.</p>
               </div>
             )}
 
@@ -571,8 +682,8 @@ export function AdminPostJobTab({ toast }: Props) {
               ))}
             </div>
 
-            <Button type="submit" className="w-full" disabled={submitting || !selectedParent}>
-              {submitting ? <><Clock className="h-4 w-4 mr-2 animate-spin" /> Posting...</> : 'Post Job'}
+            <Button type="submit" className="w-full" disabled={submitting || (!selectedParent && !(useManualParent && manualParent.full_name.trim()))}>
+              {submitting ? <><Clock className="h-4 w-4 mr-2 animate-spin" /> Posting...</> : creatingParent ? 'Creating Parent & Posting...' : 'Post Job'}
             </Button>
           </form>
         </DialogContent>
