@@ -269,7 +269,7 @@ export function AdminPostJobTab({ toast }: Props) {
     }
   };
 
-  const hasParent = !!selectedParent || manualPhone.trim().length > 0;
+  const hasParent = !!selectedParent || parentSearch.trim().length > 0;
 
   return (
     <div className="space-y-6">
