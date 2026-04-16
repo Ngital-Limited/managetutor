@@ -27,8 +27,8 @@ interface FeaturedTutor {
   total_reviews: number;
   verification_status: string;
   teaching_mode: string;
-  hourly_rate_min: number | null;
-  hourly_rate_max: number | null;
+  monthly_salary_min: number | null;
+  monthly_salary_max: number | null;
   is_available: boolean;
   profiles: { full_name: string; avatar_url: string | null };
   districts: { name_en: string; name_bn: string } | null;
@@ -79,7 +79,7 @@ export default function Index() {
         supabase.from('tutor_profiles')
           .select(`
             id, bio, education, experience_years, average_rating, total_reviews,
-            verification_status, teaching_mode, hourly_rate_min, hourly_rate_max, is_available,
+            verification_status, teaching_mode, monthly_salary_min, monthly_salary_max, is_available,
             profiles:user_id (full_name, avatar_url),
             districts (name_en, name_bn),
             tutor_subjects (subjects (name_en, name_bn))
@@ -396,10 +396,10 @@ export default function Index() {
                             ))}
                           </div>
                         )}
-                        {(tutor.hourly_rate_min || tutor.hourly_rate_max) && (
+                        {(tutor.monthly_salary_min || tutor.monthly_salary_max) && (
                           <div className="flex items-center gap-1 text-sm font-semibold text-primary">
                             <DollarSign className="h-3.5 w-3.5" />
-                            ৳{tutor.hourly_rate_min || '—'} – ৳{tutor.hourly_rate_max || '—'}/mo
+                            ৳{tutor.monthly_salary_min || '—'} – ৳{tutor.monthly_salary_max || '—'}/mo
                           </div>
                         )}
                       </CardContent>

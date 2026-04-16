@@ -137,7 +137,7 @@ export default function Favorites() {
 
                     <div className="text-right">
                       <div className="font-bold text-primary mb-2">
-                        ৳{fav.tutor_profiles?.hourly_rate_min}-{fav.tutor_profiles?.hourly_rate_max}/hr
+                        ৳{fav.tutor_profiles?.monthly_salary_min}-{fav.tutor_profiles?.monthly_salary_max}/mo
                       </div>
                       <div className="flex items-center gap-2">
                         <Button 

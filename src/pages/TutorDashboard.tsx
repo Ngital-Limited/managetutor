@@ -71,8 +71,8 @@ interface TutorProfile {
   bio: string;
   education: string;
   experience_years: number;
-  hourly_rate_min: number;
-  hourly_rate_max: number;
+  monthly_salary_min: number;
+  monthly_salary_max: number;
   average_rating: number;
   total_reviews: number;
   total_students: number;
@@ -412,7 +412,7 @@ export default function TutorDashboard() {
     if (profile.bio) complete += 20;
     if (profile.education) complete += 20;
     if (profile.experience_years > 0) complete += 20;
-    if (profile.hourly_rate_min > 0) complete += 20;
+    if (profile.monthly_salary_min > 0) complete += 20;
     if (profile.verification_status === 'approved') complete += 20;
     return complete;
   };

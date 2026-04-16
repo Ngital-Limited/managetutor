@@ -128,7 +128,7 @@ export default function BrowseJobs() {
     if (!user) return;
     const { data } = await supabase
       .from('tutor_profiles')
-      .select('id, bio, education, experience_years, hourly_rate_min, verification_status, gender, district_id, teaching_mode, class_levels')
+      .select('id, bio, education, experience_years, monthly_salary_min, verification_status, gender, district_id, teaching_mode, class_levels')
       .eq('user_id', user.id)
       .single();
     if (data) {
@@ -137,7 +137,7 @@ export default function BrowseJobs() {
       if (data.bio) complete += 10;
       if (data.education) complete += 10;
       if (data.experience_years && data.experience_years > 0) complete += 10;
-      if (data.hourly_rate_min && data.hourly_rate_min > 0) complete += 10;
+      if (data.monthly_salary_min && data.monthly_salary_min > 0) complete += 10;
       if (data.gender) complete += 10;
       if (data.district_id) complete += 10;
       if (data.teaching_mode) complete += 10;

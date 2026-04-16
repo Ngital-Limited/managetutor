@@ -162,7 +162,7 @@ export default function JobDetails() {
 
     const { data: tutorProfile } = await supabase
       .from('tutor_profiles')
-      .select('id, bio, education, experience_years, hourly_rate_min, verification_status, gender, district_id, teaching_mode, class_levels')
+      .select('id, bio, education, experience_years, monthly_salary_min, verification_status, gender, district_id, teaching_mode, class_levels')
       .eq('user_id', user.id)
       .single();
 
@@ -178,7 +178,7 @@ export default function JobDetails() {
     if (tutorProfile.bio) complete += 10;
     if (tutorProfile.education) complete += 10;
     if (tutorProfile.experience_years && tutorProfile.experience_years > 0) complete += 10;
-    if (tutorProfile.hourly_rate_min && tutorProfile.hourly_rate_min > 0) complete += 10;
+    if (tutorProfile.monthly_salary_min && tutorProfile.monthly_salary_min > 0) complete += 10;
     if (tutorProfile.gender) complete += 10;
     if (tutorProfile.district_id) complete += 10;
     if (tutorProfile.teaching_mode) complete += 10;

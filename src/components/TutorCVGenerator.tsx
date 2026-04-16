@@ -11,8 +11,8 @@ interface TutorCVData {
   experienceYears: number;
   gender: string;
   teachingMode: string | null;
-  hourlyRateMin: number | null;
-  hourlyRateMax: number | null;
+  monthlySalaryMin: number | null;
+  monthlySalaryMax: number | null;
   averageRating: number;
   totalReviews: number;
   totalStudents: number;
@@ -56,8 +56,8 @@ export async function generateTutorCV(userId: string): Promise<void> {
     experienceYears: tutor.experience_years || 0,
     gender: tutor.gender,
     teachingMode: tutor.teaching_mode,
-    hourlyRateMin: tutor.hourly_rate_min,
-    hourlyRateMax: tutor.hourly_rate_max,
+    monthlySalaryMin: tutor.monthly_salary_min,
+    monthlySalaryMax: tutor.monthly_salary_max,
     averageRating: tutor.average_rating || 0,
     totalReviews: tutor.total_reviews || 0,
     totalStudents: tutor.total_students || 0,
@@ -115,7 +115,7 @@ function openCVPrintWindow(data: TutorCVData) {
     <span>📧 ${data.email}</span>
     ${data.phone ? `<span>📱 ${data.phone}</span>` : ''}
     <span>🎓 ${teachingModeLabel}</span>
-    ${data.hourlyRateMin || data.hourlyRateMax ? `<span>💰 ৳${data.hourlyRateMin || '—'}–${data.hourlyRateMax || '—'}/mo</span>` : ''}
+    ${data.monthlySalaryMin || data.monthlySalaryMax ? `<span>💰 ৳${data.monthlySalaryMin || '—'}–${data.monthlySalaryMax || '—'}/mo</span>` : ''}
   </div>
 </div>
 
