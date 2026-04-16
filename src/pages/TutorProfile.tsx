@@ -977,12 +977,16 @@ export default function TutorProfile() {
               )}
 
               <div className="grid md:grid-cols-2 gap-4">
-                {['national_id', 'education_certificate', 'experience_certificate'].map((docType) => {
+                {(profile.is_student
+                  ? ['university_id_card', 'university_payslip']
+                  : ['national_id', 'education_certificate', 'experience_certificate']
+                ).map((docType) => {
                   const exists = documents.some(d => d.document_type === docType);
+                  const label = docType.replace(/_/g, ' ');
                   return (
                     <div key={docType} className={`border-2 border-dashed rounded-xl p-4 text-center ${exists ? 'border-success/50 bg-success/5' : 'border-border'}`}>
                       <Upload className={`h-8 w-8 mx-auto mb-2 ${exists ? 'text-success' : 'text-muted-foreground'}`} />
-                      <p className="font-medium capitalize">{docType.replace('_', ' ')}</p>
+                      <p className="font-medium capitalize">{label}</p>
                       <p className="text-xs text-muted-foreground mb-3">
                         {exists ? 'Uploaded' : 'PDF, JPG, PNG (max 5MB)'}
                       </p>
@@ -1000,8 +1004,12 @@ export default function TutorProfile() {
               <div className="flex items-start gap-2 p-4 bg-info/10 rounded-xl text-info">
                 <AlertCircle className="h-5 w-5 flex-shrink-0 mt-0.5" />
                 <div className="text-sm">
-                  <p className="font-medium">Why verify?</p>
-                  <p className="opacity-80">Verified tutors get a badge on their profile and appear higher in search results. Parents trust verified tutors more!</p>
+                  <p className="font-medium">{profile.is_student ? 'Student Document Requirements' : 'Document Requirements'}</p>
+                  <p className="opacity-80">
+                    {profile.is_student
+                      ? 'As a student, please upload your University ID Card or University Payment Slip for verification.'
+                      : 'Please upload your National ID and at least your highest/last educational certificate for verification. Experience certificates are optional but recommended.'}
+                  </p>
                 </div>
               </div>
             </CardContent>
