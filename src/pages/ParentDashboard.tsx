@@ -273,6 +273,7 @@ export default function ParentDashboard() {
     preferred_time: '',
     number_of_students: 1,
     student_age: '',
+    student_school_name: '',
     start_date: '',
     location_details: '',
   });
@@ -359,6 +360,10 @@ export default function ParentDashboard() {
   const handlePostJob = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
+    if (!jobForm.student_school_name.trim()) {
+      toast({ title: 'Required', description: 'Student School Name is required.', variant: 'destructive' });
+      return;
+    }
 
     setSubmitting(true);
     const { data: jobData, error } = await supabase.from('jobs').insert({
@@ -382,6 +387,7 @@ export default function ParentDashboard() {
       student_age: jobForm.student_age || null,
       start_date: jobForm.start_date || null,
       location_details: jobForm.location_details || null,
+      student_school_name: jobForm.student_school_name || null,
     }).select('id').single();
 
     if (error) {
@@ -466,6 +472,7 @@ export default function ParentDashboard() {
       preferred_time: job.preferred_time || '',
       number_of_students: job.number_of_students || 1,
       student_age: job.student_age || '',
+      student_school_name: (job as any).student_school_name || '',
       start_date: job.start_date || '',
       location_details: job.location_details || '',
     });
@@ -498,6 +505,7 @@ export default function ParentDashboard() {
       student_age: jobForm.student_age || null,
       start_date: jobForm.start_date || null,
       location_details: jobForm.location_details || null,
+      student_school_name: jobForm.student_school_name || null,
     }).eq('id', editingJob.id);
 
     if (error) {
