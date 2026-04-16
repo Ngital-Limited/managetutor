@@ -37,6 +37,7 @@ import { SubAdminRBACTab } from '@/components/admin/SubAdminRBACTab';
 import { PlatformDataTab } from '@/components/admin/PlatformDataTab';
 import { AdminCreateUserTab } from '@/components/admin/AdminCreateUserTab';
 import { AdminPostJobTab } from '@/components/admin/AdminPostJobTab';
+import { AdminTutorEditTab } from '@/components/admin/AdminTutorEditTab';
 
 // ──────────── Types ────────────
 interface Stats {
@@ -1319,6 +1320,7 @@ export default function AdminDashboard() {
     { title: 'Overview', value: 'overview', icon: BarChart3 },
     { title: 'Create User', value: 'create_user', icon: UserPlus },
     { title: 'Post Job', value: 'post_job', icon: Briefcase },
+    { title: 'Tutor Editor', value: 'tutor_editor', icon: GraduationCap },
     { title: 'Users', value: 'users', icon: Users },
     { title: 'Verifications', value: 'verifications', icon: UserCheck, badge: stats.pendingVerifications },
     { title: 'Jobs', value: 'jobs', icon: Briefcase },
@@ -1996,6 +1998,9 @@ export default function AdminDashboard() {
 
             {/* ═══════ POST JOB TAB ═══════ */}
             {activeTab === 'post_job' && <AdminPostJobTab toast={toast} />}
+
+            {/* ═══════ TUTOR EDITOR TAB ═══════ */}
+            {activeTab === 'tutor_editor' && <AdminTutorEditTab toast={toast} />}
 
             {/* ═══════ PLATFORM DATA TAB ═══════ */}
             {activeTab === 'platform_data' && <PlatformDataTab toast={toast} />}
