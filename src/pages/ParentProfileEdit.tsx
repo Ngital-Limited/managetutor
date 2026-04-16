@@ -212,13 +212,9 @@ export default function ParentProfileEdit() {
               </div>
               <div>
                 <Label className="flex items-center gap-1"><MapPin className="h-3 w-3" /> Division</Label>
-                <Select value={selectedDivision} onValueChange={(v) => {
+                <Select value={selectedDivisionState} onValueChange={(v) => {
+                  setSelectedDivisionState(v);
                   setForm({ ...form, district_id: '', area_id: '' });
-                  // We set division indirectly via district; just reset
-                  const firstDistrict = districts.find(d => d.division_en === v);
-                  if (firstDistrict) {
-                    // Don't auto-select, let user pick
-                  }
                 }}>
                   <SelectTrigger><SelectValue placeholder="Select division" /></SelectTrigger>
                   <SelectContent>
@@ -233,7 +229,7 @@ export default function ParentProfileEdit() {
                 <Select value={form.district_id} onValueChange={(v) => setForm({ ...form, district_id: v, area_id: '' })}>
                   <SelectTrigger><SelectValue placeholder="Select district" /></SelectTrigger>
                   <SelectContent>
-                    {(selectedDivision ? filteredDistricts : districts).map(d => (
+                    {(selectedDivisionState ? filteredDistricts : districts).map(d => (
                       <SelectItem key={d.id} value={d.id}>{d.name_en}</SelectItem>
                     ))}
                   </SelectContent>
