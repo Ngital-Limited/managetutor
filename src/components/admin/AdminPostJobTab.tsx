@@ -9,7 +9,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { supabase } from '@/integrations/supabase/client';
-import { Search, CheckCircle2, Clock, Plus, UserPlus } from 'lucide-react';
+import { Search, CheckCircle2, Clock, Plus } from 'lucide-react';
 import { MultiSearchableSelect } from '@/components/MultiSearchableSelect';
 import { SearchableSelect } from '@/components/SearchableSelect';
 import { CLASS_LEVELS } from '@/constants/classLevels';
@@ -36,9 +36,6 @@ export function AdminPostJobTab({ toast }: Props) {
   const [selectedParent, setSelectedParent] = useState<ParentResult | null>(null);
   const [searching, setSearching] = useState(false);
   // Manual phone/email entry when parent not found
-  const [manualPhone, setManualPhone] = useState('');
-  const [manualEmail, setManualEmail] = useState('');
-  const [manualName, setManualName] = useState('');
 
   const [districts, setDistricts] = useState<District[]>([]);
   const [areas, setAreas] = useState<Area[]>([]);
@@ -128,9 +125,6 @@ export function AdminPostJobTab({ toast }: Props) {
     setSelectedParent(null);
     setParentSearch('');
     setParentResults([]);
-    setManualPhone('');
-    setManualEmail('');
-    setManualName('');
     setJobForm({
       title: '', description: '', subject_ids: [], district_id: '', area_id: '', class_levels: [],
       category: '', background: '', days_per_week: 3, duration_hours: 1.5, budget_min: 3000, budget_max: 8000,
@@ -173,42 +167,28 @@ export function AdminPostJobTab({ toast }: Props) {
   };
 
   const resolveOrCreateParent = async (): Promise<string | null> => {
-    // If an existing parent is selected, use their ID
     if (selectedParent) return selectedParent.id;
 
-    // Phone is mandatory for manual entry
-    const phone = manualPhone.trim();
+    // Use the search field value as phone number
+    const phone = parentSearch.trim();
     if (!phone) {
-      toast({ title: 'Phone Required', description: 'Guardian phone number is mandatory to post a job.', variant: 'destructive' });
+      toast({ title: 'Phone Required', description: 'Search a guardian by phone number or select an existing one.', variant: 'destructive' });
       return null;
     }
 
     // Try to find existing profile by phone
     const { data: byPhone } = await supabase.from('profiles').select('id').eq('phone', phone).maybeSingle();
     if (byPhone) {
-      // Ensure parent role
       await supabase.from('user_roles').upsert({ user_id: byPhone.id, role: 'parent' }, { onConflict: 'user_id,role' });
       return byPhone.id;
     }
 
-    // Try by email if provided
-    const email = manualEmail.trim();
-    if (email) {
-      const { data: byEmail } = await supabase.from('profiles').select('id').eq('email', email).maybeSingle();
-      if (byEmail) {
-        // Update phone on existing profile & ensure role
-        await supabase.from('profiles').update({ phone }).eq('id', byEmail.id);
-        await supabase.from('user_roles').upsert({ user_id: byEmail.id, role: 'parent' }, { onConflict: 'user_id,role' });
-        return byEmail.id;
-      }
-    }
-
-    // Create new profile
+    // Create new profile with phone
     const newId = crypto.randomUUID();
     const { error: profileErr } = await supabase.from('profiles').insert({
       id: newId,
-      full_name: manualName.trim() || 'Guardian',
-      email: email || `guardian-${newId.slice(0, 8)}@placeholder.local`,
+      full_name: 'Guardian',
+      email: `guardian-${newId.slice(0, 8)}@placeholder.local`,
       phone,
     });
     if (profileErr) {
@@ -229,8 +209,8 @@ export function AdminPostJobTab({ toast }: Props) {
     e.preventDefault();
 
     // Validate phone is present (either from selected parent or manual)
-    if (!selectedParent && !manualPhone.trim()) {
-      toast({ title: 'Phone Required', description: 'Guardian phone number is mandatory.', variant: 'destructive' });
+    if (!selectedParent && !parentSearch.trim()) {
+      toast({ title: 'Guardian Required', description: 'Search a guardian by phone number or select an existing one.', variant: 'destructive' });
       return;
     }
 
@@ -277,7 +257,7 @@ export function AdminPostJobTab({ toast }: Props) {
         );
       }
 
-      const parentLabel = selectedParent?.full_name || manualName.trim() || manualPhone.trim();
+      const parentLabel = selectedParent?.full_name || parentSearch.trim();
       toast({ title: 'Job Posted!', description: `Job "${jobForm.title}" posted. Ref: ${data.job_reference}` });
       setPostedJobs(prev => [{ title: jobForm.title, parent: parentLabel, ref: data.job_reference || '', date: new Date().toISOString() }, ...prev]);
       resetAll();
@@ -289,7 +269,7 @@ export function AdminPostJobTab({ toast }: Props) {
     }
   };
 
-  const hasParent = !!selectedParent || manualPhone.trim().length > 0;
+  const hasParent = !!selectedParent || parentSearch.trim().length > 0;
 
   return (
     <div className="space-y-6">
@@ -343,11 +323,10 @@ export function AdminPostJobTab({ toast }: Props) {
 
             {!selectedParent ? (
               <div className="space-y-3">
-                {/* Search existing */}
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
-                    placeholder="Search existing parent by name, email, or phone..."
+                    placeholder="Search by phone, name, or email..."
                     value={parentSearch}
                     onChange={e => searchParents(e.target.value)}
                     className="pl-9"
@@ -367,54 +346,9 @@ export function AdminPostJobTab({ toast }: Props) {
                     ))}
                   </div>
                 )}
-
-                {/* Manual entry fields */}
-                <div className="p-3 rounded-md border border-dashed space-y-3">
-                  <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-                    <UserPlus className="h-4 w-4" />
-                    Or enter guardian details (auto-created on save)
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                    <div>
-                      <Label>Phone <span className="text-destructive">*</span></Label>
-                      <Input
-                        type="tel"
-                        placeholder="+880 1XXX-XXXXXX"
-                        value={manualPhone}
-                        onChange={e => setManualPhone(e.target.value)}
-                        onBlur={async () => {
-                          const phone = manualPhone.trim();
-                          if (phone.length < 5) return;
-                          const { data } = await supabase.from('profiles').select('id, full_name, email, phone').eq('phone', phone).maybeSingle();
-                          if (data) {
-                            setSelectedParent({ id: data.id, full_name: data.full_name, email: data.email, phone: data.phone });
-                            setManualPhone('');
-                            setManualName('');
-                            setManualEmail('');
-                            prefillFromParentLastJob(data.id);
-                          }
-                        }}
-                      />
-                    </div>
-                    <div>
-                      <Label>Name (Optional)</Label>
-                      <Input
-                        placeholder="Guardian name"
-                        value={manualName}
-                        onChange={e => setManualName(e.target.value)}
-                      />
-                    </div>
-                    <div>
-                      <Label>Email (Optional)</Label>
-                      <Input
-                        type="email"
-                        placeholder="email@example.com"
-                        value={manualEmail}
-                        onChange={e => setManualEmail(e.target.value)}
-                      />
-                    </div>
-                  </div>
-                </div>
+                {parentSearch.length >= 2 && !searching && parentResults.length === 0 && (
+                  <p className="text-xs text-muted-foreground">No guardian found. The phone number entered above will be used to auto-create a guardian profile on save.</p>
+                )}
               </div>
             ) : (
               <div className="flex items-center justify-between p-3 rounded-md border border-primary/30 bg-primary/5">
