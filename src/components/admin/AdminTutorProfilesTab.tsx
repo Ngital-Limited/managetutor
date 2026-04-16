@@ -34,6 +34,8 @@ interface TutorRow {
   avatar_url: string | null;
   gender: string;
   district_name: string | null;
+  area_name: string | null;
+  area_id: string | null;
   district_id: string | null;
   education: string | null;
   experience_years: number;
