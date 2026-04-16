@@ -57,6 +57,7 @@ interface TutorProfile {
   is_available: boolean;
   is_featured: boolean;
   verification_status: string;
+  verification_paid: boolean;
   average_rating: number;
   total_reviews: number;
   total_students: number;

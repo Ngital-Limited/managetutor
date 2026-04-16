@@ -26,6 +26,7 @@ interface FeaturedTutor {
   average_rating: number;
   total_reviews: number;
   verification_status: string;
+  verification_paid: boolean;
   teaching_mode: string;
   monthly_salary_min: number | null;
   monthly_salary_max: number | null;

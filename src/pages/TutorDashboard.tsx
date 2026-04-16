@@ -79,6 +79,7 @@ interface TutorProfile {
   is_available: boolean;
   is_featured: boolean;
   verification_status: string;
+  verification_paid: boolean;
 }
 
 interface FeaturedListing {
