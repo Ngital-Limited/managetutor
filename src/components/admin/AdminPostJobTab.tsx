@@ -36,9 +36,6 @@ export function AdminPostJobTab({ toast }: Props) {
   const [selectedParent, setSelectedParent] = useState<ParentResult | null>(null);
   const [searching, setSearching] = useState(false);
   // Manual phone/email entry when parent not found
-  const [manualPhone, setManualPhone] = useState('');
-  const [manualEmail, setManualEmail] = useState('');
-  const [manualName, setManualName] = useState('');
 
   const [districts, setDistricts] = useState<District[]>([]);
   const [areas, setAreas] = useState<Area[]>([]);
