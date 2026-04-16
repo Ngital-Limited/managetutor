@@ -438,6 +438,50 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
                   </SelectContent>
                 </Select>
               </div>
+
+              <div>
+                <Label className="text-xs font-medium text-muted-foreground">Class Level</Label>
+                <Select value={filterClassLevel} onValueChange={setFilterClassLevel}>
+                  <SelectTrigger className="mt-1 h-9"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Levels</SelectItem>
+                    {CLASS_LEVELS.map(group => (
+                      <div key={group.group}>
+                        <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground bg-muted/50">{group.group}</div>
+                        {group.items.map(item => (
+                          <SelectItem key={item} value={item}>{item}</SelectItem>
+                        ))}
+                      </div>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label className="text-xs font-medium text-muted-foreground">Subject Category</Label>
+                <Select value={filterCategory} onValueChange={v => { setFilterCategory(v); if (v !== filterCategory) setFilterSubject('all'); }}>
+                  <SelectTrigger className="mt-1 h-9"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Categories</SelectItem>
+                    {subjectCategories.map(c => (
+                      <SelectItem key={c} value={c}>{c}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label className="text-xs font-medium text-muted-foreground">Subject</Label>
+                <Select value={filterSubject} onValueChange={setFilterSubject}>
+                  <SelectTrigger className="mt-1 h-9"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Subjects</SelectItem>
+                    {filteredSubjects.map(s => (
+                      <SelectItem key={s.id} value={s.id}>{s.name_en}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </CardContent>
         </Card>
