@@ -33,6 +33,11 @@ export function AdminPostJobTab({ toast }: Props) {
   const [showPostJob, setShowPostJob] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [postedJobs, setPostedJobs] = useState<{ title: string; parent: string; ref: string; date: string }[]>([]);
+  
+  // Manual parent entry (no existing profile)
+  const [useManualParent, setUseManualParent] = useState(false);
+  const [manualParent, setManualParent] = useState({ full_name: '', email: '', phone: '' });
+  const [creatingParent, setCreatingParent] = useState(false);
 
   const [districts, setDistricts] = useState<District[]>([]);
   const [areas, setAreas] = useState<Area[]>([]);
