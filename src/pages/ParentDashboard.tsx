@@ -15,6 +15,7 @@ import { SearchableSelect } from '@/components/SearchableSelect';
 import { MultiSearchableSelect } from '@/components/MultiSearchableSelect';
 import { CLASS_LEVELS } from '@/constants/classLevels';
 import { SPECIAL_REQUIREMENTS } from '@/constants/specialRequirements';
+import { JOB_CATEGORIES, STUDENT_BACKGROUNDS } from '@/constants/jobCategories';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
@@ -256,7 +257,9 @@ export default function ParentDashboard() {
     subject_ids: [] as string[],
     district_id: '',
     area_id: '',
-    class_level: '',
+    class_levels: [] as string[],
+    category: '',
+    background: '',
     days_per_week: 3,
     duration_hours: 1.5,
     budget_min: 3000,
@@ -363,7 +366,7 @@ export default function ParentDashboard() {
       subject_id: jobForm.subject_ids.length > 0 ? jobForm.subject_ids[0] : null,
       district_id: jobForm.district_id,
       area_id: jobForm.area_id || null,
-      class_level: jobForm.class_level,
+      class_level: jobForm.class_levels.length > 0 ? jobForm.class_levels.join(', ') : null,
       days_per_week: jobForm.days_per_week,
       duration_hours: jobForm.duration_hours,
       budget_min: jobForm.budget_min,
@@ -398,7 +401,8 @@ export default function ParentDashboard() {
 
   const resetJobForm = () => {
     setJobForm({
-      title: '', description: '', subject_ids: [] as string[], district_id: '', area_id: '', class_level: '',
+      title: '', description: '', subject_ids: [] as string[], district_id: '', area_id: '', class_levels: [] as string[],
+      category: '', background: '',
       days_per_week: 3, duration_hours: 1.5, budget_min: 3000, budget_max: 8000,
       teaching_mode: 'in_person', preferred_tutor_gender: 'any', student_gender: 'any',
       special_requirements: [] as string[], preferred_time: '',
@@ -442,7 +446,9 @@ export default function ParentDashboard() {
       subject_ids: jsData?.map(js => js.subject_id) || [],
       district_id: job.district_id,
       area_id: job.area_id || '',
-      class_level: job.class_level || '',
+      class_levels: job.class_level ? job.class_level.split(', ') : [],
+      category: '',
+      background: '',
       days_per_week: job.days_per_week || 3,
       duration_hours: job.duration_hours || 1.5,
       budget_min: job.budget_min || 3000,
@@ -472,7 +478,7 @@ export default function ParentDashboard() {
       subject_id: jobForm.subject_ids.length > 0 ? jobForm.subject_ids[0] : null,
       district_id: jobForm.district_id,
       area_id: jobForm.area_id || null,
-      class_level: jobForm.class_level,
+      class_level: jobForm.class_levels.length > 0 ? jobForm.class_levels.join(', ') : null,
       days_per_week: jobForm.days_per_week,
       duration_hours: jobForm.duration_hours,
       budget_min: jobForm.budget_min,
@@ -740,6 +746,30 @@ export default function ParentDashboard() {
           </div>
           <div className="grid md:grid-cols-2 gap-4">
             <div>
+              <Label>Category</Label>
+              <Select value={jobForm.category} onValueChange={(v) => setJobForm({ ...jobForm, category: v })}>
+                <SelectTrigger><SelectValue placeholder="Select category" /></SelectTrigger>
+                <SelectContent>
+                  {JOB_CATEGORIES.map(cat => (
+                    <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Background</Label>
+              <Select value={jobForm.background} onValueChange={(v) => setJobForm({ ...jobForm, background: v })}>
+                <SelectTrigger><SelectValue placeholder="Select background" /></SelectTrigger>
+                <SelectContent>
+                  {STUDENT_BACKGROUNDS.map(bg => (
+                    <SelectItem key={bg} value={bg}>{bg}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <div className="grid md:grid-cols-2 gap-4">
+            <div>
               <Label>Subjects *</Label>
               <MultiSearchableSelect
                 options={subjectOptions}
@@ -751,12 +781,12 @@ export default function ParentDashboard() {
               />
             </div>
             <div>
-              <Label>Class Level</Label>
-              <SearchableSelect
+              <Label>Class Level(s)</Label>
+              <MultiSearchableSelect
                 options={classLevelOptions}
-                value={jobForm.class_level}
-                onValueChange={(v) => setJobForm({ ...jobForm, class_level: v })}
-                placeholder="Search class level..."
+                values={jobForm.class_levels}
+                onValuesChange={(v) => setJobForm({ ...jobForm, class_levels: v })}
+                placeholder="Select class levels..."
                 searchPlaceholder="Type to search..."
                 emptyText="No class levels found."
                 grouped
@@ -835,16 +865,12 @@ export default function ParentDashboard() {
             </div>
             <div>
               <Label>Preferred Time</Label>
-              <Select value={jobForm.preferred_time} onValueChange={(v) => setJobForm({ ...jobForm, preferred_time: v })}>
-                <SelectTrigger><SelectValue placeholder="Select time" /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="morning">Morning (6AM - 12PM)</SelectItem>
-                  <SelectItem value="afternoon">Afternoon (12PM - 4PM)</SelectItem>
-                  <SelectItem value="evening">Evening (4PM - 8PM)</SelectItem>
-                  <SelectItem value="night">Night (8PM - 10PM)</SelectItem>
-                  <SelectItem value="flexible">Flexible</SelectItem>
-                </SelectContent>
-              </Select>
+              <Input
+                type="time"
+                value={jobForm.preferred_time}
+                onChange={(e) => setJobForm({ ...jobForm, preferred_time: e.target.value })}
+                className="w-full"
+              />
             </div>
           </div>
           <div className="grid md:grid-cols-3 gap-4">

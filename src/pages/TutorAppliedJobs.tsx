@@ -38,7 +38,7 @@ interface Application {
     parent_id: string;
     districts: { name_en: string };
     subjects: { name_en: string } | null;
-    profiles: { full_name: string; phone: string; email: string } | null;
+    profiles: { full_name: string } | null;
   };
 }
 
@@ -122,7 +122,7 @@ export default function TutorAppliedJobs() {
 
     const { data: apps } = await supabase
       .from('applications')
-      .select(`*, jobs(*, districts(name_en), subjects(name_en), profiles:parent_id(full_name, phone, email))`)
+      .select(`*, jobs(*, districts(name_en), subjects(name_en), profiles:parent_id(full_name))`)
       .eq('tutor_id', tp.id)
       .order('created_at', { ascending: false });
 
@@ -239,25 +239,12 @@ export default function TutorAppliedJobs() {
                                     </span>
                                   </div>
 
-                                  {app.status === 'accepted' && app.jobs?.profiles && (
+                                  {app.status === 'accepted' && (
                                     <div className="mt-3 p-3 bg-success/10 rounded-lg border border-success/20">
-                                      <p className="text-sm font-medium text-success mb-1">
+                                      <p className="text-sm font-medium text-success">
                                         <CheckCircle2 className="h-3.5 w-3.5 inline mr-1" />
-                                        Parent Contact
+                                        You have been selected for this job. The guardian will contact you through the platform messaging system.
                                       </p>
-                                      <div className="flex flex-wrap gap-3 text-xs">
-                                        <span className="flex items-center gap-1"><User className="h-3 w-3" />{app.jobs.profiles.full_name}</span>
-                                        {app.jobs.profiles.phone && (
-                                          <a href={`tel:${app.jobs.profiles.phone}`} className="flex items-center gap-1 text-primary hover:underline">
-                                            <Phone className="h-3 w-3" />{app.jobs.profiles.phone}
-                                          </a>
-                                        )}
-                                        {app.jobs.profiles.email && (
-                                          <a href={`mailto:${app.jobs.profiles.email}`} className="flex items-center gap-1 text-primary hover:underline">
-                                            <Mail className="h-3 w-3" />{app.jobs.profiles.email}
-                                          </a>
-                                        )}
-                                      </div>
                                     </div>
                                   )}
                                 </div>
