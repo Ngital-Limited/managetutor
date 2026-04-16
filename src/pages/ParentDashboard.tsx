@@ -1667,19 +1667,19 @@ export default function ParentDashboard() {
           )}
         </div>
 
-        {/* Demo Class Fees Summary */}
+        {/* Demo Class Summary */}
         {demoBookings.length > 0 && (
           <div>
             <h4 className="text-sm font-bold mb-3 flex items-center gap-2">
-              <DollarSign className="h-4 w-4" />
-              Demo Class Fees
+              <Calendar className="h-4 w-4" />
+              Demo Classes
             </h4>
             <div className="grid grid-cols-3 gap-3">
               <div className="p-3 border rounded-lg text-center">
                 <p className="text-xl font-bold text-primary">
-                  ৳{demoBookings.reduce((sum: number, b: any) => sum + (b.class_fee || 0), 0)}
+                  {demoBookings.length}
                 </p>
-                <p className="text-xs text-muted-foreground">Total Fees</p>
+                <p className="text-xs text-muted-foreground">Total Bookings</p>
               </div>
               <div className="p-3 border rounded-lg text-center">
                 <p className="text-xl font-bold text-success">
