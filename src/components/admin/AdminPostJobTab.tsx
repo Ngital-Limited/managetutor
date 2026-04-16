@@ -357,7 +357,7 @@ export function AdminPostJobTab({ toast }: Props) {
                 {parentResults.length > 0 && (
                   <div className="space-y-1 max-h-32 overflow-y-auto border rounded-md p-1">
                     {parentResults.map(p => (
-                      <button type="button" key={p.id} onClick={() => { setSelectedParent(p); setParentResults([]); setParentSearch(''); }}
+                      <button type="button" key={p.id} onClick={() => { setSelectedParent(p); setParentResults([]); setParentSearch(''); prefillFromParentLastJob(p.id); }}
                         className="w-full flex items-center justify-between p-2 rounded hover:bg-muted/50 transition-colors text-left">
                         <div>
                           <span className="font-medium text-sm">{p.full_name}</span>
