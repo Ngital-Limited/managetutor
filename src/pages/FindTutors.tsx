@@ -50,8 +50,8 @@ interface TutorProfile {
   bio: string;
   education: string;
   experience_years: number;
-  hourly_rate_min: number;
-  hourly_rate_max: number;
+  monthly_salary_min: number;
+  monthly_salary_max: number;
   teaching_mode: string;
   gender: string;
   is_available: boolean;
@@ -176,8 +176,8 @@ export default function FindTutors() {
       .eq('is_available', true);
 
     if (selectedGender && selectedGender !== 'any') query = query.eq('gender', selectedGender as 'male' | 'female');
-    if (priceRange[0] > 0) query = query.gte('hourly_rate_min', priceRange[0]);
-    if (priceRange[1] < 10000) query = query.lte('hourly_rate_max', priceRange[1]);
+    if (priceRange[0] > 0) query = query.gte('monthly_salary_min', priceRange[0]);
+    if (priceRange[1] < 10000) query = query.lte('monthly_salary_max', priceRange[1]);
     if (verifiedOnly) query = query.eq('verification_status', 'approved');
 
     const { data } = await query.order('is_featured', { ascending: false }).order('average_rating', { ascending: false });
@@ -244,8 +244,8 @@ export default function FindTutors() {
       switch (sortBy) {
         case 'rating': return (b.average_rating || 0) - (a.average_rating || 0);
         case 'experience': return (b.experience_years || 0) - (a.experience_years || 0);
-        case 'price_low': return (a.hourly_rate_min || 0) - (b.hourly_rate_min || 0);
-        case 'price_high': return (b.hourly_rate_max || 0) - (a.hourly_rate_max || 0);
+        case 'price_low': return (a.monthly_salary_min || 0) - (b.monthly_salary_min || 0);
+        case 'price_high': return (b.monthly_salary_max || 0) - (a.monthly_salary_max || 0);
         case 'reviews': return (b.total_reviews || 0) - (a.total_reviews || 0);
         default: return 0;
       }
@@ -355,8 +355,8 @@ export default function FindTutors() {
                   <span className="text-xs text-muted-foreground">({tutor.total_reviews || 0})</span>
                 </div>
                 <div className="text-right">
-                  <span className="font-bold text-primary text-sm">৳{tutor.hourly_rate_min || 500}-{tutor.hourly_rate_max || 1500}</span>
-                  <span className="text-[10px] text-muted-foreground">/hr</span>
+                  <span className="font-bold text-primary text-sm">৳{tutor.monthly_salary_min || 500}-{tutor.monthly_salary_max || 1500}</span>
+                  <span className="text-[10px] text-muted-foreground">/mo</span>
                 </div>
                 {role === 'parent' && (
                   <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => toggleFavorite(tutor.id, e)}>
@@ -464,8 +464,8 @@ export default function FindTutors() {
                 )}
               </div>
               <div className="text-right">
-                <span className="font-bold text-primary text-sm">৳{tutor.hourly_rate_min || 500}-{tutor.hourly_rate_max || 1500}</span>
-                <span className="text-[10px] text-muted-foreground">/hr</span>
+                <span className="font-bold text-primary text-sm">৳{tutor.monthly_salary_min || 500}-{tutor.monthly_salary_max || 1500}</span>
+                <span className="text-[10px] text-muted-foreground">/mo</span>
               </div>
             </div>
 
@@ -646,7 +646,7 @@ export default function FindTutors() {
                 {/* Salary range */}
                 <div className="w-full sm:w-64">
                   <Label className="text-xs font-medium mb-1 block text-muted-foreground">
-                    Salary: ৳{priceRange[0].toLocaleString()} – ৳{priceRange[1].toLocaleString()}/hr
+                    Salary: ৳{priceRange[0].toLocaleString()} – ৳{priceRange[1].toLocaleString()}/mo
                   </Label>
                   <Slider value={priceRange} onValueChange={setPriceRange} min={0} max={10000} step={500} className="mt-2" />
                 </div>
