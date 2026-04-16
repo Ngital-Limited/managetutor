@@ -299,6 +299,7 @@ export default function TutorProfile() {
         teaching_mode: profile.teaching_mode as 'online' | 'in_person' | 'hybrid',
         gender: profile.gender as 'male' | 'female',
         is_available: profile.is_available,
+        is_student: profile.is_student,
         father_phone: profile.father_phone || null,
         mother_phone: profile.mother_phone || null,
         emergency_contact_name: profile.emergency_contact_name || null,
@@ -889,6 +890,10 @@ export default function TutorProfile() {
                 <div className="flex items-center gap-3 pt-6">
                   <Checkbox id="available" checked={profile.is_available} onCheckedChange={(checked) => setProfile({ ...profile, is_available: !!checked })} />
                   <Label htmlFor="available">Available for new students</Label>
+                </div>
+                <div className="flex items-center gap-3 pt-6">
+                  <Checkbox id="is-student" checked={profile.is_student} onCheckedChange={(checked) => setProfile({ ...profile, is_student: !!checked })} />
+                  <Label htmlFor="is-student">I am currently a student</Label>
                 </div>
               </div>
 
