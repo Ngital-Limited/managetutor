@@ -7,6 +7,7 @@ import { LanguageProvider } from "@/contexts/LanguageContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
+import ResetPassword from "./pages/ResetPassword";
 import Dashboard from "./pages/Dashboard";
 import FindTutors from "./pages/FindTutors";
 import BrowseJobs from "./pages/BrowseJobs";
@@ -50,6 +51,7 @@ const App = () => (
               <Route path="/jobs" element={<BrowseJobs />} />
               <Route path="/jobs/:id" element={<JobDetails />} />
               <Route path="/auth" element={<Auth />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/parent/dashboard" element={<ParentDashboard />} />
               <Route path="/parent/profile" element={<ParentProfileEdit />} />

@@ -5,8 +5,10 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
-import { UserPlus, Users, CheckCircle2 } from 'lucide-react';
+import { UserPlus, Users, CheckCircle2, KeyRound, Search, Loader2 } from 'lucide-react';
 import { PhoneInput } from '@/components/PhoneInput';
 
 interface Props {
@@ -107,6 +109,50 @@ export function AdminCreateUserTab({ toast }: Props) {
       toast({ title: 'Error', description: err.message, variant: 'destructive' });
     } finally {
       setCreating(false);
+    }
+  };
+
+  // ─── Admin Password Reset ───
+  const [resetSearch, setResetSearch] = useState('');
+  const [resetResults, setResetResults] = useState<{ id: string; full_name: string; email: string; phone: string | null }[]>([]);
+  const [resetSearching, setResetSearching] = useState(false);
+  const [resetDialogOpen, setResetDialogOpen] = useState(false);
+  const [resetTarget, setResetTarget] = useState<{ id: string; full_name: string; email: string } | null>(null);
+  const [newPassword, setNewPassword] = useState('');
+  const [resetting, setResetting] = useState(false);
+
+  const searchUsersForReset = async () => {
+    if (!resetSearch.trim()) return;
+    setResetSearching(true);
+    const { data } = await supabase
+      .from('profiles')
+      .select('id, full_name, email, phone')
+      .or(`full_name.ilike.%${resetSearch}%,email.ilike.%${resetSearch}%,phone.ilike.%${resetSearch}%`)
+      .limit(10);
+    setResetResults(data || []);
+    setResetSearching(false);
+  };
+
+  const handleAdminResetPassword = async () => {
+    if (!resetTarget || !newPassword || newPassword.length < 6) {
+      toast({ title: 'Error', description: 'Password must be at least 6 characters', variant: 'destructive' });
+      return;
+    }
+    setResetting(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('admin-reset-password', {
+        body: { targetUserId: resetTarget.id, newPassword },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      toast({ title: 'Password Reset', description: `Password updated for ${resetTarget.full_name}` });
+      setResetDialogOpen(false);
+      setNewPassword('');
+      setResetTarget(null);
+    } catch (err: any) {
+      toast({ title: 'Error', description: err.message, variant: 'destructive' });
+    } finally {
+      setResetting(false);
     }
   };
 
@@ -232,6 +278,85 @@ export function AdminCreateUserTab({ toast }: Props) {
           </CardContent>
         </Card>
       </div>
+
+      {/* ─── Admin Password Reset Section ─── */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2"><KeyRound className="h-5 w-5 text-primary" /> Reset User Password</CardTitle>
+          <CardDescription>Search for a user and reset their password directly.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex gap-2">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search by name, email, or phone..."
+                value={resetSearch}
+                onChange={e => setResetSearch(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && searchUsersForReset()}
+                className="pl-10"
+              />
+            </div>
+            <Button onClick={searchUsersForReset} disabled={resetSearching} size="sm">
+              {resetSearching ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Search'}
+            </Button>
+          </div>
+
+          {resetResults.length > 0 && (
+            <div className="space-y-2">
+              {resetResults.map(u => (
+                <div key={u.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                  <div className="min-w-0">
+                    <p className="font-medium text-sm truncate">{u.full_name}</p>
+                    <p className="text-xs text-muted-foreground truncate">{u.email}</p>
+                  </div>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => { setResetTarget(u); setNewPassword(''); setResetDialogOpen(true); }}
+                  >
+                    <KeyRound className="h-3.5 w-3.5 mr-1" /> Reset
+                  </Button>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Reset Password Dialog */}
+      <Dialog open={resetDialogOpen} onOpenChange={setResetDialogOpen}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Reset Password</DialogTitle>
+          </DialogHeader>
+          {resetTarget && (
+            <div className="space-y-4">
+              <div className="p-3 rounded-lg bg-muted/50">
+                <p className="font-medium text-sm">{resetTarget.full_name}</p>
+                <p className="text-xs text-muted-foreground">{resetTarget.email}</p>
+              </div>
+              <div>
+                <Label className="text-sm font-medium">New Password</Label>
+                <Input
+                  type="password"
+                  value={newPassword}
+                  onChange={e => setNewPassword(e.target.value)}
+                  placeholder="Min 6 characters"
+                  className="mt-1"
+                />
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setResetDialogOpen(false)}>Cancel</Button>
+            <Button onClick={handleAdminResetPassword} disabled={resetting}>
+              {resetting ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <KeyRound className="h-4 w-4 mr-1" />}
+              Reset Password
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
