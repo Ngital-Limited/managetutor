@@ -183,7 +183,7 @@ export default function Auth() {
                 </div>
 
                 <div>
-                  <Label htmlFor="fullName" className="text-sm font-medium text-muted-foreground">{t('auth.fullName')}</Label>
+                  <Label htmlFor="fullName" className="text-sm font-medium text-muted-foreground">{t('auth.fullName')} <span className="text-destructive">*</span></Label>
                   <div className="relative mt-1.5">
                     <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
