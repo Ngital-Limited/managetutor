@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { Menu, X, LayoutDashboard, LogOut, User } from 'lucide-react';
+import { Menu, X, LayoutDashboard, LogOut, User, Download } from 'lucide-react';
 
 export function Header() {
   const { t } = useLanguage();
@@ -37,6 +37,7 @@ export function Header() {
     { to: '/jobs', label: t('nav.browseJobs') },
     { to: '/about', label: 'About' },
     { to: '/contact', label: 'Contact' },
+    { to: '/install', label: 'Install App' },
   ];
 
   const isActive = (path: string) => location.pathname === path;
