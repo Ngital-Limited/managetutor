@@ -139,11 +139,11 @@ function SubjectsManager({ toast }: { toast: any }) {
   };
 
   const handleSave = async () => {
-    if (!form.name_en.trim() || !form.name_bn.trim()) { toast({ title: 'Name (EN & BN) required', variant: 'destructive' }); return; }
+    if (!form.name_en.trim()) { toast({ title: 'Name required', variant: 'destructive' }); return; }
     setSaving(true);
     const payload = {
-      name_en: form.name_en.trim(), name_bn: form.name_bn.trim(),
-      category_en: form.category_en.trim() || null, category_bn: form.category_bn.trim() || null,
+      name_en: form.name_en.trim(), name_bn: form.name_en.trim(),
+      category_en: form.category_en.trim() || null, category_bn: form.category_en.trim() || null,
     };
     const { error } = editingId
       ? await supabase.from('subjects').update(payload).eq('id', editingId)
@@ -183,21 +183,19 @@ function SubjectsManager({ toast }: { toast: any }) {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Name (EN)</TableHead>
-                  <TableHead>Name (BN)</TableHead>
+                  <TableHead>Name</TableHead>
                   <TableHead>Category</TableHead>
                   <TableHead className="text-right w-24">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {loading ? (
-                  <TableRow><TableCell colSpan={4} className="text-center py-8 text-muted-foreground">Loading...</TableCell></TableRow>
+                  <TableRow><TableCell colSpan={3} className="text-center py-8 text-muted-foreground">Loading...</TableCell></TableRow>
                 ) : subjects.length === 0 ? (
-                  <TableRow><TableCell colSpan={4} className="text-center py-8 text-muted-foreground">No subjects found</TableCell></TableRow>
+                  <TableRow><TableCell colSpan={3} className="text-center py-8 text-muted-foreground">No subjects found</TableCell></TableRow>
                 ) : subjects.map(s => (
                   <TableRow key={s.id}>
                     <TableCell className="font-medium text-sm">{s.name_en}</TableCell>
-                    <TableCell className="text-sm">{s.name_bn}</TableCell>
                     <TableCell>{s.category_en ? <Badge variant="outline" className="text-xs">{s.category_en}</Badge> : '—'}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex gap-1 justify-end">
@@ -218,20 +216,12 @@ function SubjectsManager({ toast }: { toast: any }) {
           <DialogHeader><DialogTitle>{editingId ? 'Edit Subject' : 'Add Subject'}</DialogTitle></DialogHeader>
           <div className="space-y-3">
             <div>
-              <label className="text-sm font-medium">Name (English) *</label>
+              <label className="text-sm font-medium">Name *</label>
               <Input value={form.name_en} onChange={e => setForm(p => ({ ...p, name_en: e.target.value }))} placeholder="e.g. Mathematics" className="mt-1" />
             </div>
             <div>
-              <label className="text-sm font-medium">Name (Bangla) *</label>
-              <Input value={form.name_bn} onChange={e => setForm(p => ({ ...p, name_bn: e.target.value }))} placeholder="e.g. গণিত" className="mt-1" />
-            </div>
-            <div>
-              <label className="text-sm font-medium">Category (English)</label>
+              <label className="text-sm font-medium">Category</label>
               <Input value={form.category_en} onChange={e => setForm(p => ({ ...p, category_en: e.target.value }))} placeholder="e.g. Science" className="mt-1" />
-            </div>
-            <div>
-              <label className="text-sm font-medium">Category (Bangla)</label>
-              <Input value={form.category_bn} onChange={e => setForm(p => ({ ...p, category_bn: e.target.value }))} placeholder="e.g. বিজ্ঞান" className="mt-1" />
             </div>
           </div>
           <DialogFooter>
@@ -273,13 +263,13 @@ function DistrictsManager({ toast }: { toast: any }) {
   };
 
   const handleSave = async () => {
-    if (!form.name_en.trim() || !form.name_bn.trim() || !form.division_en.trim() || !form.division_bn.trim()) {
-      toast({ title: 'All fields required', variant: 'destructive' }); return;
+    if (!form.name_en.trim() || !form.division_en.trim()) {
+      toast({ title: 'Name and Division required', variant: 'destructive' }); return;
     }
     setSaving(true);
     const payload = {
-      name_en: form.name_en.trim(), name_bn: form.name_bn.trim(),
-      division_en: form.division_en.trim(), division_bn: form.division_bn.trim(),
+      name_en: form.name_en.trim(), name_bn: form.name_en.trim(),
+      division_en: form.division_en.trim(), division_bn: form.division_en.trim(),
     };
     const { error } = editingId
       ? await supabase.from('districts').update(payload).eq('id', editingId)
@@ -319,21 +309,19 @@ function DistrictsManager({ toast }: { toast: any }) {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Name (EN)</TableHead>
-                  <TableHead>Name (BN)</TableHead>
+                  <TableHead>Name</TableHead>
                   <TableHead>Division</TableHead>
                   <TableHead className="text-right w-24">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {loading ? (
-                  <TableRow><TableCell colSpan={4} className="text-center py-8 text-muted-foreground">Loading...</TableCell></TableRow>
+                  <TableRow><TableCell colSpan={3} className="text-center py-8 text-muted-foreground">Loading...</TableCell></TableRow>
                 ) : districts.length === 0 ? (
-                  <TableRow><TableCell colSpan={4} className="text-center py-8 text-muted-foreground">No districts found</TableCell></TableRow>
+                  <TableRow><TableCell colSpan={3} className="text-center py-8 text-muted-foreground">No districts found</TableCell></TableRow>
                 ) : districts.map(d => (
                   <TableRow key={d.id}>
                     <TableCell className="font-medium text-sm">{d.name_en}</TableCell>
-                    <TableCell className="text-sm">{d.name_bn}</TableCell>
                     <TableCell><Badge variant="outline" className="text-xs">{d.division_en}</Badge></TableCell>
                     <TableCell className="text-right">
                       <div className="flex gap-1 justify-end">
@@ -353,25 +341,13 @@ function DistrictsManager({ toast }: { toast: any }) {
         <DialogContent className="max-w-md">
           <DialogHeader><DialogTitle>{editingId ? 'Edit District' : 'Add District'}</DialogTitle></DialogHeader>
           <div className="space-y-3">
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="text-sm font-medium">Name (English) *</label>
-                <Input value={form.name_en} onChange={e => setForm(p => ({ ...p, name_en: e.target.value }))} placeholder="e.g. Dhaka" className="mt-1" />
-              </div>
-              <div>
-                <label className="text-sm font-medium">Name (Bangla) *</label>
-                <Input value={form.name_bn} onChange={e => setForm(p => ({ ...p, name_bn: e.target.value }))} placeholder="e.g. ঢাকা" className="mt-1" />
-              </div>
+            <div>
+              <label className="text-sm font-medium">Name *</label>
+              <Input value={form.name_en} onChange={e => setForm(p => ({ ...p, name_en: e.target.value }))} placeholder="e.g. Dhaka" className="mt-1" />
             </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="text-sm font-medium">Division (English) *</label>
-                <Input value={form.division_en} onChange={e => setForm(p => ({ ...p, division_en: e.target.value }))} placeholder="e.g. Dhaka" className="mt-1" />
-              </div>
-              <div>
-                <label className="text-sm font-medium">Division (Bangla) *</label>
-                <Input value={form.division_bn} onChange={e => setForm(p => ({ ...p, division_bn: e.target.value }))} placeholder="e.g. ঢাকা" className="mt-1" />
-              </div>
+            <div>
+              <label className="text-sm font-medium">Division *</label>
+              <Input value={form.division_en} onChange={e => setForm(p => ({ ...p, division_en: e.target.value }))} placeholder="e.g. Dhaka" className="mt-1" />
             </div>
           </div>
           <DialogFooter>
@@ -422,11 +398,11 @@ function AreasManager({ toast }: { toast: any }) {
   };
 
   const handleSave = async () => {
-    if (!form.name_en.trim() || !form.name_bn.trim() || !form.district_id) {
-      toast({ title: 'All fields required', variant: 'destructive' }); return;
+    if (!form.name_en.trim() || !form.district_id) {
+      toast({ title: 'Name and District required', variant: 'destructive' }); return;
     }
     setSaving(true);
-    const payload = { name_en: form.name_en.trim(), name_bn: form.name_bn.trim(), district_id: form.district_id };
+    const payload = { name_en: form.name_en.trim(), name_bn: form.name_en.trim(), district_id: form.district_id };
     const { error } = editingId
       ? await supabase.from('areas').update(payload).eq('id', editingId)
       : await supabase.from('areas').insert(payload);
@@ -467,21 +443,19 @@ function AreasManager({ toast }: { toast: any }) {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Name (EN)</TableHead>
-                  <TableHead>Name (BN)</TableHead>
+                  <TableHead>Name</TableHead>
                   <TableHead>District</TableHead>
                   <TableHead className="text-right w-24">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {loading ? (
-                  <TableRow><TableCell colSpan={4} className="text-center py-8 text-muted-foreground">Loading...</TableCell></TableRow>
+                  <TableRow><TableCell colSpan={3} className="text-center py-8 text-muted-foreground">Loading...</TableCell></TableRow>
                 ) : areas.length === 0 ? (
-                  <TableRow><TableCell colSpan={4} className="text-center py-8 text-muted-foreground">No areas found</TableCell></TableRow>
+                  <TableRow><TableCell colSpan={3} className="text-center py-8 text-muted-foreground">No areas found</TableCell></TableRow>
                 ) : areas.map(a => (
                   <TableRow key={a.id}>
                     <TableCell className="font-medium text-sm">{a.name_en}</TableCell>
-                    <TableCell className="text-sm">{a.name_bn}</TableCell>
                     <TableCell><Badge variant="outline" className="text-xs">{(a.districts as any)?.name_en || '—'}</Badge></TableCell>
                     <TableCell className="text-right">
                       <div className="flex gap-1 justify-end">
@@ -510,15 +484,9 @@ function AreasManager({ toast }: { toast: any }) {
                 </SelectContent>
               </Select>
             </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="text-sm font-medium">Name (English) *</label>
-                <Input value={form.name_en} onChange={e => setForm(p => ({ ...p, name_en: e.target.value }))} placeholder="e.g. Dhanmondi" className="mt-1" />
-              </div>
-              <div>
-                <label className="text-sm font-medium">Name (Bangla) *</label>
-                <Input value={form.name_bn} onChange={e => setForm(p => ({ ...p, name_bn: e.target.value }))} placeholder="e.g. ধানমন্ডি" className="mt-1" />
-              </div>
+            <div>
+              <label className="text-sm font-medium">Name *</label>
+              <Input value={form.name_en} onChange={e => setForm(p => ({ ...p, name_en: e.target.value }))} placeholder="e.g. Dhanmondi" className="mt-1" />
             </div>
           </div>
           <DialogFooter>
