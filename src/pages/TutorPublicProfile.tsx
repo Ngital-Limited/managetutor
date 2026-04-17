@@ -152,6 +152,12 @@ export default function TutorPublicProfile() {
 
     if (reviewsData) setReviews(reviewsData as unknown as Review[]);
 
+    // Fetch structured education entries
+    const { data: eduData } = await supabase
+      .from('tutor_education')
+      .select('id, degree, institution, field_of_study, passing_year, result')
+      .eq('tutor_id', tutorData.id);
+    if (eduData) setEducationEntries(eduData as EducationEntry[]);
     // Check if favorite
     if (user && role === 'parent') {
       const { data: favData } = await supabase
