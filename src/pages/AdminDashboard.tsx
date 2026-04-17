@@ -1192,6 +1192,7 @@ export default function AdminDashboard() {
     if (role !== 'admin') return;
     switch (activeTab) {
       case 'users': fetchUsers(); break;
+      case 'guardians': fetchUsers(); break;
       case 'verifications': fetchVerifications(); break;
       case 'jobs': fetchJobs(); break;
       case 'reports': fetchReports(); break;
@@ -1199,6 +1200,19 @@ export default function AdminDashboard() {
       case 'payments': fetchPayments(); break;
     }
   }, [activeTab, role, fetchUsers, fetchVerifications, fetchJobs, fetchReports, fetchReviews, fetchPayments]);
+
+  // Load districts/areas once for guardian filters
+  useEffect(() => {
+    if (role !== 'admin') return;
+    (async () => {
+      const [{ data: d }, { data: a }] = await Promise.all([
+        supabase.from('districts').select('id, name_en').order('name_en'),
+        supabase.from('areas').select('id, name_en, district_id').order('name_en'),
+      ]);
+      if (d) setGuardianDistricts(d);
+      if (a) setGuardianAreas(a);
+    })();
+  }, [role]);
 
   // ── Actions ──
   const handleVerifyTutor = async (tutorId: string, status: 'approved' | 'rejected') => {
