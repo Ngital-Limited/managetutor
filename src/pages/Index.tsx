@@ -323,7 +323,9 @@ export default function Index() {
               <div>
                 <span className="text-xs uppercase tracking-[0.2em] text-muted-foreground font-medium">Opportunities</span>
                 <h2 className="text-3xl md:text-4xl font-semibold tracking-tight mt-2 mb-2">Latest Tuition Jobs</h2>
-                <p className="text-sm text-muted-foreground">New opportunities posted by parents and guardians</p>
+                <p className="text-sm text-muted-foreground max-w-xl">
+                  Fresh tuition opportunities posted daily by parents and guardians across Bangladesh. Browse open jobs by location, subject, budget, and schedule — then apply directly to start teaching and earning on your own terms.
+                </p>
               </div>
               <Link to="/jobs">
                 <Button variant="ghost" className="hidden sm:flex gap-1 text-sm text-muted-foreground hover:text-foreground">
