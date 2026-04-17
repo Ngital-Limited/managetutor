@@ -139,7 +139,7 @@ const externalLinks = [
   { title: 'Pricing', url: '/pricing', icon: CreditCard },
 ];
 
-function ParentSidebar({ activeSection, setActiveSection, onPostJob, pendingApplicants }: { activeSection: SectionKey; setActiveSection: (s: SectionKey) => void; onPostJob: () => void; pendingApplicants: number }) {
+function ParentSidebar({ activeSection, setActiveSection, onPostJob, pendingApplicants, onApplicantsClick }: { activeSection: SectionKey; setActiveSection: (s: SectionKey) => void; onPostJob: () => void; pendingApplicants: number; onApplicantsClick?: () => void }) {
   const { state } = useSidebar();
   const collapsed = state === 'collapsed';
   const { profile, user } = useAuth();
@@ -183,11 +183,19 @@ function ParentSidebar({ activeSection, setActiveSection, onPostJob, pendingAppl
               {sectionItems.map((item) => (
                 <SidebarMenuItem key={item.key}>
                   <SidebarMenuButton
-                    onClick={() => setActiveSection(item.key)}
+                    onClick={() => {
+                      setActiveSection(item.key);
+                      if (item.key === 'applicants' && pendingApplicants > 0) {
+                        onApplicantsClick?.();
+                      }
+                    }}
                     className={`cursor-pointer ${activeSection === item.key ? 'bg-muted text-primary font-medium' : 'hover:bg-muted/50'}`}
                   >
                     <item.icon className="mr-2 h-4 w-4" />
-                    {!collapsed && <span>{item.title}</span>}
+                    {!collapsed && <span className="flex-1 text-left truncate">{item.title}</span>}
+                    {!collapsed && item.key === 'applicants' && pendingApplicants > 0 && (
+                      <span className="ml-auto text-[10px] font-medium bg-destructive/10 text-destructive px-1.5 py-0.5 rounded-full">{pendingApplicants}</span>
+                    )}
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
@@ -233,6 +241,7 @@ export default function ParentDashboard() {
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const [applications, setApplications] = useState<Application[]>([]);
   const [allApplicants, setAllApplicants] = useState<(Application & { jobs: { id: string; title: string; job_reference: string } })[]>([]);
+  const [applicantsStatusFilter, setApplicantsStatusFilter] = useState<'all' | 'pending' | 'shortlisted' | 'invited_to_demo' | 'accepted' | 'rejected'>('all');
   const [loading, setLoading] = useState(true);
   const [demoBookings, setDemoBookings] = useState<any[]>([]);
   const [transactions, setTransactions] = useState<any[]>([]);
@@ -2091,18 +2100,45 @@ export default function ParentDashboard() {
     </Card>
   );
 
-  const renderApplicants = () => (
+  const renderApplicants = () => {
+    const statusOptions: { key: typeof applicantsStatusFilter; label: string }[] = [
+      { key: 'all', label: 'All' },
+      { key: 'pending', label: 'Pending' },
+      { key: 'shortlisted', label: 'Shortlisted' },
+      { key: 'invited_to_demo', label: 'Invited' },
+      { key: 'accepted', label: 'Accepted' },
+      { key: 'rejected', label: 'Rejected' },
+    ];
+    const filteredApplicants = applicantsStatusFilter === 'all'
+      ? allApplicants
+      : allApplicants.filter((a: any) => a.status === applicantsStatusFilter);
+    return (
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Users className="h-5 w-5" />
           All Applicants
-          <Badge variant="outline">{allApplicants.length}</Badge>
+          <Badge variant="outline">{filteredApplicants.length}</Badge>
         </CardTitle>
         <CardDescription>Tutors who applied to any of your job posts</CardDescription>
+        <div className="flex flex-wrap gap-1.5 pt-2">
+          {statusOptions.map(opt => {
+            const count = opt.key === 'all' ? allApplicants.length : allApplicants.filter((a: any) => a.status === opt.key).length;
+            const active = applicantsStatusFilter === opt.key;
+            return (
+              <button
+                key={opt.key}
+                onClick={() => setApplicantsStatusFilter(opt.key)}
+                className={`text-xs px-2.5 py-1 rounded-full border transition-colors ${active ? 'bg-primary text-primary-foreground border-primary' : 'bg-background text-muted-foreground hover:bg-muted'}`}
+              >
+                {opt.label} <span className="opacity-70">({count})</span>
+              </button>
+            );
+          })}
+        </div>
       </CardHeader>
       <CardContent>
-        {allApplicants.length > 0 ? (
+        {filteredApplicants.length > 0 ? (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
@@ -2117,7 +2153,7 @@ export default function ParentDashboard() {
                 </tr>
               </thead>
               <tbody>
-                {allApplicants.map((app: any) => {
+                {filteredApplicants.map((app: any) => {
                   const tutor = app.tutor_profiles;
                   return (
                     <tr key={app.id} className="border-b hover:bg-muted/50 transition-colors">
@@ -2198,12 +2234,15 @@ export default function ParentDashboard() {
         ) : (
           <div className="text-center py-12">
             <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-            <p className="text-muted-foreground">No applicants yet across your jobs</p>
+            <p className="text-muted-foreground">
+              {applicantsStatusFilter === 'all' ? 'No applicants yet across your jobs' : `No ${applicantsStatusFilter.replace('_', ' ')} applicants`}
+            </p>
           </div>
         )}
       </CardContent>
     </Card>
-  );
+    );
+  };
 
   const renderActiveSection = () => {
     switch (activeSection) {
@@ -2220,7 +2259,7 @@ export default function ParentDashboard() {
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-background">
-        <ParentSidebar activeSection={activeSection} setActiveSection={setActiveSection} onPostJob={() => { resetJobForm(); prefillFromLastJob(); setShowPostJob(true); }} pendingApplicants={allApplicants.filter((a: any) => a.status === 'pending').length} />
+        <ParentSidebar activeSection={activeSection} setActiveSection={setActiveSection} onPostJob={() => { resetJobForm(); prefillFromLastJob(); setShowPostJob(true); }} pendingApplicants={allApplicants.filter((a: any) => a.status === 'pending').length} onApplicantsClick={() => setApplicantsStatusFilter('pending')} />
 
         <div className="flex-1 flex flex-col min-w-0">
           {/* Top Bar */}

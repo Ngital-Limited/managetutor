@@ -1599,7 +1599,14 @@ export default function AdminDashboard() {
                           {group.items.map((item) => (
                             <SidebarMenuItem key={item.value}>
                               <SidebarMenuButton
-                                onClick={() => setActiveTab(item.value)}
+                                onClick={() => {
+                                  setActiveTab(item.value);
+                                  // Jump straight to pending items when there are some needing attention
+                                  if (item.value === 'applications' && (item as any).badge) {
+                                    setAllAppsStatusFilter('pending');
+                                    setSelectedAppIds(new Set());
+                                  }
+                                }}
                                 className={`w-full justify-start text-sm ${activeTab === item.value ? 'bg-primary/8 text-primary font-medium' : 'text-muted-foreground hover:text-foreground'}`}
                               >
                                 <item.icon className="h-4 w-4 mr-2.5 shrink-0" />
