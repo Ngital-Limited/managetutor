@@ -387,88 +387,87 @@ export default function Index() {
         </section>
       )}
 
-      {/* Tutor Profiles */}
+      {/* Top Rated Tutors — minimal premium */}
       {featuredTutors.length > 0 && (
-        <section className="py-16 gradient-soft">
+        <section className="py-20 bg-muted/20">
           <div className="container mx-auto px-4">
-            <div className="flex items-center justify-between mb-10">
+            <div className="flex items-end justify-between mb-12">
               <div>
-                <h2 className="text-3xl md:text-4xl font-extrabold mb-2">Top Rated Tutors</h2>
-                <p className="text-muted-foreground">Verified and trusted tutors ready to teach</p>
+                <span className="text-xs uppercase tracking-[0.2em] text-muted-foreground font-medium">Educators</span>
+                <h2 className="text-3xl md:text-4xl font-semibold tracking-tight mt-2 mb-2">Top Rated Tutors</h2>
+                <p className="text-sm text-muted-foreground">Verified and trusted tutors ready to teach</p>
               </div>
               <Link to="/tutors">
-                <Button variant="outline" className="hidden sm:flex gap-1">
-                  View All <ChevronRight className="h-4 w-4" />
+                <Button variant="ghost" className="hidden sm:flex gap-1 text-sm text-muted-foreground hover:text-foreground">
+                  View All <ArrowRight className="h-3.5 w-3.5" />
                 </Button>
               </Link>
             </div>
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-              {featuredTutors.map((tutor) => {
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {featuredTutors.map((tutor, i) => {
                 const tutorSubjects = tutor.tutor_subjects?.map(ts =>
                   ts.subjects?.name_en
                 ).filter(Boolean).slice(0, 3) || [];
 
                 return (
-                  <Link key={tutor.id} to={`/tutor/${tutor.id}`}>
-                    <Card className="hover-lift border-border/50 overflow-hidden h-full">
-                      <CardContent className="p-5">
-                        <div className="flex items-start gap-4 mb-4">
-                          <Avatar className="h-14 w-14 ring-2 ring-primary/20">
-                            <AvatarImage src={tutor.profiles?.avatar_url || ''} />
-                            <AvatarFallback className="text-lg font-bold">{tutor.profiles?.full_name?.charAt(0) || 'T'}</AvatarFallback>
-                          </Avatar>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 mb-0.5">
-                              <h3 className="font-bold text-base truncate">{tutor.profiles?.full_name}</h3>
-                              {tutor.verification_status === 'approved' && tutor.verification_paid && (
-                                <CheckCircle2 className="h-4 w-4 text-success flex-shrink-0" />
-                              )}
-                            </div>
-                            <p className="text-sm text-muted-foreground truncate">{tutor.education || 'Educator'}</p>
-                            <div className="flex items-center gap-2 mt-1">
-                              <Star className="h-3.5 w-3.5 text-accent fill-accent" />
-                              <span className="text-sm font-semibold">{tutor.average_rating || 0}</span>
-                              <span className="text-xs text-muted-foreground">({tutor.total_reviews} reviews)</span>
-                            </div>
+                  <Link key={tutor.id} to={`/tutor/${tutor.id}`} className="group block animate-fade-in" style={{ animationDelay: `${i * 60}ms` }}>
+                    <div className="bg-card rounded-xl border border-border/60 p-5 h-full transition-all hover:border-primary/30 hover:shadow-[0_4px_24px_-8px_hsl(var(--primary)/0.15)]">
+                      <div className="flex items-start gap-3 mb-4">
+                        <Avatar className="h-12 w-12 border border-border/60">
+                          <AvatarImage src={tutor.profiles?.avatar_url || ''} />
+                          <AvatarFallback className="text-sm font-medium bg-muted">{tutor.profiles?.full_name?.charAt(0) || 'T'}</AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-1.5 mb-0.5">
+                            <h3 className="font-medium text-sm tracking-tight truncate group-hover:text-primary transition-colors">{tutor.profiles?.full_name}</h3>
+                            {tutor.verification_status === 'approved' && tutor.verification_paid && (
+                              <CheckCircle2 className="h-3.5 w-3.5 text-success flex-shrink-0" />
+                            )}
+                          </div>
+                          <p className="text-xs text-muted-foreground truncate">{tutor.education || 'Educator'}</p>
+                          <div className="flex items-center gap-1.5 mt-1">
+                            <Star className="h-3 w-3 text-accent fill-accent" />
+                            <span className="text-xs font-semibold tabular-nums">{tutor.average_rating || 0}</span>
+                            <span className="text-[10px] text-muted-foreground">({tutor.total_reviews})</span>
                           </div>
                         </div>
-                        <div className="flex items-center gap-2 text-xs text-muted-foreground mb-3 flex-wrap">
-                          {tutor.districts && (
-                            <span className="flex items-center gap-1">
-                              <MapPin className="h-3 w-3" />
-                              {tutor.districts.name_en}
-                            </span>
-                          )}
+                      </div>
+                      <div className="flex items-center gap-3 text-[11px] text-muted-foreground mb-3 flex-wrap">
+                        {tutor.districts && (
                           <span className="flex items-center gap-1">
-                            <Briefcase className="h-3 w-3" />
-                            {tutor.experience_years} yrs
+                            <MapPin className="h-3 w-3" />
+                            {tutor.districts.name_en}
                           </span>
-                          <span className="flex items-center gap-1">
-                            <Clock className="h-3 w-3" />
-                            {tutor.teaching_mode === 'in_person' ? 'In-Person' : tutor.teaching_mode === 'online' ? 'Online' : 'Hybrid'}
-                          </span>
+                        )}
+                        <span className="flex items-center gap-1">
+                          <Briefcase className="h-3 w-3" />
+                          {tutor.experience_years}y
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Clock className="h-3 w-3" />
+                          {tutor.teaching_mode === 'in_person' ? 'In-Person' : tutor.teaching_mode === 'online' ? 'Online' : 'Hybrid'}
+                        </span>
+                      </div>
+                      {tutorSubjects.length > 0 && (
+                        <div className="flex flex-wrap gap-1.5 mb-4">
+                          {tutorSubjects.map((s, idx) => (
+                            <Badge key={idx} variant="outline" className="text-[10px] font-normal border-border/60">{s}</Badge>
+                          ))}
                         </div>
-                        {tutorSubjects.length > 0 && (
-                          <div className="flex flex-wrap gap-1.5 mb-3">
-                            {tutorSubjects.map((s, i) => (
-                              <Badge key={i} variant="secondary" className="text-xs">{s}</Badge>
-                            ))}
-                          </div>
-                        )}
-                        {(tutor.monthly_salary_min || tutor.monthly_salary_max) && (
-                          <div className="flex items-center gap-1 text-sm font-semibold text-primary">
-                            <DollarSign className="h-3.5 w-3.5" />
-                            ৳{tutor.monthly_salary_min || '—'} – ৳{tutor.monthly_salary_max || '—'}/mo
-                          </div>
-                        )}
-                      </CardContent>
-                    </Card>
+                      )}
+                      {(tutor.monthly_salary_min || tutor.monthly_salary_max) && (
+                        <div className="pt-3 border-t border-border/40 text-sm font-semibold tracking-tight text-foreground tabular-nums">
+                          ৳{tutor.monthly_salary_min || '—'}–{tutor.monthly_salary_max || '—'}
+                          <span className="text-[10px] font-normal text-muted-foreground ml-1">/mo</span>
+                        </div>
+                      )}
+                    </div>
                   </Link>
                 );
               })}
             </div>
             <div className="text-center mt-8 sm:hidden">
-              <Link to="/tutors"><Button variant="outline">View All Tutors <ChevronRight className="h-4 w-4 ml-1" /></Button></Link>
+              <Link to="/tutors"><Button variant="outline">View All Tutors <ArrowRight className="h-4 w-4 ml-1" /></Button></Link>
             </div>
           </div>
         </section>
