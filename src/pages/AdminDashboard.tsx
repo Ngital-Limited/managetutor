@@ -847,6 +847,89 @@ export default function AdminDashboard() {
   const [selectedAppIds, setSelectedAppIds] = useState<Set<string>>(new Set());
   const [bulkProcessing, setBulkProcessing] = useState(false);
 
+  // Admin direct demo schedule dialog
+  const [demoScheduleApp, setDemoScheduleApp] = useState<{ appId: string; jobId: string; jobTitle: string; tutorUserId: string; tutorProfileId: string; tutorName: string } | null>(null);
+  const [demoScheduleDate, setDemoScheduleDate] = useState('');
+  const [demoScheduleTime, setDemoScheduleTime] = useState('');
+  const [demoScheduleDuration, setDemoScheduleDuration] = useState('60');
+  const [demoScheduleNotes, setDemoScheduleNotes] = useState('');
+  const [demoScheduling, setDemoScheduling] = useState(false);
+
+  const openDemoSchedule = (app: { id: string; tutor_user_id: string; tutor_id: string; tutor_name: string }, jobId: string, jobTitle: string) => {
+    setDemoScheduleApp({
+      appId: app.id,
+      jobId,
+      jobTitle,
+      tutorUserId: app.tutor_user_id,
+      tutorProfileId: app.tutor_id,
+      tutorName: app.tutor_name,
+    });
+    setDemoScheduleDate('');
+    setDemoScheduleTime('');
+    setDemoScheduleDuration('60');
+    setDemoScheduleNotes('');
+  };
+
+  const handleAdminScheduleDemo = async () => {
+    if (!demoScheduleApp || !demoScheduleDate || !demoScheduleTime) {
+      toast({ title: 'Missing info', description: 'Please pick a date and time', variant: 'destructive' });
+      return;
+    }
+    setDemoScheduling(true);
+    try {
+      const { data: jobRow } = await supabase.from('jobs').select('parent_id, subject_id').eq('id', demoScheduleApp.jobId).maybeSingle();
+      if (!jobRow?.parent_id) throw new Error('Job parent not found');
+
+      // Admin-direct: status starts as 'approved' (no further admin approval gate needed)
+      const { error: bookingError } = await supabase.from('demo_bookings').insert({
+        parent_id: jobRow.parent_id,
+        tutor_id: demoScheduleApp.tutorProfileId,
+        application_id: demoScheduleApp.appId,
+        subject_id: jobRow.subject_id || null,
+        preferred_date: demoScheduleDate,
+        preferred_time: demoScheduleTime,
+        duration_minutes: parseInt(demoScheduleDuration),
+        class_fee: 0,
+        platform_commission: 0,
+        tutor_payout: 0,
+        notes: demoScheduleNotes || null,
+        status: 'approved',
+      } as any);
+      if (bookingError) throw bookingError;
+
+      // Sync application status
+      await supabase.from('applications').update({ status: 'invited_to_demo' as any }).eq('id', demoScheduleApp.appId);
+
+      const scheduleStr = `${demoScheduleDate} at ${demoScheduleTime} (${demoScheduleDuration} min)`;
+
+      if (demoScheduleApp.tutorUserId) {
+        await supabase.from('notifications').insert({
+          user_id: demoScheduleApp.tutorUserId,
+          title: 'Demo Class Scheduled by Admin',
+          message: `You have been scheduled for a demo class for "${demoScheduleApp.jobTitle}" on ${scheduleStr}.${demoScheduleNotes ? ' Notes: ' + demoScheduleNotes : ''}`,
+          type: 'application_invited_to_demo',
+          reference_id: demoScheduleApp.jobId,
+        });
+      }
+      await supabase.from('notifications').insert({
+        user_id: jobRow.parent_id,
+        title: 'Demo Class Scheduled',
+        message: `Admin has scheduled a demo class with ${demoScheduleApp.tutorName} for "${demoScheduleApp.jobTitle}" on ${scheduleStr}.`,
+        type: 'demo_approved',
+        reference_id: demoScheduleApp.jobId,
+      });
+
+      toast({ title: 'Demo scheduled', description: `${scheduleStr}. Tutor notified.` });
+      setDemoScheduleApp(null);
+      fetchJobApplications(demoScheduleApp.jobId);
+      fetchAllApplications();
+    } catch (err: any) {
+      toast({ title: 'Error', description: err.message, variant: 'destructive' });
+    } finally {
+      setDemoScheduling(false);
+    }
+  };
+
   const fetchAllApplications = useCallback(async () => {
     setLoadingAllApps(true);
     let query = supabase
