@@ -1494,12 +1494,12 @@ export default function ParentDashboard() {
                             <div className="text-xs text-muted-foreground">applicants</div>
                           </div>
                           <div className="flex gap-1">
-                            {(job.status === 'open' || job.status === 'cancelled') && (
+                            {job.status !== 'completed' && (
                               <Button size="icon" variant="ghost" title="Edit" onClick={(e) => { e.stopPropagation(); startEditJob(job); }}>
                                 <Edit className="h-4 w-4" />
                               </Button>
                             )}
-                            {job.status === 'open' && (
+                            {(job.status === 'open' || job.status === 'pending_approval' || job.status === 'in_progress') && (
                               <Button size="icon" variant="ghost" title="Pause Job" onClick={(e) => { e.stopPropagation(); updateJobStatus(job.id, 'cancelled'); }}>
                                 <Pause className="h-4 w-4" />
                               </Button>
@@ -1514,11 +1514,12 @@ export default function ParentDashboard() {
                                 <CheckCircle2 className="h-4 w-4" />
                               </Button>
                             )}
-                            {(job.status === 'open' || job.status === 'cancelled') && (
-                              <Button size="icon" variant="ghost" className="text-destructive" title="Delete" onClick={(e) => { e.stopPropagation(); deleteJob(job.id); }}>
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            )}
+                            <Button size="icon" variant="ghost" className="text-destructive" title="Delete" onClick={(e) => {
+                              e.stopPropagation();
+                              if (confirm('Delete this job permanently? This cannot be undone.')) deleteJob(job.id);
+                            }}>
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
                           </div>
                         </div>
                       </div>
