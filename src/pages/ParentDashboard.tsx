@@ -183,11 +183,19 @@ function ParentSidebar({ activeSection, setActiveSection, onPostJob, pendingAppl
               {sectionItems.map((item) => (
                 <SidebarMenuItem key={item.key}>
                   <SidebarMenuButton
-                    onClick={() => setActiveSection(item.key)}
+                    onClick={() => {
+                      setActiveSection(item.key);
+                      if (item.key === 'applicants' && pendingApplicants > 0) {
+                        onApplicantsClick?.();
+                      }
+                    }}
                     className={`cursor-pointer ${activeSection === item.key ? 'bg-muted text-primary font-medium' : 'hover:bg-muted/50'}`}
                   >
                     <item.icon className="mr-2 h-4 w-4" />
-                    {!collapsed && <span>{item.title}</span>}
+                    {!collapsed && <span className="flex-1 text-left truncate">{item.title}</span>}
+                    {!collapsed && item.key === 'applicants' && pendingApplicants > 0 && (
+                      <span className="ml-auto text-[10px] font-medium bg-destructive/10 text-destructive px-1.5 py-0.5 rounded-full">{pendingApplicants}</span>
+                    )}
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
