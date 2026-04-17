@@ -50,6 +50,7 @@ interface TutorProfile {
   user_id: string;
   slug: string | null;
   bio: string;
+  ai_overview: string | null;
   education: string;
   experience_years: number;
   monthly_salary_min: number;
@@ -430,7 +431,9 @@ export default function FindTutors() {
             </div>
 
             <p className="text-xs text-muted-foreground line-clamp-2 mb-3 leading-relaxed">
-              {tutor.bio || tutor.education || 'Experienced tutor ready to help you learn.'}
+              {tutor.ai_overview
+                ? tutor.ai_overview.split('\n').filter(Boolean).slice(0, 2).join(' ')
+                : (tutor.bio || tutor.education || 'Experienced tutor ready to help you learn.')}
             </p>
 
             {/* Subjects */}

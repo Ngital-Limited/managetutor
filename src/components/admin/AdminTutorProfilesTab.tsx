@@ -18,7 +18,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Link } from 'react-router-dom';
 import {
   Search, GraduationCap, Send, Filter, Eye, Pencil,
-  Loader2, Bell, X, LogIn, Ban, CheckCircle2, ShieldOff, ShieldCheck, Download, ArrowUpDown, ArrowUp, ArrowDown
+  Loader2, Bell, X, LogIn, Ban, CheckCircle2, ShieldOff, ShieldCheck, Download, ArrowUpDown, ArrowUp, ArrowDown, Sparkles
 } from 'lucide-react';
 import {
   DropdownMenu as DropdownMenuRoot,
@@ -498,6 +498,27 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
     toast({ title: 'CSV Exported', description: `${tutors.length} tutors exported` });
   };
 
+  // ─── Bulk AI Overview Generation ───
+  const [bulkAiRunning, setBulkAiRunning] = useState(false);
+  const handleBulkGenerateOverviews = async () => {
+    if (!confirm('Generate AI overviews for up to 25 tutors missing one? This may take a minute.')) return;
+    setBulkAiRunning(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('bulk-generate-tutor-overviews', {
+        body: { limit: 25, overwrite: false },
+      });
+      if (error) throw error;
+      toast({
+        title: 'Bulk generation complete',
+        description: `Processed ${data?.processed ?? 0}, success ${data?.success ?? 0}, failed ${data?.failed ?? 0}.`,
+      });
+    } catch (e: any) {
+      toast({ title: 'Bulk generation failed', description: e?.message || 'Unknown error', variant: 'destructive' });
+    } finally {
+      setBulkAiRunning(false);
+    }
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between flex-wrap gap-3">
@@ -515,6 +536,10 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
           )}
           <Button size="sm" variant="outline" onClick={() => { setNotifyMode('filtered'); setNotifyDialogOpen(true); }} className="gap-1.5">
             <Bell className="h-3.5 w-3.5" /> Notify All Filtered ({totalCount})
+          </Button>
+          <Button size="sm" variant="outline" onClick={handleBulkGenerateOverviews} disabled={bulkAiRunning} className="gap-1.5">
+            {bulkAiRunning ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
+            Generate AI Overviews
           </Button>
           <Button size="sm" variant="outline" onClick={handleExportCSV} className="gap-1.5">
             <Download className="h-3.5 w-3.5" /> Export CSV
