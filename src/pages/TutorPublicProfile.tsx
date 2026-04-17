@@ -261,6 +261,19 @@ export default function TutorPublicProfile() {
                       {profile.user_reference && (
                         <Badge variant="outline" className="font-mono text-xs">{profile.user_reference}</Badge>
                       )}
+                      {(() => {
+                        const RANK: Record<string, number> = { masters: 4, master: 4, bachelor: 3, hsc: 2, ssc: 1 };
+                        const highest = [...educationEntries]
+                          .filter(e => e.institution?.trim())
+                          .sort((a, b) => (RANK[(b.degree || '').toLowerCase()] ?? 0) - (RANK[(a.degree || '').toLowerCase()] ?? 0))[0];
+                        if (!highest) return null;
+                        return (
+                          <Badge variant="secondary" className="text-xs">
+                            <GraduationCap className="h-3 w-3 mr-1" />
+                            {highest.degree}{highest.institution ? ` • ${highest.institution}` : ''}
+                          </Badge>
+                        );
+                      })()}
                       {tutor.verification_status === 'approved' && tutor.verification_paid && (
                         <Badge className="bg-success"><CheckCircle2 className="h-3 w-3 mr-1" />Verified</Badge>
                       )}

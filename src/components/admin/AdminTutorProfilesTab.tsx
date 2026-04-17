@@ -18,7 +18,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Link } from 'react-router-dom';
 import {
   Search, GraduationCap, Send, Filter, Eye, Pencil,
-  Loader2, Bell, X, LogIn, Ban, CheckCircle2, ShieldOff, ShieldCheck, Download
+  Loader2, Bell, X, LogIn, Ban, CheckCircle2, ShieldOff, ShieldCheck, Download, ArrowUpDown, ArrowUp, ArrowDown
 } from 'lucide-react';
 import {
   DropdownMenu as DropdownMenuRoot,
@@ -79,6 +79,8 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
   const [filterCategory, setFilterCategory] = useState('all');
   const [filterLastEducation, setFilterLastEducation] = useState('all');
   const [showFilters, setShowFilters] = useState(false);
+  const [sortBy, setSortBy] = useState<'last_education' | 'rating' | 'joined' | null>(null);
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
 
   // ─── Data ───
   const [tutors, setTutors] = useState<TutorRow[]>([]);
@@ -302,6 +304,27 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
   }, [search, filterAreas, filterGender, filterMedium, filterEducation, filterUniversity, filterVerification, filterAvailability, filterClassLevel, filterSubject, filterCategory, filterLastEducation, areas, districts, districtMap, areaMap, subjects]);
 
   useEffect(() => { fetchTutors(); }, [fetchTutors]);
+
+  const sortedTutors = useMemo(() => {
+    if (!sortBy) return tutors;
+    const DEGREE_RANK: Record<string, number> = { masters: 4, master: 4, bachelor: 3, hsc: 2, ssc: 1 };
+    const arr = [...tutors];
+    arr.sort((a, b) => {
+      let av: number = 0, bv: number = 0;
+      if (sortBy === 'last_education') {
+        av = DEGREE_RANK[(a.last_education || '').toLowerCase()] ?? 0;
+        bv = DEGREE_RANK[(b.last_education || '').toLowerCase()] ?? 0;
+      } else if (sortBy === 'rating') {
+        av = a.average_rating ?? 0;
+        bv = b.average_rating ?? 0;
+      } else if (sortBy === 'joined') {
+        av = a.created_at ? new Date(a.created_at).getTime() : 0;
+        bv = b.created_at ? new Date(b.created_at).getTime() : 0;
+      }
+      return sortDir === 'asc' ? av - bv : bv - av;
+    });
+    return arr;
+  }, [tutors, sortBy, sortDir]);
 
   const toggleSelect = (userId: string) => {
     setSelectedIds(prev => {
@@ -668,19 +691,62 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
                   <TableHead>Contact</TableHead>
                   <TableHead>Location</TableHead>
                   <TableHead>Gender</TableHead>
-                  <TableHead>Last Education</TableHead>
+                  <TableHead>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (sortBy === 'last_education') setSortDir(d => d === 'asc' ? 'desc' : 'asc');
+                        else { setSortBy('last_education'); setSortDir('desc'); }
+                      }}
+                      className="inline-flex items-center gap-1 hover:text-foreground"
+                    >
+                      Last Education
+                      {sortBy === 'last_education'
+                        ? (sortDir === 'asc' ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />)
+                        : <ArrowUpDown className="h-3 w-3 opacity-50" />}
+                    </button>
+                  </TableHead>
                   <TableHead>Mode</TableHead>
                   <TableHead>Status</TableHead>
-                  <TableHead>Rating</TableHead>
+                  <TableHead>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (sortBy === 'rating') setSortDir(d => d === 'asc' ? 'desc' : 'asc');
+                        else { setSortBy('rating'); setSortDir('desc'); }
+                      }}
+                      className="inline-flex items-center gap-1 hover:text-foreground"
+                    >
+                      Rating
+                      {sortBy === 'rating'
+                        ? (sortDir === 'asc' ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />)
+                        : <ArrowUpDown className="h-3 w-3 opacity-50" />}
+                    </button>
+                  </TableHead>
+                  <TableHead>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (sortBy === 'joined') setSortDir(d => d === 'asc' ? 'desc' : 'asc');
+                        else { setSortBy('joined'); setSortDir('desc'); }
+                      }}
+                      className="inline-flex items-center gap-1 hover:text-foreground"
+                    >
+                      Joined
+                      {sortBy === 'joined'
+                        ? (sortDir === 'asc' ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />)
+                        : <ArrowUpDown className="h-3 w-3 opacity-50" />}
+                    </button>
+                  </TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {loading ? (
-                  <TableRow><TableCell colSpan={10} className="text-center py-12"><Loader2 className="h-6 w-6 animate-spin mx-auto text-muted-foreground" /></TableCell></TableRow>
-                ) : tutors.length === 0 ? (
-                  <TableRow><TableCell colSpan={10} className="text-center py-12 text-muted-foreground">No tutors match the current filters</TableCell></TableRow>
-                ) : tutors.map(t => (
+                  <TableRow><TableCell colSpan={11} className="text-center py-12"><Loader2 className="h-6 w-6 animate-spin mx-auto text-muted-foreground" /></TableCell></TableRow>
+                ) : sortedTutors.length === 0 ? (
+                  <TableRow><TableCell colSpan={11} className="text-center py-12 text-muted-foreground">No tutors match the current filters</TableCell></TableRow>
+                ) : sortedTutors.map(t => (
                   <TableRow key={t.tutor_id} className={`${selectedIds.has(t.user_id) ? 'bg-primary/5' : ''} ${t.is_banned ? 'opacity-60' : ''}`}>
                     <TableCell><Checkbox checked={selectedIds.has(t.user_id)} onCheckedChange={() => toggleSelect(t.user_id)} /></TableCell>
                     <TableCell>
@@ -724,6 +790,9 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
                       </div>
                     </TableCell>
                     <TableCell className="text-xs">{t.average_rating ? `★ ${t.average_rating}` : '—'}</TableCell>
+                    <TableCell className="text-[11px] text-muted-foreground whitespace-nowrap">
+                      {t.created_at ? new Date(t.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '—'}
+                    </TableCell>
                     <TableCell className="text-right">
                       <DropdownMenuRoot>
                         <DropdownMenuTrigger asChild>
