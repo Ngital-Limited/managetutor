@@ -605,6 +605,7 @@ export type Database = {
           description_bn: string | null
           district_id: string
           duration_hours: number | null
+          fixed_time: string | null
           id: string
           is_featured: boolean | null
           job_reference: string | null
@@ -637,6 +638,7 @@ export type Database = {
           description_bn?: string | null
           district_id: string
           duration_hours?: number | null
+          fixed_time?: string | null
           id?: string
           is_featured?: boolean | null
           job_reference?: string | null
@@ -669,6 +671,7 @@ export type Database = {
           description_bn?: string | null
           district_id?: string
           duration_hours?: number | null
+          fixed_time?: string | null
           id?: string
           is_featured?: boolean | null
           job_reference?: string | null

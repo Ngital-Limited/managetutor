@@ -393,6 +393,15 @@ export default function JobDetails() {
                       </div>
                     </div>
                   )}
+                  {(job as any).fixed_time && (
+                    <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
+                      <Clock className="h-5 w-5 text-primary" />
+                      <div>
+                        <div className="text-xs text-muted-foreground">Fixed Time</div>
+                        <div className="font-medium">{(job as any).fixed_time}</div>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {job.location_details && (

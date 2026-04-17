@@ -272,6 +272,7 @@ export default function ParentDashboard() {
     student_gender: 'any',
     special_requirements: [] as string[],
     preferred_time: '',
+    fixed_time: '',
     number_of_students: 1,
     student_age: '',
     student_school_name: '',
@@ -384,6 +385,7 @@ export default function ParentDashboard() {
       student_gender: jobForm.student_gender as 'male' | 'female' | 'any',
       special_requirements: jobForm.special_requirements.length > 0 ? jobForm.special_requirements.join(', ') : null,
       preferred_time: jobForm.preferred_time || null,
+      fixed_time: jobForm.fixed_time || null,
       number_of_students: jobForm.number_of_students,
       student_age: jobForm.student_age || null,
       start_date: jobForm.start_date || null,
@@ -416,7 +418,7 @@ export default function ParentDashboard() {
       category: '', background: '',
       days_per_week: 3, duration_hours: 1.5, budget_min: 3000, budget_max: 8000,
       teaching_mode: 'in_person', preferred_tutor_gender: 'any', student_gender: 'any',
-      special_requirements: [] as string[], preferred_time: '',
+      special_requirements: [] as string[], preferred_time: '', fixed_time: '',
       number_of_students: 1, student_age: '', student_school_name: '', start_date: '', location_details: '',
     });
   };
@@ -507,6 +509,7 @@ export default function ParentDashboard() {
       student_gender: job.student_gender || 'any',
       special_requirements: job.special_requirements ? job.special_requirements.split(', ') : [],
       preferred_time: job.preferred_time || '',
+      fixed_time: (job as any).fixed_time || '',
       number_of_students: job.number_of_students || 1,
       student_age: job.student_age || '',
       student_school_name: (job as any).student_school_name || '',
@@ -538,6 +541,7 @@ export default function ParentDashboard() {
       student_gender: jobForm.student_gender as 'male' | 'female' | 'any',
       special_requirements: jobForm.special_requirements.length > 0 ? jobForm.special_requirements.join(', ') : null,
       preferred_time: jobForm.preferred_time || null,
+      fixed_time: jobForm.fixed_time || null,
       number_of_students: jobForm.number_of_students,
       student_age: jobForm.student_age || null,
       start_date: jobForm.start_date || null,
@@ -956,6 +960,17 @@ export default function ParentDashboard() {
                 </SelectContent>
               </Select>
               <p className="text-xs text-muted-foreground mt-1">Choose a flexible time slot — tutors will see what works for you.</p>
+            </div>
+          </div>
+          <div className="grid md:grid-cols-2 gap-4">
+            <div>
+              <Label>Fixed Time (Optional)</Label>
+              <Input
+                type="time"
+                value={jobForm.fixed_time}
+                onChange={(e) => setJobForm({ ...jobForm, fixed_time: e.target.value })}
+              />
+              <p className="text-xs text-muted-foreground mt-1">If you need a specific clock time (e.g. 5:00 PM), set it here.</p>
             </div>
           </div>
           <div className="grid md:grid-cols-3 gap-4">
