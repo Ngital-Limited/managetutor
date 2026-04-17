@@ -533,14 +533,6 @@ export default function TutorProfile() {
     setJobExperiences(updated);
   };
 
-  if (loading || authLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-      </div>
-    );
-  }
-
   // Profile completeness — same scoring used by the apply gate (10 pts × 10 items = 100)
   const completeness = useMemo(() => {
     const requiredDegree = profile.is_student ? 'HSC' : 'Bachelor';
@@ -560,6 +552,14 @@ export default function TutorProfile() {
     const score = items.filter(i => i.ok).length * 10;
     return { score, items, missing: items.filter(i => !i.ok).map(i => i.label) };
   }, [profile, educationEntries, userProfile.district_id, selectedClassLevels, selectedSubjects]);
+
+  if (loading || authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   const profileContent = (
     <div className="px-4 py-6 max-w-5xl mx-auto">
