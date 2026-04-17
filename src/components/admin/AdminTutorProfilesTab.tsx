@@ -47,6 +47,7 @@ interface TutorRow {
   area_id: string | null;
   district_id: string | null;
   education: string | null;
+  last_education: string | null;
   experience_years: number;
   teaching_mode: string | null;
   verification_status: string;
