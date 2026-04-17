@@ -3055,9 +3055,28 @@ export default function AdminDashboard() {
             })()}
 
             {/* ═══════ REVIEWS TAB ═══════ */}
-            {activeTab === 'reviews' && (
+            {activeTab === 'reviews' && (() => {
+              const q = reviewsSearch.trim().toLowerCase();
+              const filteredReviews = !q ? reviews : reviews.filter(r =>
+                ((r.parent as any)?.full_name || '').toLowerCase().includes(q) ||
+                ((r.tutor_profiles as any)?.profiles?.full_name || '').toLowerCase().includes(q) ||
+                (r.comment || '').toLowerCase().includes(q) ||
+                String(r.rating || '').includes(q)
+              );
+              return (
               <div className="space-y-6">
-                <h1 className="text-xl font-semibold">Review Moderation</h1>
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                  <h1 className="text-xl font-semibold">Review Moderation</h1>
+                  <div className="relative w-full sm:w-72">
+                    <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      value={reviewsSearch}
+                      onChange={(e) => setReviewsSearch(e.target.value)}
+                      placeholder="Search parent, tutor, comment, or rating"
+                      className="pl-8 h-9"
+                    />
+                  </div>
+                </div>
                 <Card>
                   <CardContent className="p-0">
                     <ScrollArea className="w-full">
@@ -3074,9 +3093,9 @@ export default function AdminDashboard() {
                           </TableRow>
                         </TableHeader>
                         <TableBody>
-                          {reviews.length === 0 ? (
-                            <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">No reviews yet</TableCell></TableRow>
-                          ) : reviews.map((r) => (
+                          {filteredReviews.length === 0 ? (
+                            <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">{q ? 'No matches' : 'No reviews yet'}</TableCell></TableRow>
+                          ) : filteredReviews.map((r) => (
                             <TableRow key={r.id}>
                               <TableCell className="text-sm">{(r.parent as any)?.full_name}</TableCell>
                               <TableCell className="text-sm">{(r.tutor_profiles as any)?.profiles?.full_name || '—'}</TableCell>
@@ -3106,7 +3125,8 @@ export default function AdminDashboard() {
                   </CardContent>
                 </Card>
               </div>
-            )}
+              );
+            })()}
 
             {/* ═══════ PAYMENTS TAB ═══════ */}
             {activeTab === 'payments' && (
