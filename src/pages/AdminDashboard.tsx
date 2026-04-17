@@ -2564,7 +2564,19 @@ export default function AdminDashboard() {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="text-sm font-medium">Preferred Time</label>
-                <Input value={editJobForm.preferred_time} onChange={(e) => setEditJobForm(f => ({ ...f, preferred_time: e.target.value }))} className="mt-1" placeholder="e.g. Evening 5-7 PM" />
+                <Select value={editJobForm.preferred_time} onValueChange={(v) => setEditJobForm(f => ({ ...f, preferred_time: v }))}>
+                  <SelectTrigger className="mt-1"><SelectValue placeholder="Select preferred time" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Flexible / Anytime">Flexible / Anytime</SelectItem>
+                    <SelectItem value="Morning (6 AM – 9 AM)">Morning (6 AM – 9 AM)</SelectItem>
+                    <SelectItem value="Late Morning (9 AM – 12 PM)">Late Morning (9 AM – 12 PM)</SelectItem>
+                    <SelectItem value="Afternoon (12 PM – 4 PM)">Afternoon (12 PM – 4 PM)</SelectItem>
+                    <SelectItem value="After Evening (Anytime)">After Evening (Anytime)</SelectItem>
+                    <SelectItem value="Evening (4 PM – 7 PM)">Evening (4 PM – 7 PM)</SelectItem>
+                    <SelectItem value="Night (7 PM – 10 PM)">Night (7 PM – 10 PM)</SelectItem>
+                    <SelectItem value="Weekends Only">Weekends Only</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
               <div>
                 <label className="text-sm font-medium">Start Date</label>
