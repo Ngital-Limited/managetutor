@@ -162,6 +162,7 @@ export default function TutorProfile() {
         email: profileRes.data.email || user?.email || '',
         district_id: profileRes.data.district_id || '',
         area_id: profileRes.data.area_id || '',
+        avatar_url: profileRes.data.avatar_url || '',
       });
       // Set initial division
       if (profileRes.data.district_id && districtsRes.data) {
@@ -259,6 +260,10 @@ export default function TutorProfile() {
       toast({ title: 'Name Required', description: 'Full name is mandatory.', variant: 'destructive' });
       return;
     }
+    if (!userProfile.avatar_url) {
+      toast({ title: 'Profile Picture Required', description: 'Please upload a profile picture. It is mandatory for tutors.', variant: 'destructive' });
+      return;
+    }
     const phoneFields = [
       { value: profile.father_phone, label: "Father's Phone" },
       { value: profile.mother_phone, label: "Mother's Phone" },
@@ -277,6 +282,7 @@ export default function TutorProfile() {
       phone: userProfile.phone,
       district_id: userProfile.district_id || null,
       area_id: userProfile.area_id || null,
+      avatar_url: userProfile.avatar_url || null,
     }).eq('id', targetUserId);
 
     if (profileError) {
