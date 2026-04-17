@@ -2100,18 +2100,45 @@ export default function ParentDashboard() {
     </Card>
   );
 
-  const renderApplicants = () => (
+  const renderApplicants = () => {
+    const statusOptions: { key: typeof applicantsStatusFilter; label: string }[] = [
+      { key: 'all', label: 'All' },
+      { key: 'pending', label: 'Pending' },
+      { key: 'shortlisted', label: 'Shortlisted' },
+      { key: 'invited_to_demo', label: 'Invited' },
+      { key: 'accepted', label: 'Accepted' },
+      { key: 'rejected', label: 'Rejected' },
+    ];
+    const filteredApplicants = applicantsStatusFilter === 'all'
+      ? allApplicants
+      : allApplicants.filter((a: any) => a.status === applicantsStatusFilter);
+    return (
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Users className="h-5 w-5" />
           All Applicants
-          <Badge variant="outline">{allApplicants.length}</Badge>
+          <Badge variant="outline">{filteredApplicants.length}</Badge>
         </CardTitle>
         <CardDescription>Tutors who applied to any of your job posts</CardDescription>
+        <div className="flex flex-wrap gap-1.5 pt-2">
+          {statusOptions.map(opt => {
+            const count = opt.key === 'all' ? allApplicants.length : allApplicants.filter((a: any) => a.status === opt.key).length;
+            const active = applicantsStatusFilter === opt.key;
+            return (
+              <button
+                key={opt.key}
+                onClick={() => setApplicantsStatusFilter(opt.key)}
+                className={`text-xs px-2.5 py-1 rounded-full border transition-colors ${active ? 'bg-primary text-primary-foreground border-primary' : 'bg-background text-muted-foreground hover:bg-muted'}`}
+              >
+                {opt.label} <span className="opacity-70">({count})</span>
+              </button>
+            );
+          })}
+        </div>
       </CardHeader>
       <CardContent>
-        {allApplicants.length > 0 ? (
+        {filteredApplicants.length > 0 ? (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
