@@ -2257,8 +2257,18 @@ export default function AdminDashboard() {
                 const search = appsJobsSearch.trim().toLowerCase();
                 const filteredJobs = jobsList.filter(j => {
                   if (!search) return true;
-                  return (j.job?.title || '').toLowerCase().includes(search) ||
-                    (j.job?.job_reference || '').toLowerCase().includes(search);
+                  // Match against job title, ref, parent name/email/phone/user_reference, or any applicant's tutor name/email/phone/user_reference
+                  const apps = allApplications.filter(a => a.job_id === j.jid);
+                  const haystacks: string[] = [
+                    j.job?.title, j.job?.job_reference,
+                    apps[0]?.parent_profile?.full_name, apps[0]?.parent_profile?.email,
+                    apps[0]?.parent_profile?.phone, apps[0]?.parent_profile?.user_reference,
+                    ...apps.flatMap(a => [
+                      a.tutor_profile?.full_name, a.tutor_profile?.email,
+                      a.tutor_profile?.phone, a.tutor_profile?.user_reference,
+                    ]),
+                  ].filter(Boolean).map(String);
+                  return haystacks.some(h => h.toLowerCase().includes(search));
                 }).sort((a, b) => new Date(b.latest).getTime() - new Date(a.latest).getTime());
 
                 return (
@@ -2266,13 +2276,13 @@ export default function AdminDashboard() {
                     <div className="flex items-center justify-between flex-wrap gap-3">
                       <div>
                         <h1 className="text-xl font-semibold">Applications</h1>
-                        <p className="text-sm text-muted-foreground mt-0.5">Jobs with applications. Click a job to manage its applicants.</p>
+                        <p className="text-sm text-muted-foreground mt-0.5">Search by job title, reference, parent/tutor name, email, phone, or user ID.</p>
                       </div>
                       <Input
-                        placeholder="Search by job title or reference…"
+                        placeholder="Search title, ref, name, email, phone, user ID…"
                         value={appsJobsSearch}
                         onChange={(e) => setAppsJobsSearch(e.target.value)}
-                        className="w-72 h-9"
+                        className="w-96 h-9"
                       />
                     </div>
 
