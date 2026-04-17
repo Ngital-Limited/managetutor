@@ -120,7 +120,7 @@ export default function BrowseJobs() {
 
   useEffect(() => {
     fetchJobs();
-  }, [selectedDistrict, selectedArea, selectedCategory, selectedBackground, selectedTime, currentPage]);
+  }, [selectedArea, selectedCategory, selectedBackground, selectedTime, currentPage]);
 
   useEffect(() => {
     if (user && role === 'tutor') {
