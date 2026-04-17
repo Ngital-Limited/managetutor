@@ -146,7 +146,7 @@ export default function BrowseJobs({ embedded = false }: { embedded?: boolean } 
     if (!user) return;
     const { data } = await supabase
       .from('tutor_profiles')
-      .select('id, bio, education, experience_years, monthly_salary_min, verification_status, gender, district_id, teaching_mode, class_levels')
+      .select('id, bio, education, experience_years, monthly_salary_min, verification_status, gender, district_id, area_id, teaching_mode, class_levels')
       .eq('user_id', user.id)
       .single();
     if (data) {
