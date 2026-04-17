@@ -38,11 +38,14 @@ interface TutorProfile {
   gender: string;
   display_name: string | null;
   district_id: string | null;
+  area_id: string | null;
   created_at: string;
   video_url: string | null;
   teaching_philosophy: string | null;
   success_stories: string | null;
   ai_overview: string | null;
+  districts: { name_en: string; name_bn: string } | null;
+  areas: { name_en: string; name_bn: string } | null;
 }
 
 interface Profile {
@@ -99,18 +102,19 @@ export default function TutorPublicProfile() {
     setLoading(true);
 
     let tutorData: any = null;
+    const selectCols = '*, districts (name_en, name_bn), areas (name_en, name_bn)';
 
     if (UUID_REGEX.test(id)) {
       // Try id, then user_id
-      const r1 = await supabase.from('tutor_profiles').select('*').eq('id', id).maybeSingle();
+      const r1 = await supabase.from('tutor_profiles').select(selectCols).eq('id', id).maybeSingle();
       tutorData = r1.data;
       if (!tutorData) {
-        const r2 = await supabase.from('tutor_profiles').select('*').eq('user_id', id).maybeSingle();
+        const r2 = await supabase.from('tutor_profiles').select(selectCols).eq('user_id', id).maybeSingle();
         tutorData = r2.data;
       }
     } else {
       // Treat as slug
-      const r = await supabase.from('tutor_profiles').select('*').eq('slug', id).maybeSingle();
+      const r = await supabase.from('tutor_profiles').select(selectCols).eq('slug', id).maybeSingle();
       tutorData = r.data;
     }
 
@@ -228,8 +232,8 @@ export default function TutorPublicProfile() {
     );
   }
 
-  const districtName = profile.districts?.name_en;
-  const areaName = profile.areas?.name_en;
+  const districtName = tutor.districts?.name_en || profile.districts?.name_en;
+  const areaName = tutor.areas?.name_en || profile.areas?.name_en;
   const locationText = [areaName, districtName].filter(Boolean).join(', ');
 
   const teachingModeMeta: Record<string, { label: string; Icon: typeof Monitor }> = {
