@@ -32,6 +32,7 @@ interface Area {
   id: string;
   name_en: string;
   district_id: string;
+  district_name?: string;
 }
 
 interface Job {
