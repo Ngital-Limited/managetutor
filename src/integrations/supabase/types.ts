@@ -1578,8 +1578,6 @@ export type Database = {
       }
       tutor_profiles: {
         Row: {
-          ai_overview: string | null
-          ai_overview_updated_at: string | null
           area_id: string | null
           average_rating: number | null
           bio: string | null
@@ -1597,6 +1595,7 @@ export type Database = {
           experience_years: number | null
           father_name: string | null
           father_phone: string | null
+          featured_blurb: string | null
           gender: Database["public"]["Enums"]["gender"]
           height: string | null
           id: string
@@ -1630,8 +1629,6 @@ export type Database = {
           weight: string | null
         }
         Insert: {
-          ai_overview?: string | null
-          ai_overview_updated_at?: string | null
           area_id?: string | null
           average_rating?: number | null
           bio?: string | null
@@ -1649,6 +1646,7 @@ export type Database = {
           experience_years?: number | null
           father_name?: string | null
           father_phone?: string | null
+          featured_blurb?: string | null
           gender: Database["public"]["Enums"]["gender"]
           height?: string | null
           id?: string
@@ -1682,8 +1680,6 @@ export type Database = {
           weight?: string | null
         }
         Update: {
-          ai_overview?: string | null
-          ai_overview_updated_at?: string | null
           area_id?: string | null
           average_rating?: number | null
           bio?: string | null
@@ -1701,6 +1697,7 @@ export type Database = {
           experience_years?: number | null
           father_name?: string | null
           father_phone?: string | null
+          featured_blurb?: string | null
           gender?: Database["public"]["Enums"]["gender"]
           height?: string | null
           id?: string

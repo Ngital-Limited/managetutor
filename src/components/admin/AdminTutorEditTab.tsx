@@ -32,9 +32,12 @@ interface TutorResult {
   experience_years: number;
   verification_status: string;
   bio: string | null;
+  featured_blurb: string | null;
 }
 
 export function AdminTutorEditTab({ toast }: Props) {
+  const [blurb, setBlurb] = useState('');
+  const [savingBlurb, setSavingBlurb] = useState(false);
   const { user } = useAuth();
   const [search, setSearch] = useState('');
   const [results, setResults] = useState<TutorResult[]>([]);
@@ -69,7 +72,7 @@ export function AdminTutorEditTab({ toast }: Props) {
     if (q.length < 2) { setResults([]); return; }
     setSearching(true);
     const { data: tutors } = await supabase.from('tutor_profiles')
-      .select('id, user_id, gender, experience_years, verification_status, bio')
+      .select('id, user_id, gender, experience_years, verification_status, bio, featured_blurb')
       .limit(50);
     if (!tutors) { setResults([]); setSearching(false); return; }
     const userIds = tutors.map(t => t.user_id);
@@ -90,6 +93,7 @@ export function AdminTutorEditTab({ toast }: Props) {
           experience_years: t.experience_years || 0,
           verification_status: t.verification_status || 'pending',
           bio: t.bio,
+          featured_blurb: (t as any).featured_blurb ?? null,
         };
       });
     setResults(mapped);
@@ -155,7 +159,25 @@ export function AdminTutorEditTab({ toast }: Props) {
   const handleSelectTutor = (t: TutorResult) => {
     setSelectedTutor(t);
     setResults([]);
+    setBlurb(t.featured_blurb || '');
     loadTutorData(t.tutor_id);
+  };
+
+  const handleSaveBlurb = async () => {
+    if (!selectedTutor) return;
+    setSavingBlurb(true);
+    const value = blurb.trim() || null;
+    const { error } = await supabase
+      .from('tutor_profiles')
+      .update({ featured_blurb: value } as any)
+      .eq('id', selectedTutor.tutor_id);
+    if (error) {
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+    } else {
+      toast({ title: 'Featured blurb saved' });
+      setSelectedTutor({ ...selectedTutor, featured_blurb: value });
+    }
+    setSavingBlurb(false);
   };
 
   // ─── Subjects ───
@@ -294,7 +316,7 @@ export function AdminTutorEditTab({ toast }: Props) {
                 <p className="font-medium text-sm">{selectedTutor.name}</p>
                 <p className="text-xs text-muted-foreground">{selectedTutor.email} · {selectedTutor.gender} · {selectedTutor.experience_years} yrs exp</p>
               </div>
-              <Button size="sm" variant="outline" onClick={() => { setSelectedTutor(null); setSearch(''); setTutorSubjectIds([]); setEducations([]); setExperiences([]); }}>Change</Button>
+              <Button size="sm" variant="outline" onClick={() => { setSelectedTutor(null); setSearch(''); setTutorSubjectIds([]); setEducations([]); setExperiences([]); setBlurb(''); }}>Change</Button>
             </div>
           )}
         </CardContent>
@@ -333,6 +355,29 @@ export function AdminTutorEditTab({ toast }: Props) {
               <div className="flex justify-between"><span className="text-muted-foreground">Experience</span><span>{selectedTutor.experience_years} years</span></div>
               <div className="flex justify-between"><span className="text-muted-foreground">Gender</span><span className="capitalize">{selectedTutor.gender}</span></div>
               {selectedTutor.bio && <div><span className="text-muted-foreground">Bio:</span><p className="mt-1 text-xs bg-muted/50 p-2 rounded">{selectedTutor.bio}</p></div>}
+            </CardContent>
+          </Card>
+
+          {/* Featured blurb (manual, shown on public profile) */}
+          <Card className="md:col-span-2">
+            <CardHeader>
+              <CardTitle className="text-base flex items-center gap-2"><FileText className="h-4 w-4 text-primary" /> Featured Tutor Blurb</CardTitle>
+              <CardDescription>A short hand-written highlight (1–3 sentences) shown on this tutor's public profile.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <Textarea
+                value={blurb}
+                onChange={e => setBlurb(e.target.value.slice(0, 500))}
+                placeholder="e.g. Top-rated math tutor with 5+ years helping HSC students score A+. Patient, structured, and exam-focused."
+                rows={4}
+                maxLength={500}
+              />
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-muted-foreground">{blurb.length}/500</span>
+                <Button size="sm" onClick={handleSaveBlurb} disabled={savingBlurb}>
+                  {savingBlurb ? 'Saving...' : 'Save Blurb'}
+                </Button>
+              </div>
             </CardContent>
           </Card>
 
