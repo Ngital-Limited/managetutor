@@ -1759,7 +1759,7 @@ export default function ParentDashboard() {
                                             {app.status === 'rejected' && (
                                               <span className="text-xs text-muted-foreground">Rejected</span>
                                             )}
-                                            <Link to={`/tutor/${tutor?.id}`}>
+                                            <Link to={`/tutor/${tutor?.slug || tutor?.id}`}>
                                               <Button size="sm" variant="ghost" className="h-8 text-xs">
                                                 <Eye className="h-3.5 w-3.5" />
                                               </Button>
