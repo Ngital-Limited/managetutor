@@ -2350,9 +2350,9 @@ export default function AdminDashboard() {
                           </TableRow>
                         </TableHeader>
                         <TableBody>
-                          {jobs.length === 0 ? (
+                          {filteredJobs.length === 0 ? (
                             <TableRow><TableCell colSpan={9} className="text-center py-8 text-muted-foreground">No jobs found</TableCell></TableRow>
-                          ) : jobs.slice((jobPage - 1) * jobPageSize, jobPage * jobPageSize).map((job) => (
+                          ) : filteredJobs.slice((jobPage - 1) * jobPageSize, jobPage * jobPageSize).map((job) => (
                             <TableRow key={job.id}>
                               <TableCell className="font-mono text-xs">{job.job_reference || '—'}</TableCell>
                               <TableCell className="font-medium text-sm max-w-[200px] truncate">{job.title}</TableCell>
