@@ -2901,6 +2901,31 @@ export default function AdminDashboard() {
                       </ScrollArea>
                     </CardContent>
                   </Card>
+
+                  {visible.length > 0 && (() => {
+                    const totalPages = Math.max(1, Math.ceil(visible.length / appsApplicantsPageSize));
+                    const page = Math.min(appsApplicantsPage, totalPages);
+                    const start = (page - 1) * appsApplicantsPageSize + 1;
+                    const end = Math.min(page * appsApplicantsPageSize, visible.length);
+                    return (
+                      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-1">
+                        <div className="text-xs text-muted-foreground">Showing {start}–{end} of {visible.length}</div>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <Select value={String(appsApplicantsPageSize)} onValueChange={(v) => { setAppsApplicantsPageSize(Number(v)); setAppsApplicantsPage(1); }}>
+                            <SelectTrigger className="h-8 w-[100px] text-xs"><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              {[10, 25, 50, 100].map(n => <SelectItem key={n} value={String(n)}>{n} / page</SelectItem>)}
+                            </SelectContent>
+                          </Select>
+                          <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setAppsApplicantsPage(1)}>« First</Button>
+                          <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setAppsApplicantsPage(page - 1)}>Prev</Button>
+                          <span className="text-xs text-muted-foreground">Page {page} of {totalPages}</span>
+                          <Button variant="outline" size="sm" disabled={page >= totalPages} onClick={() => setAppsApplicantsPage(page + 1)}>Next</Button>
+                          <Button variant="outline" size="sm" disabled={page >= totalPages} onClick={() => setAppsApplicantsPage(totalPages)}>Last »</Button>
+                        </div>
+                      </div>
+                    );
+                  })()}
                 </div>
               );
             })()}
