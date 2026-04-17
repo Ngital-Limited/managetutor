@@ -91,6 +91,12 @@ export function Header() {
 
             {/* Desktop auth */}
             <div className="hidden md:flex items-center gap-2">
+              <Link to="/install" aria-label="Install App">
+                <Button variant="outline" size="sm" className="h-9 rounded-lg font-medium gap-1.5">
+                  <Download className="h-4 w-4" />
+                  Install App
+                </Button>
+              </Link>
               {user ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
