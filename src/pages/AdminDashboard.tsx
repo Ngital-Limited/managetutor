@@ -824,6 +824,44 @@ export default function AdminDashboard() {
   const [assignTutorResults, setAssignTutorResults] = useState<{ tutor_id: string; user_id: string; name: string; gender: string; experience: number; phone: string | null; email: string; district: string | null; rating: number | null; verification: string | null; reference: string | null }[]>([]);
   const [searchingTutors, setSearchingTutors] = useState(false);
 
+  // All-applications (admin Applications tab)
+  const [allApplications, setAllApplications] = useState<any[]>([]);
+  const [allAppsStatusFilter, setAllAppsStatusFilter] = useState('all');
+  const [allAppsSearch, setAllAppsSearch] = useState('');
+  const [loadingAllApps, setLoadingAllApps] = useState(false);
+
+  const fetchAllApplications = useCallback(async () => {
+    setLoadingAllApps(true);
+    let query = supabase
+      .from('applications')
+      .select(`
+        id, status, proposed_rate, cover_message, created_at, tutor_id, job_id,
+        jobs!inner ( id, title, job_reference, parent_id, status ),
+        tutor_profiles!inner ( id, user_id, gender, experience_years, verification_status )
+      `)
+      .order('created_at', { ascending: false })
+      .limit(200);
+    if (allAppsStatusFilter !== 'all') query = query.eq('status', allAppsStatusFilter as any);
+    const { data } = await query;
+    if (!data) { setAllApplications([]); setLoadingAllApps(false); return; }
+    const tutorUserIds = Array.from(new Set(data.map((a: any) => (a.tutor_profiles as any)?.user_id).filter(Boolean)));
+    const parentIds = Array.from(new Set(data.map((a: any) => (a.jobs as any)?.parent_id).filter(Boolean)));
+    const allUserIds = Array.from(new Set([...tutorUserIds, ...parentIds]));
+    let profs: any[] = [];
+    if (allUserIds.length > 0) {
+      const { data: profData } = await supabase.from('profiles').select('id, full_name, email, phone').in('id', allUserIds as string[]);
+      profs = profData || [];
+    }
+    const profMap = new Map(profs.map((p: any) => [p.id, p]));
+    setAllApplications(data.map((a: any) => ({
+      ...a,
+      tutor_profile: profMap.get((a.tutor_profiles as any)?.user_id) || null,
+      parent_profile: profMap.get((a.jobs as any)?.parent_id) || null,
+    })));
+    setLoadingAllApps(false);
+  }, [allAppsStatusFilter]);
+
+
   const fetchJobApplications = async (jobId: string) => {
     setLoadingApps(true);
     const { data } = await supabase
