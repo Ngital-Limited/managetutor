@@ -81,6 +81,8 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
   const [showFilters, setShowFilters] = useState(false);
   const [sortBy, setSortBy] = useState<'last_education' | 'joined' | null>(null);
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(25);
 
   // ─── Data ───
   const [tutors, setTutors] = useState<TutorRow[]>([]);
@@ -322,6 +324,22 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
     });
     return arr;
   }, [tutors, sortBy, sortDir]);
+
+  const totalPages = Math.max(1, Math.ceil(sortedTutors.length / pageSize));
+  const paginatedTutors = useMemo(
+    () => sortedTutors.slice((currentPage - 1) * pageSize, currentPage * pageSize),
+    [sortedTutors, currentPage, pageSize]
+  );
+
+  // Reset to page 1 when filters/sorting/page-size change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, filterAreas, filterGender, filterMedium, filterEducation, filterUniversity, filterVerification, filterAvailability, filterClassLevel, filterSubject, filterCategory, filterLastEducation, sortBy, sortDir, pageSize]);
+
+  // Clamp page if it overflows after data change
+  useEffect(() => {
+    if (currentPage > totalPages) setCurrentPage(totalPages);
+  }, [currentPage, totalPages]);
 
   const toggleSelect = (userId: string) => {
     setSelectedIds(prev => {
@@ -728,7 +746,7 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
                   <TableRow><TableCell colSpan={11} className="text-center py-12"><Loader2 className="h-6 w-6 animate-spin mx-auto text-muted-foreground" /></TableCell></TableRow>
                 ) : sortedTutors.length === 0 ? (
                   <TableRow><TableCell colSpan={11} className="text-center py-12 text-muted-foreground">No tutors match the current filters</TableCell></TableRow>
-                ) : sortedTutors.map(t => (
+                ) : paginatedTutors.map(t => (
                   <TableRow key={t.tutor_id} className={`${selectedIds.has(t.user_id) ? 'bg-primary/5' : ''} ${t.is_banned ? 'opacity-60' : ''}`}>
                     <TableCell><Checkbox checked={selectedIds.has(t.user_id)} onCheckedChange={() => toggleSelect(t.user_id)} /></TableCell>
                     <TableCell>
@@ -828,6 +846,31 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
               </TableBody>
             </Table>
           </ScrollArea>
+
+          {/* Pagination */}
+          {!loading && sortedTutors.length > 0 && (
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-4 py-3 border-t">
+              <div className="text-sm text-muted-foreground">
+                Showing {(currentPage - 1) * pageSize + 1}–{Math.min(currentPage * pageSize, sortedTutors.length)} of {sortedTutors.length}
+              </div>
+              <div className="flex items-center gap-2">
+                <Select value={String(pageSize)} onValueChange={(v) => setPageSize(Number(v))}>
+                  <SelectTrigger className="h-8 w-[110px]"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="10">10 / page</SelectItem>
+                    <SelectItem value="25">25 / page</SelectItem>
+                    <SelectItem value="50">50 / page</SelectItem>
+                    <SelectItem value="100">100 / page</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Button variant="outline" size="sm" disabled={currentPage <= 1} onClick={() => setCurrentPage(1)}>First</Button>
+                <Button variant="outline" size="sm" disabled={currentPage <= 1} onClick={() => setCurrentPage(p => Math.max(1, p - 1))}>Prev</Button>
+                <span className="text-sm font-medium px-2">Page {currentPage} of {totalPages}</span>
+                <Button variant="outline" size="sm" disabled={currentPage >= totalPages} onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}>Next</Button>
+                <Button variant="outline" size="sm" disabled={currentPage >= totalPages} onClick={() => setCurrentPage(totalPages)}>Last</Button>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
 
