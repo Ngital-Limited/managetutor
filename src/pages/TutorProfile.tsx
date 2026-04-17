@@ -4,22 +4,23 @@ import { TutorSidebarLayout } from '@/components/TutorSidebarLayout';
 import { useNavigate, Link, useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { CLASS_LEVELS } from '@/constants/classLevels';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { PhoneInput, isValidBDPhone } from '@/components/PhoneInput';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { 
+import {
   GraduationCap, ArrowLeft, Save, Upload, FileText, CheckCircle2,
-  Clock, XCircle, AlertCircle, Globe, User, MapPin, Video, Star, MessageSquare, Send,
-  Plus, Trash2, Briefcase, Heart
+  Clock, XCircle, AlertCircle, Video, Star, MessageSquare, Send,
+  Plus, Trash2, Briefcase, BookOpen, Users, Sparkles
 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
@@ -135,6 +136,7 @@ export default function TutorProfile() {
         navigate('/dashboard');
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, role, authLoading, adminEditUserId]);
 
   const fetchData = async () => {
@@ -509,88 +511,75 @@ export default function TutorProfile() {
   }
 
   const profileContent = (
-    <div className="px-4 py-8 max-w-4xl mx-auto">
-      <div className="flex items-center justify-between mb-8">
-        <div>
-            <h1 className="text-3xl font-bold">Edit Profile</h1>
-            <p className="text-muted-foreground">Update your tutor profile to attract more students</p>
+    <div className="px-4 py-6 max-w-5xl mx-auto">
+      {/* Sticky header */}
+      <div className="sticky top-0 z-30 -mx-4 px-4 py-4 mb-6 bg-background/85 backdrop-blur-xl border-b border-border">
+        <div className="flex items-center justify-between gap-4 flex-wrap">
+          <div>
+            <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Edit Profile</h1>
+            <p className="text-sm text-muted-foreground">Update your tutor profile information</p>
           </div>
-          {getStatusBadge(profile.verification_status || 'pending')}
+          <div className="flex items-center gap-3">
+            {getStatusBadge(profile.verification_status || 'pending')}
+            <Button onClick={handleSave} disabled={saving} className="rounded-xl shadow-sm">
+              <Save className="h-4 w-4 mr-2" />
+              {saving ? 'Saving...' : 'Save Changes'}
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      <Tabs defaultValue="personal" className="space-y-6">
+        <div className="rounded-2xl bg-muted/40 p-1.5 overflow-x-auto">
+          <TabsList className="bg-transparent h-auto p-0 gap-1 w-max md:w-full md:grid md:grid-cols-7">
+            <TabsTrigger value="personal" className="rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:border-border px-4 py-2">Personal</TabsTrigger>
+            <TabsTrigger value="education" className="rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:border-border px-4 py-2">Education</TabsTrigger>
+            <TabsTrigger value="experience" className="rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:border-border px-4 py-2">Experience</TabsTrigger>
+            <TabsTrigger value="subjects" className="rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:border-border px-4 py-2">Subjects</TabsTrigger>
+            <TabsTrigger value="preferences" className="rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:border-border px-4 py-2">Preferences</TabsTrigger>
+            <TabsTrigger value="family" className="rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:border-border px-4 py-2">Family</TabsTrigger>
+            <TabsTrigger value="media" className="rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:border-border px-4 py-2">Media</TabsTrigger>
+          </TabsList>
         </div>
 
-        <div className="space-y-8">
-          {/* Basic Info */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <User className="h-5 w-5" />
-                Basic Information
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
+        {/* PERSONAL TAB */}
+        <TabsContent value="personal" className="space-y-6 mt-0">
+          <Card className="rounded-2xl border-border/60 shadow-sm">
+            <CardContent className="p-6 space-y-5">
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
                   <Label>Full Name <span className="text-destructive">*</span></Label>
-                  <Input value={userProfile.full_name} onChange={(e) => setUserProfile({ ...userProfile, full_name: e.target.value })} />
+                  <Input className="rounded-xl mt-1.5 h-11" value={userProfile.full_name} onChange={(e) => setUserProfile({ ...userProfile, full_name: e.target.value })} />
                 </div>
                 <div>
                   <Label>Phone Number <span className="text-destructive">*</span></Label>
-                  <PhoneInput value={userProfile.phone} onChange={(v) => setUserProfile({ ...userProfile, phone: v })} />
+                  <div className="mt-1.5"><PhoneInput value={userProfile.phone} onChange={(v) => setUserProfile({ ...userProfile, phone: v })} /></div>
                 </div>
               </div>
               <div>
                 <Label>Email Address <span className="text-destructive">*</span></Label>
-                <Input value={userProfile.email} disabled className="bg-muted/50" />
+                <Input className="rounded-xl mt-1.5 h-11 bg-muted/50" value={userProfile.email} disabled />
                 <p className="text-xs text-muted-foreground mt-1">Email is linked to your account and cannot be changed here.</p>
               </div>
-              <div className="grid md:grid-cols-2 gap-4">
+              <div className="grid md:grid-cols-3 gap-4">
                 <div>
-                  <Label>Gender</Label>
+                  <Label>Gender <span className="text-destructive">*</span></Label>
                   <Select value={profile.gender} onValueChange={(v) => setProfile({ ...profile, gender: v })}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectTrigger className="rounded-xl mt-1.5 h-11"><SelectValue /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="male">Male</SelectItem>
                       <SelectItem value="female">Female</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
-              </div>
-              <div>
-                <Label>Bio / About You</Label>
-                <Textarea value={profile.bio} onChange={(e) => setProfile({ ...profile, bio: e.target.value })} placeholder="Tell parents about yourself, your teaching style, and experience..." rows={4} />
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Personal Details */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Heart className="h-5 w-5" />
-                Personal Details
-              </CardTitle>
-              <CardDescription>Provide personal information for verification and trust building</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid md:grid-cols-2 gap-4">
-                <div>
-                  <Label>Father's Name</Label>
-                  <Input value={profile.father_name} onChange={(e) => setProfile({ ...profile, father_name: e.target.value })} placeholder="Father's full name" />
-                </div>
-                <div>
-                  <Label>Mother's Name</Label>
-                  <Input value={profile.mother_name} onChange={(e) => setProfile({ ...profile, mother_name: e.target.value })} placeholder="Mother's full name" />
-                </div>
-              </div>
-              <div className="grid md:grid-cols-3 gap-4">
                 <div>
                   <Label>Date of Birth</Label>
-                  <Input type="date" value={profile.date_of_birth} onChange={(e) => setProfile({ ...profile, date_of_birth: e.target.value })} />
+                  <Input type="date" className="rounded-xl mt-1.5 h-11" value={profile.date_of_birth} onChange={(e) => setProfile({ ...profile, date_of_birth: e.target.value })} />
                 </div>
                 <div>
                   <Label>Marital Status</Label>
                   <Select value={profile.marital_status} onValueChange={(v) => setProfile({ ...profile, marital_status: v })}>
-                    <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
+                    <SelectTrigger className="rounded-xl mt-1.5 h-11"><SelectValue placeholder="Select" /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="single">Single</SelectItem>
                       <SelectItem value="married">Married</SelectItem>
@@ -599,10 +588,13 @@ export default function TutorProfile() {
                     </SelectContent>
                   </Select>
                 </div>
+              </div>
+
+              <div className="grid md:grid-cols-3 gap-4">
                 <div>
                   <Label>Religion</Label>
                   <Select value={profile.religion} onValueChange={(v) => setProfile({ ...profile, religion: v })}>
-                    <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
+                    <SelectTrigger className="rounded-xl mt-1.5 h-11"><SelectValue placeholder="Select" /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="islam">Islam</SelectItem>
                       <SelectItem value="hinduism">Hinduism</SelectItem>
@@ -612,63 +604,35 @@ export default function TutorProfile() {
                     </SelectContent>
                   </Select>
                 </div>
-              </div>
-              <div className="grid md:grid-cols-3 gap-4">
                 <div>
                   <Label>Nationality</Label>
-                  <Input value={profile.nationality} onChange={(e) => setProfile({ ...profile, nationality: e.target.value })} />
+                  <Input className="rounded-xl mt-1.5 h-11" value={profile.nationality} onChange={(e) => setProfile({ ...profile, nationality: e.target.value })} />
                 </div>
                 <div>
                   <Label>National ID No.</Label>
-                  <Input value={profile.national_id_no} onChange={(e) => setProfile({ ...profile, national_id_no: e.target.value })} placeholder="NID number" />
-                </div>
-                <div className="grid grid-cols-2 gap-2">
-                  <div>
-                    <Label>Height</Label>
-                    <Input value={profile.height} onChange={(e) => setProfile({ ...profile, height: e.target.value })} placeholder={'e.g. 5\'8"'} />
-                  </div>
-                  <div>
-                    <Label>Weight</Label>
-                    <Input value={profile.weight} onChange={(e) => setProfile({ ...profile, weight: e.target.value })} placeholder="e.g. 70kg" />
-                  </div>
+                  <Input className="rounded-xl mt-1.5 h-11" value={profile.national_id_no} onChange={(e) => setProfile({ ...profile, national_id_no: e.target.value })} placeholder="NID number" />
                 </div>
               </div>
-            </CardContent>
-          </Card>
 
-          {/* Contact & Family Details */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <MapPin className="h-5 w-5" />
-                Contact & Address Details
-              </CardTitle>
-              <CardDescription>Provide family contact info and addresses for verification purposes</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
-                  <Label>Father's Phone</Label>
-                  <PhoneInput value={profile.father_phone} onChange={(v) => setProfile({ ...profile, father_phone: v })} />
+                  <Label>Height</Label>
+                  <Input className="rounded-xl mt-1.5 h-11" value={profile.height} onChange={(e) => setProfile({ ...profile, height: e.target.value })} placeholder={'e.g. 5\'8"'} />
                 </div>
                 <div>
-                  <Label>Mother's Phone</Label>
-                  <PhoneInput value={profile.mother_phone} onChange={(v) => setProfile({ ...profile, mother_phone: v })} />
+                  <Label>Weight</Label>
+                  <Input className="rounded-xl mt-1.5 h-11" value={profile.weight} onChange={(e) => setProfile({ ...profile, weight: e.target.value })} placeholder="e.g. 70kg" />
                 </div>
               </div>
-              <div className="grid md:grid-cols-2 gap-4">
-                <div>
-                  <Label>Emergency Contact Name</Label>
-                  <Input value={profile.emergency_contact_name} onChange={(e) => setProfile({ ...profile, emergency_contact_name: e.target.value })} placeholder="e.g., Uncle, Guardian" />
-                </div>
-                <div>
-                  <Label>Emergency Contact Phone</Label>
-                  <PhoneInput value={profile.emergency_contact_phone} onChange={(v) => setProfile({ ...profile, emergency_contact_phone: v })} />
-                </div>
+
+              <div>
+                <Label>Bio / About You</Label>
+                <Textarea className="rounded-xl mt-1.5" value={profile.bio} onChange={(e) => setProfile({ ...profile, bio: e.target.value })} placeholder="Tell parents about yourself, your teaching style, and experience..." rows={4} />
               </div>
-              {/* Present Address with Division/District/Area */}
-              <div className="space-y-3">
-                <Label className="font-semibold">Present Address</Label>
+
+              {/* Address */}
+              <div className="space-y-3 pt-2 border-t border-border/60">
+                <Label className="font-semibold text-base">Present Address</Label>
                 <div className="grid md:grid-cols-3 gap-4">
                   <div>
                     <Label>Division</Label>
@@ -676,7 +640,7 @@ export default function TutorProfile() {
                       setSelectedDivision(v);
                       setUserProfile({ ...userProfile, district_id: '', area_id: '' });
                     }}>
-                      <SelectTrigger><SelectValue placeholder="Select division" /></SelectTrigger>
+                      <SelectTrigger className="rounded-xl mt-1.5 h-11"><SelectValue placeholder="Select division" /></SelectTrigger>
                       <SelectContent>
                         {[...new Set(districts.map(d => d.division_en))].sort().map(div => (
                           <SelectItem key={div} value={div}>{div}</SelectItem>
@@ -687,7 +651,7 @@ export default function TutorProfile() {
                   <div>
                     <Label>District</Label>
                     <Select value={userProfile.district_id} onValueChange={(v) => setUserProfile({ ...userProfile, district_id: v, area_id: '' })}>
-                      <SelectTrigger><SelectValue placeholder="Select district" /></SelectTrigger>
+                      <SelectTrigger className="rounded-xl mt-1.5 h-11"><SelectValue placeholder="Select district" /></SelectTrigger>
                       <SelectContent>
                         {(selectedDivision ? districts.filter(d => d.division_en === selectedDivision) : districts).map(d => (
                           <SelectItem key={d.id} value={d.id}>{d.name_en}</SelectItem>
@@ -699,7 +663,7 @@ export default function TutorProfile() {
                     <div>
                       <Label>Thana / Area</Label>
                       <Select value={userProfile.area_id} onValueChange={(v) => setUserProfile({ ...userProfile, area_id: v })}>
-                        <SelectTrigger><SelectValue placeholder="Select thana/area" /></SelectTrigger>
+                        <SelectTrigger className="rounded-xl mt-1.5 h-11"><SelectValue placeholder="Select thana/area" /></SelectTrigger>
                         <SelectContent>
                           {areas.filter(a => a.district_id === userProfile.district_id).map(a => (
                             <SelectItem key={a.id} value={a.id}>{a.name_en}</SelectItem>
@@ -709,91 +673,92 @@ export default function TutorProfile() {
                     </div>
                   )}
                 </div>
-                <Textarea value={profile.present_address} onChange={(e) => setProfile({ ...profile, present_address: e.target.value })} placeholder="House/Road/Village details..." rows={2} />
+                <Textarea className="rounded-xl" value={profile.present_address} onChange={(e) => setProfile({ ...profile, present_address: e.target.value })} placeholder="House/Road/Village details..." rows={2} />
               </div>
 
-              {/* Permanent Address */}
               <div className="space-y-3">
-                <Label className="font-semibold">Permanent Address</Label>
-                <Textarea value={profile.permanent_address} onChange={(e) => setProfile({ ...profile, permanent_address: e.target.value })} placeholder="Your permanent address details..." rows={2} />
+                <Label className="font-semibold text-base">Permanent Address</Label>
+                <Textarea className="rounded-xl" value={profile.permanent_address} onChange={(e) => setProfile({ ...profile, permanent_address: e.target.value })} placeholder="Your permanent address details..." rows={2} />
               </div>
+
+              <p className="text-xs text-muted-foreground pt-2">* Required fields. Other tabs let you add education, experience, subjects, family info, and media.</p>
             </CardContent>
           </Card>
+        </TabsContent>
 
-          {/* Education Background */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <GraduationCap className="h-5 w-5" />
-                Education Background
-              </CardTitle>
-              <CardDescription>Add your educational qualifications (most recent first)</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {/* Legacy education text field */}
+        {/* EDUCATION TAB */}
+        <TabsContent value="education" className="space-y-6 mt-0">
+          <Card className="rounded-2xl border-border/60 shadow-sm">
+            <CardContent className="p-6 space-y-6">
               <div>
-                <Label>Education Summary</Label>
-                <Textarea value={profile.education} onChange={(e) => setProfile({ ...profile, education: e.target.value })} placeholder="Your educational background summary (e.g., BSc in Physics from Dhaka University)" rows={2} />
+                <h3 className="font-semibold flex items-center gap-2"><GraduationCap className="h-4 w-4" /> Education Summary</h3>
+                <p className="text-sm text-muted-foreground mb-3">Quick summary of your education background.</p>
+                <Textarea className="rounded-xl" value={profile.education} onChange={(e) => setProfile({ ...profile, education: e.target.value })} placeholder="e.g., BSc in Physics from Dhaka University" rows={2} />
               </div>
 
-              {educationEntries.map((entry, index) => (
-                <div key={index} className="p-4 border border-border rounded-xl space-y-4 relative">
-                  <div className="flex items-center justify-between">
-                    <h4 className="font-medium text-sm text-muted-foreground">Education #{index + 1}</h4>
-                    <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => removeEducation(index)}>
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <div>
-                      <Label>Institution Name *</Label>
-                      <Input value={entry.institution} onChange={(e) => updateEducation(index, 'institution', e.target.value)} placeholder="e.g., Dhaka University" />
-                    </div>
-                    <div>
-                      <Label>Degree *</Label>
-                      <Input value={entry.degree} onChange={(e) => updateEducation(index, 'degree', e.target.value)} placeholder="e.g., BSc, MSc, HSC" />
-                    </div>
-                  </div>
-                  <div className="grid md:grid-cols-3 gap-4">
-                    <div>
-                      <Label>Field of Study</Label>
-                      <Input value={entry.field_of_study} onChange={(e) => updateEducation(index, 'field_of_study', e.target.value)} placeholder="e.g., Physics, CSE" />
-                    </div>
-                    <div>
-                      <Label>Passing Year</Label>
-                      <Input type="number" value={entry.passing_year ?? ''} onChange={(e) => updateEducation(index, 'passing_year', e.target.value ? parseInt(e.target.value) : null)} placeholder="e.g., 2020" />
-                    </div>
-                    <div>
-                      <Label>Result / GPA</Label>
-                      <Input value={entry.result} onChange={(e) => updateEducation(index, 'result', e.target.value)} placeholder="e.g., 3.85/4.00" />
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Checkbox id={`edu-current-${index}`} checked={entry.is_current} onCheckedChange={(checked) => updateEducation(index, 'is_current', !!checked)} />
-                    <Label htmlFor={`edu-current-${index}`} className="text-sm">Currently studying here</Label>
-                  </div>
-                </div>
-              ))}
+              <div className="border-t border-border/60 pt-6">
+                <h3 className="font-semibold mb-1">Educational Qualifications</h3>
+                <p className="text-sm text-muted-foreground mb-4">Add your qualifications (most recent first).</p>
 
-              <Button variant="outline" onClick={addEducation} className="w-full">
-                <Plus className="h-4 w-4 mr-2" />
-                Add Education
-              </Button>
+                {educationEntries.map((entry, index) => (
+                  <div key={index} className="p-4 border border-border rounded-xl space-y-4 mb-4 bg-muted/20">
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-medium text-sm text-muted-foreground">Education #{index + 1}</h4>
+                      <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => removeEducation(index)}>
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div>
+                        <Label>Institution Name *</Label>
+                        <Input className="rounded-xl mt-1.5 h-11" value={entry.institution} onChange={(e) => updateEducation(index, 'institution', e.target.value)} placeholder="e.g., Dhaka University" />
+                      </div>
+                      <div>
+                        <Label>Degree *</Label>
+                        <Input className="rounded-xl mt-1.5 h-11" value={entry.degree} onChange={(e) => updateEducation(index, 'degree', e.target.value)} placeholder="e.g., BSc, MSc, HSC" />
+                      </div>
+                    </div>
+                    <div className="grid md:grid-cols-3 gap-4">
+                      <div>
+                        <Label>Field of Study</Label>
+                        <Input className="rounded-xl mt-1.5 h-11" value={entry.field_of_study} onChange={(e) => updateEducation(index, 'field_of_study', e.target.value)} placeholder="e.g., Physics, CSE" />
+                      </div>
+                      <div>
+                        <Label>Passing Year</Label>
+                        <Input type="number" className="rounded-xl mt-1.5 h-11" value={entry.passing_year ?? ''} onChange={(e) => updateEducation(index, 'passing_year', e.target.value ? parseInt(e.target.value) : null)} placeholder="e.g., 2020" />
+                      </div>
+                      <div>
+                        <Label>Result / GPA</Label>
+                        <Input className="rounded-xl mt-1.5 h-11" value={entry.result} onChange={(e) => updateEducation(index, 'result', e.target.value)} placeholder="e.g., 3.85/4.00" />
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Checkbox id={`edu-current-${index}`} checked={entry.is_current} onCheckedChange={(checked) => updateEducation(index, 'is_current', !!checked)} />
+                      <Label htmlFor={`edu-current-${index}`} className="text-sm">Currently studying here</Label>
+                    </div>
+                  </div>
+                ))}
+
+                <Button variant="outline" onClick={addEducation} className="w-full rounded-xl">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Education
+                </Button>
+              </div>
             </CardContent>
           </Card>
+        </TabsContent>
 
-          {/* Job Experience */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Briefcase className="h-5 w-5" />
-                Job Experience
-              </CardTitle>
-              <CardDescription>Add your work experience including tutoring and other jobs</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
+        {/* EXPERIENCE TAB */}
+        <TabsContent value="experience" className="space-y-6 mt-0">
+          <Card className="rounded-2xl border-border/60 shadow-sm">
+            <CardContent className="p-6 space-y-6">
+              <div>
+                <h3 className="font-semibold flex items-center gap-2"><Briefcase className="h-4 w-4" /> Job Experience</h3>
+                <p className="text-sm text-muted-foreground mb-4">Add your work experience including tutoring and other jobs.</p>
+              </div>
+
               {jobExperiences.map((entry, index) => (
-                <div key={index} className="p-4 border border-border rounded-xl space-y-4 relative">
+                <div key={index} className="p-4 border border-border rounded-xl space-y-4 bg-muted/20">
                   <div className="flex items-center justify-between">
                     <h4 className="font-medium text-sm text-muted-foreground">Experience #{index + 1}</h4>
                     <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => removeJobExperience(index)}>
@@ -803,21 +768,21 @@ export default function TutorProfile() {
                   <div className="grid md:grid-cols-2 gap-4">
                     <div>
                       <Label>Company / Organization *</Label>
-                      <Input value={entry.company} onChange={(e) => updateJobExperience(index, 'company', e.target.value)} placeholder="e.g., ABC Coaching Center" />
+                      <Input className="rounded-xl mt-1.5 h-11" value={entry.company} onChange={(e) => updateJobExperience(index, 'company', e.target.value)} placeholder="e.g., ABC Coaching Center" />
                     </div>
                     <div>
                       <Label>Designation *</Label>
-                      <Input value={entry.designation} onChange={(e) => updateJobExperience(index, 'designation', e.target.value)} placeholder="e.g., Senior Tutor, Teacher" />
+                      <Input className="rounded-xl mt-1.5 h-11" value={entry.designation} onChange={(e) => updateJobExperience(index, 'designation', e.target.value)} placeholder="e.g., Senior Tutor" />
                     </div>
                   </div>
                   <div className="grid md:grid-cols-2 gap-4">
                     <div>
                       <Label>Start Date</Label>
-                      <Input type="date" value={entry.start_date} onChange={(e) => updateJobExperience(index, 'start_date', e.target.value)} />
+                      <Input type="date" className="rounded-xl mt-1.5 h-11" value={entry.start_date} onChange={(e) => updateJobExperience(index, 'start_date', e.target.value)} />
                     </div>
                     <div>
                       <Label>End Date</Label>
-                      <Input type="date" value={entry.end_date} onChange={(e) => updateJobExperience(index, 'end_date', e.target.value)} disabled={entry.is_current} />
+                      <Input type="date" className="rounded-xl mt-1.5 h-11" value={entry.end_date} onChange={(e) => updateJobExperience(index, 'end_date', e.target.value)} disabled={entry.is_current} />
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
@@ -829,72 +794,50 @@ export default function TutorProfile() {
                   </div>
                   <div>
                     <Label>Responsibilities</Label>
-                    <Textarea value={entry.responsibilities} onChange={(e) => updateJobExperience(index, 'responsibilities', e.target.value)} placeholder="Describe your key responsibilities and achievements..." rows={3} />
+                    <Textarea className="rounded-xl mt-1.5" value={entry.responsibilities} onChange={(e) => updateJobExperience(index, 'responsibilities', e.target.value)} placeholder="Describe your key responsibilities and achievements..." rows={3} />
                   </div>
                 </div>
               ))}
 
-              <Button variant="outline" onClick={addJobExperience} className="w-full">
+              <Button variant="outline" onClick={addJobExperience} className="w-full rounded-xl">
                 <Plus className="h-4 w-4 mr-2" />
                 Add Job Experience
               </Button>
+
+              <div className="border-t border-border/60 pt-6 grid md:grid-cols-2 gap-4">
+                <div>
+                  <Label>Total Years of Experience</Label>
+                  <Input type="number" className="rounded-xl mt-1.5 h-11" value={profile.experience_years} onChange={(e) => setProfile({ ...profile, experience_years: parseInt(e.target.value) || 0 })} />
+                </div>
+              </div>
+
+              <div className="border-t border-border/60 pt-6 space-y-4">
+                <div>
+                  <Label>Teaching Philosophy</Label>
+                  <Textarea className="rounded-xl mt-1.5" value={profile.teaching_philosophy} onChange={(e) => setProfile({ ...profile, teaching_philosophy: e.target.value })} placeholder="What's your approach to teaching?" rows={3} />
+                </div>
+                <div>
+                  <Label>Success Stories</Label>
+                  <Textarea className="rounded-xl mt-1.5" value={profile.success_stories} onChange={(e) => setProfile({ ...profile, success_stories: e.target.value })} placeholder="Share notable student achievements..." rows={3} />
+                </div>
+              </div>
             </CardContent>
           </Card>
+        </TabsContent>
 
-          {/* Teaching Details */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <GraduationCap className="h-5 w-5" />
-                Teaching Details
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid md:grid-cols-3 gap-4">
-                <div>
-                  <Label>Experience (Years)</Label>
-                  <Input type="number" value={profile.experience_years} onChange={(e) => setProfile({ ...profile, experience_years: parseInt(e.target.value) || 0 })} />
-                </div>
-                <div>
-                  <Label>Min Salary (৳/month)</Label>
-                  <Input type="number" value={profile.monthly_salary_min} onChange={(e) => setProfile({ ...profile, monthly_salary_min: parseInt(e.target.value) || 0 })} />
-                </div>
-                <div>
-                  <Label>Max Salary (৳/month)</Label>
-                  <Input type="number" value={profile.monthly_salary_max} onChange={(e) => setProfile({ ...profile, monthly_salary_max: parseInt(e.target.value) || 0 })} />
-                </div>
-              </div>
-              <div className="grid md:grid-cols-2 gap-4">
-                <div>
-                  <Label>Teaching Mode</Label>
-                  <Select value={profile.teaching_mode} onValueChange={(v) => setProfile({ ...profile, teaching_mode: v })}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="in_person">In-Person</SelectItem>
-                      <SelectItem value="online">Online</SelectItem>
-                      <SelectItem value="hybrid">Hybrid</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="flex items-center gap-3 pt-6">
-                  <Checkbox id="available" checked={profile.is_available} onCheckedChange={(checked) => setProfile({ ...profile, is_available: !!checked })} />
-                  <Label htmlFor="available">Available for new students</Label>
-                </div>
-                <div className="flex items-center gap-3 pt-6">
-                  <Checkbox id="is-student" checked={profile.is_student} onCheckedChange={(checked) => setProfile({ ...profile, is_student: !!checked })} />
-                  <Label htmlFor="is-student">I am currently a student</Label>
-                </div>
-              </div>
-
-              {/* Subjects */}
+        {/* SUBJECTS & CLASSES TAB */}
+        <TabsContent value="subjects" className="space-y-6 mt-0">
+          <Card className="rounded-2xl border-border/60 shadow-sm">
+            <CardContent className="p-6 space-y-6">
               <div>
-                <Label className="mb-3 block">Subjects You Teach</Label>
+                <h3 className="font-semibold flex items-center gap-2"><BookOpen className="h-4 w-4" /> Subjects You Teach</h3>
+                <p className="text-sm text-muted-foreground mb-3">Tap to select. You can pick multiple subjects.</p>
                 <div className="flex flex-wrap gap-2">
                   {subjects.map(subject => (
                     <Badge
                       key={subject.id}
                       variant={selectedSubjects.includes(subject.id) ? 'default' : 'outline'}
-                      className="cursor-pointer"
+                      className="cursor-pointer rounded-full px-3 py-1.5"
                       onClick={() => {
                         if (selectedSubjects.includes(subject.id)) {
                           setSelectedSubjects(selectedSubjects.filter(s => s !== subject.id));
@@ -909,9 +852,9 @@ export default function TutorProfile() {
                 </div>
               </div>
 
-              {/* Class Levels */}
-              <div>
-                <Label className="mb-3 block">Class Levels You Teach</Label>
+              <div className="border-t border-border/60 pt-6">
+                <h3 className="font-semibold mb-1">Class Levels You Teach</h3>
+                <p className="text-sm text-muted-foreground mb-4">Choose all levels you're comfortable teaching.</p>
                 <div className="space-y-4">
                   {CLASS_LEVELS.map(group => (
                     <div key={group.group}>
@@ -921,7 +864,7 @@ export default function TutorProfile() {
                           <Badge
                             key={level}
                             variant={selectedClassLevels.includes(level) ? 'default' : 'outline'}
-                            className="cursor-pointer"
+                            className="cursor-pointer rounded-full px-3 py-1.5"
                             onClick={() => {
                               if (selectedClassLevels.includes(level)) {
                                 setSelectedClassLevels(selectedClassLevels.filter(l => l !== level));
@@ -940,24 +883,115 @@ export default function TutorProfile() {
               </div>
             </CardContent>
           </Card>
+        </TabsContent>
 
+        {/* PREFERENCES TAB */}
+        <TabsContent value="preferences" className="space-y-6 mt-0">
+          <Card className="rounded-2xl border-border/60 shadow-sm">
+            <CardContent className="p-6 space-y-5">
+              <div>
+                <h3 className="font-semibold flex items-center gap-2"><Sparkles className="h-4 w-4" /> Teaching Preferences</h3>
+                <p className="text-sm text-muted-foreground mb-4">How and what you'd like to charge.</p>
+              </div>
+
+              <div className="grid md:grid-cols-3 gap-4">
+                <div>
+                  <Label>Teaching Mode</Label>
+                  <Select value={profile.teaching_mode} onValueChange={(v) => setProfile({ ...profile, teaching_mode: v })}>
+                    <SelectTrigger className="rounded-xl mt-1.5 h-11"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="in_person">In-Person</SelectItem>
+                      <SelectItem value="online">Online</SelectItem>
+                      <SelectItem value="hybrid">Hybrid</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label>Min Salary (৳/month)</Label>
+                  <Input type="number" className="rounded-xl mt-1.5 h-11" value={profile.monthly_salary_min} onChange={(e) => setProfile({ ...profile, monthly_salary_min: parseInt(e.target.value) || 0 })} />
+                </div>
+                <div>
+                  <Label>Max Salary (৳/month)</Label>
+                  <Input type="number" className="rounded-xl mt-1.5 h-11" value={profile.monthly_salary_max} onChange={(e) => setProfile({ ...profile, monthly_salary_max: parseInt(e.target.value) || 0 })} />
+                </div>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-4 pt-2">
+                <label className="flex items-center gap-3 p-3 rounded-xl border border-border bg-muted/20 cursor-pointer">
+                  <Checkbox checked={profile.is_available} onCheckedChange={(checked) => setProfile({ ...profile, is_available: !!checked })} />
+                  <span className="text-sm">Available for new students</span>
+                </label>
+                <label className="flex items-center gap-3 p-3 rounded-xl border border-border bg-muted/20 cursor-pointer">
+                  <Checkbox checked={profile.is_student} onCheckedChange={(checked) => setProfile({ ...profile, is_student: !!checked })} />
+                  <span className="text-sm">I am currently a student</span>
+                </label>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* FAMILY TAB */}
+        <TabsContent value="family" className="space-y-6 mt-0">
+          <Card className="rounded-2xl border-border/60 shadow-sm">
+            <CardContent className="p-6 space-y-5">
+              <div>
+                <h3 className="font-semibold flex items-center gap-2"><Users className="h-4 w-4" /> Family & Emergency Contact</h3>
+                <p className="text-sm text-muted-foreground mb-4">Provide family info for verification and trust building.</p>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <Label>Father's Name</Label>
+                  <Input className="rounded-xl mt-1.5 h-11" value={profile.father_name} onChange={(e) => setProfile({ ...profile, father_name: e.target.value })} placeholder="Father's full name" />
+                </div>
+                <div>
+                  <Label>Mother's Name</Label>
+                  <Input className="rounded-xl mt-1.5 h-11" value={profile.mother_name} onChange={(e) => setProfile({ ...profile, mother_name: e.target.value })} placeholder="Mother's full name" />
+                </div>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <Label>Father's Phone</Label>
+                  <div className="mt-1.5"><PhoneInput value={profile.father_phone} onChange={(v) => setProfile({ ...profile, father_phone: v })} /></div>
+                </div>
+                <div>
+                  <Label>Mother's Phone</Label>
+                  <div className="mt-1.5"><PhoneInput value={profile.mother_phone} onChange={(v) => setProfile({ ...profile, mother_phone: v })} /></div>
+                </div>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <Label>Emergency Contact Name</Label>
+                  <Input className="rounded-xl mt-1.5 h-11" value={profile.emergency_contact_name} onChange={(e) => setProfile({ ...profile, emergency_contact_name: e.target.value })} placeholder="e.g., Uncle, Guardian" />
+                </div>
+                <div>
+                  <Label>Emergency Contact Phone</Label>
+                  <div className="mt-1.5"><PhoneInput value={profile.emergency_contact_phone} onChange={(v) => setProfile({ ...profile, emergency_contact_phone: v })} /></div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* MEDIA / VERIFICATION / REVIEWS TAB */}
+        <TabsContent value="media" className="space-y-6 mt-0">
           {/* Verification Documents */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <FileText className="h-5 w-5" />
-                Verification Documents
-              </CardTitle>
-              <CardDescription>Upload documents to get verified and build trust with parents</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
+          <Card className="rounded-2xl border-border/60 shadow-sm">
+            <CardContent className="p-6 space-y-4">
+              <div>
+                <h3 className="font-semibold flex items-center gap-2"><FileText className="h-4 w-4" /> Verification Documents</h3>
+                <p className="text-sm text-muted-foreground mb-4">Upload documents to get verified and build trust.</p>
+              </div>
+
               {documents.length > 0 && (
                 <div className="space-y-2 mb-4">
                   {documents.map((doc) => (
-                    <div key={doc.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                    <div key={doc.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-xl">
                       <div className="flex items-center gap-3">
                         <FileText className="h-5 w-5 text-muted-foreground" />
-                        <span className="capitalize">{doc.document_type.replace('_', ' ')}</span>
+                        <span className="capitalize">{doc.document_type.replace(/_/g, ' ')}</span>
                       </div>
                       {getStatusBadge(doc.status)}
                     </div>
@@ -973,14 +1007,14 @@ export default function TutorProfile() {
                   const exists = documents.some(d => d.document_type === docType);
                   const label = docType.replace(/_/g, ' ');
                   return (
-                    <div key={docType} className={`border-2 border-dashed rounded-xl p-4 text-center ${exists ? 'border-success/50 bg-success/5' : 'border-border'}`}>
+                    <div key={docType} className={`border-2 border-dashed rounded-2xl p-5 text-center ${exists ? 'border-success/50 bg-success/5' : 'border-border'}`}>
                       <Upload className={`h-8 w-8 mx-auto mb-2 ${exists ? 'text-success' : 'text-muted-foreground'}`} />
                       <p className="font-medium capitalize">{label}</p>
                       <p className="text-xs text-muted-foreground mb-3">
                         {exists ? 'Uploaded' : 'PDF, JPG, PNG (max 5MB)'}
                       </p>
                       <label className="cursor-pointer">
-                        <Button variant="outline" size="sm" disabled={uploading} asChild>
+                        <Button variant="outline" size="sm" disabled={uploading} asChild className="rounded-xl">
                           <span>{exists ? 'Replace' : 'Upload'}</span>
                         </Button>
                         <input type="file" className="hidden" accept=".pdf,.jpg,.jpeg,.png" onChange={(e) => handleFileUpload(e, docType)} disabled={uploading} />
@@ -997,7 +1031,7 @@ export default function TutorProfile() {
                   <p className="opacity-80">
                     {profile.is_student
                       ? 'As a student, please upload your University ID Card or University Payment Slip for verification.'
-                      : 'Please upload your National ID and at least your highest/last educational certificate for verification. Experience certificates are optional but recommended.'}
+                      : 'Please upload your National ID and at least your highest/last educational certificate. Experience certificates are optional but recommended.'}
                   </p>
                 </div>
               </div>
@@ -1005,21 +1039,18 @@ export default function TutorProfile() {
           </Card>
 
           {/* Video Introduction */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Video className="h-5 w-5" />
-                Video Introduction
-              </CardTitle>
-              <CardDescription>Share a 30-second YouTube or Vimeo video showing your communication skills</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
+          <Card className="rounded-2xl border-border/60 shadow-sm">
+            <CardContent className="p-6 space-y-4">
+              <div>
+                <h3 className="font-semibold flex items-center gap-2"><Video className="h-4 w-4" /> Video Introduction</h3>
+                <p className="text-sm text-muted-foreground mb-4">Share a 30-second YouTube or Vimeo video showing your communication skills.</p>
+              </div>
               <div>
                 <Label>YouTube or Vimeo Video URL</Label>
-                <Input value={profile.video_url} onChange={(e) => setProfile({ ...profile, video_url: e.target.value })} placeholder="https://www.youtube.com/watch?v=... or https://vimeo.com/..." />
+                <Input className="rounded-xl mt-1.5 h-11" value={profile.video_url} onChange={(e) => setProfile({ ...profile, video_url: e.target.value })} placeholder="https://www.youtube.com/watch?v=... or https://vimeo.com/..." />
               </div>
               {profile.video_url && getVideoEmbedUrl(profile.video_url) && (
-                <div className="aspect-video rounded-xl overflow-hidden border">
+                <div className="aspect-video rounded-2xl overflow-hidden border">
                   <iframe src={getVideoEmbedUrl(profile.video_url)!} className="w-full h-full" allowFullScreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" title="Video Introduction" />
                 </div>
               )}
@@ -1029,23 +1060,19 @@ export default function TutorProfile() {
             </CardContent>
           </Card>
 
-
-          {/* Parent Reviews & Feedback */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Star className="h-5 w-5" />
-                Parent Feedback ({reviews.length})
-              </CardTitle>
-              <CardDescription>Reviews left by parents. You can request a review update if a dispute was resolved.</CardDescription>
-            </CardHeader>
-            <CardContent>
+          {/* Parent Reviews */}
+          <Card className="rounded-2xl border-border/60 shadow-sm">
+            <CardContent className="p-6">
+              <div className="mb-4">
+                <h3 className="font-semibold flex items-center gap-2"><Star className="h-4 w-4" /> Parent Feedback ({reviews.length})</h3>
+                <p className="text-sm text-muted-foreground">Reviews left by parents. You can request a review update if a dispute was resolved.</p>
+              </div>
               {reviews.length > 0 ? (
                 <div className="space-y-4">
                   {reviews.map((review: any) => {
                     const hasRequest = reviewRequests.some((r: any) => r.review_id === review.id);
                     return (
-                      <div key={review.id} className="p-4 bg-muted/50 rounded-xl">
+                      <div key={review.id} className="p-4 bg-muted/40 rounded-xl">
                         <div className="flex items-start gap-3">
                           <Avatar className="h-10 w-10">
                             <AvatarImage src={review.profiles?.avatar_url} />
@@ -1091,62 +1118,63 @@ export default function TutorProfile() {
               )}
             </CardContent>
           </Card>
+        </TabsContent>
+      </Tabs>
 
-          {/* Save Button */}
-          <div className="flex justify-end gap-4">
-            <Link to="/dashboard">
-              <Button variant="outline">Cancel</Button>
-            </Link>
-            <Button onClick={handleSave} disabled={saving}>
-              <Save className="h-4 w-4 mr-2" />
-              {saving ? 'Saving...' : 'Save Profile'}
-            </Button>
-          </div>
-        </div>
-
-        {/* Review Update Request Dialog */}
-        <Dialog open={!!selectedReviewId} onOpenChange={(open) => !open && setSelectedReviewId(null)}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Request Review Update</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4">
-              <p className="text-sm text-muted-foreground">
-                If a dispute with the parent has been resolved, you can request them to update their review. 
-                An admin will review your request.
-              </p>
-              <div>
-                <Label>Reason for Request</Label>
-                <Textarea value={reviewUpdateReason} onChange={(e) => setReviewUpdateReason(e.target.value)} placeholder="Explain why this review should be reconsidered..." rows={4} />
-              </div>
-            </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setSelectedReviewId(null)}>Cancel</Button>
-              <Button
-                disabled={!reviewUpdateReason.trim()}
-                onClick={async () => {
-                  if (!tutorProfileId || !selectedReviewId) return;
-                  const { error } = await supabase.from('review_update_requests').insert({
-                    tutor_id: tutorProfileId,
-                    review_id: selectedReviewId,
-                    reason: reviewUpdateReason,
-                  } as any);
-                  if (error) {
-                    toast({ title: 'Error', description: error.message, variant: 'destructive' });
-                  } else {
-                    toast({ title: 'Request Sent', description: 'Your review update request has been submitted for admin review.' });
-                    setSelectedReviewId(null);
-                    fetchData();
-                  }
-                }}
-              >
-                <Send className="h-4 w-4 mr-2" />
-                Submit Request
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+      {/* Bottom save row for convenience */}
+      <div className="flex justify-end gap-3 mt-8">
+        <Link to="/dashboard">
+          <Button variant="outline" className="rounded-xl">Cancel</Button>
+        </Link>
+        <Button onClick={handleSave} disabled={saving} className="rounded-xl">
+          <Save className="h-4 w-4 mr-2" />
+          {saving ? 'Saving...' : 'Save Changes'}
+        </Button>
       </div>
+
+      {/* Review Update Request Dialog */}
+      <Dialog open={!!selectedReviewId} onOpenChange={(open) => !open && setSelectedReviewId(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Request Review Update</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              If a dispute with the parent has been resolved, you can request them to update their review.
+              An admin will review your request.
+            </p>
+            <div>
+              <Label>Reason for Request</Label>
+              <Textarea value={reviewUpdateReason} onChange={(e) => setReviewUpdateReason(e.target.value)} placeholder="Explain why this review should be reconsidered..." rows={4} />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setSelectedReviewId(null)}>Cancel</Button>
+            <Button
+              disabled={!reviewUpdateReason.trim()}
+              onClick={async () => {
+                if (!tutorProfileId || !selectedReviewId) return;
+                const { error } = await supabase.from('review_update_requests').insert({
+                  tutor_id: tutorProfileId,
+                  review_id: selectedReviewId,
+                  reason: reviewUpdateReason,
+                } as any);
+                if (error) {
+                  toast({ title: 'Error', description: error.message, variant: 'destructive' });
+                } else {
+                  toast({ title: 'Request Sent', description: 'Your review update request has been submitted for admin review.' });
+                  setSelectedReviewId(null);
+                  fetchData();
+                }
+              }}
+            >
+              <Send className="h-4 w-4 mr-2" />
+              Submit Request
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
   );
 
   if (isAdminEdit) {
