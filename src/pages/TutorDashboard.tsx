@@ -229,7 +229,7 @@ export default function TutorDashboard() {
         .select(`
           *,
           jobs (
-            id, title, status, budget_min, budget_max, parent_id,
+            id, slug, title, status, budget_min, budget_max, parent_id,
             districts (name_en),
             subjects (name_en),
             profiles:parent_id (full_name, phone, email)
@@ -293,7 +293,7 @@ export default function TutorDashboard() {
       // Recommended: matching subjects
       let recQuery = supabase
         .from('jobs')
-        .select('id, title, budget_min, budget_max, teaching_mode, class_level, created_at, districts(name_en, name_bn), subjects(name_en, name_bn)')
+        .select('id, slug, title, budget_min, budget_max, teaching_mode, class_level, created_at, districts(name_en, name_bn), subjects(name_en, name_bn)')
         .eq('status', 'open')
         .order('created_at', { ascending: false })
         .limit(10);
@@ -310,7 +310,7 @@ export default function TutorDashboard() {
       if (tutorData.district_id) {
         let nearQuery = supabase
           .from('jobs')
-          .select('id, title, budget_min, budget_max, teaching_mode, class_level, created_at, districts(name_en, name_bn), subjects(name_en, name_bn)')
+          .select('id, slug, title, budget_min, budget_max, teaching_mode, class_level, created_at, districts(name_en, name_bn), subjects(name_en, name_bn)')
           .eq('status', 'open')
           .eq('district_id', tutorData.district_id)
           .order('created_at', { ascending: false })
@@ -325,7 +325,7 @@ export default function TutorDashboard() {
       // High-paying jobs
       let highQuery = supabase
         .from('jobs')
-        .select('id, title, budget_min, budget_max, teaching_mode, class_level, created_at, districts(name_en, name_bn), subjects(name_en, name_bn)')
+        .select('id, slug, title, budget_min, budget_max, teaching_mode, class_level, created_at, districts(name_en, name_bn), subjects(name_en, name_bn)')
         .eq('status', 'open')
         .order('budget_max', { ascending: false })
         .limit(10);
@@ -775,7 +775,7 @@ export default function TutorDashboard() {
                 return (
                   <TabsContent key={tab} value={tab} className="space-y-3">
                     {jobList.length > 0 ? jobList.map(job => (
-                      <Link key={job.id} to={`/jobs/${job.id}`} className="block">
+                      <Link key={job.id} to={`/jobs/${(job as any).slug || job.id}`} className="block">
                         <div className="p-4 border rounded-xl hover:bg-muted/50 transition-colors">
                           <div className="flex items-start justify-between">
                             <div className="flex-1">
@@ -946,7 +946,7 @@ export default function TutorDashboard() {
                         <div key={app.id} className="p-4 border rounded-xl hover:bg-muted/50 transition-colors">
                           <div className="flex items-start justify-between">
                             <div className="flex-1">
-                              <Link to={`/jobs/${app.jobs?.id}`} className="hover:text-primary">
+                              <Link to={`/jobs/${(app.jobs as any)?.slug || app.jobs?.id}`} className="hover:text-primary">
                                 <h4 className="font-bold mb-1">{app.jobs?.title}</h4>
                               </Link>
                               <div className="flex items-center gap-3 text-sm text-muted-foreground mb-2">
@@ -1017,7 +1017,7 @@ export default function TutorDashboard() {
                                   Withdraw
                                 </Button>
                               )}
-                              <Link to={`/jobs/${app.jobs?.id}`}>
+                              <Link to={`/jobs/${(app.jobs as any)?.slug || app.jobs?.id}`}>
                                 <Button size="sm" variant="ghost">
                                   <Eye className="h-4 w-4" />
                                 </Button>

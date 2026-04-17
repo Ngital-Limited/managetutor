@@ -92,7 +92,7 @@ export default function Index() {
           .order('average_rating', { ascending: false })
           .limit(6),
         supabase.from('jobs')
-          .select('id, title, description, budget_min, budget_max, teaching_mode, days_per_week, job_reference, created_at, districts (name_en, name_bn), subjects (name_en, name_bn)')
+          .select('id, slug, title, description, budget_min, budget_max, teaching_mode, days_per_week, job_reference, created_at, districts (name_en, name_bn), subjects (name_en, name_bn)')
           .eq('status', 'open')
           .order('created_at', { ascending: false })
           .limit(6),
@@ -333,7 +333,7 @@ export default function Index() {
             </div>
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {latestJobs.map((job, i) => (
-                <Link key={job.id} to={`/jobs/${job.id}`} className="group block animate-fade-in" style={{ animationDelay: `${i * 60}ms` }}>
+                <Link key={job.id} to={`/jobs/${(job as any).slug || job.id}`} className="group block animate-fade-in" style={{ animationDelay: `${i * 60}ms` }}>
                   <div className="bg-card rounded-xl border border-border/60 p-5 h-full transition-all hover:border-primary/30 hover:shadow-[0_4px_24px_-8px_hsl(var(--primary)/0.15)]">
                     <div className="flex items-start justify-between mb-3 gap-2">
                       <div className="flex-1 min-w-0">
