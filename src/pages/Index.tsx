@@ -243,224 +243,231 @@ export default function Index() {
         </div>
       </section>
 
-      {/* Stats */}
-      <section className="py-16 bg-background">
+      {/* Stats — minimal premium */}
+      <section className="py-20 bg-background border-y border-border/40">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-px bg-border/40 rounded-2xl overflow-hidden border border-border/40">
             {[
-              { icon: Users, value: '1,00,000+', label: t('stats.tutors'), color: 'text-primary' },
-              { icon: Award, value: '4,000+', label: t('stats.matches'), color: 'text-secondary' },
-              { icon: MapPin, value: '64', label: t('stats.cities'), color: 'text-tutor' },
-              { icon: Star, value: '98%', label: t('stats.satisfaction'), color: 'text-accent' },
+              { icon: Users, value: '1,00,000+', label: t('stats.tutors') },
+              { icon: Award, value: '4,000+', label: t('stats.matches') },
+              { icon: MapPin, value: '64', label: t('stats.cities') },
+              { icon: Star, value: '98%', label: t('stats.satisfaction') },
             ].map((stat, i) => (
-              <div key={i} className="bg-card rounded-2xl p-6 shadow-lg shadow-foreground/5 text-center hover-lift animate-fade-in card-shine" style={{ animationDelay: `${i * 100}ms` }}>
-                <stat.icon className={`h-8 w-8 mx-auto mb-3 ${stat.color}`} />
-                <div className="text-3xl md:text-4xl font-extrabold text-foreground mb-1">{stat.value}</div>
-                <div className="text-muted-foreground text-sm font-medium">{stat.label}</div>
+              <div
+                key={i}
+                className="bg-background px-6 py-10 text-center group transition-colors hover:bg-muted/30 animate-fade-in"
+                style={{ animationDelay: `${i * 80}ms` }}
+              >
+                <stat.icon className="h-5 w-5 mx-auto mb-4 text-muted-foreground/70 group-hover:text-primary transition-colors" />
+                <div className="text-3xl md:text-4xl font-semibold tracking-tight text-foreground mb-1.5">{stat.value}</div>
+                <div className="text-muted-foreground text-xs uppercase tracking-wider font-medium">{stat.label}</div>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Subject Categories */}
+      {/* Subject Categories — minimal premium */}
       {subjectCategories.length > 0 && (
-        <section className="py-16 gradient-soft">
+        <section className="py-20 bg-muted/20">
           <div className="container mx-auto px-4">
-            <div className="flex items-center justify-between mb-10">
+            <div className="flex items-end justify-between mb-12 max-w-5xl">
               <div>
-                <h2 className="text-3xl md:text-4xl font-extrabold mb-2">Browse by Subject</h2>
-                <p className="text-muted-foreground">Find tuition jobs across 50+ subjects in every category</p>
+                <span className="text-xs uppercase tracking-[0.2em] text-muted-foreground font-medium">Categories</span>
+                <h2 className="text-3xl md:text-4xl font-semibold tracking-tight mt-2 mb-2">Browse by Subject</h2>
+                <p className="text-sm text-muted-foreground">Find tuition jobs across 50+ subjects in every category</p>
               </div>
               <Link to="/jobs">
-                <Button variant="outline" className="hidden sm:flex gap-1">
-                  All Jobs <ChevronRight className="h-4 w-4" />
+                <Button variant="ghost" className="hidden sm:flex gap-1 text-sm text-muted-foreground hover:text-foreground">
+                  All Jobs <ArrowRight className="h-3.5 w-3.5" />
                 </Button>
               </Link>
             </div>
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {subjectCategories.slice(0, 6).map((cat, i) => (
-                <Card key={i} className="hover-lift border-border/50 overflow-hidden">
-                  <CardContent className="p-5">
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                        <BookOpen className="h-5 w-5 text-primary" />
-                      </div>
-                      <h3 className="font-bold text-lg">{cat.category_en}</h3>
-                      <Badge variant="secondary" className="ml-auto">{cat.subjects.length}</Badge>
-                    </div>
-                    <div className="flex flex-wrap gap-1.5">
-                      {cat.subjects.slice(0, 5).map((sub) => (
-                        <Link key={sub.id} to={`/jobs?subject=${sub.id}`}>
-                          <Badge variant="outline" className="cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors text-xs">
-                            {sub.name_en}
-                          </Badge>
-                        </Link>
-                      ))}
-                      {cat.subjects.length > 5 && (
-                        <Badge variant="outline" className="text-xs text-muted-foreground">+{cat.subjects.length - 5} more</Badge>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
+                <div
+                  key={i}
+                  className="group bg-card rounded-xl border border-border/60 p-5 transition-all hover:border-primary/30 hover:shadow-[0_4px_24px_-8px_hsl(var(--primary)/0.15)] animate-fade-in"
+                  style={{ animationDelay: `${i * 60}ms` }}
+                >
+                  <div className="flex items-center gap-3 mb-4">
+                    <BookOpen className="h-4 w-4 text-muted-foreground/70 group-hover:text-primary transition-colors" />
+                    <h3 className="font-medium text-sm tracking-tight">{cat.category_en}</h3>
+                    <span className="ml-auto text-[11px] text-muted-foreground tabular-nums">{cat.subjects.length}</span>
+                  </div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {cat.subjects.slice(0, 5).map((sub) => (
+                      <Link key={sub.id} to={`/jobs?subject=${sub.id}`}>
+                        <Badge variant="outline" className="cursor-pointer border-border/60 hover:bg-foreground hover:text-background hover:border-foreground transition-colors text-[11px] font-normal">
+                          {sub.name_en}
+                        </Badge>
+                      </Link>
+                    ))}
+                    {cat.subjects.length > 5 && (
+                      <Badge variant="outline" className="text-[11px] text-muted-foreground border-border/60 font-normal">+{cat.subjects.length - 5}</Badge>
+                    )}
+                  </div>
+                </div>
               ))}
             </div>
           </div>
         </section>
       )}
 
-      {/* Latest Tuition Jobs */}
+      {/* Latest Tuition Jobs — minimal premium */}
       {latestJobs.length > 0 && (
-        <section className="py-16 bg-background">
+        <section className="py-20 bg-background">
           <div className="container mx-auto px-4">
-            <div className="flex items-center justify-between mb-10">
+            <div className="flex items-end justify-between mb-12">
               <div>
-                <h2 className="text-3xl md:text-4xl font-extrabold mb-2">Latest Tuition Jobs</h2>
-                <p className="text-muted-foreground">New opportunities posted by parents and guardians</p>
+                <span className="text-xs uppercase tracking-[0.2em] text-muted-foreground font-medium">Opportunities</span>
+                <h2 className="text-3xl md:text-4xl font-semibold tracking-tight mt-2 mb-2">Latest Tuition Jobs</h2>
+                <p className="text-sm text-muted-foreground">New opportunities posted by parents and guardians</p>
               </div>
               <Link to="/jobs">
-                <Button variant="outline" className="hidden sm:flex gap-1">
-                  All Jobs <ChevronRight className="h-4 w-4" />
+                <Button variant="ghost" className="hidden sm:flex gap-1 text-sm text-muted-foreground hover:text-foreground">
+                  All Jobs <ArrowRight className="h-3.5 w-3.5" />
                 </Button>
               </Link>
             </div>
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-              {latestJobs.map((job) => (
-                <Link key={job.id} to={`/jobs/${job.id}`}>
-                  <Card className="hover-lift border-border/50 overflow-hidden h-full">
-                    <CardContent className="p-5">
-                      <div className="flex items-start justify-between mb-3">
-                        <div className="flex-1 min-w-0">
-                          <h3 className="font-bold text-base truncate mb-1">{job.title}</h3>
-                          {job.job_reference && (
-                            <Badge variant="outline" className="text-xs font-mono mb-2">{job.job_reference}</Badge>
-                          )}
-                        </div>
-                        <Badge className="bg-success/10 text-success border-success/20 flex-shrink-0 ml-2">Open</Badge>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {latestJobs.map((job, i) => (
+                <Link key={job.id} to={`/jobs/${job.id}`} className="group block animate-fade-in" style={{ animationDelay: `${i * 60}ms` }}>
+                  <div className="bg-card rounded-xl border border-border/60 p-5 h-full transition-all hover:border-primary/30 hover:shadow-[0_4px_24px_-8px_hsl(var(--primary)/0.15)]">
+                    <div className="flex items-start justify-between mb-3 gap-2">
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-medium text-sm tracking-tight truncate mb-1.5 group-hover:text-primary transition-colors">{job.title}</h3>
+                        {job.job_reference && (
+                          <span className="text-[10px] font-mono text-muted-foreground tracking-wider">{job.job_reference}</span>
+                        )}
                       </div>
-                      <p className="text-sm text-muted-foreground mb-3 line-clamp-2">{job.description}</p>
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground mb-3 flex-wrap">
+                      <span className="flex items-center gap-1 text-[10px] uppercase tracking-wider text-success font-medium flex-shrink-0">
+                        <span className="h-1.5 w-1.5 rounded-full bg-success" />
+                        Open
+                      </span>
+                    </div>
+                    <p className="text-xs text-muted-foreground mb-4 line-clamp-2 leading-relaxed">{job.description}</p>
+                    <div className="flex items-center gap-3 text-[11px] text-muted-foreground mb-4 flex-wrap">
+                      <span className="flex items-center gap-1">
+                        <MapPin className="h-3 w-3" />
+                        {job.districts?.name_en}
+                      </span>
+                      {job.subjects && (
                         <span className="flex items-center gap-1">
-                          <MapPin className="h-3 w-3" />
-                          {job.districts?.name_en}
+                          <BookOpen className="h-3 w-3" />
+                          {job.subjects.name_en}
                         </span>
-                        {job.subjects && (
-                          <span className="flex items-center gap-1">
-                            <BookOpen className="h-3 w-3" />
-                            {job.subjects.name_en}
-                          </span>
-                        )}
-                        {job.days_per_week && (
-                          <span className="flex items-center gap-1">
-                            <Clock className="h-3 w-3" />
-                            {job.days_per_week}d/wk
-                          </span>
-                        )}
-                      </div>
-                      <div className="flex items-center justify-between">
-                        {(job.budget_min || job.budget_max) && (
-                          <span className="text-sm font-semibold text-primary">
-                            ৳{job.budget_min || 0} – ৳{job.budget_max || 0}/mo
-                          </span>
-                        )}
-                        <span className="text-xs text-muted-foreground">
-                          {formatDistanceToNow(new Date(job.created_at), { addSuffix: true })}
+                      )}
+                      {job.days_per_week && (
+                        <span className="flex items-center gap-1">
+                          <Clock className="h-3 w-3" />
+                          {job.days_per_week}d/wk
                         </span>
-                      </div>
-                    </CardContent>
-                  </Card>
+                      )}
+                    </div>
+                    <div className="flex items-center justify-between pt-3 border-t border-border/40">
+                      {(job.budget_min || job.budget_max) ? (
+                        <span className="text-sm font-semibold tracking-tight text-foreground tabular-nums">
+                          ৳{job.budget_min || 0}–{job.budget_max || 0}
+                          <span className="text-[10px] font-normal text-muted-foreground ml-1">/mo</span>
+                        </span>
+                      ) : <span />}
+                      <span className="text-[11px] text-muted-foreground">
+                        {formatDistanceToNow(new Date(job.created_at), { addSuffix: true })}
+                      </span>
+                    </div>
+                  </div>
                 </Link>
               ))}
             </div>
             <div className="text-center mt-8 sm:hidden">
-              <Link to="/jobs"><Button variant="outline">View All Jobs <ChevronRight className="h-4 w-4 ml-1" /></Button></Link>
+              <Link to="/jobs"><Button variant="outline">View All Jobs <ArrowRight className="h-4 w-4 ml-1" /></Button></Link>
             </div>
           </div>
         </section>
       )}
 
-      {/* Tutor Profiles */}
+      {/* Top Rated Tutors — minimal premium */}
       {featuredTutors.length > 0 && (
-        <section className="py-16 gradient-soft">
+        <section className="py-20 bg-muted/20">
           <div className="container mx-auto px-4">
-            <div className="flex items-center justify-between mb-10">
+            <div className="flex items-end justify-between mb-12">
               <div>
-                <h2 className="text-3xl md:text-4xl font-extrabold mb-2">Top Rated Tutors</h2>
-                <p className="text-muted-foreground">Verified and trusted tutors ready to teach</p>
+                <span className="text-xs uppercase tracking-[0.2em] text-muted-foreground font-medium">Educators</span>
+                <h2 className="text-3xl md:text-4xl font-semibold tracking-tight mt-2 mb-2">Top Rated Tutors</h2>
+                <p className="text-sm text-muted-foreground">Verified and trusted tutors ready to teach</p>
               </div>
               <Link to="/tutors">
-                <Button variant="outline" className="hidden sm:flex gap-1">
-                  View All <ChevronRight className="h-4 w-4" />
+                <Button variant="ghost" className="hidden sm:flex gap-1 text-sm text-muted-foreground hover:text-foreground">
+                  View All <ArrowRight className="h-3.5 w-3.5" />
                 </Button>
               </Link>
             </div>
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-              {featuredTutors.map((tutor) => {
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {featuredTutors.map((tutor, i) => {
                 const tutorSubjects = tutor.tutor_subjects?.map(ts =>
                   ts.subjects?.name_en
                 ).filter(Boolean).slice(0, 3) || [];
 
                 return (
-                  <Link key={tutor.id} to={`/tutor/${tutor.id}`}>
-                    <Card className="hover-lift border-border/50 overflow-hidden h-full">
-                      <CardContent className="p-5">
-                        <div className="flex items-start gap-4 mb-4">
-                          <Avatar className="h-14 w-14 ring-2 ring-primary/20">
-                            <AvatarImage src={tutor.profiles?.avatar_url || ''} />
-                            <AvatarFallback className="text-lg font-bold">{tutor.profiles?.full_name?.charAt(0) || 'T'}</AvatarFallback>
-                          </Avatar>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 mb-0.5">
-                              <h3 className="font-bold text-base truncate">{tutor.profiles?.full_name}</h3>
-                              {tutor.verification_status === 'approved' && tutor.verification_paid && (
-                                <CheckCircle2 className="h-4 w-4 text-success flex-shrink-0" />
-                              )}
-                            </div>
-                            <p className="text-sm text-muted-foreground truncate">{tutor.education || 'Educator'}</p>
-                            <div className="flex items-center gap-2 mt-1">
-                              <Star className="h-3.5 w-3.5 text-accent fill-accent" />
-                              <span className="text-sm font-semibold">{tutor.average_rating || 0}</span>
-                              <span className="text-xs text-muted-foreground">({tutor.total_reviews} reviews)</span>
-                            </div>
+                  <Link key={tutor.id} to={`/tutor/${tutor.id}`} className="group block animate-fade-in" style={{ animationDelay: `${i * 60}ms` }}>
+                    <div className="bg-card rounded-xl border border-border/60 p-5 h-full transition-all hover:border-primary/30 hover:shadow-[0_4px_24px_-8px_hsl(var(--primary)/0.15)]">
+                      <div className="flex items-start gap-3 mb-4">
+                        <Avatar className="h-12 w-12 border border-border/60">
+                          <AvatarImage src={tutor.profiles?.avatar_url || ''} />
+                          <AvatarFallback className="text-sm font-medium bg-muted">{tutor.profiles?.full_name?.charAt(0) || 'T'}</AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-1.5 mb-0.5">
+                            <h3 className="font-medium text-sm tracking-tight truncate group-hover:text-primary transition-colors">{tutor.profiles?.full_name}</h3>
+                            {tutor.verification_status === 'approved' && tutor.verification_paid && (
+                              <CheckCircle2 className="h-3.5 w-3.5 text-success flex-shrink-0" />
+                            )}
+                          </div>
+                          <p className="text-xs text-muted-foreground truncate">{tutor.education || 'Educator'}</p>
+                          <div className="flex items-center gap-1.5 mt-1">
+                            <Star className="h-3 w-3 text-accent fill-accent" />
+                            <span className="text-xs font-semibold tabular-nums">{tutor.average_rating || 0}</span>
+                            <span className="text-[10px] text-muted-foreground">({tutor.total_reviews})</span>
                           </div>
                         </div>
-                        <div className="flex items-center gap-2 text-xs text-muted-foreground mb-3 flex-wrap">
-                          {tutor.districts && (
-                            <span className="flex items-center gap-1">
-                              <MapPin className="h-3 w-3" />
-                              {tutor.districts.name_en}
-                            </span>
-                          )}
+                      </div>
+                      <div className="flex items-center gap-3 text-[11px] text-muted-foreground mb-3 flex-wrap">
+                        {tutor.districts && (
                           <span className="flex items-center gap-1">
-                            <Briefcase className="h-3 w-3" />
-                            {tutor.experience_years} yrs
+                            <MapPin className="h-3 w-3" />
+                            {tutor.districts.name_en}
                           </span>
-                          <span className="flex items-center gap-1">
-                            <Clock className="h-3 w-3" />
-                            {tutor.teaching_mode === 'in_person' ? 'In-Person' : tutor.teaching_mode === 'online' ? 'Online' : 'Hybrid'}
-                          </span>
+                        )}
+                        <span className="flex items-center gap-1">
+                          <Briefcase className="h-3 w-3" />
+                          {tutor.experience_years}y
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Clock className="h-3 w-3" />
+                          {tutor.teaching_mode === 'in_person' ? 'In-Person' : tutor.teaching_mode === 'online' ? 'Online' : 'Hybrid'}
+                        </span>
+                      </div>
+                      {tutorSubjects.length > 0 && (
+                        <div className="flex flex-wrap gap-1.5 mb-4">
+                          {tutorSubjects.map((s, idx) => (
+                            <Badge key={idx} variant="outline" className="text-[10px] font-normal border-border/60">{s}</Badge>
+                          ))}
                         </div>
-                        {tutorSubjects.length > 0 && (
-                          <div className="flex flex-wrap gap-1.5 mb-3">
-                            {tutorSubjects.map((s, i) => (
-                              <Badge key={i} variant="secondary" className="text-xs">{s}</Badge>
-                            ))}
-                          </div>
-                        )}
-                        {(tutor.monthly_salary_min || tutor.monthly_salary_max) && (
-                          <div className="flex items-center gap-1 text-sm font-semibold text-primary">
-                            <DollarSign className="h-3.5 w-3.5" />
-                            ৳{tutor.monthly_salary_min || '—'} – ৳{tutor.monthly_salary_max || '—'}/mo
-                          </div>
-                        )}
-                      </CardContent>
-                    </Card>
+                      )}
+                      {(tutor.monthly_salary_min || tutor.monthly_salary_max) && (
+                        <div className="pt-3 border-t border-border/40 text-sm font-semibold tracking-tight text-foreground tabular-nums">
+                          ৳{tutor.monthly_salary_min || '—'}–{tutor.monthly_salary_max || '—'}
+                          <span className="text-[10px] font-normal text-muted-foreground ml-1">/mo</span>
+                        </div>
+                      )}
+                    </div>
                   </Link>
                 );
               })}
             </div>
             <div className="text-center mt-8 sm:hidden">
-              <Link to="/tutors"><Button variant="outline">View All Tutors <ChevronRight className="h-4 w-4 ml-1" /></Button></Link>
+              <Link to="/tutors"><Button variant="outline">View All Tutors <ArrowRight className="h-4 w-4 ml-1" /></Button></Link>
             </div>
           </div>
         </section>
