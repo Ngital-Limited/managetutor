@@ -32,9 +32,12 @@ interface TutorResult {
   experience_years: number;
   verification_status: string;
   bio: string | null;
+  featured_blurb: string | null;
 }
 
 export function AdminTutorEditTab({ toast }: Props) {
+  const [blurb, setBlurb] = useState('');
+  const [savingBlurb, setSavingBlurb] = useState(false);
   const { user } = useAuth();
   const [search, setSearch] = useState('');
   const [results, setResults] = useState<TutorResult[]>([]);
