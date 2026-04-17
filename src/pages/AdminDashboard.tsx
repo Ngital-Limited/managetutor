@@ -448,6 +448,14 @@ function DemoRequestsTab({ toast }: { toast: ReturnType<typeof useToast>['toast'
     const request = requests.find(r => r.id === id);
     if (request) {
       if (status === 'approved') {
+        // Format the schedule for the notification message
+        const scheduleStr = `${request.preferred_date} at ${request.preferred_time}${request.duration_minutes ? ` (${request.duration_minutes} min)` : ''}`;
+
+        // Sync the linked application status to 'invited_to_demo' if present
+        if (request.application_id) {
+          await supabase.from('applications').update({ status: 'invited_to_demo' as any }).eq('id', request.application_id);
+        }
+
         const { data: tp } = await supabase
           .from('tutor_profiles')
           .select('user_id')
@@ -456,8 +464,8 @@ function DemoRequestsTab({ toast }: { toast: ReturnType<typeof useToast>['toast'
         if (tp) {
           await supabase.from('notifications').insert({
             user_id: tp.user_id,
-            title: 'New Demo Class Request',
-            message: 'A parent has requested a demo class with you. Check your dashboard for details.',
+            title: 'Demo Class Scheduled',
+            message: `A guardian has invited you to a demo class on ${scheduleStr}. Approved by admin.${request.notes ? ' Notes: ' + request.notes : ''}`,
             type: 'demo_approved',
             reference_id: id,
           });
@@ -465,7 +473,7 @@ function DemoRequestsTab({ toast }: { toast: ReturnType<typeof useToast>['toast'
         await supabase.from('notifications').insert({
           user_id: request.parent_id,
           title: 'Demo Class Approved',
-          message: 'Your demo class request has been approved! The tutor has been notified.',
+          message: `Your demo class invitation for ${scheduleStr} has been approved! The tutor has been notified.`,
           type: 'demo_approved',
           reference_id: id,
         });
