@@ -18,7 +18,8 @@ import {
   SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarTrigger,
 } from '@/components/ui/sidebar';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, Download, Briefcase as BriefcaseIcon } from 'lucide-react';
+import { MultiSearchableSelect } from '@/components/MultiSearchableSelect';
 
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -84,6 +85,12 @@ interface UserRow {
   is_approved: boolean;
   created_at: string;
   role?: string;
+  user_reference?: string | null;
+  district_id?: string | null;
+  area_id?: string | null;
+  district_name?: string | null;
+  area_name?: string | null;
+  jobs_count?: number;
 }
 
 interface TutorVerification {
@@ -770,6 +777,15 @@ export default function AdminDashboard() {
   const [users, setUsers] = useState<UserRow[]>([]);
   const [userSearch, setUserSearch] = useState('');
   const [userRoleFilter, setUserRoleFilter] = useState('all');
+  // Guardians/Parents filters
+  const [guardianDistrictFilter, setGuardianDistrictFilter] = useState<string>('all');
+  const [guardianAreaFilter, setGuardianAreaFilter] = useState<string[]>([]);
+  const [guardianStatusFilter, setGuardianStatusFilter] = useState<string>('all');
+  const [guardianDistricts, setGuardianDistricts] = useState<{ id: string; name_en: string }[]>([]);
+  const [guardianAreas, setGuardianAreas] = useState<{ id: string; name_en: string; district_id: string }[]>([]);
+  const [viewingParentJobs, setViewingParentJobs] = useState<{ id: string; name: string } | null>(null);
+  const [parentJobs, setParentJobs] = useState<any[]>([]);
+  const [loadingParentJobs, setLoadingParentJobs] = useState(false);
   const [pendingTutors, setPendingTutors] = useState<TutorVerification[]>([]);
   const [verificationFilter, setVerificationFilter] = useState('pending');
   const [verificationPayments, setVerificationPayments] = useState<PaymentRow[]>([]);
