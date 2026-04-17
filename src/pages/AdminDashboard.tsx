@@ -2200,8 +2200,260 @@ export default function AdminDashboard() {
               </div>
             )}
 
-            {/* ═══════ APPLICATIONS TAB ═══════ */}
+            {/* ═══════ APPLICATIONS TAB (Two-level drill-down) ═══════ */}
             {activeTab === 'applications' && (() => {
+              const STATUS_OPTS = [
+                { key: 'all', label: 'All' },
+                { key: 'pending', label: 'Pending' },
+                { key: 'shortlisted', label: 'Shortlisted' },
+                { key: 'invited_to_demo', label: 'Invited' },
+                { key: 'waiting', label: 'Waiting' },
+                { key: 'accepted', label: 'Accepted' },
+                { key: 'rejected', label: 'Rejected' },
+                { key: 'withdrawn', label: 'Withdrawn' },
+              ] as const;
+
+              // ───── LEVEL 1: Jobs list ─────
+              if (appsView === 'jobs' || !selectedAppsJobId) {
+                // Group apps by job_id
+                const jobMap = new Map<string, { job: any; apps: any[] }>();
+                for (const a of allApplications) {
+                  const jid = a.job_id;
+                  if (!jid) continue;
+                  if (!jobMap.has(jid)) jobMap.set(jid, { job: a.jobs, apps: [] });
+                  jobMap.get(jid)!.apps.push(a);
+                }
+                const jobsList = Array.from(jobMap.entries()).map(([jid, { job, apps }]) => ({
+                  jid,
+                  job,
+                  total: apps.length,
+                  pending: apps.filter(a => a.status === 'pending').length,
+                  shortlisted: apps.filter(a => a.status === 'shortlisted').length,
+                  latest: apps.reduce((m, a) => (new Date(a.created_at) > new Date(m) ? a.created_at : m), apps[0].created_at),
+                }));
+                const search = appsJobsSearch.trim().toLowerCase();
+                const filteredJobs = jobsList.filter(j => {
+                  if (!search) return true;
+                  return (j.job?.title || '').toLowerCase().includes(search) ||
+                    (j.job?.job_reference || '').toLowerCase().includes(search);
+                }).sort((a, b) => new Date(b.latest).getTime() - new Date(a.latest).getTime());
+
+                return (
+                  <div className="space-y-6">
+                    <div className="flex items-center justify-between flex-wrap gap-3">
+                      <div>
+                        <h1 className="text-xl font-semibold">Applications</h1>
+                        <p className="text-sm text-muted-foreground mt-0.5">Jobs with applications. Click a job to manage its applicants.</p>
+                      </div>
+                      <Input
+                        placeholder="Search by job title or reference…"
+                        value={appsJobsSearch}
+                        onChange={(e) => setAppsJobsSearch(e.target.value)}
+                        className="w-72 h-9"
+                      />
+                    </div>
+
+                    <Card>
+                      <CardContent className="p-0">
+                        <ScrollArea className="w-full">
+                          <Table>
+                            <TableHeader>
+                              <TableRow>
+                                <TableHead className="font-mono">Ref ID</TableHead>
+                                <TableHead>Job Name</TableHead>
+                                <TableHead>Posted</TableHead>
+                                <TableHead>Job Status</TableHead>
+                                <TableHead>Applicants</TableHead>
+                                <TableHead className="text-right">Action</TableHead>
+                              </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                              {loadingAllApps ? (
+                                <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">Loading…</TableCell></TableRow>
+                              ) : filteredJobs.length === 0 ? (
+                                <TableRow><TableCell colSpan={6} className="text-center py-12 text-muted-foreground">No applications yet.</TableCell></TableRow>
+                              ) : filteredJobs.map(({ jid, job, total, pending, shortlisted, latest }) => (
+                                <TableRow
+                                  key={jid}
+                                  className="cursor-pointer"
+                                  onClick={() => { setSelectedAppsJobId(jid); setAppsView('applicants'); setSelectedAppIds(new Set()); }}
+                                >
+                                  <TableCell className="text-xs font-mono">{job?.job_reference || '—'}</TableCell>
+                                  <TableCell>
+                                    <div className="text-sm font-medium max-w-[320px] truncate">{job?.title || '—'}</div>
+                                  </TableCell>
+                                  <TableCell className="text-xs text-muted-foreground">{formatDistanceToNow(new Date(latest), { addSuffix: true })}</TableCell>
+                                  <TableCell>
+                                    <Badge className={`text-xs capitalize ${statusColor(job?.status)}`}>{(job?.status || '—').replace('_', ' ')}</Badge>
+                                  </TableCell>
+                                  <TableCell>
+                                    <div className="flex items-center gap-1.5 flex-wrap">
+                                      <Badge variant="secondary" className="text-xs gap-1"><Users className="h-3 w-3" />{total}</Badge>
+                                      {pending > 0 && <Badge variant="outline" className="text-xs">Pending: {pending}</Badge>}
+                                      {shortlisted > 0 && <Badge variant="outline" className="text-xs gap-1"><Star className="h-3 w-3" />{shortlisted}</Badge>}
+                                    </div>
+                                  </TableCell>
+                                  <TableCell className="text-right">
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      className="h-8 text-xs gap-1"
+                                      onClick={(e) => { e.stopPropagation(); setSelectedAppsJobId(jid); setAppsView('applicants'); setSelectedAppIds(new Set()); }}
+                                    >
+                                      <UserCheck className="h-3.5 w-3.5" /> View Applicants
+                                    </Button>
+                                  </TableCell>
+                                </TableRow>
+                              ))}
+                            </TableBody>
+                          </Table>
+                        </ScrollArea>
+                      </CardContent>
+                    </Card>
+                  </div>
+                );
+              }
+
+              // ───── LEVEL 2: Applicants for selected job ─────
+              const jobApps = allApplications.filter(a => a.job_id === selectedAppsJobId);
+              const selectedJob = jobApps[0]?.jobs;
+              const counts: Record<string, number> = { all: jobApps.length };
+              for (const o of STATUS_OPTS) if (o.key !== 'all') counts[o.key] = jobApps.filter(a => a.status === o.key).length;
+
+              const visible = jobApps.filter(a => {
+                if (allAppsStatusFilter !== 'all' && a.status !== allAppsStatusFilter) return false;
+                if (!allAppsSearch.trim()) return true;
+                const s = allAppsSearch.toLowerCase();
+                return (
+                  a.tutor_profile?.full_name?.toLowerCase().includes(s) ||
+                  a.tutor_profile?.email?.toLowerCase().includes(s)
+                );
+              });
+
+              return (
+                <div className="space-y-6">
+                  {/* Breadcrumb header */}
+                  <div className="flex items-start justify-between flex-wrap gap-3">
+                    <div className="space-y-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 -ml-2 gap-1.5 text-muted-foreground hover:text-foreground"
+                        onClick={() => { setAppsView('jobs'); setSelectedAppsJobId(null); setSelectedAppIds(new Set()); }}
+                      >
+                        <ArrowLeft className="h-4 w-4" /> Back to Jobs
+                      </Button>
+                      <div>
+                        <h1 className="text-xl font-semibold">{selectedJob?.title || 'Applicants'}</h1>
+                        <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground flex-wrap">
+                          <span className="font-mono">{selectedJob?.job_reference || '—'}</span>
+                          <span>•</span>
+                          <Badge className={`text-xs capitalize ${statusColor(selectedJob?.status)}`}>{(selectedJob?.status || '—').replace('_', ' ')}</Badge>
+                          <span>•</span>
+                          <span>{jobApps.length} applicant{jobApps.length === 1 ? '' : 's'}</span>
+                        </div>
+                      </div>
+                    </div>
+                    <Input
+                      placeholder="Search tutor name or email…"
+                      value={allAppsSearch}
+                      onChange={(e) => setAllAppsSearch(e.target.value)}
+                      className="w-64 h-9"
+                    />
+                  </div>
+
+                  {/* Status filter chips scoped to this job */}
+                  <div className="flex items-center gap-2 flex-wrap">
+                    {STATUS_OPTS.map(opt => {
+                      const count = counts[opt.key] || 0;
+                      const active = allAppsStatusFilter === opt.key;
+                      return (
+                        <button
+                          key={opt.key}
+                          type="button"
+                          onClick={() => setAllAppsStatusFilter(opt.key)}
+                          className={`text-xs px-2.5 py-1 rounded-full border transition-colors ${active ? 'bg-primary text-primary-foreground border-primary' : 'bg-background text-muted-foreground hover:bg-muted'}`}
+                        >
+                          {opt.label} <span className={active ? 'opacity-90' : 'opacity-70'}>({count})</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  <Card>
+                    <CardContent className="p-0">
+                      <ScrollArea className="w-full">
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead>Tutor</TableHead>
+                              <TableHead>Applied</TableHead>
+                              <TableHead>Rate</TableHead>
+                              <TableHead>Cover Message</TableHead>
+                              <TableHead>Status</TableHead>
+                              <TableHead className="text-right">Actions</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {visible.length === 0 ? (
+                              <TableRow><TableCell colSpan={6} className="text-center py-12 text-muted-foreground">No applicants match this filter.</TableCell></TableRow>
+                            ) : visible.map((app) => {
+                              const isFinal = app.status === 'accepted' || app.status === 'rejected' || app.status === 'withdrawn';
+                              return (
+                                <TableRow key={app.id}>
+                                  <TableCell>
+                                    <div className="text-sm font-medium">{app.tutor_profile?.full_name || 'Unknown'}</div>
+                                    <div className="text-xs text-muted-foreground">{app.tutor_profile?.email}</div>
+                                  </TableCell>
+                                  <TableCell className="text-xs text-muted-foreground">{formatDistanceToNow(new Date(app.created_at), { addSuffix: true })}</TableCell>
+                                  <TableCell className="text-sm">{app.proposed_rate ? `৳${app.proposed_rate}` : '—'}</TableCell>
+                                  <TableCell className="text-xs text-muted-foreground max-w-[280px] truncate" title={app.cover_message || ''}>{app.cover_message || '—'}</TableCell>
+                                  <TableCell><Badge className={`text-xs capitalize ${statusColor(app.status)}`}>{app.status}</Badge></TableCell>
+                                  <TableCell className="text-right">
+                                    <div className="flex gap-1 justify-end flex-wrap">
+                                      {!isFinal && app.status === 'pending' && (
+                                        <Button variant="outline" size="sm" className="h-8 text-xs gap-1" onClick={() => handleAdminUpdateAppStatus(app.id, 'shortlisted', app.job_id)} title="Shortlist">
+                                          <Star className="h-3.5 w-3.5" /> Shortlist
+                                        </Button>
+                                      )}
+                                      {!isFinal && (app.status === 'pending' || app.status === 'shortlisted') && (
+                                        <Button variant="outline" size="sm" className="h-8 text-xs gap-1" onClick={() => handleAdminUpdateAppStatus(app.id, 'invited_to_demo', app.job_id)} title="Invite to Demo">
+                                          <Send className="h-3.5 w-3.5" /> Invite
+                                        </Button>
+                                      )}
+                                      {!isFinal && (
+                                        <Button size="sm" className="h-8 text-xs gap-1" onClick={() => handleAdminUpdateAppStatus(app.id, 'accepted', app.job_id)} title="Hire / Accept">
+                                          <CheckCircle2 className="h-3.5 w-3.5" /> Hire
+                                        </Button>
+                                      )}
+                                      {!isFinal && (
+                                        <Button variant="outline" size="sm" className="h-8 text-xs gap-1" onClick={() => handleAdminUpdateAppStatus(app.id, 'rejected', app.job_id)} title="Reject">
+                                          <XCircle className="h-3.5 w-3.5" /> Reject
+                                        </Button>
+                                      )}
+                                      {!isFinal && (
+                                        <Button variant="ghost" size="sm" className="h-8 text-xs" onClick={() => handleAdminUpdateAppStatus(app.id, 'withdrawn', app.job_id)} title="Mark as Withdrawn">
+                                          Withdraw
+                                        </Button>
+                                      )}
+                                      <Button variant="ghost" size="sm" asChild title="View Job">
+                                        <Link to={`/jobs/${app.job_id}`}><Eye className="h-4 w-4" /></Link>
+                                      </Button>
+                                    </div>
+                                  </TableCell>
+                                </TableRow>
+                              );
+                            })}
+                          </TableBody>
+                        </Table>
+                      </ScrollArea>
+                    </CardContent>
+                  </Card>
+                </div>
+              );
+            })()}
+
+
               // Filtered view used by table, bulk-actions and CSV export
               const filteredApps = allApplications.filter((a) => {
                 if (!allAppsSearch.trim()) return true;
