@@ -810,6 +810,11 @@ export default function AdminDashboard() {
   const [jobStatusFilter, setJobStatusFilter] = useState('all');
   const [jobPage, setJobPage] = useState(1);
   const [jobPageSize, setJobPageSize] = useState(25);
+  // Applications tab pagination (Level 1: jobs grouping, Level 2: applicants list)
+  const [appsJobsPage, setAppsJobsPage] = useState(1);
+  const [appsJobsPageSize, setAppsJobsPageSize] = useState(25);
+  const [appsApplicantsPage, setAppsApplicantsPage] = useState(1);
+  const [appsApplicantsPageSize, setAppsApplicantsPageSize] = useState(25);
   const [reports, setReports] = useState<Report[]>([]);
   const [reviews, setReviews] = useState<ReviewRow[]>([]);
   const [payments, setPayments] = useState<PaymentRow[]>([]);
@@ -1284,6 +1289,10 @@ export default function AdminDashboard() {
 
   // Reset job pagination when filter or page size changes
   useEffect(() => { setJobPage(1); }, [jobStatusFilter, jobPageSize]);
+
+  // Reset Applications tab pagination when filters/search/selection change
+  useEffect(() => { setAppsJobsPage(1); }, [appsJobsSearch, appsJobsPageSize]);
+  useEffect(() => { setAppsApplicantsPage(1); }, [allAppsStatusFilter, allAppsSearch, selectedAppsJobId, appsApplicantsPageSize]);
 
   // Load verification fee from platform settings
   useEffect(() => {
