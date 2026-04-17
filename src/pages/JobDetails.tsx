@@ -83,6 +83,7 @@ export default function JobDetails() {
   const [loading, setLoading] = useState(true);
   const [applying, setApplying] = useState(false);
   const [showApply, setShowApply] = useState(false);
+  const [relatedJobs, setRelatedJobs] = useState<any[]>([]);
 
   const [applicationForm, setApplicationForm] = useState({
     cover_message: '',
