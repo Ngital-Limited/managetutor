@@ -204,7 +204,7 @@ export function RevenuePayoutTab({ toast }: { toast: any }) {
                           {p.bank_name && <p className="text-xs text-muted-foreground">{p.bank_name}</p>}
                         </TableCell>
                         <TableCell>{statusBadge(p.status)}</TableCell>
-                        <TableCell className="text-xs text-muted-foreground">{formatDistanceToNow(new Date(p.created_at), { addSuffix: true })}</TableCell>
+                        <TableCell className="text-xs text-muted-foreground">{formatExactDate(new Date(p.created_at))}</TableCell>
                         <TableCell>
                           {p.status === 'pending' && (
                             <div className="flex gap-1">
@@ -259,7 +259,7 @@ export function RevenuePayoutTab({ toast }: { toast: any }) {
                           ) : '—'}
                         </TableCell>
                         <TableCell>{statusBadge(r.status)}</TableCell>
-                        <TableCell className="text-xs text-muted-foreground">{formatDistanceToNow(new Date(r.created_at), { addSuffix: true })}</TableCell>
+                        <TableCell className="text-xs text-muted-foreground">{formatExactDate(new Date(r.created_at))}</TableCell>
                         <TableCell>
                           {r.status === 'pending' && (
                             <Button size="sm" onClick={() => { setSelectedRefund(r); setAdminNotes(''); }}>Review</Button>

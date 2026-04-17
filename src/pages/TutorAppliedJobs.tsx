@@ -252,7 +252,7 @@ export default function TutorAppliedJobs() {
                                   <div className="flex items-center gap-2 flex-wrap">
                                     <Badge variant="outline" className="text-xs">Your Rate: ৳{app.proposed_rate}/mo</Badge>
                                     <span className="text-xs text-muted-foreground">
-                                      Applied {formatDistanceToNow(new Date(app.created_at), { addSuffix: true })}
+                                      Applied {formatExactDate(new Date(app.created_at))}
                                     </span>
                                   </div>
 

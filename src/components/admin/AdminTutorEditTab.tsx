@@ -484,7 +484,7 @@ export function AdminTutorEditTab({ toast }: Props) {
                             n.category === 'behavior' ? 'border-warning text-warning' : ''
                           }`}>{n.category}</Badge>
                           <span className="text-xs text-muted-foreground">by {n.admin_name}</span>
-                          <span className="text-xs text-muted-foreground">· {formatDistanceToNow(new Date(n.created_at), { addSuffix: true })}</span>
+                          <span className="text-xs text-muted-foreground">· {formatExactDate(new Date(n.created_at))}</span>
                         </div>
                         <p className="text-sm">{n.note}</p>
                       </div>

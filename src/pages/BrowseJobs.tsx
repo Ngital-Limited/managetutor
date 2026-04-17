@@ -610,7 +610,7 @@ export default function BrowseJobs() {
                           <span className="text-border">·</span>
                           <span className="flex items-center gap-1">
                             <Clock className="h-3.5 w-3.5" />
-                            {formatDistanceToNow(new Date(job.created_at), { addSuffix: true })}
+                            {formatExactDate(new Date(job.created_at))}
                           </span>
                         </div>
 

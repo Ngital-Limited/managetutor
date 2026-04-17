@@ -1663,7 +1663,7 @@ export default function ParentDashboard() {
                             <div className="flex items-center gap-2">
                               <Badge variant="outline">৳{job.budget_min}-{job.budget_max}/mo</Badge>
                               <span className="text-xs text-muted-foreground">
-                                {formatDistanceToNow(new Date(job.created_at), { addSuffix: true })}
+                                {formatExactDate(new Date(job.created_at))}
                               </span>
                             </div>
                           </div>

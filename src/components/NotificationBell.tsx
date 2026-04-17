@@ -186,7 +186,7 @@ export function NotificationBell() {
                       </p>
                       <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{n.message}</p>
                       <p className="text-[10px] text-muted-foreground/70 mt-1">
-                        {formatDistanceToNow(new Date(n.created_at), { addSuffix: true })}
+                        {formatExactDate(new Date(n.created_at))}
                       </p>
                     </div>
                     {!n.is_read && (

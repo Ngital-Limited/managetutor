@@ -1184,7 +1184,7 @@ export default function TutorProfile() {
                             <div className="flex items-center justify-between mb-1">
                               <span className="font-medium">{review.profiles?.full_name}</span>
                               <span className="text-xs text-muted-foreground">
-                                {formatDistanceToNow(new Date(review.created_at), { addSuffix: true })}
+                                {formatExactDate(new Date(review.created_at))}
                               </span>
                             </div>
                             <div className="flex items-center gap-1 mb-2">

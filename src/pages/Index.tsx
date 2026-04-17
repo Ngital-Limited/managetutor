@@ -374,7 +374,7 @@ export default function Index() {
                         </span>
                       ) : <span />}
                       <span className="text-[11px] text-muted-foreground">
-                        {formatDistanceToNow(new Date(job.created_at), { addSuffix: true })}
+                        {formatExactDate(new Date(job.created_at))}
                       </span>
                     </div>
                   </div>

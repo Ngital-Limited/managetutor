@@ -805,7 +805,7 @@ export default function TutorDashboard() {
                                 </p>
                               )}
                               <p className="text-xs text-muted-foreground">
-                                {formatDistanceToNow(new Date(job.created_at), { addSuffix: true })}
+                                {formatExactDate(new Date(job.created_at))}
                               </p>
                             </div>
                           </div>
@@ -964,7 +964,7 @@ export default function TutorDashboard() {
                               <div className="flex items-center gap-2">
                                 <Badge variant="outline">Your Rate: ৳{app.proposed_rate}/mo</Badge>
                                 <span className="text-xs text-muted-foreground">
-                                  Applied {formatDistanceToNow(new Date(app.created_at), { addSuffix: true })}
+                                  Applied {formatExactDate(new Date(app.created_at))}
                                 </span>
                               </div>
                               

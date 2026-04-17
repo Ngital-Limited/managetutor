@@ -351,7 +351,7 @@ function ContactMessagesTab({ toast }: { toast: ReturnType<typeof useToast>['toa
                   <TableCell>{msg.name}</TableCell>
                   <TableCell className="text-sm text-muted-foreground">{msg.email}</TableCell>
                   <TableCell className="max-w-[200px] truncate">{msg.subject}</TableCell>
-                  <TableCell className="text-sm text-muted-foreground">{formatDistanceToNow(new Date(msg.created_at), { addSuffix: true })}</TableCell>
+                  <TableCell className="text-sm text-muted-foreground">{formatExactDate(new Date(msg.created_at))}</TableCell>
                   <TableCell>
                     <div className="flex gap-1">
                       <Button size="sm" variant="outline" onClick={() => { setSelectedMsg(msg); if (!msg.is_read) markAsRead(msg.id); }}>
@@ -2006,7 +2006,7 @@ export default function AdminDashboard() {
                                   <Badge className="bg-success/10 text-success border-success/20 text-xs">Approved</Badge>
                                 )}
                               </TableCell>
-                              <TableCell className="text-xs text-muted-foreground whitespace-nowrap">{formatDistanceToNow(new Date(u.created_at), { addSuffix: true })}</TableCell>
+                              <TableCell className="text-xs text-muted-foreground whitespace-nowrap">{formatExactDate(new Date(u.created_at))}</TableCell>
                               <TableCell className="text-right">
                                 <div className="flex gap-1 justify-end">
                                   <Button variant="ghost" size="sm" onClick={() => handleImpersonate(u.id)} title={`Login as ${u.full_name}`}>
@@ -2074,7 +2074,7 @@ export default function AdminDashboard() {
                             <TableCell className="text-xs">{j.subjects?.name_en || '—'}</TableCell>
                             <TableCell><Badge variant="outline" className="text-xs capitalize">{j.status?.replace('_', ' ')}</Badge></TableCell>
                             <TableCell className="text-xs">{j.total_applications || 0}</TableCell>
-                            <TableCell className="text-xs text-muted-foreground whitespace-nowrap">{formatDistanceToNow(new Date(j.created_at), { addSuffix: true })}</TableCell>
+                            <TableCell className="text-xs text-muted-foreground whitespace-nowrap">{formatExactDate(new Date(j.created_at))}</TableCell>
                             <TableCell>
                               <Button variant="ghost" size="sm" asChild><Link to={`/jobs/${j.id}`}><Eye className="h-4 w-4" /></Link></Button>
                             </TableCell>
@@ -2276,7 +2276,7 @@ export default function AdminDashboard() {
                                 </Button>
                               </TableCell>
                               <TableCell><Badge className={`text-xs capitalize ${statusColor(job.status)}`}>{job.status?.replace('_', ' ')}</Badge></TableCell>
-                              <TableCell className="text-xs text-muted-foreground">{formatDistanceToNow(new Date(job.created_at), { addSuffix: true })}</TableCell>
+                              <TableCell className="text-xs text-muted-foreground">{formatExactDate(new Date(job.created_at))}</TableCell>
                               <TableCell className="text-right">
                                 <div className="flex gap-1 justify-end flex-wrap">
                                   <Button variant="ghost" size="sm" asChild><Link to={`/jobs/${job.id}`}><Eye className="h-4 w-4" /></Link></Button>
@@ -2414,7 +2414,7 @@ export default function AdminDashboard() {
                                   </TableCell>
                                   <TableCell className="text-sm max-w-[160px] truncate">{guardianName}</TableCell>
                                   <TableCell className="text-xs font-mono whitespace-nowrap">{guardianPhone}</TableCell>
-                                  <TableCell className="text-xs text-muted-foreground">{formatDistanceToNow(new Date(latest), { addSuffix: true })}</TableCell>
+                                  <TableCell className="text-xs text-muted-foreground">{formatExactDate(new Date(latest))}</TableCell>
                                   <TableCell>
                                     <Badge className={`text-xs capitalize ${statusColor(job?.status)}`}>{(job?.status || '—').replace('_', ' ')}</Badge>
                                   </TableCell>
@@ -2666,7 +2666,7 @@ export default function AdminDashboard() {
                                 <TableRow key={app.id} className="hover:bg-muted/20">
                                   <TableCell className="text-xs font-mono text-muted-foreground align-top">
                                     <div className="text-foreground/80">{tp?.user_reference || '—'}</div>
-                                    <div className="text-[10px] mt-1 font-sans">{formatDistanceToNow(new Date(app.created_at), { addSuffix: true })}</div>
+                                    <div className="text-[10px] mt-1 font-sans">{formatExactDate(new Date(app.created_at))}</div>
                                   </TableCell>
                                   <TableCell className="align-top">
                                     <div className="flex items-center gap-2.5">
@@ -2871,7 +2871,7 @@ export default function AdminDashboard() {
                                   {r.is_approved ? 'Visible' : 'Hidden'}
                                 </Badge>
                               </TableCell>
-                              <TableCell className="text-xs text-muted-foreground">{formatDistanceToNow(new Date(r.created_at), { addSuffix: true })}</TableCell>
+                              <TableCell className="text-xs text-muted-foreground">{formatExactDate(new Date(r.created_at))}</TableCell>
                               <TableCell className="text-right">
                                 <Button variant="ghost" size="sm" onClick={() => handleToggleReview(r.id, !r.is_approved)}>
                                   {r.is_approved ? <XCircle className="h-4 w-4 text-destructive" /> : <CheckCircle2 className="h-4 w-4 text-success" />}
@@ -3382,7 +3382,7 @@ export default function AdminDashboard() {
                   {app.cover_message && (
                     <p className="text-sm bg-muted/50 p-2 rounded text-muted-foreground">{app.cover_message}</p>
                   )}
-                  <div className="text-xs text-muted-foreground">Applied {formatDistanceToNow(new Date(app.created_at), { addSuffix: true })}</div>
+                  <div className="text-xs text-muted-foreground">Applied {formatExactDate(new Date(app.created_at))}</div>
                   
                   {/* Action Buttons based on status */}
                   {app.status === 'pending' && (
