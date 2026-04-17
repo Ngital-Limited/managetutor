@@ -173,6 +173,9 @@ export default function BrowseJobs({ embedded = false }: { embedded?: boolean } 
         if (data.district_id && selectedDistrict === 'all') {
           setSelectedDistrict(data.district_id);
         }
+        if (data.area_id && selectedArea === 'all') {
+          setSelectedArea(data.area_id);
+        }
         setTutorClassLevels(data.class_levels || []);
         setTutorSubjectIds((subjectsRes.data || []).map((s: any) => s.subject_id));
         setTutorPrefilterApplied(true);
