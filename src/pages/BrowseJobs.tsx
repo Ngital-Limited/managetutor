@@ -154,13 +154,19 @@ export default function BrowseJobs() {
   };
 
   const fetchData = async () => {
-    const [districtsRes, areasRes] = await Promise.all([
-      supabase.from('districts').select('id, name_en, name_bn, division_en').order('name_en'),
-      supabase.from('areas').select('id, name_en, district_id').order('name_en'),
-    ]);
+    const { data: areasRes } = await supabase
+      .from('areas')
+      .select('id, name_en, district_id, districts (name_en)')
+      .order('name_en');
 
-    if (districtsRes.data) setDistricts(districtsRes.data);
-    if (areasRes.data) setAreas(areasRes.data as Area[]);
+    if (areasRes) {
+      setAreas(areasRes.map((a: any) => ({
+        id: a.id,
+        name_en: a.name_en,
+        district_id: a.district_id,
+        district_name: a.districts?.name_en || '',
+      })));
+    }
 
     await fetchJobs();
   };
@@ -173,9 +179,6 @@ export default function BrowseJobs() {
       .select('*', { count: 'exact', head: true })
       .eq('status', 'open');
 
-    if (selectedDistrict && selectedDistrict !== 'all') {
-      countQuery = countQuery.eq('district_id', selectedDistrict);
-    }
     if (selectedArea && selectedArea !== 'all') {
       countQuery = countQuery.eq('area_id', selectedArea);
     }
@@ -198,9 +201,6 @@ export default function BrowseJobs() {
       .order('is_featured', { ascending: false })
       .order('created_at', { ascending: false });
 
-    if (selectedDistrict && selectedDistrict !== 'all') {
-      query = query.eq('district_id', selectedDistrict);
-    }
     if (selectedArea && selectedArea !== 'all') {
       query = query.eq('area_id', selectedArea);
     }
