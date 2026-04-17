@@ -178,7 +178,7 @@ export default function JobDetails() {
 
     const { data: tutorProfile } = await supabase
       .from('tutor_profiles')
-      .select('id, bio, education, experience_years, monthly_salary_min, verification_status, gender, district_id, teaching_mode, class_levels')
+      .select('id, bio, education, experience_years, monthly_salary_min, verification_status, gender, district_id, teaching_mode, class_levels, is_student')
       .eq('user_id', user.id)
       .single();
 
@@ -189,10 +189,30 @@ export default function JobDetails() {
       return;
     }
 
-    // Calculate profile completeness
+    // Required education check: Bachelor for graduates, HSC for current students
+    const requiredDegree = tutorProfile.is_student ? 'HSC' : 'Bachelor';
+    const { data: requiredEdu } = await supabase
+      .from('tutor_education')
+      .select('id, institution')
+      .eq('tutor_id', tutorProfile.id)
+      .ilike('degree', requiredDegree)
+      .maybeSingle();
+
+    if (!requiredEdu || !requiredEdu.institution?.trim()) {
+      toast({
+        title: 'Education Required',
+        description: `Please add your ${requiredDegree} education details before applying to jobs.`,
+        variant: 'destructive',
+      });
+      navigate('/tutor/profile');
+      setApplying(false);
+      return;
+    }
+
+    // Calculate profile completeness (required degree counts toward score)
     let complete = 0;
     if (tutorProfile.bio) complete += 10;
-    if (tutorProfile.education) complete += 10;
+    complete += 10; // education (verified above)
     if (tutorProfile.experience_years && tutorProfile.experience_years > 0) complete += 10;
     if (tutorProfile.monthly_salary_min && tutorProfile.monthly_salary_min > 0) complete += 10;
     if (tutorProfile.gender) complete += 10;
