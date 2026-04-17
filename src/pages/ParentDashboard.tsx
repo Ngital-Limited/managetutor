@@ -1436,93 +1436,214 @@ export default function ParentDashboard() {
                   const needsBoost = job.status === 'open' && hoursLive >= 24 && (job.total_applications || 0) === 0;
 
                   return (
-                    <div
-                      key={job.id}
-                      className={`p-4 border rounded-xl hover:bg-muted/50 transition-colors cursor-pointer ${selectedJob?.id === job.id ? 'border-primary bg-primary/5' : ''} ${needsBoost ? 'border-accent/50' : ''}`}
-                      onClick={() => {
-                        setSelectedJob(job);
-                        fetchApplications(job.id);
-                      }}
-                    >
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1 flex-wrap">
-                            <h4 className="font-bold">{job.title}</h4>
-                            {job.job_reference && (
-                              <Badge variant="outline" className="text-xs font-mono">{job.job_reference}</Badge>
-                            )}
-                            <Badge className={getStatusColor(job.status)}>
-                              {getStatusLabel(job.status)}
-                            </Badge>
-                            {needsBoost && (
-                              <Badge variant="outline" className="text-accent border-accent/50">
-                                <Zap className="h-3 w-3 mr-1" />
-                                Needs Boost
+                    <div key={job.id} className="space-y-0">
+                      <div
+                        className={`p-4 border rounded-xl hover:bg-muted/50 transition-colors cursor-pointer ${selectedJob?.id === job.id ? 'border-primary bg-primary/5 rounded-b-none' : ''} ${needsBoost ? 'border-accent/50' : ''}`}
+                        onClick={() => {
+                          if (selectedJob?.id === job.id) {
+                            setSelectedJob(null);
+                          } else {
+                            setSelectedJob(job);
+                            fetchApplications(job.id);
+                          }
+                        }}
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1 flex-wrap">
+                              <h4 className="font-bold">{job.title}</h4>
+                              {job.job_reference && (
+                                <Badge variant="outline" className="text-xs font-mono">{job.job_reference}</Badge>
+                              )}
+                              <Badge className={getStatusColor(job.status)}>
+                                {getStatusLabel(job.status)}
                               </Badge>
-                            )}
-                          </div>
-                          <div className="flex items-center gap-3 text-sm text-muted-foreground mb-2 flex-wrap">
-                            <span className="flex items-center gap-1">
-                              <MapPin className="h-3 w-3" />
-                              {job.districts?.name_en}
-                            </span>
-                            {job.subjects && (
+                              {needsBoost && (
+                                <Badge variant="outline" className="text-accent border-accent/50">
+                                  <Zap className="h-3 w-3 mr-1" />
+                                  Needs Boost
+                                </Badge>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-3 text-sm text-muted-foreground mb-2 flex-wrap">
                               <span className="flex items-center gap-1">
-                                <BookOpen className="h-3 w-3" />
-                                {job.subjects.name_en}
+                                <MapPin className="h-3 w-3" />
+                                {job.districts?.name_en}
                               </span>
-                            )}
-                            <span className="flex items-center gap-1">
-                              <Calendar className="h-3 w-3" />
-                              {job.days_per_week} days/week
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <Clock className="h-3 w-3" />
-                              {daysLive > 0 ? `${daysLive}d` : `${hoursLive}h`} live
-                            </span>
+                              {job.subjects && (
+                                <span className="flex items-center gap-1">
+                                  <BookOpen className="h-3 w-3" />
+                                  {job.subjects.name_en}
+                                </span>
+                              )}
+                              <span className="flex items-center gap-1">
+                                <Calendar className="h-3 w-3" />
+                                {job.days_per_week} days/week
+                              </span>
+                              <span className="flex items-center gap-1">
+                                <Clock className="h-3 w-3" />
+                                {daysLive > 0 ? `${daysLive}d` : `${hoursLive}h`} live
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Badge variant="outline">৳{job.budget_min}-{job.budget_max}/mo</Badge>
+                              <span className="text-xs text-muted-foreground">
+                                {formatDistanceToNow(new Date(job.created_at), { addSuffix: true })}
+                              </span>
+                            </div>
                           </div>
-                          <div className="flex items-center gap-2">
-                            <Badge variant="outline">৳{job.budget_min}-{job.budget_max}/mo</Badge>
-                            <span className="text-xs text-muted-foreground">
-                              {formatDistanceToNow(new Date(job.created_at), { addSuffix: true })}
-                            </span>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2 flex-shrink-0">
-                          <div className="text-center mr-2">
-                            <div className="text-lg font-bold text-primary">{job.total_applications}</div>
-                            <div className="text-xs text-muted-foreground">applicants</div>
-                          </div>
-                          <div className="flex gap-1">
-                            {job.status !== 'completed' && (
-                              <Button size="icon" variant="ghost" title="Edit" onClick={(e) => { e.stopPropagation(); startEditJob(job); }}>
-                                <Edit className="h-4 w-4" />
+                          <div className="flex items-center gap-2 flex-shrink-0">
+                            <div className="text-center mr-2">
+                              <div className="text-lg font-bold text-primary">{job.total_applications}</div>
+                              <div className="text-xs text-muted-foreground">applicants</div>
+                            </div>
+                            <div className="flex gap-1">
+                              {job.status !== 'completed' && (
+                                <Button size="icon" variant="ghost" title="Edit" onClick={(e) => { e.stopPropagation(); startEditJob(job); }}>
+                                  <Edit className="h-4 w-4" />
+                                </Button>
+                              )}
+                              {(job.status === 'open' || job.status === 'pending_approval' || job.status === 'in_progress') && (
+                                <Button size="icon" variant="ghost" title="Pause Job" onClick={(e) => { e.stopPropagation(); updateJobStatus(job.id, 'cancelled'); }}>
+                                  <Pause className="h-4 w-4" />
+                                </Button>
+                              )}
+                              {job.status === 'cancelled' && (
+                                <Button size="icon" variant="ghost" title="Reactivate Job" className="text-success" onClick={(e) => { e.stopPropagation(); updateJobStatus(job.id, 'open'); }}>
+                                  <Play className="h-4 w-4" />
+                                </Button>
+                              )}
+                              {job.status === 'in_progress' && (
+                                <Button size="icon" variant="ghost" title="Mark Completed" className="text-success" onClick={(e) => { e.stopPropagation(); updateJobStatus(job.id, 'completed'); }}>
+                                  <CheckCircle2 className="h-4 w-4" />
+                                </Button>
+                              )}
+                              <Button size="icon" variant="ghost" className="text-destructive" title="Delete" onClick={(e) => {
+                                e.stopPropagation();
+                                if (confirm('Delete this job permanently? This cannot be undone.')) deleteJob(job.id);
+                              }}>
+                                <Trash2 className="h-4 w-4" />
                               </Button>
-                            )}
-                            {(job.status === 'open' || job.status === 'pending_approval' || job.status === 'in_progress') && (
-                              <Button size="icon" variant="ghost" title="Pause Job" onClick={(e) => { e.stopPropagation(); updateJobStatus(job.id, 'cancelled'); }}>
-                                <Pause className="h-4 w-4" />
-                              </Button>
-                            )}
-                            {job.status === 'cancelled' && (
-                              <Button size="icon" variant="ghost" title="Reactivate Job" className="text-success" onClick={(e) => { e.stopPropagation(); updateJobStatus(job.id, 'open'); }}>
-                                <Play className="h-4 w-4" />
-                              </Button>
-                            )}
-                            {job.status === 'in_progress' && (
-                              <Button size="icon" variant="ghost" title="Mark Completed" className="text-success" onClick={(e) => { e.stopPropagation(); updateJobStatus(job.id, 'completed'); }}>
-                                <CheckCircle2 className="h-4 w-4" />
-                              </Button>
-                            )}
-                            <Button size="icon" variant="ghost" className="text-destructive" title="Delete" onClick={(e) => {
-                              e.stopPropagation();
-                              if (confirm('Delete this job permanently? This cannot be undone.')) deleteJob(job.id);
-                            }}>
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
+                            </div>
                           </div>
                         </div>
                       </div>
+
+                      {selectedJob?.id === job.id && (
+                        <div className="border border-t-0 border-primary rounded-b-xl bg-card p-4">
+                          <div className="flex items-center justify-between mb-3">
+                            <h5 className="font-semibold flex items-center gap-2 text-sm">
+                              <Users className="h-4 w-4" />
+                              Applicants
+                              <Badge variant="outline">{applications.length}</Badge>
+                            </h5>
+                          </div>
+                          {applications.length > 0 ? (
+                            <div className="overflow-x-auto">
+                              <table className="w-full text-sm">
+                                <thead>
+                                  <tr className="border-b text-left">
+                                    <th className="py-2 px-2 font-medium text-muted-foreground">Photo</th>
+                                    <th className="py-2 px-2 font-medium text-muted-foreground">Name</th>
+                                    <th className="py-2 px-2 font-medium text-muted-foreground">Date of Apply</th>
+                                    <th className="py-2 px-2 font-medium text-muted-foreground">Proposed</th>
+                                    <th className="py-2 px-2 font-medium text-muted-foreground">Status</th>
+                                    <th className="py-2 px-2 font-medium text-muted-foreground text-center">Actions</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {applications.map(app => {
+                                    const tutor = app.tutor_profiles;
+                                    return (
+                                      <tr key={app.id} className="border-b hover:bg-muted/50 transition-colors">
+                                        <td className="py-2 px-2">
+                                          <Avatar className="h-9 w-9">
+                                            <AvatarImage src={tutor?.profiles?.avatar_url} />
+                                            <AvatarFallback>{tutor?.profiles?.full_name?.charAt(0) || 'T'}</AvatarFallback>
+                                          </Avatar>
+                                        </td>
+                                        <td className="py-2 px-2">
+                                          <div className="flex flex-col">
+                                            <span className="font-semibold">{tutor?.profiles?.full_name}</span>
+                                            <span className="text-xs text-muted-foreground">
+                                              {tutor?.experience_years || 0} yrs exp · ⭐ {tutor?.average_rating || 0}
+                                              {tutor?.verification_status === 'approved' && tutor?.verification_paid && ' · ✓ Verified'}
+                                            </span>
+                                          </div>
+                                        </td>
+                                        <td className="py-2 px-2 text-muted-foreground whitespace-nowrap">
+                                          {format(new Date(app.created_at), 'dd MMM yyyy')}
+                                        </td>
+                                        <td className="py-2 px-2 font-medium whitespace-nowrap">
+                                          ৳{app.proposed_rate}/mo
+                                        </td>
+                                        <td className="py-2 px-2">
+                                          <Badge className={
+                                            app.status === 'accepted' ? 'bg-success' :
+                                            app.status === 'rejected' ? 'bg-destructive' :
+                                            'bg-warning text-warning-foreground'
+                                          }>
+                                            {app.status.charAt(0).toUpperCase() + app.status.slice(1)}
+                                          </Badge>
+                                        </td>
+                                        <td className="py-2 px-2">
+                                          <div className="flex items-center gap-1 justify-center flex-wrap">
+                                            {app.status === 'pending' && (
+                                              <>
+                                                <Button size="sm" className="h-8 text-xs" onClick={() => handleApplicationAction(app.id, 'accepted')}>
+                                                  <CheckCircle2 className="h-3.5 w-3.5 mr-1" />
+                                                  Hire
+                                                </Button>
+                                                <Button size="sm" variant="secondary" className="h-8 text-xs" onClick={() => handleInviteToInterview(app)}>
+                                                  <Send className="h-3.5 w-3.5 mr-1" />
+                                                  Invite
+                                                </Button>
+                                                <Button size="sm" variant="outline" className="h-8 text-xs" onClick={() => handleApplicationAction(app.id, 'rejected')}>
+                                                  <XCircle className="h-3.5 w-3.5 mr-1" />
+                                                  Reject
+                                                </Button>
+                                              </>
+                                            )}
+                                            {app.status === 'accepted' && (
+                                              <Badge className="bg-success/10 text-success border-success/20">
+                                                <CheckCircle2 className="h-3 w-3 mr-1" /> Hired
+                                              </Badge>
+                                            )}
+                                            {app.status === 'rejected' && (
+                                              <span className="text-xs text-muted-foreground">Rejected</span>
+                                            )}
+                                            <Link to={`/tutor/${tutor?.id}`}>
+                                              <Button size="sm" variant="ghost" className="h-8 text-xs">
+                                                <Eye className="h-3.5 w-3.5" />
+                                              </Button>
+                                            </Link>
+                                            <Button
+                                              size="sm"
+                                              variant="ghost"
+                                              className="h-8 text-xs text-destructive"
+                                              onClick={() => {
+                                                setReportTargetApp(app);
+                                                setReportDialogOpen(true);
+                                              }}
+                                            >
+                                              <Flag className="h-3.5 w-3.5" />
+                                            </Button>
+                                          </div>
+                                        </td>
+                                      </tr>
+                                    );
+                                  })}
+                                </tbody>
+                              </table>
+                            </div>
+                          ) : (
+                            <div className="text-center py-6">
+                              <Users className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                              <p className="text-sm text-muted-foreground">No applications yet</p>
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
                   );
                 })}
