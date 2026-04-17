@@ -36,6 +36,7 @@ import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
 import Install from "./pages/Install";
 import { ImpersonationBanner } from "./components/ImpersonationBanner";
+import { InstallAppBanner } from "./components/InstallAppBanner";
 
 const queryClient = new QueryClient();
 
@@ -48,6 +49,7 @@ const App = () => (
             <Toaster />
             <Sonner />
             <ImpersonationBanner />
+            <InstallAppBanner />
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/tutors" element={<FindTutors />} />
