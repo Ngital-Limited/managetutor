@@ -808,6 +808,7 @@ export default function AdminDashboard() {
   const [verificationFee, setVerificationFee] = useState<number>(50);
   const [jobs, setJobs] = useState<JobRow[]>([]);
   const [jobStatusFilter, setJobStatusFilter] = useState('all');
+  const [jobSearch, setJobSearch] = useState('');
   const [jobPage, setJobPage] = useState(1);
   const [jobPageSize, setJobPageSize] = useState(25);
   // Applications tab pagination (Level 1: jobs grouping, Level 2: applicants list)
@@ -1288,7 +1289,7 @@ export default function AdminDashboard() {
   useEffect(() => { setGuardianPage(1); }, [userSearch, guardianDistrictFilter, guardianAreaFilter, guardianStatusFilter, guardianPageSize]);
 
   // Reset job pagination when filter or page size changes
-  useEffect(() => { setJobPage(1); }, [jobStatusFilter, jobPageSize]);
+  useEffect(() => { setJobPage(1); }, [jobStatusFilter, jobSearch, jobPageSize]);
 
   // Reset Applications tab pagination when filters/search/selection change
   useEffect(() => { setAppsJobsPage(1); }, [appsJobsSearch, appsJobsPageSize]);
@@ -2295,21 +2296,41 @@ export default function AdminDashboard() {
             )}
 
             {/* ═══════ JOBS TAB ═══════ */}
-            {activeTab === 'jobs' && (
+            {activeTab === 'jobs' && (() => {
+              const q = jobSearch.trim().toLowerCase();
+              const filteredJobs = q
+                ? jobs.filter(j =>
+                    (j.job_reference || '').toLowerCase().includes(q) ||
+                    (j.title || '').toLowerCase().includes(q) ||
+                    ((j.profiles as any)?.full_name || '').toLowerCase().includes(q)
+                  )
+                : jobs;
+              return (
               <div className="space-y-6">
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                   <h1 className="text-xl font-semibold">Job Management</h1>
-                  <Select value={jobStatusFilter} onValueChange={setJobStatusFilter}>
-                    <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Status</SelectItem>
-                      <SelectItem value="pending_approval">Pending Approval</SelectItem>
-                      <SelectItem value="open">Open</SelectItem>
-                      <SelectItem value="in_progress">In Progress</SelectItem>
-                      <SelectItem value="completed">Completed</SelectItem>
-                      <SelectItem value="cancelled">Cancelled</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                    <div className="relative w-full sm:w-72">
+                      <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        value={jobSearch}
+                        onChange={(e) => setJobSearch(e.target.value)}
+                        placeholder="Search by reference, title, or guardian"
+                        className="pl-8 h-9"
+                      />
+                    </div>
+                    <Select value={jobStatusFilter} onValueChange={setJobStatusFilter}>
+                      <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Status</SelectItem>
+                        <SelectItem value="pending_approval">Pending Approval</SelectItem>
+                        <SelectItem value="open">Open</SelectItem>
+                        <SelectItem value="in_progress">In Progress</SelectItem>
+                        <SelectItem value="completed">Completed</SelectItem>
+                        <SelectItem value="cancelled">Cancelled</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
                 <Card>
                   <CardContent className="p-0">
@@ -2329,9 +2350,9 @@ export default function AdminDashboard() {
                           </TableRow>
                         </TableHeader>
                         <TableBody>
-                          {jobs.length === 0 ? (
+                          {filteredJobs.length === 0 ? (
                             <TableRow><TableCell colSpan={9} className="text-center py-8 text-muted-foreground">No jobs found</TableCell></TableRow>
-                          ) : jobs.slice((jobPage - 1) * jobPageSize, jobPage * jobPageSize).map((job) => (
+                          ) : filteredJobs.slice((jobPage - 1) * jobPageSize, jobPage * jobPageSize).map((job) => (
                             <TableRow key={job.id}>
                               <TableCell className="font-mono text-xs">{job.job_reference || '—'}</TableCell>
                               <TableCell className="font-medium text-sm max-w-[200px] truncate">{job.title}</TableCell>
@@ -2380,14 +2401,14 @@ export default function AdminDashboard() {
                   </CardContent>
                 </Card>
 
-                {jobs.length > 0 && (() => {
-                  const totalPages = Math.max(1, Math.ceil(jobs.length / jobPageSize));
+                {filteredJobs.length > 0 && (() => {
+                  const totalPages = Math.max(1, Math.ceil(filteredJobs.length / jobPageSize));
                   const page = Math.min(jobPage, totalPages);
                   const start = (page - 1) * jobPageSize + 1;
-                  const end = Math.min(page * jobPageSize, jobs.length);
+                  const end = Math.min(page * jobPageSize, filteredJobs.length);
                   return (
                     <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-1">
-                      <div className="text-xs text-muted-foreground">Showing {start}–{end} of {jobs.length}</div>
+                      <div className="text-xs text-muted-foreground">Showing {start}–{end} of {filteredJobs.length}</div>
                       <div className="flex items-center gap-2 flex-wrap">
                         <Select value={String(jobPageSize)} onValueChange={(v) => { setJobPageSize(Number(v)); setJobPage(1); }}>
                           <SelectTrigger className="h-8 w-[100px] text-xs"><SelectValue /></SelectTrigger>
@@ -2405,7 +2426,8 @@ export default function AdminDashboard() {
                   );
                 })()}
               </div>
-            )}
+              );
+            })()}
 
             {/* ═══════ APPLICATIONS TAB (Two-level drill-down) ═══════ */}
             {activeTab === 'applications' && (() => {
