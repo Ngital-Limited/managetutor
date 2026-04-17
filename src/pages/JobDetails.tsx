@@ -101,6 +101,7 @@ export default function JobDetails() {
       .select(`
         *,
         districts (name_en, name_bn),
+        areas (name_en, name_bn),
         subjects (name_en, name_bn),
         job_subjects (subjects (name_en, name_bn))
       `)
