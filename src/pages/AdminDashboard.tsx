@@ -2320,22 +2320,39 @@ export default function AdminDashboard() {
                       onChange={(e) => setAllAppsSearch(e.target.value)}
                       className="w-64 h-9"
                     />
-                    <Select value={allAppsStatusFilter} onValueChange={(v) => { setAllAppsStatusFilter(v); setSelectedAppIds(new Set()); }}>
-                      <SelectTrigger className="w-40 h-9"><SelectValue /></SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">All Status</SelectItem>
-                        <SelectItem value="pending">Pending</SelectItem>
-                        <SelectItem value="shortlisted">Shortlisted</SelectItem>
-                        <SelectItem value="waiting">Waiting</SelectItem>
-                        <SelectItem value="accepted">Accepted</SelectItem>
-                        <SelectItem value="rejected">Rejected</SelectItem>
-                        <SelectItem value="withdrawn">Withdrawn</SelectItem>
-                      </SelectContent>
-                    </Select>
                     <Button variant="outline" size="sm" className="h-9 gap-1.5" onClick={exportCsv} title="Export filtered list to CSV">
                       <Download className="h-4 w-4" /> Export CSV
                     </Button>
                   </div>
+                </div>
+
+                {/* Status filter chips with live counts (counts are based on the loaded set; switching chip refetches) */}
+                <div className="flex items-center gap-2 flex-wrap">
+                  {([
+                    { key: 'all', label: 'All' },
+                    { key: 'pending', label: 'Pending' },
+                    { key: 'shortlisted', label: 'Shortlisted' },
+                    { key: 'invited_to_demo', label: 'Invited' },
+                    { key: 'waiting', label: 'Waiting' },
+                    { key: 'accepted', label: 'Accepted' },
+                    { key: 'rejected', label: 'Rejected' },
+                    { key: 'withdrawn', label: 'Withdrawn' },
+                  ] as const).map(opt => {
+                    const count = opt.key === 'all'
+                      ? allApplications.length
+                      : allApplications.filter((a: any) => a.status === opt.key).length;
+                    const active = allAppsStatusFilter === opt.key;
+                    return (
+                      <button
+                        key={opt.key}
+                        type="button"
+                        onClick={() => { setAllAppsStatusFilter(opt.key); setSelectedAppIds(new Set()); }}
+                        className={`text-xs px-2.5 py-1 rounded-full border transition-colors ${active ? 'bg-primary text-primary-foreground border-primary' : 'bg-background text-muted-foreground hover:bg-muted'}`}
+                      >
+                        {opt.label} {opt.key === 'all' || count > 0 ? <span className={active ? 'opacity-90' : 'opacity-70'}>({count})</span> : null}
+                      </button>
+                    );
+                  })}
                 </div>
 
                 {/* Bulk action bar */}
