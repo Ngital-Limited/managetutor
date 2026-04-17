@@ -1402,7 +1402,7 @@ export default function AdminDashboard() {
     const { data } = await supabase
       .from('payment_transactions')
       .select('id, amount, currency, status, transaction_id, created_at, completed_at, listing_type, user_id')
-      .order('created_at', { ascending: false }).limit(50);
+      .order('created_at', { ascending: false }).limit(1000);
     if (data) {
       const uids = [...new Set(data.map(p => p.user_id))];
       const { data: profs } = await supabase.from('profiles').select('id, full_name, email').in('id', uids);
@@ -1410,6 +1410,10 @@ export default function AdminDashboard() {
       setPayments(data.map(p => ({ ...p, profiles: pMap.get(p.user_id) || { full_name: 'Unknown', email: '' } })) as unknown as PaymentRow[]);
     }
   }, []);
+
+  // Reset pagination when page size changes
+  useEffect(() => { setPaymentsPage(1); }, [paymentsPageSize]);
+  useEffect(() => { setVPaymentsPage(1); }, [vPaymentsPageSize, verificationFilter]);
 
   // Load data when tab changes
   useEffect(() => {
