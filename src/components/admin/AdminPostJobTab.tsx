@@ -418,25 +418,39 @@ export function AdminPostJobTab({ toast }: Props) {
             <div className="grid md:grid-cols-2 gap-4">
               <div>
                 <Label>Category</Label>
-                <Select value={jobForm.category} onValueChange={(v) => setJobForm({ ...jobForm, category: v })}>
-                  <SelectTrigger><SelectValue placeholder="Select category" /></SelectTrigger>
-                  <SelectContent>
-                    {JOB_CATEGORIES.map(cat => (
-                      <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <div className="flex gap-2">
+                  <Select value={jobForm.category} onValueChange={(v) => setJobForm({ ...jobForm, category: v })}>
+                    <SelectTrigger><SelectValue placeholder="Select category" /></SelectTrigger>
+                    <SelectContent>
+                      {JOB_CATEGORIES.map(cat => (
+                        <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {jobForm.category && (
+                    <Button type="button" variant="outline" size="icon" onClick={() => setJobForm({ ...jobForm, category: '' })} title="Clear category">
+                      <XCircle className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
               </div>
               <div>
                 <Label>Background</Label>
-                <Select value={jobForm.background} onValueChange={(v) => setJobForm({ ...jobForm, background: v })}>
-                  <SelectTrigger><SelectValue placeholder="Select background" /></SelectTrigger>
-                  <SelectContent>
-                    {STUDENT_BACKGROUNDS.map(bg => (
-                      <SelectItem key={bg} value={bg}>{bg}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <div className="flex gap-2">
+                  <Select value={jobForm.background} onValueChange={(v) => setJobForm({ ...jobForm, background: v })}>
+                    <SelectTrigger><SelectValue placeholder="Select background" /></SelectTrigger>
+                    <SelectContent>
+                      {STUDENT_BACKGROUNDS.map(bg => (
+                        <SelectItem key={bg} value={bg}>{bg}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {jobForm.background && (
+                    <Button type="button" variant="outline" size="icon" onClick={() => setJobForm({ ...jobForm, background: '' })} title="Clear background">
+                      <XCircle className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
               </div>
             </div>
             <div className="grid md:grid-cols-2 gap-4">
