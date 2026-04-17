@@ -82,7 +82,7 @@ export default function Index() {
         supabase.from('subjects').select('id, name_en, name_bn, category_en, category_bn').order('name_en'),
         supabase.from('tutor_profiles')
           .select(`
-            id, bio, education, experience_years, average_rating, total_reviews,
+            id, slug, bio, education, experience_years, average_rating, total_reviews,
             verification_status, teaching_mode, monthly_salary_min, monthly_salary_max, is_available,
             profiles:user_id (full_name, avatar_url),
             districts (name_en, name_bn),
@@ -412,7 +412,7 @@ export default function Index() {
                 ).filter(Boolean).slice(0, 3) || [];
 
                 return (
-                  <Link key={tutor.id} to={`/tutor/${tutor.id}`} className="group block animate-fade-in" style={{ animationDelay: `${i * 60}ms` }}>
+                  <Link key={tutor.id} to={`/tutor/${(tutor as any).slug || tutor.id}`} className="group block animate-fade-in" style={{ animationDelay: `${i * 60}ms` }}>
                     <div className="bg-card rounded-xl border border-border/60 p-5 h-full transition-all hover:border-primary/30 hover:shadow-[0_4px_24px_-8px_hsl(var(--primary)/0.15)]">
                       <div className="flex items-start gap-3 mb-4">
                         <Avatar className="h-12 w-12 border border-border/60">

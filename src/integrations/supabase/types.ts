@@ -1607,6 +1607,7 @@ export type Database = {
           permanent_address: string | null
           present_address: string | null
           religion: string | null
+          slug: string | null
           success_stories: string | null
           teaching_mode: Database["public"]["Enums"]["teaching_mode"] | null
           teaching_philosophy: string | null
@@ -1655,6 +1656,7 @@ export type Database = {
           permanent_address?: string | null
           present_address?: string | null
           religion?: string | null
+          slug?: string | null
           success_stories?: string | null
           teaching_mode?: Database["public"]["Enums"]["teaching_mode"] | null
           teaching_philosophy?: string | null
@@ -1703,6 +1705,7 @@ export type Database = {
           permanent_address?: string | null
           present_address?: string | null
           religion?: string | null
+          slug?: string | null
           success_stories?: string | null
           teaching_mode?: Database["public"]["Enums"]["teaching_mode"] | null
           teaching_philosophy?: string | null
@@ -1899,6 +1902,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      generate_unique_tutor_slug: {
+        Args: { _base: string; _exclude_id?: string }
+        Returns: string
+      }
       get_user_role: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["app_role"]
@@ -1910,6 +1917,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      slugify: { Args: { _text: string }; Returns: string }
     }
     Enums: {
       app_role: "parent" | "tutor" | "agency" | "admin"
