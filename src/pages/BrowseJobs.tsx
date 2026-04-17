@@ -78,6 +78,18 @@ export default function BrowseJobs() {
   const [selectedDistrict, setSelectedDistrict] = useState<string>('all');
   const [selectedSubject, setSelectedSubject] = useState<string>('all');
   const [selectedMode, setSelectedMode] = useState<string>('all');
+  const [selectedTime, setSelectedTime] = useState<string>('all');
+
+  const TIME_OPTIONS = [
+    'Flexible / Anytime',
+    'Morning (6 AM – 9 AM)',
+    'Late Morning (9 AM – 12 PM)',
+    'Afternoon (12 PM – 4 PM)',
+    'After Evening (Anytime)',
+    'Evening (4 PM – 7 PM)',
+    'Night (7 PM – 10 PM)',
+    'Weekends Only',
+  ];
 
   // Application modal
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
@@ -106,8 +118,9 @@ export default function BrowseJobs() {
     if (selectedDistrict !== 'all') count++;
     if (selectedSubject !== 'all') count++;
     if (selectedMode !== 'all') count++;
+    if (selectedTime !== 'all') count++;
     return count;
-  }, [selectedDivision, selectedDistrict, selectedSubject, selectedMode]);
+  }, [selectedDivision, selectedDistrict, selectedSubject, selectedMode, selectedTime]);
 
   useEffect(() => {
     fetchData();
@@ -115,7 +128,7 @@ export default function BrowseJobs() {
 
   useEffect(() => {
     fetchJobs();
-  }, [selectedDistrict, selectedSubject, selectedMode, currentPage]);
+  }, [selectedDistrict, selectedSubject, selectedMode, selectedTime, currentPage]);
 
   useEffect(() => {
     if (user && role === 'tutor') {
@@ -192,6 +205,9 @@ export default function BrowseJobs() {
     if (selectedMode && selectedMode !== 'all') {
       countQuery = countQuery.eq('teaching_mode', selectedMode as 'online' | 'in_person' | 'hybrid');
     }
+    if (selectedTime && selectedTime !== 'all') {
+      countQuery = countQuery.eq('preferred_time', selectedTime);
+    }
 
     const { count } = await countQuery;
     setTotalCount(count || 0);
@@ -220,6 +236,9 @@ export default function BrowseJobs() {
     }
     if (selectedMode && selectedMode !== 'all') {
       query = query.eq('teaching_mode', selectedMode as 'online' | 'in_person' | 'hybrid');
+    }
+    if (selectedTime && selectedTime !== 'all') {
+      query = query.eq('preferred_time', selectedTime);
     }
 
     const { data } = await query;
@@ -345,6 +364,7 @@ export default function BrowseJobs() {
     setSelectedDistrict('all');
     setSelectedSubject('all');
     setSelectedMode('all');
+    setSelectedTime('all');
     setSearchQuery('');
     setCurrentPage(1);
   };
@@ -411,7 +431,7 @@ export default function BrowseJobs() {
           {/* Expandable Filters */}
           {showFilters && (
             <div className="mt-4 pt-4 border-t border-border">
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3">
                 <div>
                   <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Division</label>
                   <Select value={selectedDivision} onValueChange={(v) => { setSelectedDivision(v); setSelectedDistrict('all'); setCurrentPage(1); }}>
@@ -468,6 +488,21 @@ export default function BrowseJobs() {
                       <SelectItem value="online">Online</SelectItem>
                       <SelectItem value="in_person">In-Person</SelectItem>
                       <SelectItem value="hybrid">Hybrid</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Preferred Time</label>
+                  <Select value={selectedTime} onValueChange={(v) => { setSelectedTime(v); setCurrentPage(1); }}>
+                    <SelectTrigger className="h-10 rounded-lg">
+                      <Clock className="h-3.5 w-3.5 mr-1.5 text-muted-foreground" />
+                      <SelectValue placeholder="Any Time" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Any Time</SelectItem>
+                      {TIME_OPTIONS.map(t => (
+                        <SelectItem key={t} value={t}>{t}</SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
