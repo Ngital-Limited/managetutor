@@ -21,7 +21,7 @@ import { useToast } from '@/hooks/use-toast';
 import {
   GraduationCap, ArrowLeft, Save, Upload, FileText, CheckCircle2,
   Clock, XCircle, AlertCircle, Video, Star, MessageSquare, Send,
-  Plus, Trash2, Briefcase, BookOpen, Users, Sparkles
+  Plus, Trash2, Briefcase, BookOpen, Users, Sparkles, Loader2, RefreshCw
 } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -1092,6 +1092,46 @@ export default function TutorProfile() {
 
         {/* MEDIA / VERIFICATION / REVIEWS TAB */}
         <TabsContent value="media" className="space-y-6 mt-0">
+          {/* AI-Generated Overview */}
+          <Card className="rounded-2xl border-primary/30 bg-gradient-to-br from-primary/5 via-background to-accent/5 shadow-sm">
+            <CardContent className="p-6 space-y-3">
+              <div className="flex items-start justify-between gap-3 flex-wrap">
+                <div>
+                  <h3 className="font-semibold flex items-center gap-2">
+                    <Sparkles className="h-4 w-4 text-primary" /> AI-Generated Overview
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    A marketing-style summary parents will see on your public profile. Auto-regenerates when you save your profile.
+                  </p>
+                </div>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => tutorProfileId && regenerateAiOverview(tutorProfileId)}
+                  disabled={!tutorProfileId || generatingOverview}
+                  className="rounded-xl"
+                >
+                  {generatingOverview ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <RefreshCw className="h-4 w-4 mr-2" />}
+                  {generatingOverview ? 'Generating...' : 'Regenerate'}
+                </Button>
+              </div>
+              {aiOverview ? (
+                <div className="rounded-xl bg-background/60 border border-border/60 p-4">
+                  <p className="text-sm leading-relaxed whitespace-pre-wrap">{aiOverview}</p>
+                  {aiOverviewUpdatedAt && (
+                    <p className="text-[11px] text-muted-foreground mt-3">
+                      Last generated: {formatExactDate(new Date(aiOverviewUpdatedAt))}
+                    </p>
+                  )}
+                </div>
+              ) : (
+                <div className="rounded-xl border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
+                  No overview yet. Save your profile or click <span className="font-medium">Regenerate</span> to create one.
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
           {/* Verification Documents */}
           <Card className="rounded-2xl border-border/60 shadow-sm">
             <CardContent className="p-6 space-y-4">
