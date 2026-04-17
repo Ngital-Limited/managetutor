@@ -23,6 +23,7 @@ interface TutorCVData {
   classLevels: string[];
   districtName: string | null;
   presentAddress: string | null;
+  educationEntries: { degree: string; institution: string; field_of_study: string | null; passing_year: number | null; result: string | null }[];
 }
 
 export async function generateTutorCV(userId: string): Promise<void> {
