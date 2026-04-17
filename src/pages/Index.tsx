@@ -390,8 +390,9 @@ export default function Index() {
 
       {/* Top Rated Tutors — minimal premium */}
       {featuredTutors.length > 0 && (
-        <section className="py-20 bg-muted/20">
-          <div className="container mx-auto px-4">
+        <section className="relative py-20 bg-gradient-to-b from-background via-accent/[0.04] to-muted/30 overflow-hidden">
+          <div className="absolute bottom-0 left-0 w-[500px] h-[400px] bg-accent/5 rounded-full blur-[120px] pointer-events-none" />
+          <div className="container mx-auto px-4 relative z-10">
             <div className="flex items-end justify-between mb-12">
               <div>
                 <span className="text-xs uppercase tracking-[0.2em] text-muted-foreground font-medium">Educators</span>
