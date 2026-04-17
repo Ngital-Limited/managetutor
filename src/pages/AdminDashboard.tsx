@@ -2448,6 +2448,39 @@ export default function AdminDashboard() {
                             <p className="whitespace-pre-wrap leading-relaxed">{selectedJob.special_requirements}</p>
                           </div>
                         )}
+                        {/* Subjects */}
+                        {Array.isArray(selectedJob.job_subjects) && selectedJob.job_subjects.length > 0 && (
+                          <div className="text-xs pt-2 border-t">
+                            <div className="text-muted-foreground mb-1.5">Subjects</div>
+                            <div className="flex flex-wrap gap-1.5">
+                              {selectedJob.job_subjects.map((js: any, i: number) => (
+                                <Badge key={js?.subjects?.id || i} variant="secondary" className="text-xs">
+                                  {js?.subjects?.name_en || '—'}
+                                </Badge>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        {/* Parent contact */}
+                        {jobApps[0]?.parent_profile && (
+                          <div className="text-xs pt-2 border-t">
+                            <div className="text-muted-foreground mb-1.5">Posted By (Parent)</div>
+                            <div className="flex items-center gap-3 flex-wrap">
+                              <Avatar className="h-8 w-8">
+                                <AvatarImage src={jobApps[0].parent_profile.avatar_url || ''} />
+                                <AvatarFallback className="text-xs">{jobApps[0].parent_profile.full_name?.charAt(0) || 'P'}</AvatarFallback>
+                              </Avatar>
+                              <div className="space-y-0.5">
+                                <div className="font-medium">{jobApps[0].parent_profile.full_name || '—'}</div>
+                                <div className="text-muted-foreground flex items-center gap-3 flex-wrap">
+                                  {jobApps[0].parent_profile.user_reference && (<span className="font-mono">{jobApps[0].parent_profile.user_reference}</span>)}
+                                  {jobApps[0].parent_profile.phone && (<span>📞 {jobApps[0].parent_profile.phone}</span>)}
+                                  {jobApps[0].parent_profile.email && (<span>✉ {jobApps[0].parent_profile.email}</span>)}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        )}
                       </CardContent>
                     </Card>
                   )}
