@@ -9,7 +9,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { supabase } from '@/integrations/supabase/client';
-import { Shield, UserPlus, Settings, Search } from 'lucide-react';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { Shield, UserPlus, Settings, Search, UserMinus } from 'lucide-react';
 
 const PERMISSION_LABELS: Record<string, { label: string; description: string }> = {
   can_manage_users: { label: 'User Management', description: 'Ban/unban users, view user details' },
@@ -32,7 +33,12 @@ export function SubAdminRBACTab({ toast }: { toast: any }) {
   const [searchEmail, setSearchEmail] = useState('');
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [searching, setSearching] = useState(false);
+  const [removeTarget, setRemoveTarget] = useState<any>(null);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => setCurrentUserId(data.user?.id ?? null));
+  }, []);
   const fetchData = useCallback(async () => {
     setLoading(true);
     // Get all admin users
@@ -127,6 +133,24 @@ export function SubAdminRBACTab({ toast }: { toast: any }) {
     return Object.keys(PERMISSION_LABELS).filter(k => p[k]).length;
   };
 
+  const removeAdmin = async (userId: string) => {
+    if (userId === currentUserId) {
+      toast({ title: "You can't remove yourself", variant: 'destructive' });
+      setRemoveTarget(null);
+      return;
+    }
+    const { error: roleErr } = await supabase.from('user_roles')
+      .delete().eq('user_id', userId).eq('role', 'admin');
+    if (roleErr) {
+      toast({ title: 'Error', description: roleErr.message, variant: 'destructive' });
+      return;
+    }
+    await supabase.from('admin_permissions').delete().eq('user_id', userId);
+    toast({ title: 'Admin role removed' });
+    setRemoveTarget(null);
+    if (selectedAdmin?.id === userId) setSelectedAdmin(null);
+    fetchData();
+  };
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -167,8 +191,18 @@ export function SubAdminRBACTab({ toast }: { toast: any }) {
                           <Shield className="h-3 w-3 mr-1" />
                           {getActivePermCount(admin.id)}/{Object.keys(PERMISSION_LABELS).length} permissions
                         </Badge>
-                        <Button size="sm" variant="outline" onClick={() => setSelectedAdmin(selectedAdmin?.id === admin.id ? null : admin)}>
+                        <Button size="sm" variant="outline" onClick={() => setSelectedAdmin(selectedAdmin?.id === admin.id ? null : admin)} title="Edit permissions">
                           <Settings className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => setRemoveTarget(admin)}
+                          disabled={admin.id === currentUserId}
+                          title={admin.id === currentUserId ? "You can't remove yourself" : 'Remove admin role'}
+                          className="text-destructive hover:text-destructive"
+                        >
+                          <UserMinus className="h-4 w-4" />
                         </Button>
                       </div>
                     </div>
@@ -237,6 +271,27 @@ export function SubAdminRBACTab({ toast }: { toast: any }) {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Remove Admin Confirmation */}
+      <AlertDialog open={!!removeTarget} onOpenChange={(o) => !o && setRemoveTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remove admin role?</AlertDialogTitle>
+            <AlertDialogDescription>
+              <span className="font-medium text-foreground">{removeTarget?.full_name}</span> ({removeTarget?.email}) will lose all admin access and permissions. This action does not delete their user account.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => removeTarget && removeAdmin(removeTarget.id)}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Remove Admin
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
