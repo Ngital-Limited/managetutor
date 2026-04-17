@@ -805,6 +805,7 @@ export default function AdminDashboard() {
   const [pendingTutors, setPendingTutors] = useState<TutorVerification[]>([]);
   const [verificationFilter, setVerificationFilter] = useState('pending');
   const [verificationPayments, setVerificationPayments] = useState<PaymentRow[]>([]);
+  const [verificationFee, setVerificationFee] = useState<number>(50);
   const [jobs, setJobs] = useState<JobRow[]>([]);
   const [jobStatusFilter, setJobStatusFilter] = useState('all');
   const [jobPage, setJobPage] = useState(1);
@@ -1283,6 +1284,15 @@ export default function AdminDashboard() {
 
   // Reset job pagination when filter or page size changes
   useEffect(() => { setJobPage(1); }, [jobStatusFilter, jobPageSize]);
+
+  // Load verification fee from platform settings
+  useEffect(() => {
+    supabase.from('platform_settings').select('value').eq('key', 'verification_fee').maybeSingle()
+      .then(({ data }) => {
+        const n = Number(data?.value);
+        if (Number.isFinite(n) && n >= 0) setVerificationFee(n);
+      });
+  }, []);
 
   const fetchVerifications = useCallback(async () => {
     let query = supabase
@@ -2241,7 +2251,7 @@ export default function AdminDashboard() {
                       <CreditCard className="h-5 w-5 text-primary" />
                       Verification Badge Payments
                     </CardTitle>
-                    <CardDescription>Payment history for ৳50 verified badge purchases</CardDescription>
+                    <CardDescription>Payment history for ৳{verificationFee} verified badge purchases</CardDescription>
                   </CardHeader>
                   <CardContent className="p-0">
                     <ScrollArea className="w-full">
