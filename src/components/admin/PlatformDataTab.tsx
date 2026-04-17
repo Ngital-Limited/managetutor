@@ -398,11 +398,11 @@ function AreasManager({ toast }: { toast: any }) {
   };
 
   const handleSave = async () => {
-    if (!form.name_en.trim() || !form.name_bn.trim() || !form.district_id) {
-      toast({ title: 'All fields required', variant: 'destructive' }); return;
+    if (!form.name_en.trim() || !form.district_id) {
+      toast({ title: 'Name and District required', variant: 'destructive' }); return;
     }
     setSaving(true);
-    const payload = { name_en: form.name_en.trim(), name_bn: form.name_bn.trim(), district_id: form.district_id };
+    const payload = { name_en: form.name_en.trim(), name_bn: form.name_en.trim(), district_id: form.district_id };
     const { error } = editingId
       ? await supabase.from('areas').update(payload).eq('id', editingId)
       : await supabase.from('areas').insert(payload);
