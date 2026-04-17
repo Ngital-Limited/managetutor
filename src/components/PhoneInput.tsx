@@ -9,7 +9,8 @@ interface PhoneInputProps {
   className?: string;
 }
 
-const BD_PHONE_REGEX = /^(\+880\s?1[3-9]\d{2}-?\d{6}|01[3-9]\d{2}-?\d{6})$/;
+// Strict format: 01XXXXXXXXX (11 digits, starting with 01, 3rd digit 3-9)
+const BD_PHONE_REGEX = /^01[3-9]\d{8}$/;
 
 export function isValidBDPhone(phone: string): boolean {
   if (!phone || phone.trim() === '') return true; // empty is valid (optional field)
@@ -17,28 +18,24 @@ export function isValidBDPhone(phone: string): boolean {
 }
 
 export function formatBDPhone(raw: string): string {
-  // Strip everything except digits and +
-  const digits = raw.replace(/[^\d+]/g, '');
-  
-  // Auto-format as user types
-  if (digits.startsWith('+880')) {
-    const local = digits.slice(4);
-    if (local.length <= 5) return `+880 ${local}`;
-    return `+880 ${local.slice(0, 5)}-${local.slice(5, 11)}`;
+  // Keep digits only
+  let digits = raw.replace(/\D/g, '');
+
+  // Strip country code variants
+  if (digits.startsWith('880')) digits = digits.slice(3);
+  if (digits.startsWith('0') && digits.length > 11) {
+    // keep first 11
   }
-  if (digits.startsWith('880')) {
-    const local = digits.slice(3);
-    if (local.length <= 5) return `+880 ${local}`;
-    return `+880 ${local.slice(0, 5)}-${local.slice(5, 11)}`;
+
+  // Ensure starts with 0 if user typed 1XXXXXXXXX
+  if (digits.length > 0 && digits[0] === '1') {
+    digits = '0' + digits;
   }
-  if (digits.startsWith('01')) {
-    if (digits.length <= 5) return digits;
-    return `${digits.slice(0, 5)}-${digits.slice(5, 11)}`;
-  }
-  return raw;
+
+  return digits.slice(0, 11);
 }
 
-export function PhoneInput({ value, onChange, placeholder = '+880 1XXX-XXXXXX', className }: PhoneInputProps) {
+export function PhoneInput({ value, onChange, placeholder = '01XXXXXXXXX', className }: PhoneInputProps) {
   const [touched, setTouched] = useState(false);
   const isValid = isValidBDPhone(value);
   const showError = touched && value.trim() !== '' && !isValid;
@@ -47,19 +44,17 @@ export function PhoneInput({ value, onChange, placeholder = '+880 1XXX-XXXXXX', 
     <div className="space-y-1">
       <Input
         type="tel"
+        inputMode="numeric"
         value={value}
-        onChange={(e) => {
-          const formatted = formatBDPhone(e.target.value);
-          onChange(formatted);
-        }}
+        onChange={(e) => onChange(formatBDPhone(e.target.value))}
         onBlur={() => setTouched(true)}
         placeholder={placeholder}
         className={cn(showError && 'border-destructive focus-visible:ring-destructive', className)}
-        maxLength={18}
+        maxLength={11}
       />
       {showError && (
         <p className="text-xs text-destructive">
-          Please enter a valid Bangladesh phone number (e.g., +880 1XXXX-XXXXXX or 01XXX-XXXXXX)
+          Please enter a valid 11-digit Bangladesh phone number (e.g., 01712345678)
         </p>
       )}
     </div>
