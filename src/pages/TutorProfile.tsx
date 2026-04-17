@@ -364,6 +364,9 @@ export default function TutorProfile() {
       // Upsert education entries
       for (const entry of educationEntries) {
         if (!entry.institution || !entry.degree) continue;
+        const semesterValue = entry.is_current && (entry.degree === 'Bachelor' || entry.degree === 'Masters')
+          ? (entry.current_semester || null)
+          : null;
         if (entry.id) {
           await supabase.from('tutor_education').update({
             institution: entry.institution,
@@ -372,7 +375,8 @@ export default function TutorProfile() {
             passing_year: entry.passing_year,
             result: entry.result || null,
             is_current: entry.is_current,
-          }).eq('id', entry.id);
+            current_semester: semesterValue,
+          } as any).eq('id', entry.id);
         } else {
           const { data: newEdu } = await supabase.from('tutor_education').insert({
             tutor_id: tutorData.id,
@@ -382,7 +386,8 @@ export default function TutorProfile() {
             passing_year: entry.passing_year,
             result: entry.result || null,
             is_current: entry.is_current,
-          }).select('id').single();
+            current_semester: semesterValue,
+          } as any).select('id').single();
           if (newEdu) entry.id = newEdu.id;
         }
       }
