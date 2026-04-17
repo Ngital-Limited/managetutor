@@ -629,7 +629,7 @@ export default function FindTutors() {
 
                 {/* District */}
                 <div>
-                  <Label className="text-xs font-medium mb-1 block text-muted-foreground">District</Label>
+                  <Label className="text-xs font-medium mb-1 block text-muted-foreground">City</Label>
                   <Select value={selectedDistrict} onValueChange={v => { setSelectedDistrict(v === 'all' ? '' : v); setSelectedArea(''); }}>
                     <SelectTrigger className="h-9 text-xs rounded-lg"><SelectValue placeholder="All" /></SelectTrigger>
                     <SelectContent>
