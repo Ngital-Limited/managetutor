@@ -2192,7 +2192,7 @@ export default function ParentDashboard() {
                               </Button>
                             </>
                           )}
-                          <Link to={`/tutor/${tutor?.id}`}>
+                          <Link to={`/tutor/${(tutor as any)?.slug || tutor?.id}`}>
                             <Button size="sm" variant="ghost" className="h-8 text-xs">
                               <Eye className="h-3.5 w-3.5" />
                             </Button>
