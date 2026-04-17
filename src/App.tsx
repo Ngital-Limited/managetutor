@@ -13,6 +13,7 @@ import FindTutors from "./pages/FindTutors";
 import BrowseJobs from "./pages/BrowseJobs";
 import JobDetails from "./pages/JobDetails";
 import AdminDashboard from "./pages/AdminDashboard";
+import AdminBulkImportTutors from "./pages/AdminBulkImportTutors";
 import TutorProfile from "./pages/TutorProfile";
 import TutorDashboard from "./pages/TutorDashboard";
 import TutorAppliedJobs from "./pages/TutorAppliedJobs";
