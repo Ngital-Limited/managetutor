@@ -78,6 +78,18 @@ export default function BrowseJobs() {
   const [selectedDistrict, setSelectedDistrict] = useState<string>('all');
   const [selectedSubject, setSelectedSubject] = useState<string>('all');
   const [selectedMode, setSelectedMode] = useState<string>('all');
+  const [selectedTime, setSelectedTime] = useState<string>('all');
+
+  const TIME_OPTIONS = [
+    'Flexible / Anytime',
+    'Morning (6 AM – 9 AM)',
+    'Late Morning (9 AM – 12 PM)',
+    'Afternoon (12 PM – 4 PM)',
+    'After Evening (Anytime)',
+    'Evening (4 PM – 7 PM)',
+    'Night (7 PM – 10 PM)',
+    'Weekends Only',
+  ];
 
   // Application modal
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
@@ -106,8 +118,9 @@ export default function BrowseJobs() {
     if (selectedDistrict !== 'all') count++;
     if (selectedSubject !== 'all') count++;
     if (selectedMode !== 'all') count++;
+    if (selectedTime !== 'all') count++;
     return count;
-  }, [selectedDivision, selectedDistrict, selectedSubject, selectedMode]);
+  }, [selectedDivision, selectedDistrict, selectedSubject, selectedMode, selectedTime]);
 
   useEffect(() => {
     fetchData();
@@ -115,7 +128,7 @@ export default function BrowseJobs() {
 
   useEffect(() => {
     fetchJobs();
-  }, [selectedDistrict, selectedSubject, selectedMode, currentPage]);
+  }, [selectedDistrict, selectedSubject, selectedMode, selectedTime, currentPage]);
 
   useEffect(() => {
     if (user && role === 'tutor') {
