@@ -805,6 +805,7 @@ export default function AdminDashboard() {
   const [pendingTutors, setPendingTutors] = useState<TutorVerification[]>([]);
   const [verificationFilter, setVerificationFilter] = useState('pending');
   const [verificationPayments, setVerificationPayments] = useState<PaymentRow[]>([]);
+  const [verificationFee, setVerificationFee] = useState<number>(50);
   const [jobs, setJobs] = useState<JobRow[]>([]);
   const [jobStatusFilter, setJobStatusFilter] = useState('all');
   const [jobPage, setJobPage] = useState(1);
