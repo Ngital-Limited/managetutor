@@ -1928,10 +1928,110 @@ export default function ParentDashboard() {
     </Card>
   );
 
+  const renderApplicants = () => (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Users className="h-5 w-5" />
+          All Applicants
+          <Badge variant="outline">{allApplicants.length}</Badge>
+        </CardTitle>
+        <CardDescription>Tutors who applied to any of your job posts</CardDescription>
+      </CardHeader>
+      <CardContent>
+        {allApplicants.length > 0 ? (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b text-left">
+                  <th className="py-3 px-2 font-medium text-muted-foreground">Photo</th>
+                  <th className="py-3 px-2 font-medium text-muted-foreground">Name</th>
+                  <th className="py-3 px-2 font-medium text-muted-foreground">Job</th>
+                  <th className="py-3 px-2 font-medium text-muted-foreground">Date</th>
+                  <th className="py-3 px-2 font-medium text-muted-foreground">Proposed</th>
+                  <th className="py-3 px-2 font-medium text-muted-foreground">Status</th>
+                  <th className="py-3 px-2 font-medium text-muted-foreground text-center">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {allApplicants.map((app: any) => {
+                  const tutor = app.tutor_profiles;
+                  return (
+                    <tr key={app.id} className="border-b hover:bg-muted/50 transition-colors">
+                      <td className="py-3 px-2">
+                        <Avatar className="h-10 w-10">
+                          <AvatarImage src={tutor?.profiles?.avatar_url} />
+                          <AvatarFallback>{tutor?.profiles?.full_name?.charAt(0) || 'T'}</AvatarFallback>
+                        </Avatar>
+                      </td>
+                      <td className="py-3 px-2">
+                        <div className="flex flex-col">
+                          <span className="font-semibold">{tutor?.profiles?.full_name}</span>
+                          <span className="text-xs text-muted-foreground">
+                            {tutor?.experience_years || 0} yrs · ⭐ {tutor?.average_rating || 0}
+                            {tutor?.verification_status === 'approved' && tutor?.verification_paid && ' · ✓'}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="py-3 px-2">
+                        <div className="flex flex-col">
+                          <span className="text-xs font-medium truncate max-w-[180px]">{app.jobs?.title}</span>
+                          <span className="text-xs text-muted-foreground">{app.jobs?.job_reference}</span>
+                        </div>
+                      </td>
+                      <td className="py-3 px-2 text-muted-foreground whitespace-nowrap text-xs">
+                        {format(new Date(app.created_at), 'dd MMM yyyy')}
+                      </td>
+                      <td className="py-3 px-2 font-medium whitespace-nowrap">৳{app.proposed_rate}/mo</td>
+                      <td className="py-3 px-2">
+                        <Badge className={
+                          app.status === 'accepted' ? 'bg-success' :
+                          app.status === 'rejected' ? 'bg-destructive' :
+                          'bg-warning text-warning-foreground'
+                        }>
+                          {app.status.charAt(0).toUpperCase() + app.status.slice(1)}
+                        </Badge>
+                      </td>
+                      <td className="py-3 px-2">
+                        <div className="flex items-center gap-1 justify-center flex-wrap">
+                          {app.status === 'pending' && (
+                            <>
+                              <Button size="sm" className="h-8 text-xs" onClick={() => handleApplicationAction(app.id, 'accepted')}>
+                                <CheckCircle2 className="h-3.5 w-3.5 mr-1" />Hire
+                              </Button>
+                              <Button size="sm" variant="outline" className="h-8 text-xs" onClick={() => handleApplicationAction(app.id, 'rejected')}>
+                                <XCircle className="h-3.5 w-3.5" />
+                              </Button>
+                            </>
+                          )}
+                          <Link to={`/tutor/${tutor?.id}`}>
+                            <Button size="sm" variant="ghost" className="h-8 text-xs">
+                              <Eye className="h-3.5 w-3.5" />
+                            </Button>
+                          </Link>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <div className="text-center py-12">
+            <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+            <p className="text-muted-foreground">No applicants yet across your jobs</p>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+
   const renderActiveSection = () => {
     switch (activeSection) {
       case 'overview': return renderOverview();
       case 'jobs': return renderJobs();
+      case 'applicants': return renderApplicants();
       case 'demo': return renderDemoBookings();
       case 'payments': return renderPayments();
       case 'profile': return renderProfile();
