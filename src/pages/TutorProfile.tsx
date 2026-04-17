@@ -735,45 +735,30 @@ export default function TutorProfile() {
               {/* Address */}
               <div className="space-y-3 pt-2 border-t border-border/60">
                 <Label className="font-semibold text-base">Present Address</Label>
-                <div className="grid md:grid-cols-3 gap-4">
-                  <div>
-                    <Label>Division</Label>
-                    <Select value={selectedDivision} onValueChange={(v) => {
-                      setSelectedDivision(v);
-                      setUserProfile({ ...userProfile, district_id: '', area_id: '' });
-                    }}>
-                      <SelectTrigger className="rounded-xl mt-1.5 h-11"><SelectValue placeholder="Select division" /></SelectTrigger>
-                      <SelectContent>
-                        {[...new Set(districts.map(d => d.division_en))].sort().map(div => (
-                          <SelectItem key={div} value={div}>{div}</SelectItem>
+                <div>
+                  <Label>City (Thana / Upazila)</Label>
+                  <Select
+                    value={userProfile.area_id}
+                    onValueChange={(v) => {
+                      const area = areas.find(a => a.id === v);
+                      setUserProfile({ ...userProfile, area_id: v, district_id: area?.district_id || '' });
+                    }}
+                  >
+                    <SelectTrigger className="rounded-xl mt-1.5 h-11">
+                      <SelectValue placeholder="Select city" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {areas
+                        .map(a => {
+                          const dist = districts.find(d => d.id === a.district_id);
+                          return { id: a.id, label: dist ? `${a.name_en} (${dist.name_en})` : a.name_en };
+                        })
+                        .sort((a, b) => a.label.localeCompare(b.label))
+                        .map(c => (
+                          <SelectItem key={c.id} value={c.id}>{c.label}</SelectItem>
                         ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <Label>District</Label>
-                    <Select value={userProfile.district_id} onValueChange={(v) => setUserProfile({ ...userProfile, district_id: v, area_id: '' })}>
-                      <SelectTrigger className="rounded-xl mt-1.5 h-11"><SelectValue placeholder="Select district" /></SelectTrigger>
-                      <SelectContent>
-                        {(selectedDivision ? districts.filter(d => d.division_en === selectedDivision) : districts).map(d => (
-                          <SelectItem key={d.id} value={d.id}>{d.name_en}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  {userProfile.district_id && areas.filter(a => a.district_id === userProfile.district_id).length > 0 && (
-                    <div>
-                      <Label>Thana / Area</Label>
-                      <Select value={userProfile.area_id} onValueChange={(v) => setUserProfile({ ...userProfile, area_id: v })}>
-                        <SelectTrigger className="rounded-xl mt-1.5 h-11"><SelectValue placeholder="Select thana/area" /></SelectTrigger>
-                        <SelectContent>
-                          {areas.filter(a => a.district_id === userProfile.district_id).map(a => (
-                            <SelectItem key={a.id} value={a.id}>{a.name_en}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  )}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <Textarea className="rounded-xl" value={profile.present_address} onChange={(e) => setProfile({ ...profile, present_address: e.target.value })} placeholder="House/Road/Village details..." rows={2} />
               </div>

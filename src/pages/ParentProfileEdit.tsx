@@ -82,9 +82,12 @@ export default function ParentProfileEdit() {
     setLoading(false);
   };
 
-  const divisions = [...new Set(districts.map(d => d.division_en))].sort();
-  const filteredDistricts = selectedDivisionState ? districts.filter(d => d.division_en === selectedDivisionState) : districts;
-  const filteredAreas = areas.filter(a => a.district_id === form.district_id);
+  const cityOptions = areas
+    .map(a => {
+      const dist = districts.find(d => d.id === a.district_id);
+      return { id: a.id, label: dist ? `${a.name_en} (${dist.name_en})` : a.name_en };
+    })
+    .sort((a, b) => a.label.localeCompare(b.label));
 
   const handleSave = async () => {
     if (!form.phone) {
@@ -219,43 +222,22 @@ export default function ParentProfileEdit() {
                 <p className="text-xs text-muted-foreground mt-1">Email is linked to your account and cannot be changed here.</p>
               </div>
               <div>
-                <Label className="flex items-center gap-1"><MapPin className="h-3 w-3" /> Division</Label>
-                <Select value={selectedDivisionState} onValueChange={(v) => {
-                  setSelectedDivisionState(v);
-                  setForm({ ...form, district_id: '', area_id: '' });
-                }}>
-                  <SelectTrigger><SelectValue placeholder="Select division" /></SelectTrigger>
+                <Label className="flex items-center gap-1"><MapPin className="h-3 w-3" /> City (Thana / Upazila)</Label>
+                <Select
+                  value={form.area_id}
+                  onValueChange={(v) => {
+                    const area = areas.find(a => a.id === v);
+                    setForm({ ...form, area_id: v, district_id: area?.district_id || '' });
+                  }}
+                >
+                  <SelectTrigger><SelectValue placeholder="Select city" /></SelectTrigger>
                   <SelectContent>
-                    {divisions.map(div => (
-                      <SelectItem key={div} value={div}>{div}</SelectItem>
+                    {cityOptions.map(c => (
+                      <SelectItem key={c.id} value={c.id}>{c.label}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
-              <div>
-                <Label className="flex items-center gap-1"><MapPin className="h-3 w-3" /> District</Label>
-                <Select value={form.district_id} onValueChange={(v) => setForm({ ...form, district_id: v, area_id: '' })}>
-                  <SelectTrigger><SelectValue placeholder="Select district" /></SelectTrigger>
-                  <SelectContent>
-                    {(selectedDivisionState ? filteredDistricts : districts).map(d => (
-                      <SelectItem key={d.id} value={d.id}>{d.name_en}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              {filteredAreas.length > 0 && (
-                <div>
-                  <Label className="flex items-center gap-1"><MapPin className="h-3 w-3" /> Thana / Area</Label>
-                  <Select value={form.area_id} onValueChange={(v) => setForm({ ...form, area_id: v })}>
-                    <SelectTrigger><SelectValue placeholder="Select thana/area" /></SelectTrigger>
-                    <SelectContent>
-                      {filteredAreas.map(a => (
-                        <SelectItem key={a.id} value={a.id}>{a.name_en}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
             </CardContent>
           </Card>
 

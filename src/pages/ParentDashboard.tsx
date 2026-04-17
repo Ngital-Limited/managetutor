@@ -889,13 +889,15 @@ export default function ParentDashboard() {
     label: s.name_en,
   })), [subjects]);
 
-  const areaOptions = useMemo(() => {
-    const filtered = jobForm.district_id ? areas.filter(a => a.district_id === jobForm.district_id) : areas;
-    return filtered.map(a => ({
-      value: a.id,
-      label: a.name_en,
-    })).sort((a, b) => a.label.localeCompare(b.label));
-  }, [areas, jobForm.district_id]);
+  const cityOptions = useMemo(() => {
+    const distMap = new Map(districts.map(d => [d.id, d.name_en]));
+    return areas
+      .map(a => ({
+        value: a.id,
+        label: distMap.get(a.district_id) ? `${a.name_en} (${distMap.get(a.district_id)})` : a.name_en,
+      }))
+      .sort((a, b) => a.label.localeCompare(b.label));
+  }, [areas, districts]);
 
   const classLevelOptions = useMemo(() => CLASS_LEVELS.flatMap(group =>
     group.items.map(item => ({ value: item, label: item, group: group.group }))
@@ -1209,40 +1211,19 @@ export default function ParentDashboard() {
             <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Location & Teaching Preferences</p>
             <div className="h-px bg-border" />
           </div>
-          <div className="grid md:grid-cols-3 gap-4">
-            <div>
-              <Label>Division *</Label>
-              <Select value={selectedJobDivision} onValueChange={(v) => { setSelectedJobDivision(v); setJobForm({ ...jobForm, district_id: '', area_id: '' }); }}>
-                <SelectTrigger><SelectValue placeholder="Select Division" /></SelectTrigger>
-                <SelectContent>
-                  {jobDivisions.map(div => (
-                    <SelectItem key={div.en} value={div.en}>{div.en}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label>District *</Label>
-              <SearchableSelect
-                options={districtOptions}
-                value={jobForm.district_id}
-                onValueChange={(v) => setJobForm({ ...jobForm, district_id: v, area_id: '' })}
-                placeholder={selectedJobDivision ? "Search district..." : "Select division first"}
-                searchPlaceholder="Type to search districts..."
-                emptyText="No districts found."
-              />
-            </div>
-            <div>
-              <Label>Thana/Upazila (Optional)</Label>
-              <SearchableSelect
-                options={areaOptions}
-                value={jobForm.area_id}
-                onValueChange={(v) => setJobForm({ ...jobForm, area_id: v })}
-                placeholder={jobForm.district_id ? "Search thana/upazila..." : "Select district first"}
-                searchPlaceholder="Type to search areas..."
-                emptyText="No areas found."
-              />
-            </div>
+          <div>
+            <Label>City (Thana / Upazila) *</Label>
+            <SearchableSelect
+              options={cityOptions}
+              value={jobForm.area_id}
+              onValueChange={(v) => {
+                const area = areas.find(a => a.id === v);
+                setJobForm({ ...jobForm, area_id: v, district_id: area?.district_id || '' });
+              }}
+              placeholder="Search city..."
+              searchPlaceholder="Type to search cities..."
+              emptyText="No cities found."
+            />
           </div>
           <div className="grid md:grid-cols-2 gap-4">
             <div>
