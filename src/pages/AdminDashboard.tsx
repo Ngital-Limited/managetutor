@@ -810,6 +810,12 @@ export default function AdminDashboard() {
   const [appsJobsPageSize, setAppsJobsPageSize] = useState(25);
   const [appsApplicantsPage, setAppsApplicantsPage] = useState(1);
   const [appsApplicantsPageSize, setAppsApplicantsPageSize] = useState(25);
+  // Payments tab pagination
+  const [paymentsPage, setPaymentsPage] = useState(1);
+  const [paymentsPageSize, setPaymentsPageSize] = useState(25);
+  // Verification badge payments pagination
+  const [vPaymentsPage, setVPaymentsPage] = useState(1);
+  const [vPaymentsPageSize, setVPaymentsPageSize] = useState(25);
   const [reports, setReports] = useState<Report[]>([]);
   const [reviews, setReviews] = useState<ReviewRow[]>([]);
   const [payments, setPayments] = useState<PaymentRow[]>([]);
@@ -1325,7 +1331,7 @@ export default function AdminDashboard() {
       .select('id, amount, currency, status, transaction_id, created_at, completed_at, listing_type, user_id')
       .eq('listing_type', 'verification_badge')
       .order('created_at', { ascending: false })
-      .limit(50);
+      .limit(1000);
     if (vPayments) {
       const uids = [...new Set(vPayments.map(p => p.user_id))];
       const { data: profs } = await supabase.from('profiles').select('id, full_name, email').in('id', uids);
@@ -1396,7 +1402,7 @@ export default function AdminDashboard() {
     const { data } = await supabase
       .from('payment_transactions')
       .select('id, amount, currency, status, transaction_id, created_at, completed_at, listing_type, user_id')
-      .order('created_at', { ascending: false }).limit(50);
+      .order('created_at', { ascending: false }).limit(1000);
     if (data) {
       const uids = [...new Set(data.map(p => p.user_id))];
       const { data: profs } = await supabase.from('profiles').select('id, full_name, email').in('id', uids);
@@ -1404,6 +1410,10 @@ export default function AdminDashboard() {
       setPayments(data.map(p => ({ ...p, profiles: pMap.get(p.user_id) || { full_name: 'Unknown', email: '' } })) as unknown as PaymentRow[]);
     }
   }, []);
+
+  // Reset pagination when page size changes
+  useEffect(() => { setPaymentsPage(1); }, [paymentsPageSize]);
+  useEffect(() => { setVPaymentsPage(1); }, [vPaymentsPageSize, verificationFilter]);
 
   // Load data when tab changes
   useEffect(() => {
@@ -2277,7 +2287,7 @@ export default function AdminDashboard() {
                         <TableBody>
                           {verificationPayments.length === 0 ? (
                             <TableRow><TableCell colSpan={5} className="text-center py-8 text-muted-foreground">No verification payments yet</TableCell></TableRow>
-                          ) : verificationPayments.map((p) => (
+                          ) : verificationPayments.slice((vPaymentsPage - 1) * vPaymentsPageSize, vPaymentsPage * vPaymentsPageSize).map((p) => (
                             <TableRow key={p.id}>
                               <TableCell className="font-mono text-xs">{p.transaction_id}</TableCell>
                               <TableCell className="text-sm">{(p.profiles as any)?.full_name}</TableCell>
@@ -2291,6 +2301,30 @@ export default function AdminDashboard() {
                     </ScrollArea>
                   </CardContent>
                 </Card>
+                {verificationPayments.length > 0 && (() => {
+                  const totalPages = Math.max(1, Math.ceil(verificationPayments.length / vPaymentsPageSize));
+                  const page = Math.min(vPaymentsPage, totalPages);
+                  const start = (page - 1) * vPaymentsPageSize + 1;
+                  const end = Math.min(page * vPaymentsPageSize, verificationPayments.length);
+                  return (
+                    <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-1">
+                      <div className="text-xs text-muted-foreground">Showing {start}–{end} of {verificationPayments.length}</div>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <Select value={String(vPaymentsPageSize)} onValueChange={(v) => { setVPaymentsPageSize(Number(v)); setVPaymentsPage(1); }}>
+                          <SelectTrigger className="h-8 w-[100px] text-xs"><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            {[10, 25, 50, 100].map(n => <SelectItem key={n} value={String(n)}>{n} / page</SelectItem>)}
+                          </SelectContent>
+                        </Select>
+                        <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setVPaymentsPage(1)}>« First</Button>
+                        <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setVPaymentsPage(page - 1)}>Prev</Button>
+                        <span className="text-xs text-muted-foreground">Page {page} of {totalPages}</span>
+                        <Button variant="outline" size="sm" disabled={page >= totalPages} onClick={() => setVPaymentsPage(page + 1)}>Next</Button>
+                        <Button variant="outline" size="sm" disabled={page >= totalPages} onClick={() => setVPaymentsPage(totalPages)}>Last »</Button>
+                      </div>
+                    </div>
+                  );
+                })()}
               </div>
             )}
 
@@ -3072,7 +3106,7 @@ export default function AdminDashboard() {
                         <TableBody>
                           {payments.length === 0 ? (
                             <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">No transactions yet</TableCell></TableRow>
-                          ) : payments.map((p) => (
+                          ) : payments.slice((paymentsPage - 1) * paymentsPageSize, paymentsPage * paymentsPageSize).map((p) => (
                             <TableRow key={p.id}>
                               <TableCell className="font-mono text-xs">{p.transaction_id}</TableCell>
                               <TableCell className="text-sm">{(p.profiles as any)?.full_name}</TableCell>
@@ -3087,6 +3121,30 @@ export default function AdminDashboard() {
                     </ScrollArea>
                   </CardContent>
                 </Card>
+                {payments.length > 0 && (() => {
+                  const totalPages = Math.max(1, Math.ceil(payments.length / paymentsPageSize));
+                  const page = Math.min(paymentsPage, totalPages);
+                  const start = (page - 1) * paymentsPageSize + 1;
+                  const end = Math.min(page * paymentsPageSize, payments.length);
+                  return (
+                    <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-1">
+                      <div className="text-xs text-muted-foreground">Showing {start}–{end} of {payments.length}</div>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <Select value={String(paymentsPageSize)} onValueChange={(v) => { setPaymentsPageSize(Number(v)); setPaymentsPage(1); }}>
+                          <SelectTrigger className="h-8 w-[100px] text-xs"><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            {[10, 25, 50, 100].map(n => <SelectItem key={n} value={String(n)}>{n} / page</SelectItem>)}
+                          </SelectContent>
+                        </Select>
+                        <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPaymentsPage(1)}>« First</Button>
+                        <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPaymentsPage(page - 1)}>Prev</Button>
+                        <span className="text-xs text-muted-foreground">Page {page} of {totalPages}</span>
+                        <Button variant="outline" size="sm" disabled={page >= totalPages} onClick={() => setPaymentsPage(page + 1)}>Next</Button>
+                        <Button variant="outline" size="sm" disabled={page >= totalPages} onClick={() => setPaymentsPage(totalPages)}>Last »</Button>
+                      </div>
+                    </div>
+                  );
+                })()}
               </div>
             )}
 
