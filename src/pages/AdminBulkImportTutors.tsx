@@ -64,6 +64,7 @@ export default function AdminBulkImportTutors() {
   const [progress, setProgress] = useState(0);
   const [totals, setTotals] = useState({ imported: 0, skipped: 0, errors: 0 });
   const [log, setLog] = useState<{ email: string; status: string; reason?: string }[]>([]);
+  const [mappingInfo, setMappingInfo] = useState<{ original: string; mapped: string; recognized: boolean }[]>([]);
 
   if (role !== 'admin') {
     return (
@@ -77,15 +78,31 @@ export default function AdminBulkImportTutors() {
   const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    const originalHeaders: string[] = [];
+    const canonical = new Set(Object.values(HEADER_ALIASES));
     Papa.parse(file, {
       header: true,
       skipEmptyLines: true,
+      transformHeader: (h) => {
+        const trimmed = h.trim();
+        originalHeaders.push(trimmed);
+        return mapHeader(trimmed);
+      },
       complete: (res) => {
+        const mappedHeaders = (res.meta.fields || []) as string[];
+        setMappingInfo(originalHeaders.map((orig, i) => {
+          const mapped = mappedHeaders[i] ?? orig;
+          return { original: orig, mapped, recognized: canonical.has(mapped) };
+        }));
         setRows(res.data as any[]);
         setLog([]);
         setTotals({ imported: 0, skipped: 0, errors: 0 });
         setProgress(0);
-        toast({ title: 'CSV loaded', description: `${res.data.length} rows ready to import` });
+        const recognizedCount = mappedHeaders.filter(h => canonical.has(h)).length;
+        toast({
+          title: 'CSV loaded',
+          description: `${res.data.length} rows · ${recognizedCount}/${mappedHeaders.length} columns auto-mapped`,
+        });
       },
       error: (err) => toast({ title: 'Parse error', description: err.message, variant: 'destructive' }),
     });
