@@ -43,34 +43,6 @@ export function Footer() {
       <div className="absolute -top-40 left-1/2 -translate-x-1/2 w-[800px] h-[300px] bg-primary/10 rounded-full blur-[120px] pointer-events-none" />
 
       <div className="container mx-auto px-4 relative z-10">
-        {/* CTA / Newsletter strip */}
-        <div className="pt-16 pb-12 border-b border-secondary-foreground/10">
-          <div className="grid md:grid-cols-2 gap-8 items-center max-w-5xl mx-auto">
-            <div>
-              <span className="text-[11px] uppercase tracking-[0.2em] text-primary/80 font-medium">Stay in the loop</span>
-              <h3 className="text-2xl md:text-3xl font-semibold tracking-tight mt-2 mb-2">
-                Get the best tuition opportunities in your inbox
-              </h3>
-              <p className="text-sm text-secondary-foreground/60 leading-relaxed">
-                New jobs, top tutors, and platform updates — delivered weekly. No spam.
-              </p>
-            </div>
-            <form
-              onSubmit={(e) => e.preventDefault()}
-              className="flex gap-2 w-full md:max-w-md md:ml-auto"
-            >
-              <Input
-                type="email"
-                placeholder="your@email.com"
-                className="h-11 bg-secondary-foreground/5 border-secondary-foreground/15 text-secondary-foreground placeholder:text-secondary-foreground/40 rounded-lg focus-visible:ring-primary/40"
-              />
-              <Button type="submit" className="h-11 rounded-lg gap-1.5 shadow-sm">
-                Subscribe <Send className="h-3.5 w-3.5" />
-              </Button>
-            </form>
-          </div>
-        </div>
-
         {/* Main columns */}
         <div className="py-14 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-10 lg:gap-8">
           {/* Brand */}
