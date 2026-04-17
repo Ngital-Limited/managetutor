@@ -34,11 +34,11 @@ const HEADER_ALIASES: Record<string, string> = {
   fphone: 'f_phone', fatherphone: 'f_phone', fathersphone: 'f_phone', fathercontact: 'f_phone',
   mphone: 'm_phone', motherphone: 'm_phone', mothersphone: 'm_phone', mothercontact: 'm_phone', mothersohone: 'm_phone',
   paddress: 'p_address', presentaddress: 'p_address', currentaddress: 'p_address', address: 'p_address',
-  peraddress: 'per_address', permanentaddress: 'per_address', homeaddress: 'per_address',
+  peraddress: 'per_address', permanentaddress: 'per_address', parmanentaddress: 'per_address', homeaddress: 'per_address',
   gender: 'gender', sex: 'gender',
   school: 'school', schoolname: 'school', ssc: 'school',
   college: 'college', collegename: 'college', hsc: 'college',
-  university: 'university', universityname: 'university', institution: 'university',
+  university: 'university', universityname: 'university', univeristyname: 'university', institution: 'university',
   department: 'department', universitydepartment: 'department', major: 'department', fieldofstudy: 'department',
   presubject2: 'pre_subject', categories: 'pre_subject', category: 'pre_subject', subject: 'pre_subject',
   texperience: 't_experience', experience: 't_experience', tuitionexperience: 't_experience', teachingexperience: 't_experience', yearsofexperience: 't_experience',
@@ -52,7 +52,7 @@ const HEADER_ALIASES: Record<string, string> = {
   photo: 'photo', photourl: 'photo', picture: 'photo', avatar: 'photo', avatarurl: 'photo', image: 'photo', imageurl: 'photo', profilepicture: 'photo', profilephoto: 'photo',
 };
 
-const normalizeHeader = (h: string) => h.toLowerCase().replace(/[\s_\-./()]+/g, '');
+const normalizeHeader = (h: string) => h.toLowerCase().replace(/[\s_\-./()'’":,]+/g, '');
 const mapHeader = (h: string) => HEADER_ALIASES[normalizeHeader(h)] || h;
 
 export default function AdminBulkImportTutors() {
