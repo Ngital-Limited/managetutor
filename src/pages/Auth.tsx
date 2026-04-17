@@ -74,6 +74,31 @@ export default function Auth() {
       const { error } = await signIn(email, password);
       if (error) {
         toast({ title: 'Login Failed', description: error.message, variant: 'destructive' });
+      } else {
+        // Check ban status after successful sign-in
+        const { data: { user: signedInUser } } = await supabase.auth.getUser();
+        if (signedInUser) {
+          const { data: profileData } = await supabase
+            .from('profiles')
+            .select('is_banned, banned_reason, banned_at')
+            .eq('id', signedInUser.id)
+            .maybeSingle();
+
+          if (profileData?.is_banned) {
+            await supabase.auth.signOut();
+            const reason = profileData.banned_reason?.trim() || 'No reason provided';
+            const when = profileData.banned_at
+              ? new Date(profileData.banned_at).toLocaleDateString()
+              : '';
+            toast({
+              title: 'Account Banned',
+              description: `Your account has been banned${when ? ` on ${when}` : ''}. Reason: ${reason}. Please contact support if you believe this is a mistake.`,
+              variant: 'destructive',
+            });
+            setLoading(false);
+            return;
+          }
+        }
       }
     } else {
       if (!fullName.trim()) {
