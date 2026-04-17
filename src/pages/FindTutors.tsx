@@ -156,11 +156,19 @@ export default function FindTutors() {
     const [districtsRes, subjectsRes, areasRes] = await Promise.all([
       supabase.from('districts').select('*').order('name_en'),
       supabase.from('subjects').select('*').order('name_en'),
-      supabase.from('areas').select('*').order('name_en'),
+      supabase.from('areas').select('id, name_en, name_bn, district_id, districts (name_en)').order('name_en'),
     ]);
     if (districtsRes.data) setDistricts(districtsRes.data);
     if (subjectsRes.data) setSubjects(subjectsRes.data);
-    if (areasRes.data) setAreas(areasRes.data);
+    if (areasRes.data) {
+      setAreas(areasRes.data.map((a: any) => ({
+        id: a.id,
+        name_en: a.name_en,
+        name_bn: a.name_bn,
+        district_id: a.district_id,
+        district_name: a.districts?.name_en || '',
+      })));
+    }
     await fetchTutors();
   };
 
