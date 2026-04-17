@@ -291,8 +291,6 @@ export default function BrowseJobs() {
     const { error } = await supabase.from('applications').insert({
       job_id: selectedJob.id,
       tutor_id: tutorProfileId,
-      cover_message: coverMessage,
-      proposed_rate: parseInt(proposedRate) || null,
       status: 'pending'
     });
 
