@@ -17,7 +17,7 @@ import {
   Briefcase, BookOpen, User, Users, Share2, Video, Award, Monitor, Home, Sparkles,
 } from 'lucide-react';
 import BookDemoClassDialog from '@/components/BookDemoClassDialog';
-import { AiOverview, stripAiOverviewMarkdown } from '@/components/AiOverview';
+
 
 interface TutorProfile {
   id: string;
@@ -44,7 +44,6 @@ interface TutorProfile {
   video_url: string | null;
   teaching_philosophy: string | null;
   success_stories: string | null;
-  ai_overview: string | null;
   districts: { name_en: string; name_bn: string } | null;
   areas: { name_en: string; name_bn: string } | null;
 }
@@ -170,7 +169,7 @@ export default function TutorPublicProfile() {
     if (tutorData.district_id) {
       const { data: relData } = await supabase
         .from('tutor_profiles')
-        .select('id, slug, user_id, display_name, monthly_salary_min, monthly_salary_max, experience_years, teaching_mode, ai_overview, bio, profiles:user_id(full_name, avatar_url)')
+        .select('id, slug, user_id, display_name, monthly_salary_min, monthly_salary_max, experience_years, teaching_mode, bio, profiles:user_id(full_name, avatar_url)')
         .eq('district_id', tutorData.district_id)
         .eq('is_available', true)
         .neq('id', tutorData.id)
@@ -364,20 +363,6 @@ export default function TutorPublicProfile() {
               </TabsList>
 
               <TabsContent value="about" className="mt-4 space-y-4">
-                {tutor.ai_overview && (
-                  <Card className="border-primary/30 bg-gradient-to-br from-primary/5 via-background to-accent/5">
-                    <CardHeader className="pb-3">
-                      <CardTitle className="flex items-center gap-2 text-base">
-                        <Sparkles className="h-4 w-4 text-primary" />
-                        Overview
-                        <Badge variant="outline" className="text-[10px] font-normal ml-1">AI-generated</Badge>
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <AiOverview text={tutor.ai_overview} />
-                    </CardContent>
-                  </Card>
-                )}
                 <Card>
                   <CardHeader><CardTitle className="flex items-center gap-2 text-base"><User className="h-4 w-4" />About</CardTitle></CardHeader>
                   <CardContent className="space-y-4">
@@ -512,9 +497,7 @@ export default function TutorPublicProfile() {
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {relatedTutors.map((rt: any) => {
               const name = rt.profiles?.full_name || rt.display_name || 'Tutor';
-              const snippet = rt.ai_overview
-                ? stripAiOverviewMarkdown(rt.ai_overview).split('. ').slice(0, 2).join('. ')
-                : (rt.bio || '');
+              const snippet = rt.bio || '';
               return (
                 <Link key={rt.id} to={`/tutor/${rt.slug || rt.id}`} className="group block">
                   <Card className="h-full hover:shadow-md hover:border-primary/30 transition-all">

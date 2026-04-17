@@ -26,7 +26,7 @@ import {
 import { Progress } from '@/components/ui/progress';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { AiOverview } from '@/components/AiOverview';
+
 
 interface Subject { id: string; name_en: string; name_bn: string; }
 interface District { id: string; name_en: string; name_bn: string; division_en: string; }
@@ -114,9 +114,6 @@ export default function TutorProfile() {
   });
 
   const [tutorProfileId, setTutorProfileId] = useState<string | null>(null);
-  const [aiOverview, setAiOverview] = useState<string>('');
-  const [aiOverviewUpdatedAt, setAiOverviewUpdatedAt] = useState<string | null>(null);
-  const [generatingOverview, setGeneratingOverview] = useState(false);
   const [reviews, setReviews] = useState<any[]>([]);
   const [reviewRequests, setReviewRequests] = useState<any[]>([]);
   const [reviewUpdateReason, setReviewUpdateReason] = useState('');
@@ -206,8 +203,6 @@ export default function TutorProfile() {
       });
       setSelectedClassLevels(td.class_levels || []);
       setTutorProfileId(td.id);
-      setAiOverview(td.ai_overview || '');
-      setAiOverviewUpdatedAt(td.ai_overview_updated_at || null);
 
       // Fetch education entries and job experiences
       const [eduRes, jobRes, reviewsRes, reqRes] = await Promise.all([
@@ -432,34 +427,6 @@ export default function TutorProfile() {
 
     toast({ title: 'Profile saved!', description: 'Your profile has been updated successfully.' });
     setSaving(false);
-
-    // Trigger AI overview regeneration in the background
-    if (tutorData?.id) {
-      regenerateAiOverview(tutorData.id, true);
-    }
-  };
-
-  const regenerateAiOverview = async (tpId: string, silent = false) => {
-    setGeneratingOverview(true);
-    try {
-      const { data, error } = await supabase.functions.invoke('generate-tutor-overview', {
-        body: { tutor_profile_id: tpId },
-      });
-      if (error) throw error;
-      if (data?.overview) {
-        setAiOverview(data.overview);
-        setAiOverviewUpdatedAt(new Date().toISOString());
-        if (!silent) toast({ title: 'Overview regenerated', description: 'Your AI-generated overview is updated.' });
-      }
-    } catch (e: any) {
-      if (!silent) {
-        toast({ title: 'Could not regenerate overview', description: e.message || 'Please try again later.', variant: 'destructive' });
-      } else {
-        console.warn('AI overview generation failed:', e);
-      }
-    } finally {
-      setGeneratingOverview(false);
-    }
   };
 
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -1095,46 +1062,6 @@ export default function TutorProfile() {
 
         {/* MEDIA / VERIFICATION / REVIEWS TAB */}
         <TabsContent value="media" className="space-y-6 mt-0">
-          {/* AI-Generated Overview */}
-          <Card className="rounded-2xl border-primary/30 bg-gradient-to-br from-primary/5 via-background to-accent/5 shadow-sm">
-            <CardContent className="p-6 space-y-3">
-              <div className="flex items-start justify-between gap-3 flex-wrap">
-                <div>
-                  <h3 className="font-semibold flex items-center gap-2">
-                    <Sparkles className="h-4 w-4 text-primary" /> AI-Generated Overview
-                  </h3>
-                  <p className="text-sm text-muted-foreground">
-                    A marketing-style summary parents will see on your public profile. Auto-regenerates when you save your profile.
-                  </p>
-                </div>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => tutorProfileId && regenerateAiOverview(tutorProfileId)}
-                  disabled={!tutorProfileId || generatingOverview}
-                  className="rounded-xl"
-                >
-                  {generatingOverview ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <RefreshCw className="h-4 w-4 mr-2" />}
-                  {generatingOverview ? 'Generating...' : 'Regenerate'}
-                </Button>
-              </div>
-              {aiOverview ? (
-                <div className="rounded-xl bg-background/60 border border-border/60 p-4">
-                  <AiOverview text={aiOverview} />
-                  {aiOverviewUpdatedAt && (
-                    <p className="text-[11px] text-muted-foreground mt-3">
-                      Last generated: {formatExactDate(new Date(aiOverviewUpdatedAt))}
-                    </p>
-                  )}
-                </div>
-              ) : (
-                <div className="rounded-xl border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
-                  No overview yet. Save your profile or click <span className="font-medium">Regenerate</span> to create one.
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
           {/* Verification Documents */}
           <Card className="rounded-2xl border-border/60 shadow-sm">
             <CardContent className="p-6 space-y-4">
