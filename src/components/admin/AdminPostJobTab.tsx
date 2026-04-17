@@ -474,7 +474,7 @@ export function AdminPostJobTab({ toast }: Props) {
                       toast({ title: 'Could not add subject', description: error?.message, variant: 'destructive' });
                       return null;
                     }
-                    setSubjects(prev => [...prev, data as typeof subjects[number]]);
+                    setSubjects(prev => [...prev, data as unknown as typeof subjects[number]]);
                     return data.id;
                   }}
                 />

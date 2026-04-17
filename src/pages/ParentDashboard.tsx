@@ -869,13 +869,13 @@ export default function ParentDashboard() {
                   const { data, error } = await supabase
                     .from('subjects')
                     .insert({ name_en: name, name_bn: name })
-                    .select('id, name_en, category_en')
+                    .select('id, name_en, name_bn, category_en, category_bn, created_at')
                     .single();
                   if (error || !data) {
                     toast({ title: 'Could not add subject', description: error?.message, variant: 'destructive' });
                     return null;
                   }
-                  setSubjects(prev => [...prev, data as typeof subjects[number]]);
+                  setSubjects(prev => [...prev, data as unknown as typeof subjects[number]]);
                   return data.id;
                 }}
               />
