@@ -125,6 +125,7 @@ export default function JobDetails() {
         .from('jobs')
         .select(`id, slug, title, job_reference, budget_min, budget_max, class_level, created_at,
           districts (name_en),
+          areas (name_en),
           subjects (name_en),
           job_subjects (subjects (name_en))`)
         .eq('district_id', jobData.district_id)
@@ -503,6 +504,12 @@ export default function JobDetails() {
                               )}
                             </div>
                             <div className="text-xs text-muted-foreground mt-1 flex items-center gap-2 flex-wrap">
+                              {(rj.areas?.name_en || rj.districts?.name_en) && (
+                                <span className="flex items-center gap-1">
+                                  <MapPin className="h-3 w-3" />
+                                  {[rj.areas?.name_en, rj.districts?.name_en].filter(Boolean).join(', ')}
+                                </span>
+                              )}
                               {subj && <span className="flex items-center gap-1"><BookOpen className="h-3 w-3" />{subj}</span>}
                               {rj.class_level && <span className="flex items-center gap-1"><GraduationCap className="h-3 w-3" />{rj.class_level}</span>}
                               <span>{formatExactDate(new Date(rj.created_at))}</span>
