@@ -305,6 +305,27 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
 
   useEffect(() => { fetchTutors(); }, [fetchTutors]);
 
+  const sortedTutors = useMemo(() => {
+    if (!sortBy) return tutors;
+    const DEGREE_RANK: Record<string, number> = { masters: 4, master: 4, bachelor: 3, hsc: 2, ssc: 1 };
+    const arr = [...tutors];
+    arr.sort((a, b) => {
+      let av: number = 0, bv: number = 0;
+      if (sortBy === 'last_education') {
+        av = DEGREE_RANK[(a.last_education || '').toLowerCase()] ?? 0;
+        bv = DEGREE_RANK[(b.last_education || '').toLowerCase()] ?? 0;
+      } else if (sortBy === 'rating') {
+        av = a.average_rating ?? 0;
+        bv = b.average_rating ?? 0;
+      } else if (sortBy === 'joined') {
+        av = a.created_at ? new Date(a.created_at).getTime() : 0;
+        bv = b.created_at ? new Date(b.created_at).getTime() : 0;
+      }
+      return sortDir === 'asc' ? av - bv : bv - av;
+    });
+    return arr;
+  }, [tutors, sortBy, sortDir]);
+
   const toggleSelect = (userId: string) => {
     setSelectedIds(prev => {
       const next = new Set(prev);
