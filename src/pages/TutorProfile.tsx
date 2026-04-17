@@ -419,7 +419,29 @@ export default function TutorProfile() {
     setSaving(false);
   };
 
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, docType: string) => {
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !targetUserId) return;
+    if (file.size > 5 * 1024 * 1024) {
+      toast({ title: 'File too large', description: 'Profile picture must be under 5MB.', variant: 'destructive' });
+      return;
+    }
+    setAvatarUploading(true);
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${targetUserId}/avatar-${Date.now()}.${fileExt}`;
+    const { error: uploadError } = await supabase.storage.from('avatars').upload(fileName, file, { upsert: true });
+    if (uploadError) {
+      toast({ title: 'Upload failed', description: uploadError.message, variant: 'destructive' });
+      setAvatarUploading(false);
+      return;
+    }
+    const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(fileName);
+    setUserProfile((p) => ({ ...p, avatar_url: urlData.publicUrl }));
+    await supabase.from('profiles').update({ avatar_url: urlData.publicUrl }).eq('id', targetUserId);
+    setAvatarUploading(false);
+    toast({ title: 'Profile picture updated' });
+  };
+
     const file = e.target.files?.[0];
     if (!file || !user) return;
 
