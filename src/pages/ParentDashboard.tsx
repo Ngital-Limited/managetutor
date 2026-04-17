@@ -241,6 +241,7 @@ export default function ParentDashboard() {
   const [areas, setAreas] = useState<Area[]>([]);
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [jobs, setJobs] = useState<Job[]>([]);
+  const [jobBoosts, setJobBoosts] = useState<Record<string, { end_date: string; is_active: boolean }>>({});
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const [applications, setApplications] = useState<Application[]>([]);
   const [allApplicants, setAllApplicants] = useState<(Application & { jobs: { id: string; title: string; job_reference: string } })[]>([]);
@@ -349,6 +350,26 @@ export default function ParentDashboard() {
     if (subjectsRes.data) setSubjects(subjectsRes.data);
     if (profileRes.data) setUserProfile(profileRes.data as UserProfileFull);
     if (jobsRes.data) setJobs(jobsRes.data as unknown as Job[]);
+
+    // Fetch most recent featured listing per job (active or expired) so we can show status + offer "Boost again"
+    const allJobIds = (jobsRes.data || []).map((j: any) => j.id);
+    if (allJobIds.length > 0) {
+      const { data: listings } = await supabase
+        .from('featured_listings')
+        .select('job_id, end_date, is_active, start_date')
+        .eq('listing_type', 'job_post')
+        .in('job_id', allJobIds)
+        .order('end_date', { ascending: false });
+      const map: Record<string, { end_date: string; is_active: boolean }> = {};
+      (listings || []).forEach((l: any) => {
+        if (l.job_id && !map[l.job_id]) {
+          map[l.job_id] = { end_date: l.end_date, is_active: !!l.is_active };
+        }
+      });
+      setJobBoosts(map);
+    } else {
+      setJobBoosts({});
+    }
 
     const { data: bookingsData } = await supabase
       .from('demo_bookings')
@@ -1699,23 +1720,50 @@ export default function ParentDashboard() {
                               <div className="text-xs text-muted-foreground">applicants</div>
                             </div>
                             <div className="flex gap-1">
-                              {job.status !== 'completed' && !job.is_featured && (
-                                <Button
-                                  size="icon"
-                                  variant="ghost"
-                                  title={`Boost (Featured for 30 days) — ৳${featuredJobPrice}`}
-                                  className="text-accent"
-                                  disabled={boostingJobId === job.id}
-                                  onClick={(e) => { e.stopPropagation(); handleBoostJob(job); }}
-                                >
-                                  <Zap className="h-4 w-4" />
-                                </Button>
-                              )}
-                              {job.is_featured && (
-                                <Badge className="bg-accent text-accent-foreground gap-1">
-                                  <Zap className="h-3 w-3" />Featured
-                                </Badge>
-                              )}
+                              {(() => {
+                                const boost = jobBoosts[job.id];
+                                const isActive = !!job.is_featured && boost?.is_active && boost?.end_date && new Date(boost.end_date) > new Date();
+                                const isExpired = !job.is_featured && !!boost?.end_date && new Date(boost.end_date) <= new Date();
+                                if (isActive && boost) {
+                                  return (
+                                    <Badge
+                                      className="bg-accent text-accent-foreground gap-1"
+                                      title={`Featured until ${formatExactDate(new Date(boost.end_date))}`}
+                                    >
+                                      <Zap className="h-3 w-3" />
+                                      Featured · ends {formatExactDate(new Date(boost.end_date))}
+                                    </Badge>
+                                  );
+                                }
+                                if (job.status === 'completed') return null;
+                                if (isExpired) {
+                                  return (
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      title={`Re-boost (Featured for 30 days) — ৳${featuredJobPrice}`}
+                                      className="h-8 gap-1 text-accent border-accent/40"
+                                      disabled={boostingJobId === job.id}
+                                      onClick={(e) => { e.stopPropagation(); handleBoostJob(job); }}
+                                    >
+                                      <Zap className="h-3.5 w-3.5" />
+                                      Boost again
+                                    </Button>
+                                  );
+                                }
+                                return (
+                                  <Button
+                                    size="icon"
+                                    variant="ghost"
+                                    title={`Boost (Featured for 30 days) — ৳${featuredJobPrice}`}
+                                    className="text-accent"
+                                    disabled={boostingJobId === job.id}
+                                    onClick={(e) => { e.stopPropagation(); handleBoostJob(job); }}
+                                  >
+                                    <Zap className="h-4 w-4" />
+                                  </Button>
+                                );
+                              })()}
                               {job.status !== 'completed' && (
                                 <Button size="icon" variant="ghost" title="Edit" onClick={(e) => { e.stopPropagation(); startEditJob(job); }}>
                                   <Edit className="h-4 w-4" />
