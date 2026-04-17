@@ -3147,22 +3147,17 @@ export default function AdminDashboard() {
                   <Card>
                     <CardHeader>
                       <CardTitle>Commission & Pricing</CardTitle>
-                      <CardDescription>Configure platform fees</CardDescription>
+                      <CardDescription>Platform fees are configured in Platform Data</CardDescription>
                     </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div>
-                        <label className="text-sm font-medium">Commission Rate (%)</label>
-                        <Input type="number" defaultValue="10" className="mt-1" />
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium">Featured Tutor Daily Rate (৳)</label>
-                        <Input type="number" defaultValue="50" className="mt-1" />
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium">Featured Job Daily Rate (৳)</label>
-                        <Input type="number" defaultValue="30" className="mt-1" />
-                      </div>
-                      <Button className="w-full">Save Settings</Button>
+                    <CardContent className="space-y-3">
+                      <p className="text-sm text-muted-foreground">
+                        Commission percentage, verification fee, and featured listing prices are managed centrally
+                        under <strong>Platform Data → Pricing & Fees</strong>. They are read live by the demo booking,
+                        boost, and verification flows.
+                      </p>
+                      <Button variant="outline" className="w-full" onClick={() => setActiveTab('platform_data')}>
+                        Open Platform Data
+                      </Button>
                     </CardContent>
                   </Card>
                   <Card>
