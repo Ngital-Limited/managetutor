@@ -15,8 +15,10 @@ import { formatDistanceToNow } from 'date-fns';
 import {
   GraduationCap, Users, MapPin, Star, Search, FileText,
   Globe, ArrowRight, Shield, BookOpen, Clock, Award,
-  Briefcase, CheckCircle2, DollarSign, ChevronRight
+  Briefcase, CheckCircle2, DollarSign, ChevronRight, Layers, UserCircle2
 } from 'lucide-react';
+import { CLASS_LEVELS } from '@/constants/classLevels';
+import { JOB_CATEGORIES } from '@/constants/jobCategories';
 
 interface FeaturedTutor {
   id: string;
