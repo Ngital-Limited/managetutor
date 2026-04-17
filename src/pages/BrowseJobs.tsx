@@ -205,6 +205,9 @@ export default function BrowseJobs() {
     if (selectedMode && selectedMode !== 'all') {
       countQuery = countQuery.eq('teaching_mode', selectedMode as 'online' | 'in_person' | 'hybrid');
     }
+    if (selectedTime && selectedTime !== 'all') {
+      countQuery = countQuery.eq('preferred_time', selectedTime);
+    }
 
     const { count } = await countQuery;
     setTotalCount(count || 0);
@@ -233,6 +236,9 @@ export default function BrowseJobs() {
     }
     if (selectedMode && selectedMode !== 'all') {
       query = query.eq('teaching_mode', selectedMode as 'online' | 'in_person' | 'hybrid');
+    }
+    if (selectedTime && selectedTime !== 'all') {
+      query = query.eq('preferred_time', selectedTime);
     }
 
     const { data } = await query;
@@ -358,6 +364,7 @@ export default function BrowseJobs() {
     setSelectedDistrict('all');
     setSelectedSubject('all');
     setSelectedMode('all');
+    setSelectedTime('all');
     setSearchQuery('');
     setCurrentPage(1);
   };
