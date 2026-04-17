@@ -558,6 +558,17 @@ export function AdminPostJobTab({ toast }: Props) {
                 </Select>
               </div>
             </div>
+            <div className="grid md:grid-cols-2 gap-4">
+              <div>
+                <Label>Fixed Time (Optional)</Label>
+                <Input
+                  type="time"
+                  value={jobForm.fixed_time}
+                  onChange={(e) => setJobForm({ ...jobForm, fixed_time: e.target.value })}
+                />
+                <p className="text-xs text-muted-foreground mt-1">Specific clock time, e.g. 5:00 PM.</p>
+              </div>
+            </div>
             <div className="grid md:grid-cols-3 gap-4">
               <div>
                 <Label>Budget Min (৳/month)</Label>

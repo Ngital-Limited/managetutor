@@ -2579,6 +2579,10 @@ export default function AdminDashboard() {
                 </Select>
               </div>
               <div>
+                <label className="text-sm font-medium">Fixed Time (Optional)</label>
+                <Input type="time" value={editJobForm.fixed_time} onChange={(e) => setEditJobForm(f => ({ ...f, fixed_time: e.target.value }))} className="mt-1" />
+              </div>
+              <div>
                 <label className="text-sm font-medium">Start Date</label>
                 <Input type="date" value={editJobForm.start_date} onChange={(e) => setEditJobForm(f => ({ ...f, start_date: e.target.value }))} className="mt-1" />
               </div>
