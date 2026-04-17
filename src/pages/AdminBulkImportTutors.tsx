@@ -20,7 +20,7 @@ interface BatchResult {
   details: { email: string; status: string; reason?: string }[];
 }
 
-const BATCH_SIZE = 25;
+const BATCH_SIZE = 50;
 
 export default function AdminBulkImportTutors() {
   const { role } = useAuth();
