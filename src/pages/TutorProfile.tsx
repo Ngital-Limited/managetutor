@@ -68,6 +68,7 @@ export default function TutorProfile() {
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [minCompleteness, setMinCompleteness] = useState(70);
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [districts, setDistricts] = useState<District[]>([]);
   const [areas, setAreas] = useState<{ id: string; name_en: string; name_bn: string; district_id: string }[]>([]);
