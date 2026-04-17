@@ -810,6 +810,12 @@ export default function AdminDashboard() {
   const [appsJobsPageSize, setAppsJobsPageSize] = useState(25);
   const [appsApplicantsPage, setAppsApplicantsPage] = useState(1);
   const [appsApplicantsPageSize, setAppsApplicantsPageSize] = useState(25);
+  // Payments tab pagination
+  const [paymentsPage, setPaymentsPage] = useState(1);
+  const [paymentsPageSize, setPaymentsPageSize] = useState(25);
+  // Verification badge payments pagination
+  const [vPaymentsPage, setVPaymentsPage] = useState(1);
+  const [vPaymentsPageSize, setVPaymentsPageSize] = useState(25);
   const [reports, setReports] = useState<Report[]>([]);
   const [reviews, setReviews] = useState<ReviewRow[]>([]);
   const [payments, setPayments] = useState<PaymentRow[]>([]);
