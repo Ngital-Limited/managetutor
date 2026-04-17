@@ -21,7 +21,7 @@ const tutorSidebarItems = [
   { title: 'Demo Classes', url: '/tutor/dashboard#demo-classes', icon: Calendar },
   { title: 'Find Jobs', url: '/tutor/find-jobs', icon: Briefcase },
   { title: 'My Profile', url: '/tutor/profile', icon: User },
-  { title: 'Find Tutors', url: '/tutors', icon: Search },
+  
   { title: 'Pricing', url: '/pricing', icon: CreditCard },
 ];
 
