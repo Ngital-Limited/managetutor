@@ -103,8 +103,8 @@ export default function FindTutors() {
   const [selectedGender, setSelectedGender] = useState<string>(searchParams.get('gender') || '');
   const [priceRange, setPriceRange] = useState<number[]>([0, 10000]);
   const [selectedDivision, setSelectedDivision] = useState<string>('');
-  const [selectedDistrict, setSelectedDistrict] = useState<string>(searchParams.get('district') || '');
-  const [selectedArea, setSelectedArea] = useState<string>('');
+  const [selectedDistrict, setSelectedDistrict] = useState<string>('');
+  const [selectedArea, setSelectedArea] = useState<string>(searchParams.get('area') || '');
   const [districtSearch, setDistrictSearch] = useState('');
   const [areaSearch, setAreaSearch] = useState('');
   const [verifiedOnly, setVerifiedOnly] = useState<boolean>(searchParams.get('verified') === 'true');
