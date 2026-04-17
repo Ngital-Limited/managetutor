@@ -27,6 +27,13 @@ const typeIcons: Record<string, typeof Bell> = {
   application_received: FileText,
   application_accepted: UserCheck,
   application_rejected: XCircle,
+  application_shortlisted: UserCheck,
+  application_invited_to_demo: Briefcase,
+  demo_approved: Briefcase,
+  demo_result_confirmed: UserCheck,
+  demo_result_cancelled: XCircle,
+  interview_invite: Briefcase,
+  hire: UserCheck,
   new_job: Briefcase,
 };
 
@@ -102,21 +109,27 @@ export function NotificationBell() {
     const ref = notification.reference_id;
     const type = notification.type;
 
-    if (type === 'new_job' && ref) {
+    // Tutor-facing job-related notifications → open the job
+    const tutorJobTypes = [
+      'new_job',
+      'application_accepted',
+      'application_rejected',
+      'application_shortlisted',
+      'application_invited_to_demo',
+      'demo_approved',
+      'demo_result_confirmed',
+      'demo_result_cancelled',
+      'interview_invite',
+      'hire',
+    ];
+
+    if (ref && tutorJobTypes.includes(type)) {
       navigate(`/jobs/${ref}`);
     } else if (type === 'application_received' && ref) {
       // Parent received an application → go to parent dashboard with job context
       navigate(`/parent-dashboard?job=${ref}`);
-    } else if ((type === 'application_accepted' || type === 'application_rejected') && ref) {
-      // Tutor's application status changed → go to tutor dashboard or job details
-      navigate(`/jobs/${ref}`);
-    } else if (type === 'interview_invite' && ref) {
-      // Tutor invited to interview → go to job details
-      navigate(`/jobs/${ref}`);
     } else if (type === 'demo_booking' && ref) {
       navigate('/dashboard');
-    } else if (type === 'hire' && ref) {
-      navigate(`/jobs/${ref}`);
     } else {
       // Fallback: go to dashboard
       navigate('/dashboard');
