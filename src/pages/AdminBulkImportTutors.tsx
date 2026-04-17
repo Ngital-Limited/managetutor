@@ -52,7 +52,7 @@ const HEADER_ALIASES: Record<string, string> = {
   photo: 'photo', photourl: 'photo', picture: 'photo', avatar: 'photo', avatarurl: 'photo', image: 'photo', imageurl: 'photo', profilepicture: 'photo', profilephoto: 'photo',
 };
 
-const normalizeHeader = (h: string) => h.toLowerCase().replace(/[\s_\-./()]+/g, '');
+const normalizeHeader = (h: string) => h.toLowerCase().replace(/[\s_\-./()'’":,]+/g, '');
 const mapHeader = (h: string) => HEADER_ALIASES[normalizeHeader(h)] || h;
 
 export default function AdminBulkImportTutors() {
