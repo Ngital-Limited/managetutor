@@ -173,18 +173,46 @@ export default function Index() {
               </button>
             </div>
             <div className="p-5 md:p-6">
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
                 <div className="space-y-1.5">
                   <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5"><MapPin className="h-3.5 w-3.5" /> Location</label>
-                  <SearchableSelect options={districts.map(d => ({ value: d.id, label: d.name_en }))} value={selectedDistrict} onValueChange={setSelectedDistrict} placeholder="All Districts" className="h-11 rounded-xl bg-muted/50 border-border/60 focus:bg-card" />
+                  <SearchableSelect
+                    options={districts.map(d => ({ value: d.id, label: d.name_en }))}
+                    value={selectedDistrict}
+                    onValueChange={setSelectedDistrict}
+                    placeholder="Type a district…"
+                    className="h-11 rounded-xl bg-muted/50 border-border/60 focus:bg-card"
+                  />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5"><BookOpen className="h-3.5 w-3.5" /> Subject</label>
-                  <SearchableSelect options={subjectsList.map(s => ({ value: s.id, label: s.name_en }))} value={selectedSubject} onValueChange={setSelectedSubject} placeholder="All Subjects" className="h-11 rounded-xl bg-muted/50 border-border/60 focus:bg-card" />
+                  <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5"><GraduationCap className="h-3.5 w-3.5" /> Background</label>
+                  <SearchableSelect
+                    options={STUDENT_BACKGROUNDS.map(b => ({ value: b, label: b }))}
+                    value={selectedBackground}
+                    onValueChange={setSelectedBackground}
+                    placeholder="Any background"
+                    className="h-11 rounded-xl bg-muted/50 border-border/60 focus:bg-card"
+                  />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5"><Globe className="h-3.5 w-3.5" /> Mode</label>
-                  <SearchableSelect options={[{ value: 'online', label: 'Online' }, { value: 'in_person', label: 'In-Person' }, { value: 'hybrid', label: 'Both' }]} value={selectedMode} onValueChange={setSelectedMode} placeholder="Any Mode" className="h-11 rounded-xl bg-muted/50 border-border/60 focus:bg-card" />
+                  <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5"><BookOpen className="h-3.5 w-3.5" /> Category</label>
+                  <SearchableSelect
+                    options={JOB_CATEGORIES.map(c => ({ value: c, label: c }))}
+                    value={selectedCategory}
+                    onValueChange={setSelectedCategory}
+                    placeholder="Any category"
+                    className="h-11 rounded-xl bg-muted/50 border-border/60 focus:bg-card"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5"><UserCircle2 className="h-3.5 w-3.5" /> Gender</label>
+                  <SearchableSelect
+                    options={[{ value: 'male', label: 'Male' }, { value: 'female', label: 'Female' }, { value: 'any', label: 'Any' }]}
+                    value={selectedGender}
+                    onValueChange={setSelectedGender}
+                    placeholder="Any gender"
+                    className="h-11 rounded-xl bg-muted/50 border-border/60 focus:bg-card"
+                  />
                 </div>
               </div>
               <Button onClick={handleSearch} className="w-full h-12 rounded-xl text-base font-bold gap-2 shadow-lg shadow-primary/20">
