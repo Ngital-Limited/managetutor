@@ -1634,6 +1634,7 @@ export default function AdminDashboard() {
         { title: 'Guardians / Parents', value: 'guardians', icon: Users },
         { title: 'Verifications', value: 'verifications', icon: UserCheck, badge: stats.pendingVerifications },
         { title: 'Create User', value: 'create_user', icon: UserPlus },
+        { title: 'Import Tutors', value: 'import_tutors', icon: Download, href: '/admin/import-tutors' },
       ],
     },
     {
@@ -1715,27 +1716,39 @@ export default function AdminDashboard() {
                     <CollapsibleContent>
                       <SidebarGroupContent>
                         <SidebarMenu>
-                          {group.items.map((item) => (
-                            <SidebarMenuItem key={item.value}>
-                              <SidebarMenuButton
-                                onClick={() => {
-                                  setActiveTab(item.value);
-                                  // Jump straight to pending items when there are some needing attention
-                                  if (item.value === 'applications' && (item as any).badge) {
-                                    setAllAppsStatusFilter('pending');
-                                    setSelectedAppIds(new Set());
-                                  }
-                                }}
-                                className={`w-full justify-start text-sm ${activeTab === item.value ? 'bg-primary/8 text-primary font-medium' : 'text-muted-foreground hover:text-foreground'}`}
-                              >
-                                <item.icon className="h-4 w-4 mr-2.5 shrink-0" />
-                                <span className="flex-1 text-left truncate">{item.title}</span>
-                                {'badge' in item && item.badge ? (
-                                  <span className="ml-auto text-[10px] font-medium bg-destructive/10 text-destructive px-1.5 py-0.5 rounded-full">{item.badge}</span>
-                                ) : null}
-                              </SidebarMenuButton>
-                            </SidebarMenuItem>
-                          ))}
+                          {group.items.map((item) => {
+                            const itemHref = (item as any).href as string | undefined;
+                            const buttonClass = `w-full justify-start text-sm ${activeTab === item.value ? 'bg-primary/8 text-primary font-medium' : 'text-muted-foreground hover:text-foreground'}`;
+                            return (
+                              <SidebarMenuItem key={item.value}>
+                                {itemHref ? (
+                                  <SidebarMenuButton asChild className={buttonClass}>
+                                    <Link to={itemHref}>
+                                      <item.icon className="h-4 w-4 mr-2.5 shrink-0" />
+                                      <span className="flex-1 text-left truncate">{item.title}</span>
+                                    </Link>
+                                  </SidebarMenuButton>
+                                ) : (
+                                  <SidebarMenuButton
+                                    onClick={() => {
+                                      setActiveTab(item.value);
+                                      if (item.value === 'applications' && (item as any).badge) {
+                                        setAllAppsStatusFilter('pending');
+                                        setSelectedAppIds(new Set());
+                                      }
+                                    }}
+                                    className={buttonClass}
+                                  >
+                                    <item.icon className="h-4 w-4 mr-2.5 shrink-0" />
+                                    <span className="flex-1 text-left truncate">{item.title}</span>
+                                    {'badge' in item && item.badge ? (
+                                      <span className="ml-auto text-[10px] font-medium bg-destructive/10 text-destructive px-1.5 py-0.5 rounded-full">{item.badge}</span>
+                                    ) : null}
+                                  </SidebarMenuButton>
+                                )}
+                              </SidebarMenuItem>
+                            );
+                          })}
                         </SidebarMenu>
                       </SidebarGroupContent>
                     </CollapsibleContent>
