@@ -889,13 +889,15 @@ export default function ParentDashboard() {
     label: s.name_en,
   })), [subjects]);
 
-  const areaOptions = useMemo(() => {
-    const filtered = jobForm.district_id ? areas.filter(a => a.district_id === jobForm.district_id) : areas;
-    return filtered.map(a => ({
-      value: a.id,
-      label: a.name_en,
-    })).sort((a, b) => a.label.localeCompare(b.label));
-  }, [areas, jobForm.district_id]);
+  const cityOptions = useMemo(() => {
+    const distMap = new Map(districts.map(d => [d.id, d.name_en]));
+    return areas
+      .map(a => ({
+        value: a.id,
+        label: distMap.get(a.district_id) ? `${a.name_en} (${distMap.get(a.district_id)})` : a.name_en,
+      }))
+      .sort((a, b) => a.label.localeCompare(b.label));
+  }, [areas, districts]);
 
   const classLevelOptions = useMemo(() => CLASS_LEVELS.flatMap(group =>
     group.items.map(item => ({ value: item, label: item, group: group.group }))
