@@ -18,7 +18,7 @@ import {
   SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarTrigger,
 } from '@/components/ui/sidebar';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { ChevronDown, Download, Briefcase as BriefcaseIcon } from 'lucide-react';
+import { ChevronDown, Download } from 'lucide-react';
 import { MultiSearchableSelect } from '@/components/MultiSearchableSelect';
 
 import { useAuth } from '@/contexts/AuthContext';
