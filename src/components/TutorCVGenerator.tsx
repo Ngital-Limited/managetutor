@@ -38,11 +38,11 @@ export async function generateTutorCV(userId: string): Promise<void> {
   const tutor = tutorRes.data;
   const profile = profileRes.data as any;
 
-  // Fetch subjects
-  const { data: subjectsData } = await supabase
-    .from('tutor_subjects')
-    .select('subjects(name_en)')
-    .eq('tutor_profile_id', tutor.id);
+  // Fetch subjects + structured education in parallel
+  const [{ data: subjectsData }, { data: eduData }] = await Promise.all([
+    supabase.from('tutor_subjects').select('subjects(name_en)').eq('tutor_profile_id', tutor.id),
+    supabase.from('tutor_education').select('degree, institution, field_of_study, passing_year, result').eq('tutor_id', tutor.id),
+  ]);
 
   const subjects = subjectsData?.map((s: any) => s.subjects?.name_en).filter(Boolean) || [];
 
