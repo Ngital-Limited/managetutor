@@ -2395,10 +2395,14 @@ export default function AdminDashboard() {
                             </TableHeader>
                             <TableBody>
                               {loadingAllApps ? (
-                                <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">Loading…</TableCell></TableRow>
+                                <TableRow><TableCell colSpan={8} className="text-center py-8 text-muted-foreground">Loading…</TableCell></TableRow>
                               ) : filteredJobs.length === 0 ? (
-                                <TableRow><TableCell colSpan={6} className="text-center py-12 text-muted-foreground">No applications yet.</TableCell></TableRow>
-                              ) : filteredJobs.map(({ jid, job, total, pending, shortlisted, latest }) => (
+                                <TableRow><TableCell colSpan={8} className="text-center py-12 text-muted-foreground">No applications yet.</TableCell></TableRow>
+                              ) : filteredJobs.map(({ jid, job, total, pending, shortlisted, latest }) => {
+                                const guardianApp = allApplications.find(a => a.job_id === jid);
+                                const guardianName = guardianApp?.parent_profile?.full_name || '—';
+                                const guardianPhone = guardianApp?.parent_profile?.phone || '—';
+                                return (
                                 <TableRow
                                   key={jid}
                                   className="cursor-pointer"
@@ -2406,8 +2410,10 @@ export default function AdminDashboard() {
                                 >
                                   <TableCell className="text-xs font-mono">{job?.job_reference || '—'}</TableCell>
                                   <TableCell>
-                                    <div className="text-sm font-medium max-w-[320px] truncate">{job?.title || '—'}</div>
+                                    <div className="text-sm font-medium max-w-[280px] truncate">{job?.title || '—'}</div>
                                   </TableCell>
+                                  <TableCell className="text-sm max-w-[160px] truncate">{guardianName}</TableCell>
+                                  <TableCell className="text-xs font-mono whitespace-nowrap">{guardianPhone}</TableCell>
                                   <TableCell className="text-xs text-muted-foreground">{formatDistanceToNow(new Date(latest), { addSuffix: true })}</TableCell>
                                   <TableCell>
                                     <Badge className={`text-xs capitalize ${statusColor(job?.status)}`}>{(job?.status || '—').replace('_', ' ')}</Badge>
@@ -2430,7 +2436,8 @@ export default function AdminDashboard() {
                                     </Button>
                                   </TableCell>
                                 </TableRow>
-                              ))}
+                                );
+                              })}
                             </TableBody>
                           </Table>
                         </ScrollArea>
