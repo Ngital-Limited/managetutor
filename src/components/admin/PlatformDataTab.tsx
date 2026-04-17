@@ -117,13 +117,13 @@ function SubjectsManager({ toast }: { toast: any }) {
   const [search, setSearch] = useState('');
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [form, setForm] = useState({ name_en: '', name_bn: '', category_en: '', category_bn: '' });
+  const [form, setForm] = useState({ name_en: '', category_en: '' });
   const [saving, setSaving] = useState(false);
 
   const fetch = useCallback(async () => {
     setLoading(true);
     let query = supabase.from('subjects').select('*').order('category_en').order('name_en');
-    if (search) query = query.or(`name_en.ilike.%${search}%,name_bn.ilike.%${search}%,category_en.ilike.%${search}%`);
+    if (search) query = query.or(`name_en.ilike.%${search}%,category_en.ilike.%${search}%`);
     const { data } = await query;
     setSubjects(data || []);
     setLoading(false);
@@ -131,10 +131,10 @@ function SubjectsManager({ toast }: { toast: any }) {
 
   useEffect(() => { fetch(); }, [fetch]);
 
-  const openCreate = () => { setEditingId(null); setForm({ name_en: '', name_bn: '', category_en: '', category_bn: '' }); setDialogOpen(true); };
+  const openCreate = () => { setEditingId(null); setForm({ name_en: '', category_en: '' }); setDialogOpen(true); };
   const openEdit = (s: any) => {
     setEditingId(s.id);
-    setForm({ name_en: s.name_en, name_bn: s.name_bn, category_en: s.category_en || '', category_bn: s.category_bn || '' });
+    setForm({ name_en: s.name_en, category_en: s.category_en || '' });
     setDialogOpen(true);
   };
 
@@ -142,8 +142,8 @@ function SubjectsManager({ toast }: { toast: any }) {
     if (!form.name_en.trim()) { toast({ title: 'Name required', variant: 'destructive' }); return; }
     setSaving(true);
     const payload = {
-      name_en: form.name_en.trim(), name_bn: form.name_en.trim(),
-      category_en: form.category_en.trim() || null, category_bn: form.category_en.trim() || null,
+      name_en: form.name_en.trim(),
+      category_en: form.category_en.trim() || null,
     };
     const { error } = editingId
       ? await supabase.from('subjects').update(payload).eq('id', editingId)
@@ -241,13 +241,13 @@ function DistrictsManager({ toast }: { toast: any }) {
   const [search, setSearch] = useState('');
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [form, setForm] = useState({ name_en: '', name_bn: '', division_en: '', division_bn: '' });
+  const [form, setForm] = useState({ name_en: '', division_en: '' });
   const [saving, setSaving] = useState(false);
 
   const fetch = useCallback(async () => {
     setLoading(true);
     let query = supabase.from('districts').select('*').order('division_en').order('name_en');
-    if (search) query = query.or(`name_en.ilike.%${search}%,name_bn.ilike.%${search}%,division_en.ilike.%${search}%`);
+    if (search) query = query.or(`name_en.ilike.%${search}%,division_en.ilike.%${search}%`);
     const { data } = await query;
     setDistricts(data || []);
     setLoading(false);
@@ -255,10 +255,10 @@ function DistrictsManager({ toast }: { toast: any }) {
 
   useEffect(() => { fetch(); }, [fetch]);
 
-  const openCreate = () => { setEditingId(null); setForm({ name_en: '', name_bn: '', division_en: '', division_bn: '' }); setDialogOpen(true); };
+  const openCreate = () => { setEditingId(null); setForm({ name_en: '', division_en: '' }); setDialogOpen(true); };
   const openEdit = (d: any) => {
     setEditingId(d.id);
-    setForm({ name_en: d.name_en, name_bn: d.name_bn, division_en: d.division_en, division_bn: d.division_bn });
+    setForm({ name_en: d.name_en, division_en: d.division_en });
     setDialogOpen(true);
   };
 
@@ -268,8 +268,8 @@ function DistrictsManager({ toast }: { toast: any }) {
     }
     setSaving(true);
     const payload = {
-      name_en: form.name_en.trim(), name_bn: form.name_en.trim(),
-      division_en: form.division_en.trim(), division_bn: form.division_en.trim(),
+      name_en: form.name_en.trim(),
+      division_en: form.division_en.trim(),
     };
     const { error } = editingId
       ? await supabase.from('districts').update(payload).eq('id', editingId)
