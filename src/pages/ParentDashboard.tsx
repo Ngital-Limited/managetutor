@@ -484,7 +484,29 @@ export default function ParentDashboard() {
     }
   };
 
+  const notifyAppliedTutors = async (jobId: string, title: string, message: string, type: string) => {
+    const { data: apps } = await supabase
+      .from('applications')
+      .select('tutor_id, tutor_profiles!inner (user_id)')
+      .eq('job_id', jobId);
+    if (!apps || apps.length === 0) return;
+    const userIds = Array.from(new Set(apps.map((a: any) => a.tutor_profiles?.user_id).filter(Boolean)));
+    if (userIds.length === 0) return;
+    await supabase.from('notifications').insert(
+      userIds.map((uid) => ({ user_id: uid, title, message, type, reference_id: jobId }))
+    );
+  };
+
   const deleteJob = async (jobId: string) => {
+    const job = jobs.find(j => j.id === jobId);
+    const jobTitle = job?.title || 'a job you applied to';
+    // Notify applied tutors BEFORE deletion (applications row will be removed)
+    await notifyAppliedTutors(
+      jobId,
+      'Job removed',
+      `The guardian deleted the job "${jobTitle}". Your application has been withdrawn.`,
+      'job_deleted'
+    );
     const { error } = await supabase.from('jobs').delete().eq('id', jobId);
     if (error) {
       toast({ title: 'Error', description: error.message, variant: 'destructive' });
@@ -506,6 +528,16 @@ export default function ParentDashboard() {
         completed: 'Job marked as completed',
         in_progress: 'Job marked as in progress',
       };
+      if (status === 'cancelled') {
+        const job = jobs.find(j => j.id === jobId);
+        const jobTitle = job?.title || 'a job you applied to';
+        await notifyAppliedTutors(
+          jobId,
+          'Job paused by guardian',
+          `The guardian paused the job "${jobTitle}". You'll be notified if it reopens.`,
+          'job_paused'
+        );
+      }
       toast({ title: 'Updated', description: labels[status] || 'Job status updated' });
       fetchData();
     }

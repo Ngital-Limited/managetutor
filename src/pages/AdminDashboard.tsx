@@ -824,6 +824,44 @@ export default function AdminDashboard() {
   const [assignTutorResults, setAssignTutorResults] = useState<{ tutor_id: string; user_id: string; name: string; gender: string; experience: number; phone: string | null; email: string; district: string | null; rating: number | null; verification: string | null; reference: string | null }[]>([]);
   const [searchingTutors, setSearchingTutors] = useState(false);
 
+  // All-applications (admin Applications tab)
+  const [allApplications, setAllApplications] = useState<any[]>([]);
+  const [allAppsStatusFilter, setAllAppsStatusFilter] = useState('all');
+  const [allAppsSearch, setAllAppsSearch] = useState('');
+  const [loadingAllApps, setLoadingAllApps] = useState(false);
+
+  const fetchAllApplications = useCallback(async () => {
+    setLoadingAllApps(true);
+    let query = supabase
+      .from('applications')
+      .select(`
+        id, status, proposed_rate, cover_message, created_at, tutor_id, job_id,
+        jobs!inner ( id, title, job_reference, parent_id, status ),
+        tutor_profiles!inner ( id, user_id, gender, experience_years, verification_status )
+      `)
+      .order('created_at', { ascending: false })
+      .limit(200);
+    if (allAppsStatusFilter !== 'all') query = query.eq('status', allAppsStatusFilter as any);
+    const { data } = await query;
+    if (!data) { setAllApplications([]); setLoadingAllApps(false); return; }
+    const tutorUserIds = Array.from(new Set(data.map((a: any) => (a.tutor_profiles as any)?.user_id).filter(Boolean)));
+    const parentIds = Array.from(new Set(data.map((a: any) => (a.jobs as any)?.parent_id).filter(Boolean)));
+    const allUserIds = Array.from(new Set([...tutorUserIds, ...parentIds]));
+    let profs: any[] = [];
+    if (allUserIds.length > 0) {
+      const { data: profData } = await supabase.from('profiles').select('id, full_name, email, phone').in('id', allUserIds as string[]);
+      profs = profData || [];
+    }
+    const profMap = new Map(profs.map((p: any) => [p.id, p]));
+    setAllApplications(data.map((a: any) => ({
+      ...a,
+      tutor_profile: profMap.get((a.tutor_profiles as any)?.user_id) || null,
+      parent_profile: profMap.get((a.jobs as any)?.parent_id) || null,
+    })));
+    setLoadingAllApps(false);
+  }, [allAppsStatusFilter]);
+
+
   const fetchJobApplications = async (jobId: string) => {
     setLoadingApps(true);
     const { data } = await supabase
@@ -1219,11 +1257,12 @@ export default function AdminDashboard() {
       case 'guardians': fetchUsers(); break;
       case 'verifications': fetchVerifications(); break;
       case 'jobs': fetchJobs(); break;
+      case 'applications': fetchAllApplications(); break;
       case 'reports': fetchReports(); break;
       case 'reviews': fetchReviews(); break;
       case 'payments': fetchPayments(); break;
     }
-  }, [activeTab, role, fetchUsers, fetchVerifications, fetchJobs, fetchReports, fetchReviews, fetchPayments]);
+  }, [activeTab, role, fetchUsers, fetchVerifications, fetchJobs, fetchAllApplications, fetchReports, fetchReviews, fetchPayments]);
 
   // Load districts/areas once for guardian filters
   useEffect(() => {
@@ -1474,6 +1513,7 @@ export default function AdminDashboard() {
       label: 'Jobs & Tutoring',
       items: [
         { title: 'Jobs', value: 'jobs', icon: Briefcase },
+        { title: 'Applications', value: 'applications', icon: FileText },
         { title: 'Post Job', value: 'post_job', icon: Plus },
         { title: 'Demo Requests', value: 'demo_requests', icon: BookOpen },
       ],
@@ -2141,7 +2181,102 @@ export default function AdminDashboard() {
               </div>
             )}
 
-            {/* ═══════ REPORTS TAB ═══════ */}
+            {/* ═══════ APPLICATIONS TAB ═══════ */}
+            {activeTab === 'applications' && (
+              <div className="space-y-6">
+                <div className="flex items-center justify-between flex-wrap gap-3">
+                  <div>
+                    <h1 className="text-xl font-semibold">Applications</h1>
+                    <p className="text-sm text-muted-foreground mt-0.5">All tutor applications across every job</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Input
+                      placeholder="Search tutor, job, reference…"
+                      value={allAppsSearch}
+                      onChange={(e) => setAllAppsSearch(e.target.value)}
+                      className="w-64 h-9"
+                    />
+                    <Select value={allAppsStatusFilter} onValueChange={setAllAppsStatusFilter}>
+                      <SelectTrigger className="w-40 h-9"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Status</SelectItem>
+                        <SelectItem value="pending">Pending</SelectItem>
+                        <SelectItem value="shortlisted">Shortlisted</SelectItem>
+                        <SelectItem value="waiting">Waiting</SelectItem>
+                        <SelectItem value="accepted">Accepted</SelectItem>
+                        <SelectItem value="rejected">Rejected</SelectItem>
+                        <SelectItem value="withdrawn">Withdrawn</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <Card>
+                  <CardContent className="p-0">
+                    <ScrollArea className="w-full">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Tutor</TableHead>
+                            <TableHead>Job</TableHead>
+                            <TableHead>Guardian</TableHead>
+                            <TableHead>Rate</TableHead>
+                            <TableHead>Status</TableHead>
+                            <TableHead>Applied</TableHead>
+                            <TableHead className="text-right">Actions</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {loadingAllApps ? (
+                            <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">Loading…</TableCell></TableRow>
+                          ) : allApplications.length === 0 ? (
+                            <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">No applications found</TableCell></TableRow>
+                          ) : allApplications
+                            .filter((a) => {
+                              if (!allAppsSearch.trim()) return true;
+                              const s = allAppsSearch.toLowerCase();
+                              return (
+                                a.tutor_profile?.full_name?.toLowerCase().includes(s) ||
+                                a.tutor_profile?.email?.toLowerCase().includes(s) ||
+                                a.jobs?.title?.toLowerCase().includes(s) ||
+                                a.jobs?.job_reference?.toLowerCase().includes(s) ||
+                                a.parent_profile?.full_name?.toLowerCase().includes(s)
+                              );
+                            })
+                            .map((app) => (
+                            <TableRow key={app.id}>
+                              <TableCell>
+                                <div className="text-sm font-medium">{app.tutor_profile?.full_name || 'Unknown'}</div>
+                                <div className="text-xs text-muted-foreground">{app.tutor_profile?.email}</div>
+                              </TableCell>
+                              <TableCell>
+                                <div className="text-sm font-medium max-w-[220px] truncate">{app.jobs?.title || '—'}</div>
+                                <div className="text-xs font-mono text-muted-foreground">{app.jobs?.job_reference || '—'}</div>
+                              </TableCell>
+                              <TableCell className="text-sm">{app.parent_profile?.full_name || '—'}</TableCell>
+                              <TableCell className="text-sm">{app.proposed_rate ? `৳${app.proposed_rate}` : '—'}</TableCell>
+                              <TableCell><Badge className={`text-xs capitalize ${statusColor(app.status)}`}>{app.status}</Badge></TableCell>
+                              <TableCell className="text-xs text-muted-foreground">{formatDistanceToNow(new Date(app.created_at), { addSuffix: true })}</TableCell>
+                              <TableCell className="text-right">
+                                <div className="flex gap-1 justify-end flex-wrap">
+                                  <Button variant="ghost" size="sm" asChild title="View Job">
+                                    <Link to={`/jobs/${app.job_id}`}><Eye className="h-4 w-4" /></Link>
+                                  </Button>
+                                  <Button variant="outline" size="sm" className="text-xs gap-1" onClick={() => { setViewingJobApps({ jobId: app.job_id, jobTitle: app.jobs?.title || '' }); fetchJobApplications(app.job_id); }} title="Open job applications">
+                                    <UserCheck className="h-3.5 w-3.5" /> Manage
+                                  </Button>
+                                </div>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </ScrollArea>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
+
+
             {activeTab === 'reports' && (
               <div className="space-y-6">
                 <h1 className="text-xl font-semibold">User Reports</h1>
