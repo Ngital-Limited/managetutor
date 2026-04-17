@@ -807,6 +807,8 @@ export default function AdminDashboard() {
   const [verificationPayments, setVerificationPayments] = useState<PaymentRow[]>([]);
   const [jobs, setJobs] = useState<JobRow[]>([]);
   const [jobStatusFilter, setJobStatusFilter] = useState('all');
+  const [jobPage, setJobPage] = useState(1);
+  const [jobPageSize, setJobPageSize] = useState(25);
   const [reports, setReports] = useState<Report[]>([]);
   const [reviews, setReviews] = useState<ReviewRow[]>([]);
   const [payments, setPayments] = useState<PaymentRow[]>([]);
@@ -1279,6 +1281,9 @@ export default function AdminDashboard() {
   // Reset guardian pagination when filters change
   useEffect(() => { setGuardianPage(1); }, [userSearch, guardianDistrictFilter, guardianAreaFilter, guardianStatusFilter, guardianPageSize]);
 
+  // Reset job pagination when filter or page size changes
+  useEffect(() => { setJobPage(1); }, [jobStatusFilter, jobPageSize]);
+
   const fetchVerifications = useCallback(async () => {
     let query = supabase
       .from('tutor_profiles')
@@ -1314,7 +1319,7 @@ export default function AdminDashboard() {
     let query = supabase
       .from('jobs')
       .select('id, title, job_reference, status, teaching_mode, total_applications, created_at, parent_id, districts (name_en), subjects (name_en)')
-      .order('created_at', { ascending: false }).limit(100);
+      .order('created_at', { ascending: false }).limit(1000);
     if (jobStatusFilter !== 'all') query = query.eq('status', jobStatusFilter as any);
     const { data } = await query;
     if (data) {
@@ -2307,7 +2312,7 @@ export default function AdminDashboard() {
                         <TableBody>
                           {jobs.length === 0 ? (
                             <TableRow><TableCell colSpan={9} className="text-center py-8 text-muted-foreground">No jobs found</TableCell></TableRow>
-                          ) : jobs.map((job) => (
+                          ) : jobs.slice((jobPage - 1) * jobPageSize, jobPage * jobPageSize).map((job) => (
                             <TableRow key={job.id}>
                               <TableCell className="font-mono text-xs">{job.job_reference || '—'}</TableCell>
                               <TableCell className="font-medium text-sm max-w-[200px] truncate">{job.title}</TableCell>
@@ -2355,6 +2360,31 @@ export default function AdminDashboard() {
                     </ScrollArea>
                   </CardContent>
                 </Card>
+
+                {jobs.length > 0 && (() => {
+                  const totalPages = Math.max(1, Math.ceil(jobs.length / jobPageSize));
+                  const page = Math.min(jobPage, totalPages);
+                  const start = (page - 1) * jobPageSize + 1;
+                  const end = Math.min(page * jobPageSize, jobs.length);
+                  return (
+                    <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-1">
+                      <div className="text-xs text-muted-foreground">Showing {start}–{end} of {jobs.length}</div>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <Select value={String(jobPageSize)} onValueChange={(v) => { setJobPageSize(Number(v)); setJobPage(1); }}>
+                          <SelectTrigger className="h-8 w-[100px] text-xs"><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            {[10, 25, 50, 100].map(n => <SelectItem key={n} value={String(n)}>{n} / page</SelectItem>)}
+                          </SelectContent>
+                        </Select>
+                        <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setJobPage(1)}>« First</Button>
+                        <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setJobPage(page - 1)}>Prev</Button>
+                        <span className="text-xs text-muted-foreground">Page {page} of {totalPages}</span>
+                        <Button variant="outline" size="sm" disabled={page >= totalPages} onClick={() => setJobPage(page + 1)}>Next</Button>
+                        <Button variant="outline" size="sm" disabled={page >= totalPages} onClick={() => setJobPage(totalPages)}>Last »</Button>
+                      </div>
+                    </div>
+                  );
+                })()}
               </div>
             )}
 
