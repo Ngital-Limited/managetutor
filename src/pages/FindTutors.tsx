@@ -642,17 +642,23 @@ export default function FindTutors() {
                   </Select>
                 </div>
 
-                {/* District */}
+                {/* City (Thana/Upazila) */}
                 <div>
                   <Label className="text-xs font-medium mb-1 block text-muted-foreground">City</Label>
-                  <Select value={selectedDistrict} onValueChange={v => { setSelectedDistrict(v === 'all' ? '' : v); setSelectedArea(''); }}>
+                  <Select value={selectedArea || 'all'} onValueChange={v => setSelectedArea(v === 'all' ? '' : v)}>
                     <SelectTrigger className="h-9 text-xs rounded-lg"><SelectValue placeholder="All" /></SelectTrigger>
                     <SelectContent>
                       <div className="px-2 pb-1">
-                        <Input placeholder="Search..." value={districtSearch} onChange={e => setDistrictSearch(e.target.value)} className="h-7 text-xs" onClick={e => e.stopPropagation()} />
+                        <Input placeholder="Search..." value={areaSearch} onChange={e => setAreaSearch(e.target.value)} className="h-7 text-xs" onClick={e => e.stopPropagation()} />
                       </div>
                       <SelectItem value="all">All Cities</SelectItem>
-                      {filteredDistricts.map(d => <SelectItem key={d.id} value={d.id}>{d.name_en}</SelectItem>)}
+                      {areas
+                        .filter(a => !areaSearch || a.name_en.toLowerCase().includes(areaSearch.toLowerCase()) || (a.district_name || '').toLowerCase().includes(areaSearch.toLowerCase()))
+                        .map(a => (
+                          <SelectItem key={a.id} value={a.id}>
+                            {a.name_en}{a.district_name ? ` (${a.district_name})` : ''}
+                          </SelectItem>
+                        ))}
                     </SelectContent>
                   </Select>
                 </div>
