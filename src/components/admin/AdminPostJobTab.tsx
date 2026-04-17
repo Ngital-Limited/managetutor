@@ -543,12 +543,19 @@ export function AdminPostJobTab({ toast }: Props) {
               </div>
               <div>
                 <Label>Preferred Time</Label>
-                <Input
-                  type="time"
-                  value={jobForm.preferred_time}
-                  onChange={(e) => setJobForm({ ...jobForm, preferred_time: e.target.value })}
-                  className="w-full"
-                />
+                <Select value={jobForm.preferred_time} onValueChange={(v) => setJobForm({ ...jobForm, preferred_time: v })}>
+                  <SelectTrigger className="w-full"><SelectValue placeholder="Select preferred time" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Flexible / Anytime">Flexible / Anytime</SelectItem>
+                    <SelectItem value="Morning (6 AM – 9 AM)">Morning (6 AM – 9 AM)</SelectItem>
+                    <SelectItem value="Late Morning (9 AM – 12 PM)">Late Morning (9 AM – 12 PM)</SelectItem>
+                    <SelectItem value="Afternoon (12 PM – 4 PM)">Afternoon (12 PM – 4 PM)</SelectItem>
+                    <SelectItem value="After Evening (Anytime)">After Evening (Anytime)</SelectItem>
+                    <SelectItem value="Evening (4 PM – 7 PM)">Evening (4 PM – 7 PM)</SelectItem>
+                    <SelectItem value="Night (7 PM – 10 PM)">Night (7 PM – 10 PM)</SelectItem>
+                    <SelectItem value="Weekends Only">Weekends Only</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
             <div className="grid md:grid-cols-3 gap-4">
