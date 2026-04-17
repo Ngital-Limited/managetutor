@@ -351,6 +351,26 @@ export default function ParentDashboard() {
     if (profileRes.data) setUserProfile(profileRes.data as UserProfileFull);
     if (jobsRes.data) setJobs(jobsRes.data as unknown as Job[]);
 
+    // Fetch most recent featured listing per job (active or expired) so we can show status + offer "Boost again"
+    const allJobIds = (jobsRes.data || []).map((j: any) => j.id);
+    if (allJobIds.length > 0) {
+      const { data: listings } = await supabase
+        .from('featured_listings')
+        .select('job_id, end_date, is_active, start_date')
+        .eq('listing_type', 'job_post')
+        .in('job_id', allJobIds)
+        .order('end_date', { ascending: false });
+      const map: Record<string, { end_date: string; is_active: boolean }> = {};
+      (listings || []).forEach((l: any) => {
+        if (l.job_id && !map[l.job_id]) {
+          map[l.job_id] = { end_date: l.end_date, is_active: !!l.is_active };
+        }
+      });
+      setJobBoosts(map);
+    } else {
+      setJobBoosts({});
+    }
+
     const { data: bookingsData } = await supabase
       .from('demo_bookings')
       .select('*, subjects(name_en), tutor_profiles:tutor_id(id, profiles:user_id(full_name, avatar_url))')
