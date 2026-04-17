@@ -1120,7 +1120,7 @@ export default function TutorProfile() {
               </div>
               {aiOverview ? (
                 <div className="rounded-xl bg-background/60 border border-border/60 p-4">
-                  <p className="text-sm leading-relaxed whitespace-pre-wrap">{aiOverview}</p>
+                  <AiOverview text={aiOverview} />
                   {aiOverviewUpdatedAt && (
                     <p className="text-[11px] text-muted-foreground mt-3">
                       Last generated: {formatExactDate(new Date(aiOverviewUpdatedAt))}
