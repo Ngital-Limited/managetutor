@@ -1276,6 +1276,9 @@ export default function AdminDashboard() {
     setUsers(result);
   }, [userSearch, guardianDistrictFilter, guardianAreaFilter, guardianStatusFilter, guardianDistricts, guardianAreas]);
 
+  // Reset guardian pagination when filters change
+  useEffect(() => { setGuardianPage(1); }, [userSearch, guardianDistrictFilter, guardianAreaFilter, guardianStatusFilter, guardianPageSize]);
+
   const fetchVerifications = useCallback(async () => {
     let query = supabase
       .from('tutor_profiles')
