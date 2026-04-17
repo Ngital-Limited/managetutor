@@ -232,6 +232,7 @@ export default function ParentDashboard() {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const [applications, setApplications] = useState<Application[]>([]);
+  const [allApplicants, setAllApplicants] = useState<(Application & { jobs: { id: string; title: string; job_reference: string } })[]>([]);
   const [loading, setLoading] = useState(true);
   const [demoBookings, setDemoBookings] = useState<any[]>([]);
   const [transactions, setTransactions] = useState<any[]>([]);
