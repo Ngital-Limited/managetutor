@@ -85,6 +85,7 @@ export default function TutorPublicProfile() {
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [educationEntries, setEducationEntries] = useState<EducationEntry[]>([]);
+  const [relatedTutors, setRelatedTutors] = useState<any[]>([]);
   const [isFavorite, setIsFavorite] = useState(false);
   const [favoriteLoading, setFavoriteLoading] = useState(false);
 
