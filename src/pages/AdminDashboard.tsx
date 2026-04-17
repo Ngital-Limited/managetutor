@@ -795,6 +795,8 @@ export default function AdminDashboard() {
   const [guardianDistrictFilter, setGuardianDistrictFilter] = useState<string>('all');
   const [guardianAreaFilter, setGuardianAreaFilter] = useState<string[]>([]);
   const [guardianStatusFilter, setGuardianStatusFilter] = useState<string>('all');
+  const [guardianPage, setGuardianPage] = useState(1);
+  const [guardianPageSize, setGuardianPageSize] = useState(25);
   const [guardianDistricts, setGuardianDistricts] = useState<{ id: string; name_en: string }[]>([]);
   const [guardianAreas, setGuardianAreas] = useState<{ id: string; name_en: string; district_id: string }[]>([]);
   const [viewingParentJobs, setViewingParentJobs] = useState<{ id: string; name: string } | null>(null);
