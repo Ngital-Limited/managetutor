@@ -12,7 +12,7 @@ serve(async (req) => {
   }
 
   try {
-    const { amount, productName, productCategory, customerName, customerEmail, customerPhone, userId, planId, listingType } = await req.json();
+    const { amount, productName, productCategory, customerName, customerEmail, customerPhone, userId, planId, listingType, jobId } = await req.json();
 
     const storeId = Deno.env.get("SSLCOMMERZ_STORE_ID");
     const storePassword = Deno.env.get("SSLCOMMERZ_STORE_PASSWORD");
@@ -53,6 +53,7 @@ serve(async (req) => {
       value_a: userId || "",
       value_b: planId || "",
       value_c: listingType || "",
+      value_d: jobId || "",
     });
 
     const response = await fetch(sslcommerzUrl, {

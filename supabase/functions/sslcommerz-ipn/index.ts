@@ -32,6 +32,7 @@ serve(async (req) => {
     const userId = data.value_a;
     const planId = data.value_b;
     const listingType = data.value_c;
+    const jobId = data.value_d;
 
     // Validate the transaction with SSLCommerz
     if (status === "VALID" || status === "VALIDATED") {
@@ -102,13 +103,39 @@ serve(async (req) => {
               type: "verification",
             });
           }
-        } else if (listingType && userId) {
-          // Featured listing payment
+        } else if (listingType === 'job_post' && jobId && userId) {
+          // Featured job listing payment
           const startDate = new Date();
           const endDate = new Date();
-          endDate.setDate(endDate.getDate() + 30); // 30 days featured
+          endDate.setDate(endDate.getDate() + 30);
 
-          // Get tutor profile
+          await supabase.from("featured_listings").insert({
+            job_id: jobId,
+            listing_type: 'job_post',
+            start_date: startDate.toISOString(),
+            end_date: endDate.toISOString(),
+            amount_paid: Math.round(amount),
+            is_active: true,
+          });
+
+          await supabase
+            .from("jobs")
+            .update({ is_featured: true })
+            .eq("id", jobId);
+
+          await supabase.from("notifications").insert({
+            user_id: userId,
+            title: "Job Boosted! 🚀",
+            message: "Your job post is now featured for 30 days and will appear at the top of search results.",
+            type: "job_boost",
+            reference_id: jobId,
+          });
+        } else if (listingType && userId) {
+          // Featured tutor listing payment
+          const startDate = new Date();
+          const endDate = new Date();
+          endDate.setDate(endDate.getDate() + 30);
+
           const { data: tutorProfile } = await supabase
             .from("tutor_profiles")
             .select("id")
@@ -125,11 +152,17 @@ serve(async (req) => {
               is_active: true,
             });
 
-            // Update tutor profile
             await supabase
               .from("tutor_profiles")
               .update({ is_featured: true })
               .eq("id", tutorProfile.id);
+
+            await supabase.from("notifications").insert({
+              user_id: userId,
+              title: "Profile Boosted! ⭐",
+              message: "Your profile is now featured for 30 days and will appear at the top of search results.",
+              type: "profile_boost",
+            });
           }
         }
 
