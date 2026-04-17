@@ -617,6 +617,7 @@ export type Database = {
           parent_id: string
           preferred_time: string | null
           preferred_tutor_gender: Database["public"]["Enums"]["gender"] | null
+          slug: string | null
           special_requirements: string | null
           start_date: string | null
           status: Database["public"]["Enums"]["job_status"] | null
@@ -650,6 +651,7 @@ export type Database = {
           parent_id: string
           preferred_time?: string | null
           preferred_tutor_gender?: Database["public"]["Enums"]["gender"] | null
+          slug?: string | null
           special_requirements?: string | null
           start_date?: string | null
           status?: Database["public"]["Enums"]["job_status"] | null
@@ -683,6 +685,7 @@ export type Database = {
           parent_id?: string
           preferred_time?: string | null
           preferred_tutor_gender?: Database["public"]["Enums"]["gender"] | null
+          slug?: string | null
           special_requirements?: string | null
           start_date?: string | null
           status?: Database["public"]["Enums"]["job_status"] | null
@@ -1918,6 +1921,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      generate_unique_job_slug: {
+        Args: {
+          _area_id: string
+          _district_id: string
+          _exclude_id?: string
+          _job_reference: string
+          _title: string
+        }
+        Returns: string
+      }
       generate_unique_tutor_slug: {
         Args: { _base: string; _exclude_id?: string }
         Returns: string
