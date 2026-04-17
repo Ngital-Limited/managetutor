@@ -115,6 +115,20 @@ export default function JobDetails() {
         proposed_rate: jobData.budget_min || 0
       }));
 
+      // Fetch related job posts (same district, open status, exclude current)
+      const { data: related } = await supabase
+        .from('jobs')
+        .select(`id, title, job_reference, budget_min, budget_max, class_level, created_at,
+          districts (name_en),
+          subjects (name_en),
+          job_subjects (subjects (name_en))`)
+        .eq('district_id', jobData.district_id)
+        .eq('status', 'open')
+        .neq('id', jobData.id)
+        .order('created_at', { ascending: false })
+        .limit(5);
+      if (related) setRelatedJobs(related);
+
       // Fetch applications if parent owns this job
       if (user?.id === jobData.parent_id) {
         const { data: apps } = await supabase
