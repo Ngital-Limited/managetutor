@@ -32,7 +32,7 @@ import {
   Eye, Ban, UserCheck, FileCheck,
   LogOut, Home, Star, DollarSign, Trash2, CreditCard, Megaphone, Send, Mail,
   Package, Plus, Pencil, ToggleLeft, ToggleRight, Wallet, MapPin, LifeBuoy, ShieldCheck,
-  LogIn, BookOpen, UserPlus, TrendingUp
+  LogIn, BookOpen, UserPlus, TrendingUp, ChevronLeft, ArrowLeft
 } from 'lucide-react';
 import { RevenuePayoutTab } from '@/components/admin/RevenuePayoutTab';
 import { SupportTicketsTab } from '@/components/admin/SupportTicketsTab';
@@ -831,6 +831,9 @@ export default function AdminDashboard() {
   const [allApplications, setAllApplications] = useState<any[]>([]);
   const [allAppsStatusFilter, setAllAppsStatusFilter] = useState('all');
   const [allAppsSearch, setAllAppsSearch] = useState('');
+  const [appsView, setAppsView] = useState<'jobs' | 'applicants'>('jobs');
+  const [selectedAppsJobId, setSelectedAppsJobId] = useState<string | null>(null);
+  const [appsJobsSearch, setAppsJobsSearch] = useState('');
   const [loadingAllApps, setLoadingAllApps] = useState(false);
   const [selectedAppIds, setSelectedAppIds] = useState<Set<string>>(new Set());
   const [bulkProcessing, setBulkProcessing] = useState(false);
@@ -846,7 +849,7 @@ export default function AdminDashboard() {
       `)
       .order('created_at', { ascending: false })
       .limit(200);
-    if (allAppsStatusFilter !== 'all') query = query.eq('status', allAppsStatusFilter as any);
+    // Note: do NOT filter by status in the query — chips and drill-down need full counts.
     const { data } = await query;
     if (!data) { setAllApplications([]); setLoadingAllApps(false); return; }
     const tutorUserIds = Array.from(new Set(data.map((a: any) => (a.tutor_profiles as any)?.user_id).filter(Boolean)));
@@ -864,7 +867,7 @@ export default function AdminDashboard() {
       parent_profile: profMap.get((a.jobs as any)?.parent_id) || null,
     })));
     setLoadingAllApps(false);
-  }, [allAppsStatusFilter]);
+  }, []);
 
 
   const fetchJobApplications = async (jobId: string) => {
@@ -927,6 +930,7 @@ export default function AdminDashboard() {
       }
       toast({ title: `Application ${status}` });
       fetchJobApplications(jobId);
+      fetchAllApplications();
       fetchJobs();
       fetchStats();
     }
@@ -2196,266 +2200,259 @@ export default function AdminDashboard() {
               </div>
             )}
 
-            {/* ═══════ APPLICATIONS TAB ═══════ */}
+            {/* ═══════ APPLICATIONS TAB (Two-level drill-down) ═══════ */}
             {activeTab === 'applications' && (() => {
-              // Filtered view used by table, bulk-actions and CSV export
-              const filteredApps = allApplications.filter((a) => {
+              const STATUS_OPTS = [
+                { key: 'all', label: 'All' },
+                { key: 'pending', label: 'Pending' },
+                { key: 'shortlisted', label: 'Shortlisted' },
+                { key: 'invited_to_demo', label: 'Invited' },
+                { key: 'waiting', label: 'Waiting' },
+                { key: 'accepted', label: 'Accepted' },
+                { key: 'rejected', label: 'Rejected' },
+                { key: 'withdrawn', label: 'Withdrawn' },
+              ] as const;
+
+              // ───── LEVEL 1: Jobs list ─────
+              if (appsView === 'jobs' || !selectedAppsJobId) {
+                // Group apps by job_id
+                const jobMap = new Map<string, { job: any; apps: any[] }>();
+                for (const a of allApplications) {
+                  const jid = a.job_id;
+                  if (!jid) continue;
+                  if (!jobMap.has(jid)) jobMap.set(jid, { job: a.jobs, apps: [] });
+                  jobMap.get(jid)!.apps.push(a);
+                }
+                const jobsList = Array.from(jobMap.entries()).map(([jid, { job, apps }]) => ({
+                  jid,
+                  job,
+                  total: apps.length,
+                  pending: apps.filter(a => a.status === 'pending').length,
+                  shortlisted: apps.filter(a => a.status === 'shortlisted').length,
+                  latest: apps.reduce((m, a) => (new Date(a.created_at) > new Date(m) ? a.created_at : m), apps[0].created_at),
+                }));
+                const search = appsJobsSearch.trim().toLowerCase();
+                const filteredJobs = jobsList.filter(j => {
+                  if (!search) return true;
+                  return (j.job?.title || '').toLowerCase().includes(search) ||
+                    (j.job?.job_reference || '').toLowerCase().includes(search);
+                }).sort((a, b) => new Date(b.latest).getTime() - new Date(a.latest).getTime());
+
+                return (
+                  <div className="space-y-6">
+                    <div className="flex items-center justify-between flex-wrap gap-3">
+                      <div>
+                        <h1 className="text-xl font-semibold">Applications</h1>
+                        <p className="text-sm text-muted-foreground mt-0.5">Jobs with applications. Click a job to manage its applicants.</p>
+                      </div>
+                      <Input
+                        placeholder="Search by job title or reference…"
+                        value={appsJobsSearch}
+                        onChange={(e) => setAppsJobsSearch(e.target.value)}
+                        className="w-72 h-9"
+                      />
+                    </div>
+
+                    <Card>
+                      <CardContent className="p-0">
+                        <ScrollArea className="w-full">
+                          <Table>
+                            <TableHeader>
+                              <TableRow>
+                                <TableHead className="font-mono">Ref ID</TableHead>
+                                <TableHead>Job Name</TableHead>
+                                <TableHead>Posted</TableHead>
+                                <TableHead>Job Status</TableHead>
+                                <TableHead>Applicants</TableHead>
+                                <TableHead className="text-right">Action</TableHead>
+                              </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                              {loadingAllApps ? (
+                                <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">Loading…</TableCell></TableRow>
+                              ) : filteredJobs.length === 0 ? (
+                                <TableRow><TableCell colSpan={6} className="text-center py-12 text-muted-foreground">No applications yet.</TableCell></TableRow>
+                              ) : filteredJobs.map(({ jid, job, total, pending, shortlisted, latest }) => (
+                                <TableRow
+                                  key={jid}
+                                  className="cursor-pointer"
+                                  onClick={() => { setSelectedAppsJobId(jid); setAppsView('applicants'); setSelectedAppIds(new Set()); }}
+                                >
+                                  <TableCell className="text-xs font-mono">{job?.job_reference || '—'}</TableCell>
+                                  <TableCell>
+                                    <div className="text-sm font-medium max-w-[320px] truncate">{job?.title || '—'}</div>
+                                  </TableCell>
+                                  <TableCell className="text-xs text-muted-foreground">{formatDistanceToNow(new Date(latest), { addSuffix: true })}</TableCell>
+                                  <TableCell>
+                                    <Badge className={`text-xs capitalize ${statusColor(job?.status)}`}>{(job?.status || '—').replace('_', ' ')}</Badge>
+                                  </TableCell>
+                                  <TableCell>
+                                    <div className="flex items-center gap-1.5 flex-wrap">
+                                      <Badge variant="secondary" className="text-xs gap-1"><Users className="h-3 w-3" />{total}</Badge>
+                                      {pending > 0 && <Badge variant="outline" className="text-xs">Pending: {pending}</Badge>}
+                                      {shortlisted > 0 && <Badge variant="outline" className="text-xs gap-1"><Star className="h-3 w-3" />{shortlisted}</Badge>}
+                                    </div>
+                                  </TableCell>
+                                  <TableCell className="text-right">
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      className="h-8 text-xs gap-1"
+                                      onClick={(e) => { e.stopPropagation(); setSelectedAppsJobId(jid); setAppsView('applicants'); setSelectedAppIds(new Set()); }}
+                                    >
+                                      <UserCheck className="h-3.5 w-3.5" /> View Applicants
+                                    </Button>
+                                  </TableCell>
+                                </TableRow>
+                              ))}
+                            </TableBody>
+                          </Table>
+                        </ScrollArea>
+                      </CardContent>
+                    </Card>
+                  </div>
+                );
+              }
+
+              // ───── LEVEL 2: Applicants for selected job ─────
+              const jobApps = allApplications.filter(a => a.job_id === selectedAppsJobId);
+              const selectedJob = jobApps[0]?.jobs;
+              const counts: Record<string, number> = { all: jobApps.length };
+              for (const o of STATUS_OPTS) if (o.key !== 'all') counts[o.key] = jobApps.filter(a => a.status === o.key).length;
+
+              const visible = jobApps.filter(a => {
+                if (allAppsStatusFilter !== 'all' && a.status !== allAppsStatusFilter) return false;
                 if (!allAppsSearch.trim()) return true;
                 const s = allAppsSearch.toLowerCase();
                 return (
                   a.tutor_profile?.full_name?.toLowerCase().includes(s) ||
-                  a.tutor_profile?.email?.toLowerCase().includes(s) ||
-                  a.jobs?.title?.toLowerCase().includes(s) ||
-                  a.jobs?.job_reference?.toLowerCase().includes(s) ||
-                  a.parent_profile?.full_name?.toLowerCase().includes(s)
+                  a.tutor_profile?.email?.toLowerCase().includes(s)
                 );
               });
 
-              const toggleSelect = (id: string, checked: boolean) => {
-                setSelectedAppIds(prev => {
-                  const next = new Set(prev);
-                  if (checked) next.add(id); else next.delete(id);
-                  return next;
-                });
-              };
-
-              const toggleSelectAll = (checked: boolean) => {
-                if (checked) setSelectedAppIds(new Set(filteredApps.map(a => a.id)));
-                else setSelectedAppIds(new Set());
-              };
-
-              const allVisibleSelected = filteredApps.length > 0 && filteredApps.every(a => selectedAppIds.has(a.id));
-              const someVisibleSelected = filteredApps.some(a => selectedAppIds.has(a.id)) && !allVisibleSelected;
-
-              const handleBulkAction = async (status: 'shortlisted' | 'rejected') => {
-                const ids = Array.from(selectedAppIds);
-                if (ids.length === 0) return;
-                const confirmMsg = `${status === 'shortlisted' ? 'Shortlist' : 'Reject'} ${ids.length} selected application${ids.length > 1 ? 's' : ''}?`;
-                if (!window.confirm(confirmMsg)) return;
-                setBulkProcessing(true);
-                // Only update apps whose current status is pending (or pending/shortlisted for reject)
-                const eligible = filteredApps.filter(a =>
-                  ids.includes(a.id) && (a.status === 'pending' || (status === 'rejected' && a.status === 'shortlisted'))
-                );
-                const eligibleIds = eligible.map(a => a.id);
-                if (eligibleIds.length === 0) {
-                  toast({ title: 'Nothing to update', description: 'Selected applications are not in an updatable state.', variant: 'destructive' });
-                  setBulkProcessing(false);
-                  return;
-                }
-                const { error } = await supabase.from('applications').update({ status: status as any }).in('id', eligibleIds);
-                if (error) {
-                  toast({ title: 'Bulk update failed', description: error.message, variant: 'destructive' });
-                  setBulkProcessing(false);
-                  return;
-                }
-                // Best-effort tutor notifications
-                const notifPayloads = eligible
-                  .map(a => a.tutor_profiles?.user_id)
-                  .filter(Boolean)
-                  .map((uid: string, idx: number) => ({
-                    user_id: uid,
-                    title: status === 'shortlisted' ? 'You have been shortlisted!' : 'Application not selected',
-                    message: status === 'shortlisted'
-                      ? `You've been shortlisted for "${eligible[idx].jobs?.title || ''}".`
-                      : `Your application for "${eligible[idx].jobs?.title || ''}" was not selected.`,
-                    type: status === 'shortlisted' ? 'application_shortlisted' : 'application_rejected',
-                    reference_id: eligible[idx].job_id,
-                  }));
-                if (notifPayloads.length > 0) {
-                  await supabase.from('notifications').insert(notifPayloads);
-                }
-                toast({ title: 'Bulk update complete', description: `${eligibleIds.length} application${eligibleIds.length > 1 ? 's' : ''} updated.` });
-                setSelectedAppIds(new Set());
-                setBulkProcessing(false);
-                fetchAllApplications();
-              };
-
-              const exportCsv = () => {
-                if (filteredApps.length === 0) {
-                  toast({ title: 'Nothing to export', description: 'No applications match the current filters.' });
-                  return;
-                }
-                const headers = ['Tutor Name','Tutor Email','Job Title','Job Reference','Guardian','Proposed Rate (BDT)','Status','Applied At'];
-                const escape = (v: any) => {
-                  const s = v == null ? '' : String(v);
-                  return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
-                };
-                const rows = filteredApps.map(a => [
-                  a.tutor_profile?.full_name || '',
-                  a.tutor_profile?.email || '',
-                  a.jobs?.title || '',
-                  a.jobs?.job_reference || '',
-                  a.parent_profile?.full_name || '',
-                  a.proposed_rate ?? '',
-                  a.status || '',
-                  a.created_at ? new Date(a.created_at).toISOString() : '',
-                ].map(escape).join(','));
-                const csv = [headers.join(','), ...rows].join('\n');
-                const blob = new Blob([`\ufeff${csv}`], { type: 'text/csv;charset=utf-8;' });
-                const url = URL.createObjectURL(blob);
-                const link = document.createElement('a');
-                link.href = url;
-                const stamp = format(new Date(), 'yyyyMMdd-HHmmss');
-                const filterTag = allAppsStatusFilter === 'all' ? 'all' : allAppsStatusFilter;
-                link.download = `applications-${filterTag}-${stamp}.csv`;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                URL.revokeObjectURL(url);
-                toast({ title: 'Export ready', description: `${filteredApps.length} row${filteredApps.length > 1 ? 's' : ''} exported.` });
-              };
-
               return (
-              <div className="space-y-6">
-                <div className="flex items-center justify-between flex-wrap gap-3">
-                  <div>
-                    <h1 className="text-xl font-semibold">Applications</h1>
-                    <p className="text-sm text-muted-foreground mt-0.5">All tutor applications across every job</p>
-                  </div>
-                  <div className="flex items-center gap-2">
+                <div className="space-y-6">
+                  {/* Breadcrumb header */}
+                  <div className="flex items-start justify-between flex-wrap gap-3">
+                    <div className="space-y-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 -ml-2 gap-1.5 text-muted-foreground hover:text-foreground"
+                        onClick={() => { setAppsView('jobs'); setSelectedAppsJobId(null); setSelectedAppIds(new Set()); }}
+                      >
+                        <ArrowLeft className="h-4 w-4" /> Back to Jobs
+                      </Button>
+                      <div>
+                        <h1 className="text-xl font-semibold">{selectedJob?.title || 'Applicants'}</h1>
+                        <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground flex-wrap">
+                          <span className="font-mono">{selectedJob?.job_reference || '—'}</span>
+                          <span>•</span>
+                          <Badge className={`text-xs capitalize ${statusColor(selectedJob?.status)}`}>{(selectedJob?.status || '—').replace('_', ' ')}</Badge>
+                          <span>•</span>
+                          <span>{jobApps.length} applicant{jobApps.length === 1 ? '' : 's'}</span>
+                        </div>
+                      </div>
+                    </div>
                     <Input
-                      placeholder="Search tutor, job, reference…"
+                      placeholder="Search tutor name or email…"
                       value={allAppsSearch}
                       onChange={(e) => setAllAppsSearch(e.target.value)}
                       className="w-64 h-9"
                     />
-                    <Button variant="outline" size="sm" className="h-9 gap-1.5" onClick={exportCsv} title="Export filtered list to CSV">
-                      <Download className="h-4 w-4" /> Export CSV
-                    </Button>
                   </div>
-                </div>
 
-                {/* Status filter chips with live counts (counts are based on the loaded set; switching chip refetches) */}
-                <div className="flex items-center gap-2 flex-wrap">
-                  {([
-                    { key: 'all', label: 'All' },
-                    { key: 'pending', label: 'Pending' },
-                    { key: 'shortlisted', label: 'Shortlisted' },
-                    { key: 'invited_to_demo', label: 'Invited' },
-                    { key: 'waiting', label: 'Waiting' },
-                    { key: 'accepted', label: 'Accepted' },
-                    { key: 'rejected', label: 'Rejected' },
-                    { key: 'withdrawn', label: 'Withdrawn' },
-                  ] as const).map(opt => {
-                    const count = opt.key === 'all'
-                      ? allApplications.length
-                      : allApplications.filter((a: any) => a.status === opt.key).length;
-                    const active = allAppsStatusFilter === opt.key;
-                    return (
-                      <button
-                        key={opt.key}
-                        type="button"
-                        onClick={() => { setAllAppsStatusFilter(opt.key); setSelectedAppIds(new Set()); }}
-                        className={`text-xs px-2.5 py-1 rounded-full border transition-colors ${active ? 'bg-primary text-primary-foreground border-primary' : 'bg-background text-muted-foreground hover:bg-muted'}`}
-                      >
-                        {opt.label} {opt.key === 'all' || count > 0 ? <span className={active ? 'opacity-90' : 'opacity-70'}>({count})</span> : null}
-                      </button>
-                    );
-                  })}
-                </div>
-
-                {/* Bulk action bar */}
-                {selectedAppIds.size > 0 && (
-                  <div className="flex items-center justify-between gap-3 px-4 py-2.5 rounded-lg border bg-accent/30">
-                    <div className="text-sm font-medium">
-                      {selectedAppIds.size} selected
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Button size="sm" variant="outline" className="h-8 gap-1.5" disabled={bulkProcessing} onClick={() => handleBulkAction('shortlisted')}>
-                        <Star className="h-3.5 w-3.5" /> Bulk Shortlist
-                      </Button>
-                      <Button size="sm" variant="outline" className="h-8 gap-1.5" disabled={bulkProcessing} onClick={() => handleBulkAction('rejected')}>
-                        <XCircle className="h-3.5 w-3.5" /> Bulk Reject
-                      </Button>
-                      <Button size="sm" variant="ghost" className="h-8" onClick={() => setSelectedAppIds(new Set())}>Clear</Button>
-                    </div>
+                  {/* Status filter chips scoped to this job */}
+                  <div className="flex items-center gap-2 flex-wrap">
+                    {STATUS_OPTS.map(opt => {
+                      const count = counts[opt.key] || 0;
+                      const active = allAppsStatusFilter === opt.key;
+                      return (
+                        <button
+                          key={opt.key}
+                          type="button"
+                          onClick={() => setAllAppsStatusFilter(opt.key)}
+                          className={`text-xs px-2.5 py-1 rounded-full border transition-colors ${active ? 'bg-primary text-primary-foreground border-primary' : 'bg-background text-muted-foreground hover:bg-muted'}`}
+                        >
+                          {opt.label} <span className={active ? 'opacity-90' : 'opacity-70'}>({count})</span>
+                        </button>
+                      );
+                    })}
                   </div>
-                )}
 
-                <Card>
-                  <CardContent className="p-0">
-                    <ScrollArea className="w-full">
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead className="w-10">
-                              <Checkbox
-                                checked={allVisibleSelected ? true : someVisibleSelected ? 'indeterminate' as any : false}
-                                onCheckedChange={(c) => toggleSelectAll(!!c)}
-                                aria-label="Select all"
-                              />
-                            </TableHead>
-                            <TableHead>Tutor</TableHead>
-                            <TableHead>Job</TableHead>
-                            <TableHead>Guardian</TableHead>
-                            <TableHead>Rate</TableHead>
-                            <TableHead>Status</TableHead>
-                            <TableHead>Applied</TableHead>
-                            <TableHead className="text-right">Actions</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {loadingAllApps ? (
-                            <TableRow><TableCell colSpan={8} className="text-center py-8 text-muted-foreground">Loading…</TableCell></TableRow>
-                          ) : filteredApps.length === 0 ? (
-                            <TableRow><TableCell colSpan={8} className="text-center py-8 text-muted-foreground">No applications found</TableCell></TableRow>
-                          ) : filteredApps.map((app) => (
-                            <TableRow key={app.id} data-state={selectedAppIds.has(app.id) ? 'selected' : undefined}>
-                              <TableCell>
-                                <Checkbox
-                                  checked={selectedAppIds.has(app.id)}
-                                  onCheckedChange={(c) => toggleSelect(app.id, !!c)}
-                                  aria-label={`Select application ${app.id}`}
-                                />
-                              </TableCell>
-                              <TableCell>
-                                <div className="text-sm font-medium">{app.tutor_profile?.full_name || 'Unknown'}</div>
-                                <div className="text-xs text-muted-foreground">{app.tutor_profile?.email}</div>
-                              </TableCell>
-                              <TableCell>
-                                <div className="text-sm font-medium max-w-[220px] truncate">{app.jobs?.title || '—'}</div>
-                                <div className="text-xs font-mono text-muted-foreground">{app.jobs?.job_reference || '—'}</div>
-                              </TableCell>
-                              <TableCell className="text-sm">{app.parent_profile?.full_name || '—'}</TableCell>
-                              <TableCell className="text-sm">{app.proposed_rate ? `৳${app.proposed_rate}` : '—'}</TableCell>
-                              <TableCell><Badge className={`text-xs capitalize ${statusColor(app.status)}`}>{app.status}</Badge></TableCell>
-                              <TableCell className="text-xs text-muted-foreground">{formatDistanceToNow(new Date(app.created_at), { addSuffix: true })}</TableCell>
-                              <TableCell className="text-right">
-                                <div className="flex gap-1 justify-end flex-wrap">
-                                  {(app.status === 'pending' || app.status === 'shortlisted') && (
-                                    <>
-                                      {app.status === 'pending' && (
+                  <Card>
+                    <CardContent className="p-0">
+                      <ScrollArea className="w-full">
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead>Tutor</TableHead>
+                              <TableHead>Applied</TableHead>
+                              <TableHead>Rate</TableHead>
+                              <TableHead>Cover Message</TableHead>
+                              <TableHead>Status</TableHead>
+                              <TableHead className="text-right">Actions</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {visible.length === 0 ? (
+                              <TableRow><TableCell colSpan={6} className="text-center py-12 text-muted-foreground">No applicants match this filter.</TableCell></TableRow>
+                            ) : visible.map((app) => {
+                              const isFinal = app.status === 'accepted' || app.status === 'rejected' || app.status === 'withdrawn';
+                              return (
+                                <TableRow key={app.id}>
+                                  <TableCell>
+                                    <div className="text-sm font-medium">{app.tutor_profile?.full_name || 'Unknown'}</div>
+                                    <div className="text-xs text-muted-foreground">{app.tutor_profile?.email}</div>
+                                  </TableCell>
+                                  <TableCell className="text-xs text-muted-foreground">{formatDistanceToNow(new Date(app.created_at), { addSuffix: true })}</TableCell>
+                                  <TableCell className="text-sm">{app.proposed_rate ? `৳${app.proposed_rate}` : '—'}</TableCell>
+                                  <TableCell className="text-xs text-muted-foreground max-w-[280px] truncate" title={app.cover_message || ''}>{app.cover_message || '—'}</TableCell>
+                                  <TableCell><Badge className={`text-xs capitalize ${statusColor(app.status)}`}>{app.status}</Badge></TableCell>
+                                  <TableCell className="text-right">
+                                    <div className="flex gap-1 justify-end flex-wrap">
+                                      {!isFinal && app.status === 'pending' && (
                                         <Button variant="outline" size="sm" className="h-8 text-xs gap-1" onClick={() => handleAdminUpdateAppStatus(app.id, 'shortlisted', app.job_id)} title="Shortlist">
                                           <Star className="h-3.5 w-3.5" /> Shortlist
                                         </Button>
                                       )}
-                                      <Button size="sm" className="h-8 text-xs gap-1" onClick={() => handleAdminUpdateAppStatus(app.id, 'accepted', app.job_id)} title="Hire">
-                                        <CheckCircle2 className="h-3.5 w-3.5" /> Hire
+                                      {!isFinal && (app.status === 'pending' || app.status === 'shortlisted') && (
+                                        <Button variant="outline" size="sm" className="h-8 text-xs gap-1" onClick={() => handleAdminUpdateAppStatus(app.id, 'invited_to_demo', app.job_id)} title="Invite to Demo">
+                                          <Send className="h-3.5 w-3.5" /> Invite
+                                        </Button>
+                                      )}
+                                      {!isFinal && (
+                                        <Button size="sm" className="h-8 text-xs gap-1" onClick={() => handleAdminUpdateAppStatus(app.id, 'accepted', app.job_id)} title="Hire / Accept">
+                                          <CheckCircle2 className="h-3.5 w-3.5" /> Hire
+                                        </Button>
+                                      )}
+                                      {!isFinal && (
+                                        <Button variant="outline" size="sm" className="h-8 text-xs gap-1" onClick={() => handleAdminUpdateAppStatus(app.id, 'rejected', app.job_id)} title="Reject">
+                                          <XCircle className="h-3.5 w-3.5" /> Reject
+                                        </Button>
+                                      )}
+                                      {!isFinal && (
+                                        <Button variant="ghost" size="sm" className="h-8 text-xs" onClick={() => handleAdminUpdateAppStatus(app.id, 'withdrawn', app.job_id)} title="Mark as Withdrawn">
+                                          Withdraw
+                                        </Button>
+                                      )}
+                                      <Button variant="ghost" size="sm" asChild title="View Job">
+                                        <Link to={`/jobs/${app.job_id}`}><Eye className="h-4 w-4" /></Link>
                                       </Button>
-                                      <Button variant="outline" size="sm" className="h-8 text-xs gap-1" onClick={() => handleAdminUpdateAppStatus(app.id, 'rejected', app.job_id)} title="Reject">
-                                        <XCircle className="h-3.5 w-3.5" />
-                                      </Button>
-                                    </>
-                                  )}
-                                  <Button variant="ghost" size="sm" asChild title="View Job">
-                                    <Link to={`/jobs/${app.job_id}`}><Eye className="h-4 w-4" /></Link>
-                                  </Button>
-                                  <Button variant="outline" size="sm" className="text-xs gap-1" onClick={() => { setViewingJobApps({ jobId: app.job_id, jobTitle: app.jobs?.title || '' }); fetchJobApplications(app.job_id); }} title="Open job applications">
-                                    <UserCheck className="h-3.5 w-3.5" /> Manage
-                                  </Button>
-                                </div>
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
-                    </ScrollArea>
-                  </CardContent>
-                </Card>
-              </div>
+                                    </div>
+                                  </TableCell>
+                                </TableRow>
+                              );
+                            })}
+                          </TableBody>
+                        </Table>
+                      </ScrollArea>
+                    </CardContent>
+                  </Card>
+                </div>
               );
             })()}
+
 
 
             {activeTab === 'reports' && (
