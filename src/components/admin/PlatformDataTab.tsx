@@ -369,7 +369,7 @@ function AreasManager({ toast }: { toast: any }) {
   const [districtFilter, setDistrictFilter] = useState('all');
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [form, setForm] = useState({ name_en: '', name_bn: '', district_id: '' });
+  const [form, setForm] = useState({ name_en: '', district_id: '' });
   const [saving, setSaving] = useState(false);
 
   const fetchDistricts = useCallback(async () => {
@@ -380,7 +380,7 @@ function AreasManager({ toast }: { toast: any }) {
   const fetchAreas = useCallback(async () => {
     setLoading(true);
     let query = supabase.from('areas').select('*, districts(name_en)').order('name_en');
-    if (search) query = query.or(`name_en.ilike.%${search}%,name_bn.ilike.%${search}%`);
+    if (search) query = query.ilike('name_en', `%${search}%`);
     if (districtFilter !== 'all') query = query.eq('district_id', districtFilter);
     const { data } = await query;
     setAreas(data || []);
@@ -390,10 +390,10 @@ function AreasManager({ toast }: { toast: any }) {
   useEffect(() => { fetchDistricts(); }, [fetchDistricts]);
   useEffect(() => { fetchAreas(); }, [fetchAreas]);
 
-  const openCreate = () => { setEditingId(null); setForm({ name_en: '', name_bn: '', district_id: districts[0]?.id || '' }); setDialogOpen(true); };
+  const openCreate = () => { setEditingId(null); setForm({ name_en: '', district_id: districts[0]?.id || '' }); setDialogOpen(true); };
   const openEdit = (a: any) => {
     setEditingId(a.id);
-    setForm({ name_en: a.name_en, name_bn: a.name_bn, district_id: a.district_id });
+    setForm({ name_en: a.name_en, district_id: a.district_id });
     setDialogOpen(true);
   };
 
@@ -402,7 +402,7 @@ function AreasManager({ toast }: { toast: any }) {
       toast({ title: 'Name and District required', variant: 'destructive' }); return;
     }
     setSaving(true);
-    const payload = { name_en: form.name_en.trim(), name_bn: form.name_en.trim(), district_id: form.district_id };
+    const payload = { name_en: form.name_en.trim(), district_id: form.district_id };
     const { error } = editingId
       ? await supabase.from('areas').update(payload).eq('id', editingId)
       : await supabase.from('areas').insert(payload);
