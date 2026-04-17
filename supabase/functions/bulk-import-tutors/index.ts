@@ -14,6 +14,13 @@ interface TutorRow {
   t_experience?: string; background?: string; medium?: string;
   fb_link?: string; pre_class?: string; pre_subject?: string; pre_area?: string;
   status?: string; photo?: string;
+  nid_url?: string; student_id_url?: string;
+}
+
+function normalizeUrl(u?: string): string | null {
+  const c = u && u !== "NULL" && u.trim() !== "" ? u.trim() : null;
+  if (!c) return null;
+  return /^https?:\/\//i.test(c) ? c : null;
 }
 
 const clean = (v?: string) => (v && v !== "NULL" && v.trim() !== "" ? v.trim() : null);
@@ -202,7 +209,7 @@ Deno.serve(async (req) => {
 
         // Tutor profile
         const verification_status = "approved"; // imported tutors auto-approved
-        const { error: tpErr } = await admin.from("tutor_profiles").insert({
+        const { data: tpData, error: tpErr } = await admin.from("tutor_profiles").insert({
           user_id: uid,
           gender: normalizeGender(r.gender),
           bio: buildBio(r) || null,
@@ -217,11 +224,33 @@ Deno.serve(async (req) => {
           verification_status,
           is_available: true,
           is_student: clean(r.university) ? true : false,
-        });
-        if (tpErr) {
+        }).select("id").single();
+        if (tpErr || !tpData) {
           results.errors++;
-          results.details.push({ email, status: "error", reason: `tutor_profile: ${tpErr.message}` });
+          results.details.push({ email, status: "error", reason: `tutor_profile: ${tpErr?.message || "no id"}` });
           continue;
+        }
+        const tutorProfileId = tpData.id;
+
+        // Bachelors education row from university + department
+        if (clean(r.university)) {
+          await admin.from("tutor_education").insert({
+            tutor_id: tutorProfileId,
+            institution: clean(r.university)!,
+            degree: "Bachelors",
+            field_of_study: clean(r.department),
+            is_current: true,
+          });
+        }
+
+        // Verification documents (NID + university student ID)
+        const verifDocs: { tutor_id: string; document_type: string; document_url: string; status: "approved" }[] = [];
+        const nidUrl = normalizeUrl(r.nid_url);
+        const sidUrl = normalizeUrl(r.student_id_url);
+        if (nidUrl) verifDocs.push({ tutor_id: tutorProfileId, document_type: "national_id", document_url: nidUrl, status: "approved" });
+        if (sidUrl) verifDocs.push({ tutor_id: tutorProfileId, document_type: "student_id", document_url: sidUrl, status: "approved" });
+        if (verifDocs.length) {
+          await admin.from("verification_documents").insert(verifDocs);
         }
 
         results.imported++;
