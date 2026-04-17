@@ -17,6 +17,7 @@ import {
   Briefcase, BookOpen, User, Users, Share2, Video, Award, Monitor, Home, Sparkles,
 } from 'lucide-react';
 import BookDemoClassDialog from '@/components/BookDemoClassDialog';
+import { AiOverview, stripAiOverviewMarkdown } from '@/components/AiOverview';
 
 interface TutorProfile {
   id: string;
@@ -373,7 +374,7 @@ export default function TutorPublicProfile() {
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <p className="text-sm leading-relaxed whitespace-pre-wrap text-foreground/90">{tutor.ai_overview}</p>
+                      <AiOverview text={tutor.ai_overview} />
                     </CardContent>
                   </Card>
                 )}
@@ -512,7 +513,7 @@ export default function TutorPublicProfile() {
             {relatedTutors.map((rt: any) => {
               const name = rt.profiles?.full_name || rt.display_name || 'Tutor';
               const snippet = rt.ai_overview
-                ? rt.ai_overview.split('\n').filter(Boolean).slice(0, 2).join(' ')
+                ? stripAiOverviewMarkdown(rt.ai_overview).split('. ').slice(0, 2).join('. ')
                 : (rt.bio || '');
               return (
                 <Link key={rt.id} to={`/tutor/${rt.slug || rt.id}`} className="group block">
