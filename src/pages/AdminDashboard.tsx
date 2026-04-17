@@ -1285,6 +1285,15 @@ export default function AdminDashboard() {
   // Reset job pagination when filter or page size changes
   useEffect(() => { setJobPage(1); }, [jobStatusFilter, jobPageSize]);
 
+  // Load verification fee from platform settings
+  useEffect(() => {
+    supabase.from('platform_settings').select('value').eq('key', 'verification_fee').maybeSingle()
+      .then(({ data }) => {
+        const n = Number(data?.value);
+        if (Number.isFinite(n) && n >= 0) setVerificationFee(n);
+      });
+  }, []);
+
   const fetchVerifications = useCallback(async () => {
     let query = supabase
       .from('tutor_profiles')
