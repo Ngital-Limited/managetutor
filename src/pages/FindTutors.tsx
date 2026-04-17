@@ -48,6 +48,7 @@ interface Subject {
 interface TutorProfile {
   id: string;
   user_id: string;
+  slug: string | null;
   bio: string;
   education: string;
   experience_years: number;
