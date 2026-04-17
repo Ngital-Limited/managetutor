@@ -72,7 +72,7 @@ export function AdminTutorEditTab({ toast }: Props) {
     if (q.length < 2) { setResults([]); return; }
     setSearching(true);
     const { data: tutors } = await supabase.from('tutor_profiles')
-      .select('id, user_id, gender, experience_years, verification_status, bio')
+      .select('id, user_id, gender, experience_years, verification_status, bio, featured_blurb')
       .limit(50);
     if (!tutors) { setResults([]); setSearching(false); return; }
     const userIds = tutors.map(t => t.user_id);
@@ -93,6 +93,7 @@ export function AdminTutorEditTab({ toast }: Props) {
           experience_years: t.experience_years || 0,
           verification_status: t.verification_status || 'pending',
           bio: t.bio,
+          featured_blurb: (t as any).featured_blurb ?? null,
         };
       });
     setResults(mapped);
