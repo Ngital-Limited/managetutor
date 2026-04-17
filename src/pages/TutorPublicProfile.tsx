@@ -64,6 +64,15 @@ interface Review {
   profiles: { full_name: string; avatar_url: string };
 }
 
+interface EducationEntry {
+  id: string;
+  degree: string;
+  institution: string;
+  field_of_study: string | null;
+  passing_year: number | null;
+  result: string | null;
+}
+
 export default function TutorPublicProfile() {
   const { id } = useParams();
   const { user, role } = useAuth();
@@ -76,6 +85,7 @@ export default function TutorPublicProfile() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [reviews, setReviews] = useState<Review[]>([]);
+  const [educationEntries, setEducationEntries] = useState<EducationEntry[]>([]);
   const [isFavorite, setIsFavorite] = useState(false);
   const [favoriteLoading, setFavoriteLoading] = useState(false);
 
@@ -142,6 +152,12 @@ export default function TutorPublicProfile() {
 
     if (reviewsData) setReviews(reviewsData as unknown as Review[]);
 
+    // Fetch structured education entries
+    const { data: eduData } = await supabase
+      .from('tutor_education')
+      .select('id, degree, institution, field_of_study, passing_year, result')
+      .eq('tutor_id', tutorData.id);
+    if (eduData) setEducationEntries(eduData as EducationEntry[]);
     // Check if favorite
     if (user && role === 'parent') {
       const { data: favData } = await supabase
@@ -326,10 +342,54 @@ export default function TutorPublicProfile() {
                   Education
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground whitespace-pre-wrap">
-                  {tutor.education || 'No education details provided yet.'}
-                </p>
+              <CardContent className="space-y-3">
+                {(() => {
+                  const FIXED = ['SSC', 'HSC', 'Bachelor', 'Masters'];
+                  const filled = FIXED.map(deg => ({
+                    deg,
+                    entry: educationEntries.find(e => (e.degree || '').toLowerCase() === deg.toLowerCase()),
+                  })).filter(x => x.entry?.institution?.trim());
+
+                  if (filled.length === 0) {
+                    return (
+                      <p className="text-muted-foreground text-sm">
+                        {tutor.education || 'No education details provided yet.'}
+                      </p>
+                    );
+                  }
+
+                  const labels: Record<string, string> = {
+                    SSC: 'Secondary School Certificate',
+                    HSC: 'Higher School Certificate',
+                    Bachelor: 'Bachelor',
+                    Masters: 'Masters',
+                  };
+
+                  return (
+                    <div className="grid sm:grid-cols-2 gap-3">
+                      {filled.map(({ deg, entry }) => (
+                        <div key={deg} className="border border-border/60 rounded-xl p-3 bg-muted/30">
+                          <div className="flex items-center justify-between gap-2 mb-1">
+                            <Badge variant="secondary" className="text-[10px] font-semibold">{deg}</Badge>
+                            {entry!.passing_year && (
+                              <span className="text-[11px] text-muted-foreground">{entry!.passing_year}</span>
+                            )}
+                          </div>
+                          <p className="text-xs text-muted-foreground">{labels[deg]}</p>
+                          <p className="font-medium text-sm mt-1">{entry!.institution}</p>
+                          {entry!.field_of_study && (
+                            <p className="text-xs text-muted-foreground mt-0.5">
+                              {(deg === 'SSC' || deg === 'HSC') ? 'Group: ' : 'Field: '}{entry!.field_of_study}
+                            </p>
+                          )}
+                          {entry!.result && (
+                            <p className="text-xs text-muted-foreground mt-0.5">Result: {entry!.result}</p>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  );
+                })()}
               </CardContent>
             </Card>
 

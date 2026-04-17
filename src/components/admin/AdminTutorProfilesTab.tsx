@@ -47,6 +47,7 @@ interface TutorRow {
   area_id: string | null;
   district_id: string | null;
   education: string | null;
+  last_education: string | null;
   experience_years: number;
   teaching_mode: string | null;
   verification_status: string;
@@ -76,6 +77,7 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
   const [filterClassLevel, setFilterClassLevel] = useState('all');
   const [filterSubject, setFilterSubject] = useState('all');
   const [filterCategory, setFilterCategory] = useState('all');
+  const [filterLastEducation, setFilterLastEducation] = useState('all');
   const [showFilters, setShowFilters] = useState(false);
 
   // ─── Data ───
@@ -233,6 +235,7 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
         area_id: prof?.area_id || null,
         district_id: t.district_id,
         education: t.education,
+        last_education: null,
         experience_years: t.experience_years || 0,
         teaching_mode: t.teaching_mode,
         verification_status: t.verification_status || 'pending',
@@ -269,10 +272,34 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
       );
     }
 
+    // Compute last_education (highest degree) for displayed tutors
+    const DEGREE_RANK: Record<string, number> = { masters: 4, master: 4, bachelor: 3, hsc: 2, ssc: 1 };
+    const tutorIds = result.map(t => t.tutor_id);
+    if (tutorIds.length > 0) {
+      const { data: allEdu } = await supabase
+        .from('tutor_education')
+        .select('tutor_id, degree, institution')
+        .in('tutor_id', tutorIds);
+      const byTutor = new Map<string, { degree: string; rank: number }>();
+      (allEdu || []).forEach((e: any) => {
+        if (!e.institution?.trim()) return;
+        const key = (e.degree || '').toLowerCase().trim();
+        const rank = DEGREE_RANK[key] ?? 0;
+        const cur = byTutor.get(e.tutor_id);
+        if (!cur || rank > cur.rank) byTutor.set(e.tutor_id, { degree: e.degree, rank });
+      });
+      result = result.map(t => ({ ...t, last_education: byTutor.get(t.tutor_id)?.degree || null }));
+    }
+
+    // Last education filter
+    if (filterLastEducation !== 'all') {
+      result = result.filter(t => (t.last_education || '').toLowerCase() === filterLastEducation.toLowerCase());
+    }
+
     setTutors(result);
     setTotalCount(result.length);
     setLoading(false);
-  }, [search, filterAreas, filterGender, filterMedium, filterEducation, filterUniversity, filterVerification, filterAvailability, filterClassLevel, filterSubject, filterCategory, areas, districts, districtMap, areaMap, subjects]);
+  }, [search, filterAreas, filterGender, filterMedium, filterEducation, filterUniversity, filterVerification, filterAvailability, filterClassLevel, filterSubject, filterCategory, filterLastEducation, areas, districts, districtMap, areaMap, subjects]);
 
   useEffect(() => { fetchTutors(); }, [fetchTutors]);
 
@@ -399,6 +426,7 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
     setFilterClassLevel('all');
     setFilterSubject('all');
     setFilterCategory('all');
+    setFilterLastEducation('all');
   };
 
   const activeFilterCount = [
@@ -406,6 +434,7 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
     filterEducation !== '', filterUniversity !== '',
     filterVerification !== 'all', filterAvailability !== 'all',
     filterClassLevel !== 'all', filterSubject !== 'all', filterCategory !== 'all',
+    filterLastEducation !== 'all',
   ].filter(Boolean).length;
 
   const statusColor = (s: string) => {
@@ -426,12 +455,12 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
   // ─── CSV Export ───
   const handleExportCSV = () => {
     if (tutors.length === 0) { toast({ title: 'No data to export', variant: 'destructive' }); return; }
-    const headers = ['Reference', 'Name', 'Email', 'Phone', 'Gender', 'District', 'Area/Thana', 'Education', 'Experience (yrs)', 'Teaching Mode', 'Verification', 'Available', 'Rating', 'Class Levels', 'Approved', 'Banned', 'Joined'];
+    const headers = ['Reference', 'Name', 'Email', 'Phone', 'Gender', 'District', 'Area/Thana', 'Education', 'Last Education', 'Experience (yrs)', 'Teaching Mode', 'Verification', 'Available', 'Rating', 'Class Levels', 'Approved', 'Banned', 'Joined'];
     const esc = (v: string) => `"${(v || '').replace(/"/g, '""')}"`;
     const rows = tutors.map(t => [
       esc(t.user_reference || ''), esc(t.name), esc(t.email), esc(t.phone || ''),
       esc(t.gender), esc(t.district_name || ''), esc(t.area_name || ''),
-      esc(t.education || ''), String(t.experience_years), esc(t.teaching_mode || ''),
+      esc(t.education || ''), esc(t.last_education || ''), String(t.experience_years), esc(t.teaching_mode || ''),
       esc(t.verification_status), t.is_available ? 'Yes' : 'No',
       String(t.average_rating ?? ''), esc((t.class_levels || []).join(', ')),
       t.is_approved ? 'Yes' : 'No', t.is_banned ? 'Yes' : 'No',
@@ -608,6 +637,20 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
                   </SelectContent>
                 </Select>
               </div>
+
+              <div>
+                <Label className="text-xs font-medium text-muted-foreground">Last Education</Label>
+                <Select value={filterLastEducation} onValueChange={setFilterLastEducation}>
+                  <SelectTrigger className="mt-1 h-9"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Any</SelectItem>
+                    <SelectItem value="Masters">Masters</SelectItem>
+                    <SelectItem value="Bachelor">Bachelor</SelectItem>
+                    <SelectItem value="HSC">HSC</SelectItem>
+                    <SelectItem value="SSC">SSC</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -625,6 +668,7 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
                   <TableHead>Contact</TableHead>
                   <TableHead>Location</TableHead>
                   <TableHead>Gender</TableHead>
+                  <TableHead>Last Education</TableHead>
                   <TableHead>Mode</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Rating</TableHead>
@@ -633,9 +677,9 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
               </TableHeader>
               <TableBody>
                 {loading ? (
-                  <TableRow><TableCell colSpan={9} className="text-center py-12"><Loader2 className="h-6 w-6 animate-spin mx-auto text-muted-foreground" /></TableCell></TableRow>
+                  <TableRow><TableCell colSpan={10} className="text-center py-12"><Loader2 className="h-6 w-6 animate-spin mx-auto text-muted-foreground" /></TableCell></TableRow>
                 ) : tutors.length === 0 ? (
-                  <TableRow><TableCell colSpan={9} className="text-center py-12 text-muted-foreground">No tutors match the current filters</TableCell></TableRow>
+                  <TableRow><TableCell colSpan={10} className="text-center py-12 text-muted-foreground">No tutors match the current filters</TableCell></TableRow>
                 ) : tutors.map(t => (
                   <TableRow key={t.tutor_id} className={`${selectedIds.has(t.user_id) ? 'bg-primary/5' : ''} ${t.is_banned ? 'opacity-60' : ''}`}>
                     <TableCell><Checkbox checked={selectedIds.has(t.user_id)} onCheckedChange={() => toggleSelect(t.user_id)} /></TableCell>
@@ -665,6 +709,13 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
                       {t.area_name && t.district_name && <span className="block text-[10px] text-muted-foreground">{t.district_name}</span>}
                     </TableCell>
                     <TableCell><Badge variant="outline" className="text-[10px] capitalize">{t.gender}</Badge></TableCell>
+                    <TableCell className="text-xs">
+                      {t.last_education ? (
+                        <Badge variant="secondary" className="text-[10px] font-semibold">{t.last_education}</Badge>
+                      ) : (
+                        <span className="text-muted-foreground">—</span>
+                      )}
+                    </TableCell>
                     <TableCell className="text-xs capitalize">{t.teaching_mode?.replace('_', ' ') || '—'}</TableCell>
                     <TableCell>
                       <div className="flex flex-col gap-0.5">

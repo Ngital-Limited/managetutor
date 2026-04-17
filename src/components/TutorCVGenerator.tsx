@@ -23,6 +23,7 @@ interface TutorCVData {
   classLevels: string[];
   districtName: string | null;
   presentAddress: string | null;
+  educationEntries: { degree: string; institution: string; field_of_study: string | null; passing_year: number | null; result: string | null }[];
 }
 
 export async function generateTutorCV(userId: string): Promise<void> {
@@ -37,11 +38,11 @@ export async function generateTutorCV(userId: string): Promise<void> {
   const tutor = tutorRes.data;
   const profile = profileRes.data as any;
 
-  // Fetch subjects
-  const { data: subjectsData } = await supabase
-    .from('tutor_subjects')
-    .select('subjects(name_en)')
-    .eq('tutor_profile_id', tutor.id);
+  // Fetch subjects + structured education in parallel
+  const [{ data: subjectsData }, { data: eduData }] = await Promise.all([
+    supabase.from('tutor_subjects').select('subjects(name_en)').eq('tutor_profile_id', tutor.id),
+    supabase.from('tutor_education').select('degree, institution, field_of_study, passing_year, result').eq('tutor_id', tutor.id),
+  ]);
 
   const subjects = subjectsData?.map((s: any) => s.subjects?.name_en).filter(Boolean) || [];
 
@@ -68,6 +69,13 @@ export async function generateTutorCV(userId: string): Promise<void> {
     classLevels: tutor.class_levels || [],
     districtName: profile.districts?.name_en || null,
     presentAddress: tutor.present_address,
+    educationEntries: (eduData || []).filter((e: any) => e.institution?.trim()).map((e: any) => ({
+      degree: e.degree,
+      institution: e.institution,
+      field_of_study: e.field_of_study,
+      passing_year: e.passing_year,
+      result: e.result,
+    })),
   };
 
   openCVPrintWindow(data);
@@ -134,7 +142,26 @@ ${data.subjects.length > 0 ? `<div class="section"><h2>Subjects</h2><div class="
 ${data.classLevels.length > 0 ? `<div class="section"><h2>Class Levels</h2><div class="badges">${data.classLevels.map(c => `<span class="badge">${c}</span>`).join('')}</div></div>` : ''}
 
 <div class="two-col">
-  ${data.education ? `<div class="section"><h2>Education</h2><p>${data.education}</p>${data.educationDetail ? `<p style="margin-top:4px;color:#555;font-size:13px">${data.educationDetail}</p>` : ''}</div>` : ''}
+  ${(() => {
+    const FIXED = ['SSC', 'HSC', 'Bachelor', 'Masters'];
+    const labels: Record<string, string> = { SSC: 'Secondary School Certificate', HSC: 'Higher School Certificate', Bachelor: 'Bachelor', Masters: 'Masters' };
+    const filled = FIXED.map(deg => ({ deg, e: data.educationEntries.find(e => (e.degree || '').toLowerCase() === deg.toLowerCase()) })).filter(x => x.e);
+    if (filled.length === 0 && data.education) {
+      return `<div class="section"><h2>Education</h2><p>${data.education}</p>${data.educationDetail ? `<p style="margin-top:4px;color:#555;font-size:13px">${data.educationDetail}</p>` : ''}</div>`;
+    }
+    if (filled.length === 0) return '';
+    const items = filled.map(({ deg, e }) => `
+      <div style="margin-bottom:8px;padding:8px 10px;border:1px solid #e0e0e0;border-radius:6px;background:#fafafa">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+          <strong style="font-size:13px;color:#0f3460">${deg} <span style="font-weight:normal;color:#666">— ${labels[deg]}</span></strong>
+          ${e!.passing_year ? `<span style="font-size:12px;color:#777">${e!.passing_year}</span>` : ''}
+        </div>
+        <div style="font-size:13px;margin-top:2px">${e!.institution}</div>
+        ${e!.field_of_study ? `<div style="font-size:12px;color:#666">${(deg === 'SSC' || deg === 'HSC') ? 'Group' : 'Field'}: ${e!.field_of_study}</div>` : ''}
+        ${e!.result ? `<div style="font-size:12px;color:#666">Result: ${e!.result}</div>` : ''}
+      </div>`).join('');
+    return `<div class="section" style="grid-column:1 / -1"><h2>Education</h2>${items}</div>`;
+  })()}
   ${data.presentAddress ? `<div class="section"><h2>Address</h2><p>${data.presentAddress}</p></div>` : ''}
 </div>
 
