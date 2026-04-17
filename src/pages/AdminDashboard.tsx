@@ -2251,7 +2251,7 @@ export default function AdminDashboard() {
                       <CreditCard className="h-5 w-5 text-primary" />
                       Verification Badge Payments
                     </CardTitle>
-                    <CardDescription>Payment history for ৳50 verified badge purchases</CardDescription>
+                    <CardDescription>Payment history for ৳{verificationFee} verified badge purchases</CardDescription>
                   </CardHeader>
                   <CardContent className="p-0">
                     <ScrollArea className="w-full">
