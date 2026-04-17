@@ -71,6 +71,7 @@ interface TutorProfile {
     avatar_url: string;
     district_id: string;
     districts?: { name_en: string; name_bn: string };
+    areas?: { name_en: string; name_bn: string } | null;
   } | null;
   tutor_subjects: { subjects: Subject }[];
 }
@@ -196,7 +197,7 @@ export default function FindTutors() {
       const userIds = data.map((t: any) => t.user_id);
       const { data: profilesData } = await supabase
         .from('profiles')
-        .select('id, full_name, avatar_url, district_id, districts (name_en, name_bn)')
+        .select('id, full_name, avatar_url, district_id, districts (name_en, name_bn), areas (name_en, name_bn)')
         .in('id', userIds);
 
       const profilesMap = new Map<string, any>();
@@ -348,7 +349,7 @@ export default function FindTutors() {
                 </div>
                 <div className="flex items-center gap-3 text-xs text-muted-foreground">
                   {(tutor.districts || tutor.profiles?.districts) && (
-                    <span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{tutor.districts?.name_en || tutor.profiles?.districts?.name_en}</span>
+                    <span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{tutor.profiles?.areas?.name_en ? `${tutor.profiles.areas.name_en}, ` : ''}{tutor.districts?.name_en || tutor.profiles?.districts?.name_en}</span>
                   )}
                   <span className="flex items-center gap-1"><ModeIcon className="h-3 w-3" />{modeInfo.label}</span>
                   <span className="flex items-center gap-1"><Clock className="h-3 w-3" />{tutor.experience_years || 0}y exp</span>
@@ -414,7 +415,7 @@ export default function FindTutors() {
                     {(tutor.districts || tutor.profiles?.districts) && (
                       <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
                         <MapPin className="h-3 w-3 flex-shrink-0" />
-                        <span className="truncate">{tutor.districts?.name_en || tutor.profiles?.districts?.name_en}</span>
+                        <span className="truncate">{tutor.profiles?.areas?.name_en ? `${tutor.profiles.areas.name_en}, ` : ''}{tutor.districts?.name_en || tutor.profiles?.districts?.name_en}</span>
                       </p>
                     )}
                   </div>
