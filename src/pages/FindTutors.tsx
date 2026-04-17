@@ -673,21 +673,6 @@ export default function FindTutors() {
                   <Slider value={priceRange} onValueChange={setPriceRange} min={0} max={10000} step={500} className="mt-2" />
                 </div>
 
-                {/* Thana */}
-                <div className="w-40">
-                  <Label className="text-xs font-medium mb-1 block text-muted-foreground">Thana/Upazila</Label>
-                  <Select value={selectedArea} onValueChange={v => setSelectedArea(v === 'all' ? '' : v)} disabled={!selectedDistrict}>
-                    <SelectTrigger className="h-9 text-xs rounded-lg"><SelectValue placeholder={selectedDistrict ? 'All' : 'Select city'} /></SelectTrigger>
-                    <SelectContent>
-                      <div className="px-2 pb-1">
-                        <Input placeholder="Search..." value={areaSearch} onChange={e => setAreaSearch(e.target.value)} className="h-7 text-xs" onClick={e => e.stopPropagation()} />
-                      </div>
-                      <SelectItem value="all">All</SelectItem>
-                      {filteredAreas.map(a => <SelectItem key={a.id} value={a.id}>{a.name_en}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                </div>
-
                 {/* Verified */}
                 <div className="flex items-center gap-2 h-9">
                   <Checkbox id="verified-only" checked={verifiedOnly} onCheckedChange={c => setVerifiedOnly(c === true)} />
