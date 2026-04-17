@@ -2153,7 +2153,7 @@ export default function ParentDashboard() {
                 </tr>
               </thead>
               <tbody>
-                {allApplicants.map((app: any) => {
+                {filteredApplicants.map((app: any) => {
                   const tutor = app.tutor_profiles;
                   return (
                     <tr key={app.id} className="border-b hover:bg-muted/50 transition-colors">
@@ -2234,12 +2234,15 @@ export default function ParentDashboard() {
         ) : (
           <div className="text-center py-12">
             <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-            <p className="text-muted-foreground">No applicants yet across your jobs</p>
+            <p className="text-muted-foreground">
+              {applicantsStatusFilter === 'all' ? 'No applicants yet across your jobs' : `No ${applicantsStatusFilter.replace('_', ' ')} applicants`}
+            </p>
           </div>
         )}
       </CardContent>
     </Card>
-  );
+    );
+  };
 
   const renderActiveSection = () => {
     switch (activeSection) {
@@ -2256,7 +2259,7 @@ export default function ParentDashboard() {
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-background">
-        <ParentSidebar activeSection={activeSection} setActiveSection={setActiveSection} onPostJob={() => { resetJobForm(); prefillFromLastJob(); setShowPostJob(true); }} pendingApplicants={allApplicants.filter((a: any) => a.status === 'pending').length} />
+        <ParentSidebar activeSection={activeSection} setActiveSection={setActiveSection} onPostJob={() => { resetJobForm(); prefillFromLastJob(); setShowPostJob(true); }} pendingApplicants={allApplicants.filter((a: any) => a.status === 'pending').length} onApplicantsClick={() => setApplicantsStatusFilter('pending')} />
 
         <div className="flex-1 flex flex-col min-w-0">
           {/* Top Bar */}
