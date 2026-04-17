@@ -332,55 +332,76 @@ export default function Index() {
                 </Button>
               </Link>
             </div>
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
               {latestJobs.map((job, i) => (
                 <Link key={job.id} to={`/jobs/${(job as any).slug || job.id}`} className="group block animate-fade-in" style={{ animationDelay: `${i * 60}ms` }}>
-                  <div className="bg-card rounded-xl border border-border/60 p-5 h-full transition-all hover:border-primary/30 hover:shadow-[0_4px_24px_-8px_hsl(var(--primary)/0.15)]">
-                    <div className="flex items-start justify-between mb-3 gap-2">
-                      <div className="flex-1 min-w-0">
-                        <h3 className="font-medium text-sm tracking-tight truncate mb-1.5 group-hover:text-primary transition-colors">{job.title}</h3>
-                        {job.job_reference && (
-                          <span className="text-[10px] font-mono text-muted-foreground tracking-wider">{job.job_reference}</span>
-                        )}
-                      </div>
-                      <span className="flex items-center gap-1 text-[10px] uppercase tracking-wider text-success font-medium flex-shrink-0">
-                        <span className="h-1.5 w-1.5 rounded-full bg-success" />
+                  <article className="relative bg-card rounded-2xl border border-border/60 p-6 h-full transition-all duration-300 hover:border-primary/40 hover:shadow-[0_8px_30px_-12px_hsl(var(--primary)/0.18)] hover:-translate-y-0.5 overflow-hidden">
+                    {/* Subtle top accent on hover */}
+                    <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+
+                    {/* Header: reference + status */}
+                    <div className="flex items-center justify-between mb-3">
+                      {job.job_reference ? (
+                        <span className="text-[10px] font-mono text-muted-foreground tracking-wider px-2 py-0.5 rounded-md bg-muted/60 border border-border/40">
+                          {job.job_reference}
+                        </span>
+                      ) : <span />}
+                      <span className="flex items-center gap-1.5 text-[10px] uppercase tracking-wider text-success font-semibold">
+                        <span className="relative flex h-1.5 w-1.5">
+                          <span className="absolute inline-flex h-full w-full rounded-full bg-success opacity-60 animate-ping" />
+                          <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-success" />
+                        </span>
                         Open
                       </span>
                     </div>
-                    <p className="text-xs text-muted-foreground mb-4 line-clamp-2 leading-relaxed">{job.description}</p>
-                    <div className="flex items-center gap-3 text-[11px] text-muted-foreground mb-4 flex-wrap">
-                      <span className="flex items-center gap-1">
-                        <MapPin className="h-3 w-3" />
+
+                    {/* Title */}
+                    <h3 className="font-semibold text-[15px] tracking-tight leading-snug mb-2 line-clamp-2 group-hover:text-primary transition-colors min-h-[2.6rem]">
+                      {job.title}
+                    </h3>
+
+                    {/* Description */}
+                    <p className="text-xs text-muted-foreground mb-5 line-clamp-2 leading-relaxed min-h-[2rem]">{job.description}</p>
+
+                    {/* Meta chips */}
+                    <div className="flex items-center gap-1.5 flex-wrap mb-5">
+                      <span className="inline-flex items-center gap-1 text-[11px] text-foreground/80 bg-muted/50 px-2 py-1 rounded-md">
+                        <MapPin className="h-3 w-3 text-muted-foreground" />
                         {job.areas?.name_en
                           ? `${job.areas.name_en}, ${job.districts?.name_en || ''}`
                           : job.districts?.name_en}
                       </span>
                       {job.subjects && (
-                        <span className="flex items-center gap-1">
-                          <BookOpen className="h-3 w-3" />
+                        <span className="inline-flex items-center gap-1 text-[11px] text-foreground/80 bg-muted/50 px-2 py-1 rounded-md">
+                          <BookOpen className="h-3 w-3 text-muted-foreground" />
                           {job.subjects.name_en}
                         </span>
                       )}
                       {job.days_per_week && (
-                        <span className="flex items-center gap-1">
-                          <Clock className="h-3 w-3" />
+                        <span className="inline-flex items-center gap-1 text-[11px] text-foreground/80 bg-muted/50 px-2 py-1 rounded-md">
+                          <Clock className="h-3 w-3 text-muted-foreground" />
                           {job.days_per_week}d/wk
                         </span>
                       )}
                     </div>
-                    <div className="flex items-center justify-between pt-3 border-t border-border/40">
+
+                    {/* Footer: price + date */}
+                    <div className="flex items-end justify-between pt-4 border-t border-border/50">
                       {(job.budget_min || job.budget_max) ? (
-                        <span className="text-sm font-semibold tracking-tight text-foreground tabular-nums">
-                          ৳{job.budget_min || 0}–{job.budget_max || 0}
-                          <span className="text-[10px] font-normal text-muted-foreground ml-1">/mo</span>
-                        </span>
+                        <div className="flex flex-col">
+                          <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Budget</span>
+                          <span className="text-base font-bold tracking-tight text-foreground tabular-nums leading-tight">
+                            ৳{job.budget_min || 0}–{job.budget_max || 0}
+                            <span className="text-[10px] font-normal text-muted-foreground ml-1">/mo</span>
+                          </span>
+                        </div>
                       ) : <span />}
-                      <span className="text-[11px] text-muted-foreground">
+                      <span className="text-[11px] text-muted-foreground flex items-center gap-1">
+                        <Clock className="h-3 w-3" />
                         {formatExactDate(new Date(job.created_at))}
                       </span>
                     </div>
-                  </div>
+                  </article>
                 </Link>
               ))}
             </div>
@@ -408,60 +429,100 @@ export default function Index() {
                 </Button>
               </Link>
             </div>
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
               {featuredTutors.map((tutor, i) => {
                 const tutorSubjects = tutor.tutor_subjects?.map(ts =>
                   ts.subjects?.name_en
                 ).filter(Boolean).slice(0, 3) || [];
+                const isVerified = tutor.verification_status === 'approved' && tutor.verification_paid;
 
                 return (
                   <Link key={tutor.id} to={`/tutor/${(tutor as any).slug || tutor.id}`} className="group block animate-fade-in" style={{ animationDelay: `${i * 60}ms` }}>
-                    <div className="bg-card rounded-xl border border-border/60 p-5 h-full transition-all hover:border-primary/30 hover:shadow-[0_4px_24px_-8px_hsl(var(--primary)/0.15)]">
+                    <article className="relative bg-card rounded-2xl border border-border/60 p-6 h-full transition-all duration-300 hover:border-primary/40 hover:shadow-[0_8px_30px_-12px_hsl(var(--primary)/0.18)] hover:-translate-y-0.5 overflow-hidden">
+                      {/* Top hover accent */}
+                      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+
+                      {/* Header: avatar + name + rating */}
                       <div className="flex items-start gap-3 mb-4">
-                        <Avatar className="h-12 w-12 border border-border/60">
-                          <AvatarImage src={tutor.profiles?.avatar_url || ''} />
-                          <AvatarFallback className="text-sm font-medium bg-muted">{tutor.profiles?.full_name?.charAt(0) || 'T'}</AvatarFallback>
-                        </Avatar>
+                        <div className="relative flex-shrink-0">
+                          <Avatar className="h-14 w-14 border-2 border-border/60 ring-2 ring-background">
+                            <AvatarImage src={tutor.profiles?.avatar_url || ''} />
+                            <AvatarFallback className="text-base font-semibold bg-gradient-to-br from-primary/15 to-accent/15 text-primary">
+                              {tutor.profiles?.full_name?.charAt(0) || 'T'}
+                            </AvatarFallback>
+                          </Avatar>
+                          {isVerified && (
+                            <span className="absolute -bottom-0.5 -right-0.5 bg-success rounded-full p-0.5 ring-2 ring-card">
+                              <CheckCircle2 className="h-3 w-3 text-background" strokeWidth={3} />
+                            </span>
+                          )}
+                        </div>
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-1.5 mb-0.5">
-                            <h3 className="font-medium text-sm tracking-tight truncate group-hover:text-primary transition-colors">{tutor.profiles?.full_name}</h3>
-                            {tutor.verification_status === 'approved' && tutor.verification_paid && (
-                              <CheckCircle2 className="h-3.5 w-3.5 text-success flex-shrink-0" />
-                            )}
-                          </div>
-                          <p className="text-xs text-muted-foreground truncate">{tutor.education || 'Educator'}</p>
+                          <h3 className="font-semibold text-[15px] tracking-tight truncate group-hover:text-primary transition-colors leading-tight">
+                            {tutor.profiles?.full_name}
+                          </h3>
+                          <p className="text-xs text-muted-foreground truncate mt-0.5">{tutor.education || 'Educator'}</p>
+                          {tutor.average_rating > 0 && (
+                            <div className="flex items-center gap-1 mt-1.5">
+                              <Star className="h-3 w-3 fill-warning text-warning" />
+                              <span className="text-[11px] font-semibold text-foreground tabular-nums">{tutor.average_rating.toFixed(1)}</span>
+                              <span className="text-[11px] text-muted-foreground">({tutor.total_reviews})</span>
+                            </div>
+                          )}
                         </div>
                       </div>
-                      <div className="flex items-center gap-3 text-[11px] text-muted-foreground mb-3 flex-wrap">
+
+                      {/* Meta chips */}
+                      <div className="flex items-center gap-1.5 flex-wrap mb-3">
                         {tutor.districts && (
-                          <span className="flex items-center gap-1">
-                            <MapPin className="h-3 w-3" />
+                          <span className="inline-flex items-center gap-1 text-[11px] text-foreground/80 bg-muted/50 px-2 py-1 rounded-md">
+                            <MapPin className="h-3 w-3 text-muted-foreground" />
                             {tutor.districts.name_en}
                           </span>
                         )}
-                        <span className="flex items-center gap-1">
-                          <Briefcase className="h-3 w-3" />
-                          {tutor.experience_years}y
+                        <span className="inline-flex items-center gap-1 text-[11px] text-foreground/80 bg-muted/50 px-2 py-1 rounded-md">
+                          <Briefcase className="h-3 w-3 text-muted-foreground" />
+                          {tutor.experience_years}y exp
                         </span>
-                        <span className="flex items-center gap-1">
-                          <Clock className="h-3 w-3" />
+                        <span className="inline-flex items-center gap-1 text-[11px] text-foreground/80 bg-muted/50 px-2 py-1 rounded-md">
+                          <Clock className="h-3 w-3 text-muted-foreground" />
                           {tutor.teaching_mode === 'in_person' ? 'In-Person' : tutor.teaching_mode === 'online' ? 'Online' : 'Hybrid'}
                         </span>
                       </div>
+
+                      {/* Subjects */}
                       {tutorSubjects.length > 0 && (
-                        <div className="flex flex-wrap gap-1.5 mb-4">
+                        <div className="flex flex-wrap gap-1.5 mb-5">
                           {tutorSubjects.map((s, idx) => (
-                            <Badge key={idx} variant="outline" className="text-[10px] font-normal border-border/60">{s}</Badge>
+                            <Badge key={idx} variant="outline" className="text-[10px] font-medium border-primary/20 bg-primary/5 text-primary hover:bg-primary/10">
+                              {s}
+                            </Badge>
                           ))}
                         </div>
                       )}
-                      {(tutor.monthly_salary_min || tutor.monthly_salary_max) && (
-                        <div className="pt-3 border-t border-border/40 text-sm font-semibold tracking-tight text-foreground tabular-nums">
-                          ৳{tutor.monthly_salary_min || '—'}–{tutor.monthly_salary_max || '—'}
-                          <span className="text-[10px] font-normal text-muted-foreground ml-1">/mo</span>
+
+                      {/* Footer: salary */}
+                      {(tutor.monthly_salary_min || tutor.monthly_salary_max) ? (
+                        <div className="flex items-end justify-between pt-4 border-t border-border/50">
+                          <div className="flex flex-col">
+                            <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Expected</span>
+                            <span className="text-base font-bold tracking-tight text-foreground tabular-nums leading-tight">
+                              ৳{tutor.monthly_salary_min || '—'}–{tutor.monthly_salary_max || '—'}
+                              <span className="text-[10px] font-normal text-muted-foreground ml-1">/mo</span>
+                            </span>
+                          </div>
+                          <span className="text-[11px] text-primary font-medium opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-0.5">
+                            View profile <ArrowRight className="h-3 w-3" />
+                          </span>
+                        </div>
+                      ) : (
+                        <div className="pt-4 border-t border-border/50 flex justify-end">
+                          <span className="text-[11px] text-primary font-medium opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-0.5">
+                            View profile <ArrowRight className="h-3 w-3" />
+                          </span>
                         </div>
                       )}
-                    </div>
+                    </article>
                   </Link>
                 );
               })}
@@ -473,29 +534,39 @@ export default function Index() {
         </section>
       )}
 
-      {/* How It Works */}
-      <section className="py-24 bg-background">
+      {/* How It Works — minimal premium */}
+      <section className="py-20 bg-background">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-5xl font-extrabold mb-4">{t('howItWorks.title')}</h2>
-            <p className="text-muted-foreground text-lg max-w-xl mx-auto">Simple steps to find your perfect tutor</p>
+          <div className="text-center mb-14 max-w-2xl mx-auto">
+            <span className="text-xs uppercase tracking-[0.2em] text-muted-foreground font-medium">Process</span>
+            <h2 className="text-3xl md:text-4xl font-semibold tracking-tight mt-2 mb-3">{t('howItWorks.title')}</h2>
+            <p className="text-sm text-muted-foreground">Three simple steps to find your perfect tutor</p>
           </div>
-          <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+          <div className="grid md:grid-cols-3 gap-5 max-w-5xl mx-auto relative">
+            {/* Connecting line on desktop */}
+            <div className="hidden md:block absolute top-[58px] left-[16.66%] right-[16.66%] h-px bg-gradient-to-r from-transparent via-border to-transparent" />
+
             {[
-              { icon: FileText, title: t('howItWorks.step1.title'), desc: t('howItWorks.step1.desc'), step: '01', color: 'bg-primary' },
-              { icon: Users, title: t('howItWorks.step2.title'), desc: t('howItWorks.step2.desc'), step: '02', color: 'bg-secondary' },
-              { icon: BookOpen, title: t('howItWorks.step3.title'), desc: t('howItWorks.step3.desc'), step: '03', color: 'bg-accent' },
+              { icon: FileText, title: t('howItWorks.step1.title'), desc: t('howItWorks.step1.desc'), step: '01' },
+              { icon: Users, title: t('howItWorks.step2.title'), desc: t('howItWorks.step2.desc'), step: '02' },
+              { icon: BookOpen, title: t('howItWorks.step3.title'), desc: t('howItWorks.step3.desc'), step: '03' },
             ].map((step, i) => (
-              <div key={i} className="relative animate-fade-in" style={{ animationDelay: `${i * 150}ms` }}>
-                <div className="bg-card rounded-3xl p-8 shadow-xl shadow-foreground/5 hover-lift h-full border border-border/50">
-                  <div className="text-6xl font-extrabold text-muted/50 mb-4">{step.step}</div>
-                  <div className={`${step.color} w-14 h-14 rounded-2xl flex items-center justify-center mb-5`}>
-                    <step.icon className="h-7 w-7 text-primary-foreground" />
+              <div
+                key={i}
+                className="group relative bg-card rounded-2xl border border-border/60 p-7 transition-all duration-300 hover:border-primary/40 hover:shadow-[0_8px_30px_-12px_hsl(var(--primary)/0.18)] hover:-translate-y-0.5 animate-fade-in"
+                style={{ animationDelay: `${i * 120}ms` }}
+              >
+                {/* Icon + step number */}
+                <div className="flex items-center justify-between mb-5">
+                  <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/15 group-hover:scale-105 transition-all">
+                    <step.icon className="h-5 w-5 text-primary" />
                   </div>
-                  <h3 className="text-xl font-bold mb-3 text-foreground">{step.title}</h3>
-                  <p className="text-muted-foreground leading-relaxed">{step.desc}</p>
+                  <span className="text-xs font-mono uppercase tracking-[0.2em] text-muted-foreground/60 font-medium">
+                    Step {step.step}
+                  </span>
                 </div>
-                {i < 2 && <ArrowRight className="hidden md:block absolute top-1/2 -right-4 transform -translate-y-1/2 text-border h-8 w-8" />}
+                <h3 className="font-semibold text-base tracking-tight text-foreground mb-2">{step.title}</h3>
+                <p className="text-xs text-muted-foreground leading-relaxed">{step.desc}</p>
               </div>
             ))}
           </div>
