@@ -56,6 +56,7 @@ interface Job {
   job_reference: string | null;
   is_featured: boolean;
   districts: { name_en: string; name_bn: string } | null;
+  areas: { name_en: string; name_bn: string } | null;
   subjects: { name_en: string; name_bn: string } | null;
   job_subjects?: { subjects: { name_en: string; name_bn: string } }[];
 }
@@ -194,6 +195,7 @@ export default function BrowseJobs() {
       .select(`
         *,
         districts (name_en, name_bn),
+        areas (name_en, name_bn),
         subjects (name_en, name_bn),
         job_subjects (subjects (name_en, name_bn))
       `)
@@ -585,7 +587,9 @@ export default function BrowseJobs() {
                         <div className="flex items-center gap-3 text-sm text-muted-foreground mb-3">
                           <span className="flex items-center gap-1">
                             <MapPin className="h-3.5 w-3.5" />
-                            {job.districts?.name_en || 'N/A'}
+                            {job.areas?.name_en
+                              ? `${job.areas.name_en}, ${job.districts?.name_en || ''}`
+                              : job.districts?.name_en || 'N/A'}
                           </span>
                           <span className="text-border">·</span>
                           <span className="flex items-center gap-1">
