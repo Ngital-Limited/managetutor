@@ -77,8 +77,8 @@ export default function Index() {
 
   useEffect(() => {
     const fetchAll = async () => {
-      const [{ data: d }, { data: s }, { data: tutors }, { data: jobs }] = await Promise.all([
-        supabase.from('districts').select('id, name_en, name_bn').order('name_en'),
+      const [{ data: a }, { data: s }, { data: tutors }, { data: jobs }] = await Promise.all([
+        supabase.from('areas').select('id, name_en, districts (name_en)').order('name_en'),
         supabase.from('subjects').select('id, name_en, name_bn, category_en, category_bn').order('name_en'),
         supabase.from('tutor_profiles')
           .select(`
@@ -98,7 +98,7 @@ export default function Index() {
           .limit(6),
       ]);
 
-      if (d) setDistricts(d);
+      if (a) setAreas(a.map((x: any) => ({ id: x.id, name_en: x.name_en, district_name: x.districts?.name_en || '' })));
       if (s) {
         setSubjectsList(s);
         const catMap = new Map<string, SubjectCategory>();
@@ -123,7 +123,7 @@ export default function Index() {
 
   const handleSearch = () => {
     const params = new URLSearchParams();
-    if (selectedDistrict) params.set('district', selectedDistrict);
+    if (selectedArea) params.set('area', selectedArea);
     if (selectedCategory) params.set('category', selectedCategory);
     if (selectedBackground) params.set('background', selectedBackground);
     if (selectedGender) params.set('gender', selectedGender);
