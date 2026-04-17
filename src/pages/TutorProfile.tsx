@@ -37,6 +37,7 @@ interface EducationEntry {
   passing_year: number | null;
   result: string;
   is_current: boolean;
+  current_semester: string;
 }
 interface JobExperienceEntry {
   id?: string;
