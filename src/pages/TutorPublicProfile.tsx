@@ -44,6 +44,7 @@ interface TutorProfile {
   video_url: string | null;
   teaching_philosophy: string | null;
   success_stories: string | null;
+  featured_blurb: string | null;
   districts: { name_en: string; name_bn: string } | null;
   areas: { name_en: string; name_bn: string } | null;
 }
