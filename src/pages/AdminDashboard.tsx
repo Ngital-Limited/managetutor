@@ -810,6 +810,11 @@ export default function AdminDashboard() {
   const [jobStatusFilter, setJobStatusFilter] = useState('all');
   const [jobPage, setJobPage] = useState(1);
   const [jobPageSize, setJobPageSize] = useState(25);
+  // Applications tab pagination (Level 1: jobs grouping, Level 2: applicants list)
+  const [appsJobsPage, setAppsJobsPage] = useState(1);
+  const [appsJobsPageSize, setAppsJobsPageSize] = useState(25);
+  const [appsApplicantsPage, setAppsApplicantsPage] = useState(1);
+  const [appsApplicantsPageSize, setAppsApplicantsPageSize] = useState(25);
   const [reports, setReports] = useState<Report[]>([]);
   const [reviews, setReviews] = useState<ReviewRow[]>([]);
   const [payments, setPayments] = useState<PaymentRow[]>([]);
@@ -1284,6 +1289,10 @@ export default function AdminDashboard() {
 
   // Reset job pagination when filter or page size changes
   useEffect(() => { setJobPage(1); }, [jobStatusFilter, jobPageSize]);
+
+  // Reset Applications tab pagination when filters/search/selection change
+  useEffect(() => { setAppsJobsPage(1); }, [appsJobsSearch, appsJobsPageSize]);
+  useEffect(() => { setAppsApplicantsPage(1); }, [allAppsStatusFilter, allAppsSearch, selectedAppsJobId, appsApplicantsPageSize]);
 
   // Load verification fee from platform settings
   useEffect(() => {
@@ -2482,7 +2491,7 @@ export default function AdminDashboard() {
                                 <TableRow><TableCell colSpan={8} className="text-center py-8 text-muted-foreground">Loading…</TableCell></TableRow>
                               ) : filteredJobs.length === 0 ? (
                                 <TableRow><TableCell colSpan={8} className="text-center py-12 text-muted-foreground">No applications yet.</TableCell></TableRow>
-                              ) : filteredJobs.map(({ jid, job, total, pending, shortlisted, latest }) => {
+                              ) : filteredJobs.slice((appsJobsPage - 1) * appsJobsPageSize, appsJobsPage * appsJobsPageSize).map(({ jid, job, total, pending, shortlisted, latest }) => {
                                 const guardianApp = allApplications.find(a => a.job_id === jid);
                                 const guardianName = guardianApp?.parent_profile?.full_name || '—';
                                 const guardianPhone = guardianApp?.parent_profile?.phone || '—';
@@ -2527,6 +2536,31 @@ export default function AdminDashboard() {
                         </ScrollArea>
                       </CardContent>
                     </Card>
+
+                    {filteredJobs.length > 0 && (() => {
+                      const totalPages = Math.max(1, Math.ceil(filteredJobs.length / appsJobsPageSize));
+                      const page = Math.min(appsJobsPage, totalPages);
+                      const start = (page - 1) * appsJobsPageSize + 1;
+                      const end = Math.min(page * appsJobsPageSize, filteredJobs.length);
+                      return (
+                        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-1">
+                          <div className="text-xs text-muted-foreground">Showing {start}–{end} of {filteredJobs.length}</div>
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <Select value={String(appsJobsPageSize)} onValueChange={(v) => { setAppsJobsPageSize(Number(v)); setAppsJobsPage(1); }}>
+                              <SelectTrigger className="h-8 w-[100px] text-xs"><SelectValue /></SelectTrigger>
+                              <SelectContent>
+                                {[10, 25, 50, 100].map(n => <SelectItem key={n} value={String(n)}>{n} / page</SelectItem>)}
+                              </SelectContent>
+                            </Select>
+                            <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setAppsJobsPage(1)}>« First</Button>
+                            <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setAppsJobsPage(page - 1)}>Prev</Button>
+                            <span className="text-xs text-muted-foreground">Page {page} of {totalPages}</span>
+                            <Button variant="outline" size="sm" disabled={page >= totalPages} onClick={() => setAppsJobsPage(page + 1)}>Next</Button>
+                            <Button variant="outline" size="sm" disabled={page >= totalPages} onClick={() => setAppsJobsPage(totalPages)}>Last »</Button>
+                          </div>
+                        </div>
+                      );
+                    })()}
                   </div>
                 );
               }
@@ -2740,7 +2774,7 @@ export default function AdminDashboard() {
                                 <Users className="h-8 w-8 mx-auto mb-2 opacity-30" />
                                 <div className="text-sm">No applicants match this filter.</div>
                               </TableCell></TableRow>
-                            ) : visible.map((app) => {
+                            ) : visible.slice((appsApplicantsPage - 1) * appsApplicantsPageSize, appsApplicantsPage * appsApplicantsPageSize).map((app) => {
                               const isFinal = app.status === 'accepted' || app.status === 'rejected' || app.status === 'withdrawn';
                               const tp = app.tutor_profile;
                               const tprof = app.tutor_profiles as any;
@@ -2867,6 +2901,31 @@ export default function AdminDashboard() {
                       </ScrollArea>
                     </CardContent>
                   </Card>
+
+                  {visible.length > 0 && (() => {
+                    const totalPages = Math.max(1, Math.ceil(visible.length / appsApplicantsPageSize));
+                    const page = Math.min(appsApplicantsPage, totalPages);
+                    const start = (page - 1) * appsApplicantsPageSize + 1;
+                    const end = Math.min(page * appsApplicantsPageSize, visible.length);
+                    return (
+                      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-1">
+                        <div className="text-xs text-muted-foreground">Showing {start}–{end} of {visible.length}</div>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <Select value={String(appsApplicantsPageSize)} onValueChange={(v) => { setAppsApplicantsPageSize(Number(v)); setAppsApplicantsPage(1); }}>
+                            <SelectTrigger className="h-8 w-[100px] text-xs"><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              {[10, 25, 50, 100].map(n => <SelectItem key={n} value={String(n)}>{n} / page</SelectItem>)}
+                            </SelectContent>
+                          </Select>
+                          <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setAppsApplicantsPage(1)}>« First</Button>
+                          <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setAppsApplicantsPage(page - 1)}>Prev</Button>
+                          <span className="text-xs text-muted-foreground">Page {page} of {totalPages}</span>
+                          <Button variant="outline" size="sm" disabled={page >= totalPages} onClick={() => setAppsApplicantsPage(page + 1)}>Next</Button>
+                          <Button variant="outline" size="sm" disabled={page >= totalPages} onClick={() => setAppsApplicantsPage(totalPages)}>Last »</Button>
+                        </div>
+                      </div>
+                    );
+                  })()}
                 </div>
               );
             })()}
