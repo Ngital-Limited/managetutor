@@ -443,21 +443,19 @@ function AreasManager({ toast }: { toast: any }) {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Name (EN)</TableHead>
-                  <TableHead>Name (BN)</TableHead>
+                  <TableHead>Name</TableHead>
                   <TableHead>District</TableHead>
                   <TableHead className="text-right w-24">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {loading ? (
-                  <TableRow><TableCell colSpan={4} className="text-center py-8 text-muted-foreground">Loading...</TableCell></TableRow>
+                  <TableRow><TableCell colSpan={3} className="text-center py-8 text-muted-foreground">Loading...</TableCell></TableRow>
                 ) : areas.length === 0 ? (
-                  <TableRow><TableCell colSpan={4} className="text-center py-8 text-muted-foreground">No areas found</TableCell></TableRow>
+                  <TableRow><TableCell colSpan={3} className="text-center py-8 text-muted-foreground">No areas found</TableCell></TableRow>
                 ) : areas.map(a => (
                   <TableRow key={a.id}>
                     <TableCell className="font-medium text-sm">{a.name_en}</TableCell>
-                    <TableCell className="text-sm">{a.name_bn}</TableCell>
                     <TableCell><Badge variant="outline" className="text-xs">{(a.districts as any)?.name_en || '—'}</Badge></TableCell>
                     <TableCell className="text-right">
                       <div className="flex gap-1 justify-end">
