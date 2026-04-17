@@ -297,7 +297,7 @@ export default function TutorAppliedJobs() {
                                     {app.status.charAt(0).toUpperCase() + app.status.slice(1)}
                                   </Badge>
                                   {app.status === 'pending' && (
-                                    <Button size="sm" variant="ghost" className="text-destructive h-8 text-xs" onClick={() => withdrawApplication(app.id)}>
+                                    <Button size="sm" variant="ghost" className="text-destructive h-8 text-xs" onClick={() => setWithdrawId(app.id)}>
                                       Withdraw
                                     </Button>
                                   )}
@@ -331,6 +331,27 @@ export default function TutorAppliedJobs() {
           </main>
         </div>
       </div>
+
+      <AlertDialog open={!!withdrawId} onOpenChange={(open) => !open && setWithdrawId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Withdraw Application?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to withdraw this application? This action cannot be undone, and you will not be able to re-apply for the same job.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={withdrawing}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => { e.preventDefault(); confirmWithdraw(); }}
+              disabled={withdrawing}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {withdrawing ? 'Withdrawing...' : 'Yes, Withdraw'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </SidebarProvider>
   );
 }
