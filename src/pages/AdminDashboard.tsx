@@ -1257,11 +1257,12 @@ export default function AdminDashboard() {
       case 'guardians': fetchUsers(); break;
       case 'verifications': fetchVerifications(); break;
       case 'jobs': fetchJobs(); break;
+      case 'applications': fetchAllApplications(); break;
       case 'reports': fetchReports(); break;
       case 'reviews': fetchReviews(); break;
       case 'payments': fetchPayments(); break;
     }
-  }, [activeTab, role, fetchUsers, fetchVerifications, fetchJobs, fetchReports, fetchReviews, fetchPayments]);
+  }, [activeTab, role, fetchUsers, fetchVerifications, fetchJobs, fetchAllApplications, fetchReports, fetchReviews, fetchPayments]);
 
   // Load districts/areas once for guardian filters
   useEffect(() => {
