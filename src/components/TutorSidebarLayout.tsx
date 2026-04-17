@@ -12,7 +12,8 @@ import {
   SidebarProvider, SidebarTrigger, useSidebar,
 } from '@/components/ui/sidebar';
 import {
-  Home, FileText, Calendar, Briefcase, User, Search, CreditCard, LogOut,
+  Home, FileText, Calendar, Briefcase, User, CreditCard, LogOut,
+  Sparkles, Zap, ShieldCheck,
 } from 'lucide-react';
 
 const tutorSidebarItems = [
@@ -20,9 +21,11 @@ const tutorSidebarItems = [
   { title: 'My Applications', url: '/tutor/applications', icon: FileText },
   { title: 'Demo Classes', url: '/tutor/dashboard#demo-classes', icon: Calendar },
   { title: 'Find Jobs', url: '/tutor/find-jobs', icon: Briefcase },
+  { title: 'Job Recommendations', url: '/tutor/recommendations', icon: Sparkles },
   { title: 'My Profile', url: '/tutor/profile', icon: User },
-  
-  { title: 'Pricing', url: '/pricing', icon: CreditCard },
+  { title: 'Boost Your Profile', url: '/tutor/boost', icon: Zap },
+  { title: 'Verify Badge Payment', url: '/tutor/verify-badge', icon: ShieldCheck },
+  { title: 'Monthly Plan', url: '/pricing', icon: CreditCard },
 ];
 
 function TutorSidebarInner() {
