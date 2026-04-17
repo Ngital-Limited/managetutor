@@ -229,6 +229,7 @@ export default function TutorProfile() {
           passing_year: match?.passing_year ?? null,
           result: match?.result || '',
           is_current: match?.is_current || false,
+          current_semester: (match as any)?.current_semester || '',
         };
       }));
       if (jobRes.data) {
