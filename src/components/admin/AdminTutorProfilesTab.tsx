@@ -709,6 +709,13 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
                       {t.area_name && t.district_name && <span className="block text-[10px] text-muted-foreground">{t.district_name}</span>}
                     </TableCell>
                     <TableCell><Badge variant="outline" className="text-[10px] capitalize">{t.gender}</Badge></TableCell>
+                    <TableCell className="text-xs">
+                      {t.last_education ? (
+                        <Badge variant="secondary" className="text-[10px] font-semibold">{t.last_education}</Badge>
+                      ) : (
+                        <span className="text-muted-foreground">—</span>
+                      )}
+                    </TableCell>
                     <TableCell className="text-xs capitalize">{t.teaching_mode?.replace('_', ' ') || '—'}</TableCell>
                     <TableCell>
                       <div className="flex flex-col gap-0.5">
