@@ -35,6 +35,7 @@ interface Area {
   name_en: string;
   name_bn: string;
   district_id: string;
+  district_name?: string;
 }
 
 interface Subject {
@@ -102,8 +103,8 @@ export default function FindTutors() {
   const [selectedGender, setSelectedGender] = useState<string>(searchParams.get('gender') || '');
   const [priceRange, setPriceRange] = useState<number[]>([0, 10000]);
   const [selectedDivision, setSelectedDivision] = useState<string>('');
-  const [selectedDistrict, setSelectedDistrict] = useState<string>(searchParams.get('district') || '');
-  const [selectedArea, setSelectedArea] = useState<string>('');
+  const [selectedDistrict, setSelectedDistrict] = useState<string>('');
+  const [selectedArea, setSelectedArea] = useState<string>(searchParams.get('area') || '');
   const [districtSearch, setDistrictSearch] = useState('');
   const [areaSearch, setAreaSearch] = useState('');
   const [verifiedOnly, setVerifiedOnly] = useState<boolean>(searchParams.get('verified') === 'true');
@@ -155,11 +156,19 @@ export default function FindTutors() {
     const [districtsRes, subjectsRes, areasRes] = await Promise.all([
       supabase.from('districts').select('*').order('name_en'),
       supabase.from('subjects').select('*').order('name_en'),
-      supabase.from('areas').select('*').order('name_en'),
+      supabase.from('areas').select('id, name_en, name_bn, district_id, districts (name_en)').order('name_en'),
     ]);
     if (districtsRes.data) setDistricts(districtsRes.data);
     if (subjectsRes.data) setSubjects(subjectsRes.data);
-    if (areasRes.data) setAreas(areasRes.data);
+    if (areasRes.data) {
+      setAreas(areasRes.data.map((a: any) => ({
+        id: a.id,
+        name_en: a.name_en,
+        name_bn: a.name_bn,
+        district_id: a.district_id,
+        district_name: a.districts?.name_en || '',
+      })));
+    }
     await fetchTutors();
   };
 
@@ -225,6 +234,12 @@ export default function FindTutors() {
     if (selectedDistrict && selectedDistrict !== 'all') {
       result = result.filter(t => t.district_id === selectedDistrict || t.profiles?.district_id === selectedDistrict);
     }
+    if (selectedArea) {
+      const area = areas.find(a => a.id === selectedArea);
+      if (area) {
+        result = result.filter(t => t.district_id === area.district_id || t.profiles?.district_id === area.district_id);
+      }
+    }
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
       result = result.filter(t =>
@@ -253,7 +268,7 @@ export default function FindTutors() {
     });
 
     return result;
-  }, [allTutors, selectedCategory, selectedBackground, selectedSubject, selectedDivision, selectedDistrict, searchQuery, sortBy]);
+  }, [allTutors, selectedCategory, selectedBackground, selectedSubject, selectedDivision, selectedDistrict, selectedArea, areas, searchQuery, sortBy]);
 
   const totalCount = filteredTutors.length;
   const totalPages = Math.ceil(totalCount / TUTORS_PER_PAGE);
@@ -627,17 +642,23 @@ export default function FindTutors() {
                   </Select>
                 </div>
 
-                {/* District */}
+                {/* City (Thana/Upazila) */}
                 <div>
                   <Label className="text-xs font-medium mb-1 block text-muted-foreground">City</Label>
-                  <Select value={selectedDistrict} onValueChange={v => { setSelectedDistrict(v === 'all' ? '' : v); setSelectedArea(''); }}>
+                  <Select value={selectedArea || 'all'} onValueChange={v => setSelectedArea(v === 'all' ? '' : v)}>
                     <SelectTrigger className="h-9 text-xs rounded-lg"><SelectValue placeholder="All" /></SelectTrigger>
                     <SelectContent>
                       <div className="px-2 pb-1">
-                        <Input placeholder="Search..." value={districtSearch} onChange={e => setDistrictSearch(e.target.value)} className="h-7 text-xs" onClick={e => e.stopPropagation()} />
+                        <Input placeholder="Search..." value={areaSearch} onChange={e => setAreaSearch(e.target.value)} className="h-7 text-xs" onClick={e => e.stopPropagation()} />
                       </div>
                       <SelectItem value="all">All Cities</SelectItem>
-                      {filteredDistricts.map(d => <SelectItem key={d.id} value={d.id}>{d.name_en}</SelectItem>)}
+                      {areas
+                        .filter(a => !areaSearch || a.name_en.toLowerCase().includes(areaSearch.toLowerCase()) || (a.district_name || '').toLowerCase().includes(areaSearch.toLowerCase()))
+                        .map(a => (
+                          <SelectItem key={a.id} value={a.id}>
+                            {a.name_en}{a.district_name ? ` (${a.district_name})` : ''}
+                          </SelectItem>
+                        ))}
                     </SelectContent>
                   </Select>
                 </div>
@@ -650,21 +671,6 @@ export default function FindTutors() {
                     Salary: ৳{priceRange[0].toLocaleString()} – ৳{priceRange[1].toLocaleString()}/mo
                   </Label>
                   <Slider value={priceRange} onValueChange={setPriceRange} min={0} max={10000} step={500} className="mt-2" />
-                </div>
-
-                {/* Thana */}
-                <div className="w-40">
-                  <Label className="text-xs font-medium mb-1 block text-muted-foreground">Thana/Upazila</Label>
-                  <Select value={selectedArea} onValueChange={v => setSelectedArea(v === 'all' ? '' : v)} disabled={!selectedDistrict}>
-                    <SelectTrigger className="h-9 text-xs rounded-lg"><SelectValue placeholder={selectedDistrict ? 'All' : 'Select city'} /></SelectTrigger>
-                    <SelectContent>
-                      <div className="px-2 pb-1">
-                        <Input placeholder="Search..." value={areaSearch} onChange={e => setAreaSearch(e.target.value)} className="h-7 text-xs" onClick={e => e.stopPropagation()} />
-                      </div>
-                      <SelectItem value="all">All</SelectItem>
-                      {filteredAreas.map(a => <SelectItem key={a.id} value={a.id}>{a.name_en}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
                 </div>
 
                 {/* Verified */}

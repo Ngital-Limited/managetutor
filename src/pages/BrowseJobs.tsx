@@ -32,6 +32,7 @@ interface Area {
   id: string;
   name_en: string;
   district_id: string;
+  district_name?: string;
 }
 
 interface Job {
@@ -76,8 +77,7 @@ export default function BrowseJobs() {
   // Filters
   const [searchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedDistrict, setSelectedDistrict] = useState<string>(searchParams.get('district') || 'all');
-  const [selectedArea, setSelectedArea] = useState<string>('all');
+  const [selectedArea, setSelectedArea] = useState<string>(searchParams.get('area') || 'all');
   const [selectedCategory, setSelectedCategory] = useState<string>(searchParams.get('category') || 'all');
   const [selectedBackground, setSelectedBackground] = useState<string>(searchParams.get('background') || 'all');
   const [selectedTime, setSelectedTime] = useState<string>('all');
@@ -101,24 +101,18 @@ export default function BrowseJobs() {
   const [tutorProfileId, setTutorProfileId] = useState<string | null>(null);
   const [tutorProfileCompleteness, setTutorProfileCompleteness] = useState(0);
 
-  const sortedDistricts = useMemo(() => {
-    return [...districts].sort((a, b) => a.name_en.localeCompare(b.name_en));
-  }, [districts]);
-
-  const filteredAreas = useMemo(() => {
-    if (!selectedDistrict || selectedDistrict === 'all') return [];
-    return areas.filter(a => a.district_id === selectedDistrict).sort((a, b) => a.name_en.localeCompare(b.name_en));
-  }, [areas, selectedDistrict]);
+  const sortedAreas = useMemo(() => {
+    return [...areas].sort((a, b) => a.name_en.localeCompare(b.name_en));
+  }, [areas]);
 
   const activeFilterCount = useMemo(() => {
     let count = 0;
-    if (selectedDistrict !== 'all') count++;
     if (selectedArea !== 'all') count++;
     if (selectedCategory !== 'all') count++;
     if (selectedBackground !== 'all') count++;
     if (selectedTime !== 'all') count++;
     return count;
-  }, [selectedDistrict, selectedArea, selectedCategory, selectedBackground, selectedTime]);
+  }, [selectedArea, selectedCategory, selectedBackground, selectedTime]);
 
   useEffect(() => {
     fetchData();
@@ -126,7 +120,7 @@ export default function BrowseJobs() {
 
   useEffect(() => {
     fetchJobs();
-  }, [selectedDistrict, selectedArea, selectedCategory, selectedBackground, selectedTime, currentPage]);
+  }, [selectedArea, selectedCategory, selectedBackground, selectedTime, currentPage]);
 
   useEffect(() => {
     if (user && role === 'tutor') {
@@ -160,13 +154,19 @@ export default function BrowseJobs() {
   };
 
   const fetchData = async () => {
-    const [districtsRes, areasRes] = await Promise.all([
-      supabase.from('districts').select('id, name_en, name_bn, division_en').order('name_en'),
-      supabase.from('areas').select('id, name_en, district_id').order('name_en'),
-    ]);
+    const { data: areasRes } = await supabase
+      .from('areas')
+      .select('id, name_en, district_id, districts (name_en)')
+      .order('name_en');
 
-    if (districtsRes.data) setDistricts(districtsRes.data);
-    if (areasRes.data) setAreas(areasRes.data as Area[]);
+    if (areasRes) {
+      setAreas(areasRes.map((a: any) => ({
+        id: a.id,
+        name_en: a.name_en,
+        district_id: a.district_id,
+        district_name: a.districts?.name_en || '',
+      })));
+    }
 
     await fetchJobs();
   };
@@ -179,9 +179,6 @@ export default function BrowseJobs() {
       .select('*', { count: 'exact', head: true })
       .eq('status', 'open');
 
-    if (selectedDistrict && selectedDistrict !== 'all') {
-      countQuery = countQuery.eq('district_id', selectedDistrict);
-    }
     if (selectedArea && selectedArea !== 'all') {
       countQuery = countQuery.eq('area_id', selectedArea);
     }
@@ -204,9 +201,6 @@ export default function BrowseJobs() {
       .order('is_featured', { ascending: false })
       .order('created_at', { ascending: false });
 
-    if (selectedDistrict && selectedDistrict !== 'all') {
-      query = query.eq('district_id', selectedDistrict);
-    }
     if (selectedArea && selectedArea !== 'all') {
       query = query.eq('area_id', selectedArea);
     }
@@ -359,7 +353,6 @@ export default function BrowseJobs() {
   };
 
   const clearFilters = () => {
-    setSelectedDistrict('all');
     setSelectedArea('all');
     setSelectedCategory('all');
     setSelectedBackground('all');
@@ -430,33 +423,20 @@ export default function BrowseJobs() {
           {/* Expandable Filters */}
           {showFilters && (
             <div className="mt-4 pt-4 border-t border-border">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
                 <div>
                   <label className="text-xs font-medium text-muted-foreground mb-1.5 block">City</label>
-                  <Select value={selectedDistrict} onValueChange={(v) => { setSelectedDistrict(v); setSelectedArea('all'); setCurrentPage(1); }}>
+                  <Select value={selectedArea} onValueChange={(v) => { setSelectedArea(v); setCurrentPage(1); }}>
                     <SelectTrigger className="h-10 rounded-lg">
                       <MapPin className="h-3.5 w-3.5 mr-1.5 text-muted-foreground" />
                       <SelectValue placeholder="All Cities" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">All Cities</SelectItem>
-                      {sortedDistricts.map(d => (
-                        <SelectItem key={d.id} value={d.id}>{d.name_en}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Area</label>
-                  <Select value={selectedArea} onValueChange={(v) => { setSelectedArea(v); setCurrentPage(1); }} disabled={selectedDistrict === 'all'}>
-                    <SelectTrigger className="h-10 rounded-lg">
-                      <MapPin className="h-3.5 w-3.5 mr-1.5 text-muted-foreground" />
-                      <SelectValue placeholder={selectedDistrict === 'all' ? 'Pick city first' : 'All Areas'} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Areas</SelectItem>
-                      {filteredAreas.map(a => (
-                        <SelectItem key={a.id} value={a.id}>{a.name_en}</SelectItem>
+                      {sortedAreas.map(a => (
+                        <SelectItem key={a.id} value={a.id}>
+                          {a.name_en}{a.district_name ? ` (${a.district_name})` : ''}
+                        </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
