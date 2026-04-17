@@ -17,6 +17,7 @@ import AdminBulkImportTutors from "./pages/AdminBulkImportTutors";
 import TutorProfile from "./pages/TutorProfile";
 import TutorDashboard from "./pages/TutorDashboard";
 import TutorAppliedJobs from "./pages/TutorAppliedJobs";
+import TutorFindJobs from "./pages/TutorFindJobs";
 import ParentDashboard from "./pages/ParentDashboard";
 import ParentProfileEdit from "./pages/ParentProfileEdit";
 
@@ -58,6 +59,7 @@ const App = () => (
               <Route path="/admin/parent/:userId" element={<ParentProfileEdit />} />
               <Route path="/tutor/dashboard" element={<TutorDashboard />} />
               <Route path="/tutor/applications" element={<TutorAppliedJobs />} />
+              <Route path="/tutor/find-jobs" element={<TutorFindJobs />} />
               <Route path="/tutor/profile" element={<TutorProfile />} />
               <Route path="/admin/tutor/:userId" element={<TutorProfile />} />
               <Route path="/favorites" element={<Favorites />} />

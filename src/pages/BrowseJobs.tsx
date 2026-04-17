@@ -63,7 +63,7 @@ interface Job {
 
 const JOBS_PER_PAGE = 10;
 
-export default function BrowseJobs() {
+export default function BrowseJobs({ embedded = false }: { embedded?: boolean } = {}) {
   const { user, role } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -381,8 +381,8 @@ export default function BrowseJobs() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
+    <div className={embedded ? '' : 'min-h-screen bg-background'}>
+      {!embedded && <Header />}
 
       {/* Hero Section */}
       <section className="relative overflow-hidden bg-gradient-to-br from-primary via-primary/90 to-blue-700 text-primary-foreground">
@@ -816,7 +816,7 @@ export default function BrowseJobs() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      <Footer />
+      {!embedded && <Footer />}
     </div>
   );
 }
