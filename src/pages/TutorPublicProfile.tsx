@@ -373,7 +373,7 @@ export default function TutorPublicProfile() {
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <p className="text-sm leading-relaxed whitespace-pre-wrap text-foreground/90">{tutor.ai_overview}</p>
+                      <AiOverview text={tutor.ai_overview} />
                     </CardContent>
                   </Card>
                 )}
