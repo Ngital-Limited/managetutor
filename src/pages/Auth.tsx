@@ -10,7 +10,17 @@ import { Logo } from '@/components/Logo';
 import { supabase } from '@/integrations/supabase/client';
 import { GraduationCap, Users, Building2, Loader2, Mail, Lock, User, ArrowRight, Phone, ArrowLeft } from 'lucide-react';
 import { PhoneInput, isValidBDPhone } from '@/components/PhoneInput';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { z } from 'zod';
+
+const REFERRAL_SOURCES = [
+  'Facebook',
+  'Google Search',
+  'Friend / Family',
+  'YouTube',
+  'Newspaper / Ad',
+  'Other',
+];
 
 type AppRole = 'parent' | 'tutor' | 'agency';
 
@@ -29,6 +39,7 @@ export default function Auth() {
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
   const [phone, setPhone] = useState('');
+  const [referralSource, setReferralSource] = useState('');
   const [selectedRole, setSelectedRole] = useState<AppRole>(
     (searchParams.get('role') as AppRole) || 'parent'
   );
@@ -116,7 +127,7 @@ export default function Auth() {
         setLoading(false);
         return;
       }
-      const { error } = await signUp(email, password, fullName, selectedRole, phone);
+      const { error } = await signUp(email, password, fullName, selectedRole, phone, referralSource || undefined);
       if (error) {
         toast({ title: 'Sign Up Failed', description: error.message, variant: 'destructive' });
       } else {
@@ -302,6 +313,20 @@ export default function Auth() {
                       <div className="mt-1.5">
                         <PhoneInput value={phone} onChange={setPhone} />
                       </div>
+                    </div>
+
+                    <div>
+                      <Label htmlFor="referralSource" className="text-sm font-medium text-muted-foreground">How did you hear about us?</Label>
+                      <Select value={referralSource} onValueChange={setReferralSource}>
+                        <SelectTrigger id="referralSource" className="h-11 mt-1.5 rounded-lg border-border">
+                          <SelectValue placeholder="Select a source (optional)" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {REFERRAL_SOURCES.map((src) => (
+                            <SelectItem key={src} value={src}>{src}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
                   </>
                 )}
