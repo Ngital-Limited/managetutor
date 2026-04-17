@@ -2501,7 +2501,7 @@ export default function AdminDashboard() {
                   })()}
 
                   {/* Status filter chips scoped to this job */}
-                  <div className="flex items-center gap-2 flex-wrap">
+                  <div className="flex items-center gap-1.5 flex-wrap p-1 rounded-lg bg-muted/40 border border-border/40 w-fit">
                     {STATUS_OPTS.map(opt => {
                       const count = counts[opt.key] || 0;
                       const active = allAppsStatusFilter === opt.key;
@@ -2510,33 +2510,37 @@ export default function AdminDashboard() {
                           key={opt.key}
                           type="button"
                           onClick={() => setAllAppsStatusFilter(opt.key)}
-                          className={`text-xs px-2.5 py-1 rounded-full border transition-colors ${active ? 'bg-primary text-primary-foreground border-primary' : 'bg-background text-muted-foreground hover:bg-muted'}`}
+                          className={`text-xs px-3 py-1.5 rounded-md font-medium transition-all ${active ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
                         >
-                          {opt.label} <span className={active ? 'opacity-90' : 'opacity-70'}>({count})</span>
+                          {opt.label}
+                          <span className={`ml-1.5 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] ${active ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>{count}</span>
                         </button>
                       );
                     })}
                   </div>
 
-                  <Card>
+                  <Card className="border-border/60">
                     <CardContent className="p-0">
                       <ScrollArea className="w-full">
                         <Table>
                           <TableHeader>
-                            <TableRow>
-                              <TableHead>Tutor ID</TableHead>
-                              <TableHead>Tutor</TableHead>
-                              <TableHead>Contact</TableHead>
-                              <TableHead>Last Education</TableHead>
-                              <TableHead>Rate</TableHead>
-                              <TableHead>Bio</TableHead>
-                              <TableHead>Status</TableHead>
-                              <TableHead className="text-right">Actions</TableHead>
+                            <TableRow className="bg-muted/30 hover:bg-muted/30">
+                              <TableHead className="text-[10px] uppercase tracking-wider font-semibold">Tutor ID</TableHead>
+                              <TableHead className="text-[10px] uppercase tracking-wider font-semibold">Tutor</TableHead>
+                              <TableHead className="text-[10px] uppercase tracking-wider font-semibold">Contact</TableHead>
+                              <TableHead className="text-[10px] uppercase tracking-wider font-semibold">Last Education</TableHead>
+                              <TableHead className="text-[10px] uppercase tracking-wider font-semibold">Rate</TableHead>
+                              <TableHead className="text-[10px] uppercase tracking-wider font-semibold">Bio</TableHead>
+                              <TableHead className="text-[10px] uppercase tracking-wider font-semibold">Status</TableHead>
+                              <TableHead className="text-right text-[10px] uppercase tracking-wider font-semibold">Actions</TableHead>
                             </TableRow>
                           </TableHeader>
                           <TableBody>
                             {visible.length === 0 ? (
-                              <TableRow><TableCell colSpan={8} className="text-center py-12 text-muted-foreground">No applicants match this filter.</TableCell></TableRow>
+                              <TableRow><TableCell colSpan={8} className="text-center py-16 text-muted-foreground">
+                                <Users className="h-8 w-8 mx-auto mb-2 opacity-30" />
+                                <div className="text-sm">No applicants match this filter.</div>
+                              </TableCell></TableRow>
                             ) : visible.map((app) => {
                               const isFinal = app.status === 'accepted' || app.status === 'rejected' || app.status === 'withdrawn';
                               const tp = app.tutor_profile;
@@ -2544,51 +2548,62 @@ export default function AdminDashboard() {
                               const edu = app.tutor_last_education;
                               const bio = tprof?.bio || '';
                               return (
-                                <TableRow key={app.id}>
+                                <TableRow key={app.id} className="hover:bg-muted/20">
                                   <TableCell className="text-xs font-mono text-muted-foreground align-top">
-                                    {tp?.user_reference || '—'}
-                                    <div className="text-[10px] mt-1">{formatDistanceToNow(new Date(app.created_at), { addSuffix: true })}</div>
+                                    <div className="text-foreground/80">{tp?.user_reference || '—'}</div>
+                                    <div className="text-[10px] mt-1 font-sans">{formatDistanceToNow(new Date(app.created_at), { addSuffix: true })}</div>
                                   </TableCell>
                                   <TableCell className="align-top">
-                                    <div className="flex items-center gap-2">
-                                      <Avatar className="h-9 w-9">
+                                    <div className="flex items-center gap-2.5">
+                                      <Avatar className="h-9 w-9 ring-2 ring-background shadow-sm">
                                         <AvatarImage src={tp?.avatar_url || ''} />
-                                        <AvatarFallback className="text-xs">{tp?.full_name?.charAt(0) || 'T'}</AvatarFallback>
+                                        <AvatarFallback className="text-xs bg-primary/10 text-primary">{tp?.full_name?.charAt(0) || 'T'}</AvatarFallback>
                                       </Avatar>
                                       <div>
-                                        <div className="text-sm font-medium">{tp?.full_name || 'Unknown'}</div>
+                                        <div className="text-sm font-semibold leading-tight">{tp?.full_name || 'Unknown'}</div>
                                         {tprof?.experience_years != null && (
-                                          <div className="text-[11px] text-muted-foreground">{tprof.experience_years} yr exp</div>
+                                          <div className="text-[11px] text-muted-foreground mt-0.5">{tprof.experience_years} yr exp</div>
                                         )}
                                       </div>
                                     </div>
                                   </TableCell>
                                   <TableCell className="text-xs align-top">
-                                    <div className="space-y-0.5">
-                                      {tp?.phone && <div>📞 {tp.phone}</div>}
-                                      {tp?.email && <div className="text-muted-foreground truncate max-w-[180px]" title={tp.email}>{tp.email}</div>}
+                                    <div className="space-y-1">
+                                      {tp?.phone && (
+                                        <a href={`tel:${tp.phone}`} className="flex items-center gap-1 hover:text-primary"><Phone className="h-3 w-3 text-muted-foreground" />{tp.phone}</a>
+                                      )}
+                                      {tp?.email && (
+                                        <a href={`mailto:${tp.email}`} className="flex items-center gap-1 text-muted-foreground hover:text-primary truncate max-w-[200px]" title={tp.email}><Mail className="h-3 w-3" /><span className="truncate">{tp.email}</span></a>
+                                      )}
                                       {!tp?.phone && !tp?.email && <span className="text-muted-foreground">—</span>}
                                     </div>
                                   </TableCell>
                                   <TableCell className="text-xs align-top max-w-[180px]">
                                     {edu ? (
                                       <div>
-                                        <div className="font-medium truncate" title={edu.degree}>{edu.degree}</div>
+                                        <div className="font-semibold truncate" title={edu.degree}>{edu.degree}</div>
                                         <div className="text-muted-foreground truncate" title={edu.institution}>{edu.institution}</div>
-                                        {edu.passing_year && <div className="text-[10px] text-muted-foreground">{edu.passing_year}</div>}
+                                        {edu.passing_year && <div className="text-[10px] text-muted-foreground/70 mt-0.5">{edu.passing_year}</div>}
                                       </div>
                                     ) : (
                                       <span className="text-muted-foreground">—</span>
                                     )}
                                   </TableCell>
-                                  <TableCell className="text-sm align-top">{app.proposed_rate ? `৳${app.proposed_rate}` : '—'}</TableCell>
-                                  <TableCell className="text-xs text-muted-foreground max-w-[220px] align-top">
-                                    <p className="line-clamp-3" title={bio}>{bio || '—'}</p>
-                                    {app.cover_message && (
-                                      <p className="line-clamp-2 mt-1 italic" title={app.cover_message}>“{app.cover_message}”</p>
+                                  <TableCell className="align-top">
+                                    {app.proposed_rate ? (
+                                      <span className="text-sm font-semibold text-foreground">৳{app.proposed_rate}</span>
+                                    ) : (
+                                      <span className="text-muted-foreground text-xs">—</span>
                                     )}
                                   </TableCell>
-                                  <TableCell className="align-top"><Badge className={`text-xs capitalize ${statusColor(app.status)}`}>{app.status}</Badge></TableCell>
+                                  <TableCell className="text-xs text-muted-foreground max-w-[220px] align-top">
+                                    {bio && <p className="line-clamp-2 text-foreground/80" title={bio}>{bio}</p>}
+                                    {app.cover_message && (
+                                      <p className="line-clamp-2 mt-1 italic border-l-2 border-primary/30 pl-2" title={app.cover_message}>“{app.cover_message}”</p>
+                                    )}
+                                    {!bio && !app.cover_message && '—'}
+                                  </TableCell>
+                                  <TableCell className="align-top"><Badge className={`text-[10px] capitalize ${statusColor(app.status)}`}>{app.status}</Badge></TableCell>
                                   <TableCell className="text-right align-top">
                                     <div className="flex gap-1 justify-end flex-wrap">
                                       {!isFinal && app.status === 'pending' && (
@@ -2612,11 +2627,11 @@ export default function AdminDashboard() {
                                         </Button>
                                       )}
                                       {!isFinal && (
-                                        <Button variant="ghost" size="sm" className="h-8 text-xs" onClick={() => handleAdminUpdateAppStatus(app.id, 'withdrawn', app.job_id)} title="Mark as Withdrawn">
+                                        <Button variant="ghost" size="sm" className="h-8 text-xs text-muted-foreground" onClick={() => handleAdminUpdateAppStatus(app.id, 'withdrawn', app.job_id)} title="Mark as Withdrawn">
                                           Withdraw
                                         </Button>
                                       )}
-                                      <Button variant="ghost" size="sm" asChild title="View Tutor Profile">
+                                      <Button variant="ghost" size="sm" asChild title="View Tutor Profile" className="h-8 w-8 p-0">
                                         <Link to={`/tutor/${tprof?.id}`}><Eye className="h-4 w-4" /></Link>
                                       </Button>
                                     </div>
