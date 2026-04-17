@@ -263,13 +263,13 @@ function DistrictsManager({ toast }: { toast: any }) {
   };
 
   const handleSave = async () => {
-    if (!form.name_en.trim() || !form.name_bn.trim() || !form.division_en.trim() || !form.division_bn.trim()) {
-      toast({ title: 'All fields required', variant: 'destructive' }); return;
+    if (!form.name_en.trim() || !form.division_en.trim()) {
+      toast({ title: 'Name and Division required', variant: 'destructive' }); return;
     }
     setSaving(true);
     const payload = {
-      name_en: form.name_en.trim(), name_bn: form.name_bn.trim(),
-      division_en: form.division_en.trim(), division_bn: form.division_bn.trim(),
+      name_en: form.name_en.trim(), name_bn: form.name_en.trim(),
+      division_en: form.division_en.trim(), division_bn: form.division_en.trim(),
     };
     const { error } = editingId
       ? await supabase.from('districts').update(payload).eq('id', editingId)
