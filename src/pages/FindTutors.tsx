@@ -629,14 +629,14 @@ export default function FindTutors() {
 
                 {/* District */}
                 <div>
-                  <Label className="text-xs font-medium mb-1 block text-muted-foreground">District</Label>
+                  <Label className="text-xs font-medium mb-1 block text-muted-foreground">City</Label>
                   <Select value={selectedDistrict} onValueChange={v => { setSelectedDistrict(v === 'all' ? '' : v); setSelectedArea(''); }}>
                     <SelectTrigger className="h-9 text-xs rounded-lg"><SelectValue placeholder="All" /></SelectTrigger>
                     <SelectContent>
                       <div className="px-2 pb-1">
                         <Input placeholder="Search..." value={districtSearch} onChange={e => setDistrictSearch(e.target.value)} className="h-7 text-xs" onClick={e => e.stopPropagation()} />
                       </div>
-                      <SelectItem value="all">All Districts</SelectItem>
+                      <SelectItem value="all">All Cities</SelectItem>
                       {filteredDistricts.map(d => <SelectItem key={d.id} value={d.id}>{d.name_en}</SelectItem>)}
                     </SelectContent>
                   </Select>
@@ -656,7 +656,7 @@ export default function FindTutors() {
                 <div className="w-40">
                   <Label className="text-xs font-medium mb-1 block text-muted-foreground">Thana/Upazila</Label>
                   <Select value={selectedArea} onValueChange={v => setSelectedArea(v === 'all' ? '' : v)} disabled={!selectedDistrict}>
-                    <SelectTrigger className="h-9 text-xs rounded-lg"><SelectValue placeholder={selectedDistrict ? 'All' : 'Select district'} /></SelectTrigger>
+                    <SelectTrigger className="h-9 text-xs rounded-lg"><SelectValue placeholder={selectedDistrict ? 'All' : 'Select city'} /></SelectTrigger>
                     <SelectContent>
                       <div className="px-2 pb-1">
                         <Input placeholder="Search..." value={areaSearch} onChange={e => setAreaSearch(e.target.value)} className="h-7 text-xs" onClick={e => e.stopPropagation()} />
