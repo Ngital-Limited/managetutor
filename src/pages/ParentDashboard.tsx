@@ -752,7 +752,7 @@ export default function ParentDashboard() {
     setSchedulingInterview(true);
     const formattedDate = format(interviewDate, 'yyyy-MM-dd');
 
-    // Create a demo booking for the interview
+    // Create a demo booking for the interview, linked to the application
     const { error: bookingError } = await supabase.from('demo_bookings').insert({
       parent_id: user!.id,
       tutor_id: interviewApp.tutor_profiles.id,
@@ -762,23 +762,31 @@ export default function ParentDashboard() {
       class_fee: 0,
       status: 'pending',
       subject_id: selectedJob.subject_ids?.[0] || null,
-    });
+      application_id: interviewApp.id,
+    } as any);
+
+    // Mark the application as invited_to_demo
+    if (!bookingError) {
+      await supabase.from('applications').update({ status: 'invited_to_demo' as any }).eq('id', interviewApp.id);
+    }
 
     // Notify the tutor
     const { error: notifError } = await supabase.from('notifications').insert({
       user_id: interviewApp.tutor_profiles.user_id,
-      title: 'Interview/Demo Class Invitation',
-      message: `You have been invited for a demo class for "${selectedJob.title}" on ${format(interviewDate, 'PPP')} at ${interviewTime}.${interviewNotes ? ' Notes: ' + interviewNotes : ''}`,
-      type: 'interview_invite',
+      title: 'Demo Class Invitation',
+      message: `You have been invited for a demo class for "${selectedJob.title}" on ${format(interviewDate, 'PPP')} at ${interviewTime}. Awaiting admin approval.${interviewNotes ? ' Notes: ' + interviewNotes : ''}`,
+      type: 'demo_invite',
       reference_id: selectedJob.id,
     });
 
     if (bookingError || notifError) {
       toast({ title: 'Error', description: (bookingError || notifError)?.message, variant: 'destructive' });
     } else {
-      toast({ title: 'Interview Scheduled!', description: `Demo class scheduled for ${format(interviewDate, 'PPP')} at ${interviewTime}` });
+      toast({ title: 'Demo Class Invite Sent', description: `Scheduled for ${format(interviewDate, 'PPP')} at ${interviewTime}. Pending admin approval.` });
       setInterviewDialogOpen(false);
       setInterviewApp(null);
+      fetchData();
+      if (selectedJob) fetchApplications(selectedJob.id);
     }
     setSchedulingInterview(false);
   };
