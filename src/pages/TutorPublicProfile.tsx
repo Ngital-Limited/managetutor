@@ -491,6 +491,52 @@ export default function TutorPublicProfile() {
         </div>
       </main>
 
+      {/* Related Tutors */}
+      {relatedTutors.length > 0 && (
+        <section className="container mx-auto px-4 pb-12 max-w-6xl">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-bold flex items-center gap-2">
+              <Users className="h-5 w-5 text-primary" /> Related Tutors
+            </h2>
+            {districtName && (
+              <Link to={`/tutors?district=${tutor.district_id}`} className="text-sm text-primary hover:underline">
+                View all in {districtName} →
+              </Link>
+            )}
+          </div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {relatedTutors.map((rt: any) => {
+              const name = rt.profiles?.full_name || rt.display_name || 'Tutor';
+              const snippet = rt.ai_overview
+                ? rt.ai_overview.split('\n').filter(Boolean).slice(0, 2).join(' ')
+                : (rt.bio || '');
+              return (
+                <Link key={rt.id} to={`/tutor/${rt.slug || rt.id}`} className="group block">
+                  <Card className="h-full hover:shadow-md hover:border-primary/30 transition-all">
+                    <CardContent className="p-4">
+                      <div className="flex items-center gap-3 mb-3">
+                        <Avatar className="h-12 w-12">
+                          <AvatarImage src={rt.profiles?.avatar_url} />
+                          <AvatarFallback className="bg-primary/10 text-primary">{name.charAt(0)}</AvatarFallback>
+                        </Avatar>
+                        <div className="min-w-0">
+                          <p className="font-semibold text-sm truncate group-hover:text-primary">{name}</p>
+                          <p className="text-xs text-muted-foreground">{rt.experience_years || 0} yrs exp</p>
+                        </div>
+                      </div>
+                      {snippet && (
+                        <p className="text-xs text-muted-foreground line-clamp-2 mb-2">{snippet}</p>
+                      )}
+                      <p className="text-sm font-bold text-primary">৳{rt.monthly_salary_min || 0}–{rt.monthly_salary_max || 0}<span className="text-[10px] text-muted-foreground font-normal ml-1">/month</span></p>
+                    </CardContent>
+                  </Card>
+                </Link>
+              );
+            })}
+          </div>
+        </section>
+      )}
+
       {/* Mobile sticky CTA */}
       <div className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-background/95 backdrop-blur border-t border-border p-3 shadow-[0_-4px_20px_-8px_hsl(var(--foreground)/0.15)]">
         <div className="flex items-center gap-3">
