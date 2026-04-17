@@ -301,6 +301,21 @@ export default function ParentDashboard() {
     }
   }, [user, authLoading]);
 
+  // Realtime: refresh applicants when applications change for this parent's jobs
+  useEffect(() => {
+    if (!user) return;
+    const channel = supabase
+      .channel('parent-applications-realtime')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'applications' }, () => {
+        fetchData();
+      })
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
+
   const fetchData = async () => {
     if (!user) return;
 
