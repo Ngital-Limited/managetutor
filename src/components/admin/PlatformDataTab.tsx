@@ -9,7 +9,79 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Plus, Pencil, Trash2, Search, BookOpen, MapPin, Map, GraduationCap } from 'lucide-react';
+import { Plus, Pencil, Trash2, Search, BookOpen, MapPin, Map, GraduationCap, Settings as SettingsIcon, BadgeCheck } from 'lucide-react';
+
+// ─── Settings Manager ───
+function SettingsManager({ toast }: { toast: any }) {
+  const [verificationFee, setVerificationFee] = useState<string>('');
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+
+  const fetchSettings = useCallback(async () => {
+    setLoading(true);
+    const { data } = await supabase
+      .from('platform_settings')
+      .select('key, value')
+      .eq('key', 'verification_fee')
+      .maybeSingle();
+    setVerificationFee(data?.value ?? '50');
+    setLoading(false);
+  }, []);
+
+  useEffect(() => { fetchSettings(); }, [fetchSettings]);
+
+  const handleSave = async () => {
+    const n = Number(verificationFee);
+    if (!Number.isFinite(n) || n < 0) {
+      toast({ title: 'Enter a valid non-negative number', variant: 'destructive' });
+      return;
+    }
+    setSaving(true);
+    const { error } = await supabase
+      .from('platform_settings')
+      .upsert(
+        { key: 'verification_fee', value: String(Math.round(n)), description: 'Tutor verification badge fee in BDT (৳)' },
+        { onConflict: 'key' }
+      );
+    if (error) toast({ title: 'Error', description: error.message, variant: 'destructive' });
+    else toast({ title: 'Verification fee updated' });
+    setSaving(false);
+  };
+
+  return (
+    <div className="space-y-4 max-w-xl">
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-sm flex items-center gap-2">
+            <BadgeCheck className="h-4 w-4 text-primary" />
+            Tutor Verification Badge Fee
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <p className="text-xs text-muted-foreground">
+            Fee charged to tutors (in BDT ৳) when they purchase the Verified Badge via PayStation.
+          </p>
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-medium">৳</span>
+            <Input
+              type="number"
+              min={0}
+              step={1}
+              value={loading ? '' : verificationFee}
+              onChange={(e) => setVerificationFee(e.target.value)}
+              placeholder="50"
+              disabled={loading}
+              className="max-w-[160px]"
+            />
+            <Button onClick={handleSave} disabled={saving || loading} size="sm">
+              {saving ? 'Saving...' : 'Save'}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
 
 // ─── Subjects Manager ───
 function SubjectsManager({ toast }: { toast: any }) {
@@ -499,12 +571,14 @@ export function PlatformDataTab({ toast }: { toast: any }) {
           <TabsTrigger value="districts" className="gap-1.5"><MapPin className="h-3.5 w-3.5" /> Districts</TabsTrigger>
           <TabsTrigger value="areas" className="gap-1.5"><Map className="h-3.5 w-3.5" /> Areas</TabsTrigger>
           <TabsTrigger value="classes" className="gap-1.5"><GraduationCap className="h-3.5 w-3.5" /> Class Levels</TabsTrigger>
+          <TabsTrigger value="settings" className="gap-1.5"><SettingsIcon className="h-3.5 w-3.5" /> Settings</TabsTrigger>
         </TabsList>
 
         <TabsContent value="subjects"><SubjectsManager toast={toast} /></TabsContent>
         <TabsContent value="districts"><DistrictsManager toast={toast} /></TabsContent>
         <TabsContent value="areas"><AreasManager toast={toast} /></TabsContent>
         <TabsContent value="classes"><ClassLevelsManager toast={toast} /></TabsContent>
+        <TabsContent value="settings"><SettingsManager toast={toast} /></TabsContent>
       </Tabs>
     </div>
   );
