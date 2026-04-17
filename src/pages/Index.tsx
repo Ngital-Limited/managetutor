@@ -124,8 +124,9 @@ export default function Index() {
   const handleSearch = () => {
     const params = new URLSearchParams();
     if (selectedDistrict) params.set('district', selectedDistrict);
-    if (selectedSubject) params.set('subject', selectedSubject);
-    if (selectedMode) params.set('mode', selectedMode);
+    if (selectedCategory) params.set('category', selectedCategory);
+    if (selectedBackground) params.set('background', selectedBackground);
+    if (selectedGender) params.set('gender', selectedGender);
     navigate(`/${searchType === 'tutors' ? 'tutors' : 'jobs'}?${params.toString()}`);
   };
 
