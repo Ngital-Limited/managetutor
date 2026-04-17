@@ -536,7 +536,9 @@ export default function Index() {
           <div className="text-center mb-14 max-w-2xl mx-auto">
             <span className="text-xs uppercase tracking-[0.2em] text-muted-foreground font-medium">Process</span>
             <h2 className="text-3xl md:text-4xl font-semibold tracking-tight mt-2 mb-3">{t('howItWorks.title')}</h2>
-            <p className="text-sm text-muted-foreground">Three simple steps to find your perfect tutor</p>
+            <p className="text-sm text-muted-foreground">
+              From posting your requirement to starting your first lesson — our streamlined process gets you matched with the right tutor in just three simple steps. No middlemen, no hidden fees, just direct connections backed by a fully vetted platform.
+            </p>
           </div>
           <div className="grid md:grid-cols-3 gap-5 max-w-5xl mx-auto relative">
             {/* Connecting line on desktop */}
