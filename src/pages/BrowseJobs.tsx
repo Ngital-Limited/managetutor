@@ -243,8 +243,11 @@ export default function BrowseJobs({ embedded = false }: { embedded?: boolean } 
       query = query.eq('preferred_time', selectedTime);
     }
 
+    // Tutor pre-filter (embedded dashboard view): match class_levels and subjects
+    const tutorFilterActive = embedded && tutorPrefilterApplied && (tutorClassLevels.length > 0 || tutorSubjectIds.length > 0);
+
     // Category & Background filters apply client-side (matched against title, description, class_level, special_requirements)
-    const needsClientFilter = (selectedCategory && selectedCategory !== 'all') || (selectedBackground && selectedBackground !== 'all') || !!searchQuery;
+    const needsClientFilter = (selectedCategory && selectedCategory !== 'all') || (selectedBackground && selectedBackground !== 'all') || !!searchQuery || tutorFilterActive;
 
     if (!needsClientFilter) {
       const { count } = await countQuery;
