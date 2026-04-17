@@ -1485,6 +1485,7 @@ export type Database = {
       tutor_education: {
         Row: {
           created_at: string
+          current_semester: string | null
           degree: string
           field_of_study: string | null
           id: string
@@ -1496,6 +1497,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          current_semester?: string | null
           degree: string
           field_of_study?: string | null
           id?: string
@@ -1507,6 +1509,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          current_semester?: string | null
           degree?: string
           field_of_study?: string | null
           id?: string
