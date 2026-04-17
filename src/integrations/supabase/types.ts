@@ -1575,6 +1575,7 @@ export type Database = {
       }
       tutor_profiles: {
         Row: {
+          area_id: string | null
           average_rating: number | null
           bio: string | null
           bio_bn: string | null
@@ -1624,6 +1625,7 @@ export type Database = {
           weight: string | null
         }
         Insert: {
+          area_id?: string | null
           average_rating?: number | null
           bio?: string | null
           bio_bn?: string | null
@@ -1673,6 +1675,7 @@ export type Database = {
           weight?: string | null
         }
         Update: {
+          area_id?: string | null
           average_rating?: number | null
           bio?: string | null
           bio_bn?: string | null
@@ -1722,6 +1725,13 @@ export type Database = {
           weight?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "tutor_profiles_area_id_fkey"
+            columns: ["area_id"]
+            isOneToOne: false
+            referencedRelation: "areas"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "tutor_profiles_district_id_fkey"
             columns: ["district_id"]
