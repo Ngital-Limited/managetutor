@@ -21,7 +21,7 @@ import {
   User, Clock, CheckCircle2, X, ChevronDown, Heart, Award, ArrowRight, ChevronLeft, ChevronRight,
   BookOpen, Monitor, Users, SlidersHorizontal, LayoutGrid, LayoutList, GraduationCap
 } from 'lucide-react';
-import { stripAiOverviewMarkdown } from '@/components/AiOverview';
+
 
 interface District {
   id: string;
@@ -51,7 +51,6 @@ interface TutorProfile {
   user_id: string;
   slug: string | null;
   bio: string;
-  ai_overview: string | null;
   education: string;
   experience_years: number;
   monthly_salary_min: number;
@@ -431,9 +430,7 @@ export default function FindTutors() {
             </div>
 
             <p className="text-xs text-muted-foreground line-clamp-2 mb-3 leading-relaxed">
-              {tutor.ai_overview
-                ? stripAiOverviewMarkdown(tutor.ai_overview).split('. ').slice(0, 2).join('. ')
-                : (tutor.bio || tutor.education || 'Experienced tutor ready to help you learn.')}
+              {tutor.bio || tutor.education || 'Experienced tutor ready to help you learn.'}
             </p>
 
             {/* Subjects */}
