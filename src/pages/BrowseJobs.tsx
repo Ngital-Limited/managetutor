@@ -431,61 +431,62 @@ export default function BrowseJobs() {
             <div className="mt-4 pt-4 border-t border-border">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3">
                 <div>
-                  <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Division</label>
-                  <Select value={selectedDivision} onValueChange={(v) => { setSelectedDivision(v); setSelectedDistrict('all'); setCurrentPage(1); }}>
-                    <SelectTrigger className="h-10 rounded-lg">
-                      <SelectValue placeholder="All Divisions" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Divisions</SelectItem>
-                      {divisions.map(div => (
-                        <SelectItem key={div} value={div}>{div}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
                   <label className="text-xs font-medium text-muted-foreground mb-1.5 block">District</label>
-                  <Select value={selectedDistrict} onValueChange={(v) => { setSelectedDistrict(v); setCurrentPage(1); }}>
+                  <Select value={selectedDistrict} onValueChange={(v) => { setSelectedDistrict(v); setSelectedArea('all'); setCurrentPage(1); }}>
                     <SelectTrigger className="h-10 rounded-lg">
                       <MapPin className="h-3.5 w-3.5 mr-1.5 text-muted-foreground" />
                       <SelectValue placeholder="All Districts" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">All Districts</SelectItem>
-                      {filteredDistricts.map(d => (
+                      {sortedDistricts.map(d => (
                         <SelectItem key={d.id} value={d.id}>{d.name_en}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
                 <div>
-                  <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Subject</label>
-                  <Select value={selectedSubject} onValueChange={(v) => { setSelectedSubject(v); setCurrentPage(1); }}>
+                  <label className="text-xs font-medium text-muted-foreground mb-1.5 block">City / Area</label>
+                  <Select value={selectedArea} onValueChange={(v) => { setSelectedArea(v); setCurrentPage(1); }} disabled={selectedDistrict === 'all'}>
                     <SelectTrigger className="h-10 rounded-lg">
-                      <BookOpen className="h-3.5 w-3.5 mr-1.5 text-muted-foreground" />
-                      <SelectValue placeholder="All Subjects" />
+                      <MapPin className="h-3.5 w-3.5 mr-1.5 text-muted-foreground" />
+                      <SelectValue placeholder={selectedDistrict === 'all' ? 'Pick district first' : 'All Areas'} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="all">All Subjects</SelectItem>
-                      {subjects.map(s => (
-                        <SelectItem key={s.id} value={s.id}>{s.name_en}</SelectItem>
+                      <SelectItem value="all">All Areas</SelectItem>
+                      {filteredAreas.map(a => (
+                        <SelectItem key={a.id} value={a.id}>{a.name_en}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
                 <div>
-                  <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Teaching Mode</label>
-                  <Select value={selectedMode} onValueChange={(v) => { setSelectedMode(v); setCurrentPage(1); }}>
+                  <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Job Category</label>
+                  <Select value={selectedCategory} onValueChange={(v) => { setSelectedCategory(v); setCurrentPage(1); }}>
                     <SelectTrigger className="h-10 rounded-lg">
-                      <Monitor className="h-3.5 w-3.5 mr-1.5 text-muted-foreground" />
-                      <SelectValue placeholder="All Modes" />
+                      <Tag className="h-3.5 w-3.5 mr-1.5 text-muted-foreground" />
+                      <SelectValue placeholder="All Categories" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="all">All Modes</SelectItem>
-                      <SelectItem value="online">Online</SelectItem>
-                      <SelectItem value="in_person">In-Person</SelectItem>
-                      <SelectItem value="hybrid">Hybrid</SelectItem>
+                      <SelectItem value="all">All Categories</SelectItem>
+                      {JOB_CATEGORIES.map(c => (
+                        <SelectItem key={c} value={c}>{c}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Background</label>
+                  <Select value={selectedBackground} onValueChange={(v) => { setSelectedBackground(v); setCurrentPage(1); }}>
+                    <SelectTrigger className="h-10 rounded-lg">
+                      <GraduationCap className="h-3.5 w-3.5 mr-1.5 text-muted-foreground" />
+                      <SelectValue placeholder="All Backgrounds" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Backgrounds</SelectItem>
+                      {STUDENT_BACKGROUNDS.map(b => (
+                        <SelectItem key={b} value={b}>{b}</SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
