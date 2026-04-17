@@ -14,7 +14,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import {
   GraduationCap, MapPin, Star, CheckCircle2, Heart,
-  Briefcase, BookOpen, User, Users, Share2, Video, Award, Monitor, Home,
+  Briefcase, BookOpen, User, Users, Share2, Video, Award, Monitor, Home, Sparkles,
 } from 'lucide-react';
 import BookDemoClassDialog from '@/components/BookDemoClassDialog';
 
@@ -42,6 +42,7 @@ interface TutorProfile {
   video_url: string | null;
   teaching_philosophy: string | null;
   success_stories: string | null;
+  ai_overview: string | null;
 }
 
 interface Profile {
@@ -355,7 +356,21 @@ export default function TutorPublicProfile() {
                 <TabsTrigger value="details">Details</TabsTrigger>
               </TabsList>
 
-              <TabsContent value="about" className="mt-4">
+              <TabsContent value="about" className="mt-4 space-y-4">
+                {tutor.ai_overview && (
+                  <Card className="border-primary/30 bg-gradient-to-br from-primary/5 via-background to-accent/5">
+                    <CardHeader className="pb-3">
+                      <CardTitle className="flex items-center gap-2 text-base">
+                        <Sparkles className="h-4 w-4 text-primary" />
+                        Overview
+                        <Badge variant="outline" className="text-[10px] font-normal ml-1">AI-generated</Badge>
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-sm leading-relaxed whitespace-pre-wrap text-foreground/90">{tutor.ai_overview}</p>
+                    </CardContent>
+                  </Card>
+                )}
                 <Card>
                   <CardHeader><CardTitle className="flex items-center gap-2 text-base"><User className="h-4 w-4" />About</CardTitle></CardHeader>
                   <CardContent className="space-y-4">
