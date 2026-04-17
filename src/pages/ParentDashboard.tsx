@@ -528,6 +528,40 @@ export default function ParentDashboard() {
     );
   };
 
+  const handleBoostJob = async (job: Job) => {
+    if (!user || !userProfile) return;
+    if (job.is_featured) {
+      toast({ title: 'Already boosted', description: 'This job is already featured.' });
+      return;
+    }
+    setBoostingJobId(job.id);
+    try {
+      const { data, error } = await supabase.functions.invoke('sslcommerz-init', {
+        body: {
+          amount: featuredJobPrice,
+          productName: `Featured Job: ${job.title}`,
+          productCategory: 'Featured Listing',
+          customerName: userProfile.full_name,
+          customerEmail: user.email,
+          customerPhone: userProfile.phone || '01700000000',
+          userId: user.id,
+          listingType: 'job_post',
+          jobId: job.id,
+        },
+      });
+      if (error) throw error;
+      if (data?.gatewayUrl) {
+        window.location.href = data.gatewayUrl;
+      } else {
+        throw new Error('No gateway URL returned');
+      }
+    } catch (e: any) {
+      toast({ title: 'Error', description: e.message, variant: 'destructive' });
+    } finally {
+      setBoostingJobId(null);
+    }
+  };
+
   const deleteJob = async (jobId: string) => {
     const job = jobs.find(j => j.id === jobId);
     const jobTitle = job?.title || 'a job you applied to';
