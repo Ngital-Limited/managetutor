@@ -187,6 +187,19 @@ export default function TutorDashboard() {
   const [activeFeatured, setActiveFeatured] = useState<FeaturedListing | null>(null);
   const [boostLoading, setBoostLoading] = useState(false);
   const [verifyLoading, setVerifyLoading] = useState(false);
+  const [verificationFee, setVerificationFee] = useState<number>(50);
+
+  useEffect(() => {
+    supabase
+      .from('platform_settings')
+      .select('value')
+      .eq('key', 'verification_fee')
+      .maybeSingle()
+      .then(({ data }) => {
+        const n = Number(data?.value);
+        if (Number.isFinite(n) && n >= 0) setVerificationFee(n);
+      });
+  }, []);
   const [demoBookings, setDemoBookings] = useState<any[]>([]);
   const [recommendedJobs, setRecommendedJobs] = useState<RecommendedJob[]>([]);
   const [nearbyJobs, setNearbyJobs] = useState<RecommendedJob[]>([]);
@@ -424,7 +437,7 @@ export default function TutorDashboard() {
     try {
       const { data, error } = await supabase.functions.invoke('sslcommerz-init', {
         body: {
-          amount: 50,
+          amount: verificationFee,
           productName: 'Verified Badge',
           productCategory: 'Verification',
           customerName: userProfile.full_name,
@@ -562,11 +575,11 @@ export default function TutorDashboard() {
                 <div className="flex-1">
                   <h3 className="font-bold">Get Verified Badge</h3>
                   <p className="text-sm text-muted-foreground">
-                    Stand out with a verified badge on your profile. Parents trust verified tutors more. Only ৳50 one-time fee.
+                    Stand out with a verified badge on your profile. Parents trust verified tutors more. Only ৳{verificationFee} one-time fee.
                   </p>
                 </div>
                 <Button onClick={handlePayForVerification} disabled={verifyLoading}>
-                  {verifyLoading ? 'Processing...' : 'Pay ৳50 & Verify'}
+                  {verifyLoading ? 'Processing...' : `Pay ৳${verificationFee} & Verify`}
                 </Button>
               </div>
             </CardContent>
