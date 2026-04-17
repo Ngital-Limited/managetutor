@@ -1468,11 +1468,7 @@ export default function AdminDashboard() {
     else { toast({ title: 'Job deleted' }); fetchJobs(); fetchStats(); }
   };
 
-  const handleToggleReview = async (reviewId: string, approved: boolean) => {
-    const { error } = await supabase.from('reviews').update({ is_approved: approved }).eq('id', reviewId);
-    if (error) toast({ title: 'Error', description: error.message, variant: 'destructive' });
-    else { toast({ title: `Review ${approved ? 'approved' : 'hidden'}` }); fetchReviews(); }
-  };
+  const handleUpdateJobStatus2Placeholder = null;
 
   const handleUpdateJobStatus = async (jobId: string, status: string) => {
     const { error } = await supabase.from('jobs').update({ status: status as any }).eq('id', jobId);
@@ -2529,7 +2525,7 @@ export default function AdminDashboard() {
                                     <div className="flex items-center gap-1.5 flex-wrap">
                                       <Badge variant="secondary" className="text-xs gap-1"><Users className="h-3 w-3" />{total}</Badge>
                                       {pending > 0 && <Badge variant="outline" className="text-xs">Pending: {pending}</Badge>}
-                                      {shortlisted > 0 && <Badge variant="outline" className="text-xs gap-1"><Star className="h-3 w-3" />{shortlisted}</Badge>}
+                                      {shortlisted > 0 && <Badge variant="outline" className="text-xs gap-1"><CheckCircle2 className="h-3 w-3" />{shortlisted}</Badge>}
                                     </div>
                                   </TableCell>
                                   <TableCell className="text-right">
@@ -2874,7 +2870,7 @@ export default function AdminDashboard() {
                                     <div className="flex gap-1 justify-end flex-wrap">
                                       {!isFinal && app.status === 'pending' && (
                                         <Button variant="outline" size="sm" className="h-8 text-xs gap-1" onClick={() => handleAdminUpdateAppStatus(app.id, 'shortlisted', app.job_id)} title="Shortlist">
-                                          <Star className="h-3.5 w-3.5" /> Shortlist
+                                          <CheckCircle2 className="h-3.5 w-3.5" /> Shortlist
                                         </Button>
                                       )}
                                       {!isFinal && (app.status === 'pending' || app.status === 'shortlisted') && (
@@ -3006,79 +3002,7 @@ export default function AdminDashboard() {
               );
             })()}
 
-            {/* ═══════ REVIEWS TAB ═══════ */}
-            {activeTab === 'reviews' && (() => {
-              const q = reviewsSearch.trim().toLowerCase();
-              const filteredReviews = !q ? reviews : reviews.filter(r =>
-                ((r.parent as any)?.full_name || '').toLowerCase().includes(q) ||
-                ((r.tutor_profiles as any)?.profiles?.full_name || '').toLowerCase().includes(q) ||
-                (r.comment || '').toLowerCase().includes(q) ||
-                String(r.rating || '').includes(q)
-              );
-              return (
-              <div className="space-y-6">
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                  <h1 className="text-xl font-semibold">Review Moderation</h1>
-                  <div className="relative w-full sm:w-72">
-                    <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      value={reviewsSearch}
-                      onChange={(e) => setReviewsSearch(e.target.value)}
-                      placeholder="Search parent, tutor, comment, or rating"
-                      className="pl-8 h-9"
-                    />
-                  </div>
-                </div>
-                <Card>
-                  <CardContent className="p-0">
-                    <ScrollArea className="w-full">
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead>Parent</TableHead>
-                            <TableHead>Tutor</TableHead>
-                            <TableHead>Rating</TableHead>
-                            <TableHead>Comment</TableHead>
-                            <TableHead>Status</TableHead>
-                            <TableHead>Date</TableHead>
-                            <TableHead className="text-right">Actions</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {filteredReviews.length === 0 ? (
-                            <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">{q ? 'No matches' : 'No reviews yet'}</TableCell></TableRow>
-                          ) : filteredReviews.map((r) => (
-                            <TableRow key={r.id}>
-                              <TableCell className="text-sm">{(r.parent as any)?.full_name}</TableCell>
-                              <TableCell className="text-sm">{(r.tutor_profiles as any)?.profiles?.full_name || '—'}</TableCell>
-                              <TableCell>
-                                <div className="flex items-center gap-1">
-                                  <Star className="h-3.5 w-3.5 text-accent fill-accent" />
-                                  <span className="text-sm font-medium">{r.rating}</span>
-                                </div>
-                              </TableCell>
-                              <TableCell className="text-sm max-w-[250px] truncate">{r.comment || '—'}</TableCell>
-                              <TableCell>
-                                <Badge className={`text-xs ${r.is_approved ? 'bg-success/10 text-success' : 'bg-destructive/10 text-destructive'}`}>
-                                  {r.is_approved ? 'Visible' : 'Hidden'}
-                                </Badge>
-                              </TableCell>
-                              <TableCell className="text-xs text-muted-foreground">{formatExactDate(new Date(r.created_at))}</TableCell>
-                              <TableCell className="text-right">
-                                <Button variant="ghost" size="sm" onClick={() => handleToggleReview(r.id, !r.is_approved)}>
-                                  {r.is_approved ? <XCircle className="h-4 w-4 text-destructive" /> : <CheckCircle2 className="h-4 w-4 text-success" />}
-                                </Button>
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
-                    </ScrollArea>
-                  </CardContent>
-                </Card>
-              </div>
-              );
-            })()}
+            {/* Reviews tab removed */}
 
             {/* ═══════ PAYMENTS TAB ═══════ */}
             {activeTab === 'payments' && (
