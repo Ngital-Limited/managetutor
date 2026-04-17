@@ -2125,19 +2125,34 @@ export default function ParentDashboard() {
                         <Badge className={
                           app.status === 'accepted' ? 'bg-success' :
                           app.status === 'rejected' ? 'bg-destructive' :
+                          app.status === 'shortlisted' ? 'bg-primary' :
+                          app.status === 'invited_to_demo' ? 'bg-accent text-accent-foreground' :
                           'bg-warning text-warning-foreground'
                         }>
-                          {app.status.charAt(0).toUpperCase() + app.status.slice(1)}
+                          {app.status === 'invited_to_demo' ? 'Invited' : app.status.charAt(0).toUpperCase() + app.status.slice(1)}
                         </Badge>
                       </td>
                       <td className="py-3 px-2">
                         <div className="flex items-center gap-1 justify-center flex-wrap">
-                          {app.status === 'pending' && (
+                          {(app.status === 'pending' || app.status === 'shortlisted') && (
                             <>
-                              <Button size="sm" className="h-8 text-xs" onClick={() => handleApplicationAction(app.id, 'accepted')}>
-                                <CheckCircle2 className="h-3.5 w-3.5 mr-1" />Hire
+                              {app.status === 'pending' && (
+                                <Button size="sm" variant="outline" className="h-8 text-xs" onClick={() => handleApplicationAction(app.id, 'shortlisted')} title="Shortlist">
+                                  <Star className="h-3.5 w-3.5" />
+                                </Button>
+                              )}
+                              <Button size="sm" variant="secondary" className="h-8 text-xs" onClick={() => {
+                                // Make sure selectedJob is set so the demo dialog has context
+                                const job = jobs.find(j => j.id === app.jobs?.id);
+                                if (job) setSelectedJob(job);
+                                handleInviteToInterview(app);
+                              }} title="Invite to demo class">
+                                <Send className="h-3.5 w-3.5" />
                               </Button>
-                              <Button size="sm" variant="outline" className="h-8 text-xs" onClick={() => handleApplicationAction(app.id, 'rejected')}>
+                              <Button size="sm" className="h-8 text-xs" onClick={() => handleApplicationAction(app.id, 'accepted')} title="Hire">
+                                <CheckCircle2 className="h-3.5 w-3.5" />
+                              </Button>
+                              <Button size="sm" variant="outline" className="h-8 text-xs" onClick={() => handleApplicationAction(app.id, 'rejected')} title="Reject">
                                 <XCircle className="h-3.5 w-3.5" />
                               </Button>
                             </>
