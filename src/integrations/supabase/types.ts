@@ -73,10 +73,8 @@ export type Database = {
       agency_profiles: {
         Row: {
           agency_name: string
-          agency_name_bn: string | null
           created_at: string | null
           description: string | null
-          description_bn: string | null
           id: string
           logo_url: string | null
           total_tutors: number | null
@@ -90,10 +88,8 @@ export type Database = {
         }
         Insert: {
           agency_name: string
-          agency_name_bn?: string | null
           created_at?: string | null
           description?: string | null
-          description_bn?: string | null
           id?: string
           logo_url?: string | null
           total_tutors?: number | null
@@ -107,10 +103,8 @@ export type Database = {
         }
         Update: {
           agency_name?: string
-          agency_name_bn?: string | null
           created_at?: string | null
           description?: string | null
-          description_bn?: string | null
           id?: string
           logo_url?: string | null
           total_tutors?: number | null
@@ -221,21 +215,18 @@ export type Database = {
           created_at: string | null
           district_id: string
           id: string
-          name_bn: string
           name_en: string
         }
         Insert: {
           created_at?: string | null
           district_id: string
           id?: string
-          name_bn: string
           name_en: string
         }
         Update: {
           created_at?: string | null
           district_id?: string
           id?: string
-          name_bn?: string
           name_en?: string
         }
         Relationships: [
@@ -409,7 +400,6 @@ export type Database = {
           district_id: string | null
           email: string | null
           full_name: string
-          full_name_bn: string | null
           id: string
           phone: string | null
         }
@@ -419,7 +409,6 @@ export type Database = {
           district_id?: string | null
           email?: string | null
           full_name: string
-          full_name_bn?: string | null
           id?: string
           phone?: string | null
         }
@@ -429,7 +418,6 @@ export type Database = {
           district_id?: string | null
           email?: string | null
           full_name?: string
-          full_name_bn?: string | null
           id?: string
           phone?: string | null
         }
@@ -446,26 +434,20 @@ export type Database = {
       districts: {
         Row: {
           created_at: string | null
-          division_bn: string
           division_en: string
           id: string
-          name_bn: string
           name_en: string
         }
         Insert: {
           created_at?: string | null
-          division_bn: string
           division_en: string
           id?: string
-          name_bn: string
           name_en: string
         }
         Update: {
           created_at?: string | null
-          division_bn?: string
           division_en?: string
           id?: string
-          name_bn?: string
           name_en?: string
         }
         Relationships: []
@@ -605,7 +587,6 @@ export type Database = {
           created_at: string | null
           days_per_week: number | null
           description: string
-          description_bn: string | null
           district_id: string
           duration_hours: number | null
           fixed_time: string | null
@@ -627,7 +608,6 @@ export type Database = {
           subject_id: string | null
           teaching_mode: Database["public"]["Enums"]["teaching_mode"] | null
           title: string
-          title_bn: string | null
           total_applications: number | null
           updated_at: string | null
         }
@@ -639,7 +619,6 @@ export type Database = {
           created_at?: string | null
           days_per_week?: number | null
           description: string
-          description_bn?: string | null
           district_id: string
           duration_hours?: number | null
           fixed_time?: string | null
@@ -661,7 +640,6 @@ export type Database = {
           subject_id?: string | null
           teaching_mode?: Database["public"]["Enums"]["teaching_mode"] | null
           title: string
-          title_bn?: string | null
           total_applications?: number | null
           updated_at?: string | null
         }
@@ -673,7 +651,6 @@ export type Database = {
           created_at?: string | null
           days_per_week?: number | null
           description?: string
-          description_bn?: string | null
           district_id?: string
           duration_hours?: number | null
           fixed_time?: string | null
@@ -695,7 +672,6 @@ export type Database = {
           subject_id?: string | null
           teaching_mode?: Database["public"]["Enums"]["teaching_mode"] | null
           title?: string
-          title_bn?: string | null
           total_applications?: number | null
           updated_at?: string | null
         }
@@ -987,7 +963,6 @@ export type Database = {
           email: string
           email_verified: boolean | null
           full_name: string
-          full_name_bn: string | null
           id: string
           is_approved: boolean | null
           is_banned: boolean | null
@@ -1008,7 +983,6 @@ export type Database = {
           email: string
           email_verified?: boolean | null
           full_name: string
-          full_name_bn?: string | null
           id: string
           is_approved?: boolean | null
           is_banned?: boolean | null
@@ -1029,7 +1003,6 @@ export type Database = {
           email?: string
           email_verified?: boolean | null
           full_name?: string
-          full_name_bn?: string | null
           id?: string
           is_approved?: boolean | null
           is_banned?: boolean | null
@@ -1266,27 +1239,21 @@ export type Database = {
       }
       subjects: {
         Row: {
-          category_bn: string | null
           category_en: string | null
           created_at: string | null
           id: string
-          name_bn: string
           name_en: string
         }
         Insert: {
-          category_bn?: string | null
           category_en?: string | null
           created_at?: string | null
           id?: string
-          name_bn: string
           name_en: string
         }
         Update: {
-          category_bn?: string | null
           category_en?: string | null
           created_at?: string | null
           id?: string
-          name_bn?: string
           name_en?: string
         }
         Relationships: []
@@ -1300,7 +1267,6 @@ export type Database = {
           is_active: boolean | null
           max_applications_per_month: number | null
           name: string
-          name_bn: string | null
           price_monthly: number
           price_quarterly: number | null
           price_yearly: number | null
@@ -1314,7 +1280,6 @@ export type Database = {
           is_active?: boolean | null
           max_applications_per_month?: number | null
           name: string
-          name_bn?: string | null
           price_monthly: number
           price_quarterly?: number | null
           price_yearly?: number | null
@@ -1328,7 +1293,6 @@ export type Database = {
           is_active?: boolean | null
           max_applications_per_month?: number | null
           name?: string
-          name_bn?: string | null
           price_monthly?: number
           price_quarterly?: number | null
           price_yearly?: number | null
@@ -1581,14 +1545,12 @@ export type Database = {
           area_id: string | null
           average_rating: number | null
           bio: string | null
-          bio_bn: string | null
           class_levels: string[] | null
           created_at: string | null
           date_of_birth: string | null
           display_name: string | null
           district_id: string | null
           education: string | null
-          education_bn: string | null
           education_detail: string | null
           emergency_contact_name: string | null
           emergency_contact_phone: string | null
@@ -1632,14 +1594,12 @@ export type Database = {
           area_id?: string | null
           average_rating?: number | null
           bio?: string | null
-          bio_bn?: string | null
           class_levels?: string[] | null
           created_at?: string | null
           date_of_birth?: string | null
           display_name?: string | null
           district_id?: string | null
           education?: string | null
-          education_bn?: string | null
           education_detail?: string | null
           emergency_contact_name?: string | null
           emergency_contact_phone?: string | null
@@ -1683,14 +1643,12 @@ export type Database = {
           area_id?: string | null
           average_rating?: number | null
           bio?: string | null
-          bio_bn?: string | null
           class_levels?: string[] | null
           created_at?: string | null
           date_of_birth?: string | null
           display_name?: string | null
           district_id?: string | null
           education?: string | null
-          education_bn?: string | null
           education_detail?: string | null
           emergency_contact_name?: string | null
           emergency_contact_phone?: string | null

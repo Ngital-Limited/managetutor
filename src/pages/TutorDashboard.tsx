@@ -62,8 +62,8 @@ interface RecommendedJob {
   teaching_mode: string;
   class_level: string;
   created_at: string;
-  districts: { name_en: string; name_bn: string } | null;
-  subjects: { name_en: string; name_bn: string } | null;
+  districts: { name_en: string} | null;
+  subjects: { name_en: string} | null;
 }
 
 interface TutorProfile {
@@ -285,7 +285,7 @@ export default function TutorDashboard() {
       // Fetch demo bookings
       const { data: bookingsData } = await supabase
         .from('demo_bookings')
-        .select('*, subjects(name_en, name_bn), profiles:parent_id(full_name, phone, email)')
+        .select('*, subjects(name_en), profiles:parent_id(full_name, phone, email)')
         .eq('tutor_id', tutorData.id)
         .order('created_at', { ascending: false });
 
@@ -306,7 +306,7 @@ export default function TutorDashboard() {
       // Recommended: matching subjects
       let recQuery = supabase
         .from('jobs')
-        .select('id, slug, title, budget_min, budget_max, teaching_mode, class_level, created_at, districts(name_en, name_bn), subjects(name_en, name_bn)')
+        .select('id, slug, title, budget_min, budget_max, teaching_mode, class_level, created_at, districts(name_en), subjects(name_en)')
         .eq('status', 'open')
         .order('created_at', { ascending: false })
         .limit(10);
@@ -323,7 +323,7 @@ export default function TutorDashboard() {
       if (tutorData.district_id) {
         let nearQuery = supabase
           .from('jobs')
-          .select('id, slug, title, budget_min, budget_max, teaching_mode, class_level, created_at, districts(name_en, name_bn), subjects(name_en, name_bn)')
+          .select('id, slug, title, budget_min, budget_max, teaching_mode, class_level, created_at, districts(name_en), subjects(name_en)')
           .eq('status', 'open')
           .eq('district_id', tutorData.district_id)
           .order('created_at', { ascending: false })
@@ -338,7 +338,7 @@ export default function TutorDashboard() {
       // High-paying jobs
       let highQuery = supabase
         .from('jobs')
-        .select('id, slug, title, budget_min, budget_max, teaching_mode, class_level, created_at, districts(name_en, name_bn), subjects(name_en, name_bn)')
+        .select('id, slug, title, budget_min, budget_max, teaching_mode, class_level, created_at, districts(name_en), subjects(name_en)')
         .eq('status', 'open')
         .order('budget_max', { ascending: false })
         .limit(10);

@@ -50,9 +50,9 @@ import {
   Send, AlertTriangle, Receipt, DollarSign, LayoutDashboard
 } from 'lucide-react';
 
-interface District { id: string; name_en: string; name_bn: string; division_en: string; division_bn: string; }
-interface Subject { id: string; name_en: string; name_bn: string; }
-interface Area { id: string; name_en: string; name_bn: string; district_id: string; }
+interface District { id: string; name_en: string; division_en: string; }
+interface Subject { id: string; name_en: string; }
+interface Area { id: string; name_en: string; district_id: string; }
 
 interface Job {
   id: string;
@@ -79,9 +79,9 @@ interface Job {
   student_age: string | null;
   start_date: string | null;
   location_details: string | null;
-  districts: { name_en: string; name_bn: string };
-  subjects: { name_en: string; name_bn: string } | null;
-  job_subjects?: { subjects: { name_en: string; name_bn: string } }[];
+  districts: { name_en: string};
+  subjects: { name_en: string} | null;
+  job_subjects?: { subjects: { name_en: string} }[];
   is_featured?: boolean;
 }
 
@@ -109,9 +109,9 @@ interface Application {
     monthly_salary_max: number | null;
     is_available: boolean;
     district_id: string | null;
-    districts: { name_en: string; name_bn: string } | null;
+    districts: { name_en: string} | null;
     profiles: { full_name: string; avatar_url: string };
-    tutor_subjects: { subjects: { name_en: string; name_bn: string } }[];
+    tutor_subjects: { subjects: { name_en: string} }[];
   };
 }
 
@@ -338,7 +338,7 @@ export default function ParentDashboard() {
       supabase.from('subjects').select('*').order('name_en'),
       supabase.from('profiles').select('full_name, avatar_url, phone, email, district_id, area_id, user_reference').eq('id', user.id).single(),
       supabase.from('jobs')
-        .select('*, districts (name_en, name_bn), subjects (name_en, name_bn), job_subjects (subjects (name_en, name_bn))')
+        .select('*, districts (name_en), subjects (name_en), job_subjects (subjects (name_en))')
         .eq('parent_id', user.id)
         .order('created_at', { ascending: false }),
       supabase.from('areas').select('*').order('name_en'),
@@ -352,7 +352,7 @@ export default function ParentDashboard() {
 
     const { data: bookingsData } = await supabase
       .from('demo_bookings')
-      .select('*, subjects(name_en, name_bn), tutor_profiles:tutor_id(id, profiles:user_id(full_name, avatar_url))')
+      .select('*, subjects(name_en), tutor_profiles:tutor_id(id, profiles:user_id(full_name, avatar_url))')
       .eq('parent_id', user.id)
       .order('created_at', { ascending: false });
 
@@ -388,9 +388,9 @@ export default function ParentDashboard() {
             id, user_id, bio, education, education_detail, experience_years,
             average_rating, total_reviews, total_students, verification_status, verification_paid,
             teaching_mode, gender, monthly_salary_min, monthly_salary_max, is_available,
-            district_id, districts (name_en, name_bn),
+            district_id, districts (name_en),
             profiles:user_id (full_name, avatar_url),
-            tutor_subjects (subjects (name_en, name_bn))
+            tutor_subjects (subjects (name_en))
           )
         `)
         .in('job_id', jobIds)
@@ -412,9 +412,9 @@ export default function ParentDashboard() {
           id, user_id, bio, education, education_detail, experience_years, 
           average_rating, total_reviews, total_students, verification_status, verification_paid,
           teaching_mode, gender, monthly_salary_min, monthly_salary_max, is_available,
-          district_id, districts (name_en, name_bn),
+          district_id, districts (name_en),
           profiles:user_id (full_name, avatar_url),
-          tutor_subjects (subjects (name_en, name_bn))
+          tutor_subjects (subjects (name_en))
         )
       `)
       .eq('job_id', jobId)
@@ -1076,8 +1076,8 @@ export default function ParentDashboard() {
                 onCreateOption={async (name) => {
                   const { data, error } = await supabase
                     .from('subjects')
-                    .insert({ name_en: name, name_bn: name })
-                    .select('id, name_en, name_bn, category_en, category_bn, created_at')
+                    .insert({ name_en: name})
+                    .select('id, name_en, category_en, created_at')
                     .single();
                   if (error || !data) {
                     toast({ title: 'Could not add subject', description: error?.message, variant: 'destructive' });

@@ -34,8 +34,8 @@ interface FeaturedTutor {
   monthly_salary_max: number | null;
   is_available: boolean;
   profiles: { full_name: string; avatar_url: string | null };
-  districts: { name_en: string; name_bn: string } | null;
-  tutor_subjects: { subjects: { name_en: string; name_bn: string } }[];
+  districts: { name_en: string} | null;
+  tutor_subjects: { subjects: { name_en: string} }[];
 }
 
 interface LatestJob {
@@ -48,15 +48,14 @@ interface LatestJob {
   days_per_week: number | null;
   job_reference: string | null;
   created_at: string;
-  districts: { name_en: string; name_bn: string };
-  areas: { name_en: string; name_bn: string } | null;
-  subjects: { name_en: string; name_bn: string } | null;
+  districts: { name_en: string};
+  areas: { name_en: string} | null;
+  subjects: { name_en: string} | null;
 }
 
 interface SubjectCategory {
   category_en: string;
-  category_bn: string | null;
-  subjects: { id: string; name_en: string; name_bn: string }[];
+  subjects: { id: string; name_en: string}[];
 }
 
 export default function Index() {
@@ -65,7 +64,7 @@ export default function Index() {
   const navigate = useNavigate();
 
   const [areas, setAreas] = useState<{ id: string; name_en: string; district_name: string }[]>([]);
-  const [subjectsList, setSubjectsList] = useState<{ id: string; name_en: string; name_bn: string }[]>([]);
+  const [subjectsList, setSubjectsList] = useState<{ id: string; name_en: string}[]>([]);
   const [selectedArea, setSelectedArea] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedBackground, setSelectedBackground] = useState('');
@@ -80,20 +79,20 @@ export default function Index() {
     const fetchAll = async () => {
       const [{ data: a }, { data: s }, { data: tutors }, { data: jobs }] = await Promise.all([
         supabase.from('areas').select('id, name_en, districts (name_en)').order('name_en'),
-        supabase.from('subjects').select('id, name_en, name_bn, category_en, category_bn').order('name_en'),
+        supabase.from('subjects').select('id, name_en, category_en').order('name_en'),
         supabase.from('tutor_profiles')
           .select(`
             id, slug, bio, education, experience_years, average_rating, total_reviews,
             verification_status, teaching_mode, monthly_salary_min, monthly_salary_max, is_available,
             profiles:user_id (full_name, avatar_url),
-            districts (name_en, name_bn),
-            tutor_subjects (subjects (name_en, name_bn))
+            districts (name_en),
+            tutor_subjects (subjects (name_en))
           `)
           .eq('is_available', true)
           .order('average_rating', { ascending: false })
           .limit(6),
         supabase.from('jobs')
-          .select('id, slug, title, description, budget_min, budget_max, teaching_mode, days_per_week, job_reference, created_at, districts (name_en, name_bn), areas (name_en, name_bn), subjects (name_en, name_bn)')
+          .select('id, slug, title, description, budget_min, budget_max, teaching_mode, days_per_week, job_reference, created_at, districts (name_en), areas (name_en), subjects (name_en)')
           .eq('status', 'open')
           .order('created_at', { ascending: false })
           .limit(6),
@@ -108,7 +107,6 @@ export default function Index() {
           if (!catMap.has(catKey)) {
             catMap.set(catKey, {
               category_en: catKey,
-              category_bn: (sub as any).category_bn || catKey,
               subjects: [],
             });
           }

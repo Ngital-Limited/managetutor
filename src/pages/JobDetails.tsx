@@ -48,10 +48,10 @@ interface Job {
   start_date: string | null;
   location_details: string | null;
   job_reference: string | null;
-  districts: { name_en: string; name_bn: string } | null;
-  areas: { name_en: string; name_bn: string } | null;
-  subjects: { name_en: string; name_bn: string } | null;
-  job_subjects?: { subjects: { name_en: string; name_bn: string } }[];
+  districts: { name_en: string} | null;
+  areas: { name_en: string} | null;
+  subjects: { name_en: string} | null;
+  job_subjects?: { subjects: { name_en: string} }[];
 }
 
 interface Application {
@@ -104,10 +104,10 @@ export default function JobDetails() {
       .from('jobs')
       .select(`
         *,
-        districts (name_en, name_bn),
-        areas (name_en, name_bn),
-        subjects (name_en, name_bn),
-        job_subjects (subjects (name_en, name_bn))
+        districts (name_en),
+        areas (name_en),
+        subjects (name_en),
+        job_subjects (subjects (name_en))
       `);
     const { data: jobData, error } = await (isUuid
       ? query.eq('id', id!).single()

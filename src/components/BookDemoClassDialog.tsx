@@ -14,7 +14,6 @@ import { getPlatformCommissionPct, computeFeeSplit } from '@/lib/commission';
 interface Subject {
   id: string;
   name_en: string;
-  name_bn: string;
 }
 
 interface BookDemoClassDialogProps {

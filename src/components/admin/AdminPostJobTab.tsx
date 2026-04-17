@@ -20,7 +20,7 @@ interface Props {
   toast: (opts: { title: string; description?: string; variant?: 'default' | 'destructive' }) => void;
 }
 
-interface District { id: string; name_en: string; name_bn: string; division_en: string; division_bn: string; }
+interface District { id: string; name_en: string; division_en: string; }
 interface Area { id: string; name_en: string; district_id: string; }
 interface Subject { id: string; name_en: string; category_en: string | null; }
 interface ParentResult { id: string; full_name: string; email: string; phone: string | null; }
@@ -70,7 +70,7 @@ export function AdminPostJobTab({ toast }: Props) {
 
   useEffect(() => {
     Promise.all([
-      supabase.from('districts').select('id, name_en, name_bn, division_en, division_bn').order('name_en'),
+      supabase.from('districts').select('id, name_en, division_en').order('name_en'),
       supabase.from('areas').select('id, name_en, district_id').order('name_en'),
       supabase.from('subjects').select('id, name_en, category_en').order('name_en'),
     ]).then(([d, a, s]) => {
@@ -455,7 +455,7 @@ export function AdminPostJobTab({ toast }: Props) {
                   onCreateOption={async (name) => {
                     const { data, error } = await supabase
                       .from('subjects')
-                      .insert({ name_en: name, name_bn: name })
+                      .insert({ name_en: name})
                       .select('id, name_en, category_en')
                       .single();
                     if (error || !data) {
