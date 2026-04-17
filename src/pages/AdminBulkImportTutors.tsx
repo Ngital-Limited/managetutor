@@ -22,6 +22,38 @@ interface BatchResult {
 
 const BATCH_SIZE = 50;
 
+// Aliases → canonical field name expected by the edge function.
+// Keys are normalized (lowercase, no spaces/underscores/dashes/punctuation).
+const HEADER_ALIASES: Record<string, string> = {
+  firstname: 'fname', fname: 'fname', givenname: 'fname',
+  lastname: 'lname', lname: 'lname', surname: 'lname', familyname: 'lname',
+  fullname: 'fname', name: 'fname',
+  email: 'email', emailaddress: 'email', mail: 'email',
+  phone: 'phone', mobile: 'phone', mobilenumber: 'phone', phonenumber: 'phone', contact: 'phone', primaryphone: 'phone',
+  altphone: 'alt_phone', alternatephone: 'alt_phone', alternativephone: 'alt_phone', secondaryphone: 'alt_phone', emergencyphone: 'alt_phone', emergencycontact: 'alt_phone',
+  fphone: 'f_phone', fatherphone: 'f_phone', fathersphone: 'f_phone', fathercontact: 'f_phone',
+  mphone: 'm_phone', motherphone: 'm_phone', mothersphone: 'm_phone', mothercontact: 'm_phone',
+  paddress: 'p_address', presentaddress: 'p_address', currentaddress: 'p_address', address: 'p_address',
+  peraddress: 'per_address', permanentaddress: 'per_address', homeaddress: 'per_address',
+  gender: 'gender', sex: 'gender',
+  school: 'school', schoolname: 'school', ssc: 'school',
+  college: 'college', collegename: 'college', hsc: 'college',
+  university: 'university', universityname: 'university', institution: 'university',
+  department: 'department', subject: 'department', major: 'department', fieldofstudy: 'department',
+  texperience: 't_experience', experience: 't_experience', tuitionexperience: 't_experience', teachingexperience: 't_experience', yearsofexperience: 't_experience',
+  background: 'background', educationbackground: 'background', educationalbackground: 'background',
+  medium: 'medium', languagemedium: 'medium', teachingmedium: 'medium',
+  fblink: 'fb_link', facebook: 'fb_link', facebooklink: 'fb_link', facebookurl: 'fb_link', fburl: 'fb_link',
+  preclass: 'pre_class', preferredclass: 'pre_class', preferredclasses: 'pre_class', classpreference: 'pre_class', classes: 'pre_class',
+  presubject: 'pre_subject', preferredsubject: 'pre_subject', preferredsubjects: 'pre_subject', subjectpreference: 'pre_subject', subjects: 'pre_subject',
+  prearea: 'pre_area', preferredarea: 'pre_area', preferredareas: 'pre_area', areapreference: 'pre_area', area: 'pre_area', location: 'pre_area', district: 'pre_area',
+  status: 'status',
+  photo: 'photo', photourl: 'photo', picture: 'photo', avatar: 'photo', avatarurl: 'photo', image: 'photo', imageurl: 'photo', profilepicture: 'photo', profilephoto: 'photo',
+};
+
+const normalizeHeader = (h: string) => h.toLowerCase().replace(/[\s_\-./()]+/g, '');
+const mapHeader = (h: string) => HEADER_ALIASES[normalizeHeader(h)] || h;
+
 export default function AdminBulkImportTutors() {
   const { role } = useAuth();
   const navigate = useNavigate();
