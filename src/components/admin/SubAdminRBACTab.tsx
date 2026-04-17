@@ -191,8 +191,18 @@ export function SubAdminRBACTab({ toast }: { toast: any }) {
                           <Shield className="h-3 w-3 mr-1" />
                           {getActivePermCount(admin.id)}/{Object.keys(PERMISSION_LABELS).length} permissions
                         </Badge>
-                        <Button size="sm" variant="outline" onClick={() => setSelectedAdmin(selectedAdmin?.id === admin.id ? null : admin)}>
+                        <Button size="sm" variant="outline" onClick={() => setSelectedAdmin(selectedAdmin?.id === admin.id ? null : admin)} title="Edit permissions">
                           <Settings className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => setRemoveTarget(admin)}
+                          disabled={admin.id === currentUserId}
+                          title={admin.id === currentUserId ? "You can't remove yourself" : 'Remove admin role'}
+                          className="text-destructive hover:text-destructive"
+                        >
+                          <UserMinus className="h-4 w-4" />
                         </Button>
                       </div>
                     </div>
