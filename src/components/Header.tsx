@@ -19,8 +19,24 @@ export function Header() {
   const { user, profile, signOut } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [isInstalled, setIsInstalled] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const check = () =>
+      window.matchMedia("(display-mode: standalone)").matches ||
+      (window.navigator as any).standalone === true;
+    setIsInstalled(check());
+    const mq = window.matchMedia("(display-mode: standalone)");
+    const onChange = () => setIsInstalled(check());
+    mq.addEventListener?.("change", onChange);
+    window.addEventListener("appinstalled", onChange);
+    return () => {
+      mq.removeEventListener?.("change", onChange);
+      window.removeEventListener("appinstalled", onChange);
+    };
+  }, []);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 10);
@@ -37,7 +53,7 @@ export function Header() {
     { to: '/jobs', label: t('nav.browseJobs') },
     { to: '/about', label: 'About' },
     { to: '/contact', label: 'Contact' },
-    { to: '/install', label: 'Install App' },
+    ...(isInstalled ? [] : [{ to: '/install', label: 'Install App' }]),
   ];
 
   const isActive = (path: string) => location.pathname === path;
@@ -91,12 +107,14 @@ export function Header() {
 
             {/* Desktop auth */}
             <div className="hidden md:flex items-center gap-2">
-              <Link to="/install" aria-label="Install App">
-                <Button variant="outline" size="sm" className="h-9 rounded-lg font-medium gap-1.5">
-                  <Download className="h-4 w-4" />
-                  Install App
-                </Button>
-              </Link>
+              {!isInstalled && (
+                <Link to="/install" aria-label="Install App">
+                  <Button variant="outline" size="sm" className="h-9 rounded-lg font-medium gap-1.5">
+                    <Download className="h-4 w-4" />
+                    Install App
+                  </Button>
+                </Link>
+              )}
               {user ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
