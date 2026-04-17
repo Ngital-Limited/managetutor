@@ -2354,10 +2354,10 @@ export default function AdminDashboard() {
               });
 
               return (
-                <div className="space-y-6">
+                <div className="space-y-5">
                   {/* Breadcrumb header */}
                   <div className="flex items-start justify-between flex-wrap gap-3">
-                    <div className="space-y-2">
+                    <div className="space-y-2 min-w-0">
                       <Button
                         variant="ghost"
                         size="sm"
@@ -2367,12 +2367,12 @@ export default function AdminDashboard() {
                         <ArrowLeft className="h-4 w-4" /> Back to Jobs
                       </Button>
                       <div>
-                        <h1 className="text-xl font-semibold">{selectedJob?.title || 'Applicants'}</h1>
-                        <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground flex-wrap">
-                          <span className="font-mono">{selectedJob?.job_reference || '—'}</span>
-                          <span>•</span>
-                          <Badge className={`text-xs capitalize ${statusColor(selectedJob?.status)}`}>{(selectedJob?.status || '—').replace('_', ' ')}</Badge>
-                          <span>•</span>
+                        <h1 className="text-2xl font-semibold tracking-tight">{selectedJob?.title || 'Applicants'}</h1>
+                        <div className="flex items-center gap-2 mt-1.5 text-xs text-muted-foreground flex-wrap">
+                          <span className="font-mono px-1.5 py-0.5 rounded bg-muted text-foreground/80">{selectedJob?.job_reference || '—'}</span>
+                          <span className="text-muted-foreground/50">•</span>
+                          <Badge className={`text-[10px] capitalize ${statusColor(selectedJob?.status)}`}>{(selectedJob?.status || '—').replace('_', ' ')}</Badge>
+                          <span className="text-muted-foreground/50">•</span>
                           <span>{jobApps.length} applicant{jobApps.length === 1 ? '' : 's'}</span>
                         </div>
                       </div>
@@ -2386,105 +2386,119 @@ export default function AdminDashboard() {
                   </div>
 
                   {/* Job requirement details panel */}
-                  {selectedJob && (
-                    <Card>
-                      <CardContent className="p-4 space-y-3">
-                        <div className="flex items-center gap-2">
-                          <BookOpen className="h-4 w-4 text-primary" />
+                  {selectedJob && (() => {
+                    const fields: { label: string; value: React.ReactNode }[] = [];
+                    if (selectedJob.class_level) fields.push({ label: 'Class Level', value: selectedJob.class_level });
+                    if (selectedJob.budget_min || selectedJob.budget_max) fields.push({ label: 'Budget', value: `৳${selectedJob.budget_min ?? '—'} – ৳${selectedJob.budget_max ?? '—'}` });
+                    if (selectedJob.teaching_mode) fields.push({ label: 'Mode', value: <span className="capitalize">{String(selectedJob.teaching_mode).replace('_', ' ')}</span> });
+                    if (selectedJob.days_per_week) fields.push({ label: 'Days / Week', value: selectedJob.days_per_week });
+                    if (selectedJob.duration_hours) fields.push({ label: 'Duration', value: `${selectedJob.duration_hours} hr` });
+                    if (selectedJob.preferred_time || selectedJob.fixed_time) fields.push({ label: 'Time', value: selectedJob.fixed_time || selectedJob.preferred_time });
+                    if (selectedJob.start_date) fields.push({ label: 'Start Date', value: new Date(selectedJob.start_date).toLocaleDateString() });
+                    if (selectedJob.number_of_students) fields.push({ label: 'Students', value: selectedJob.number_of_students });
+                    if (selectedJob.student_age) fields.push({ label: 'Student Age', value: selectedJob.student_age });
+                    if (selectedJob.student_gender) fields.push({ label: 'Student Gender', value: <span className="capitalize">{selectedJob.student_gender}</span> });
+                    if (selectedJob.preferred_tutor_gender && selectedJob.preferred_tutor_gender !== 'any') fields.push({ label: 'Preferred Tutor', value: <span className="capitalize">{selectedJob.preferred_tutor_gender}</span> });
+                    if (selectedJob.student_school_name) fields.push({ label: 'School', value: selectedJob.student_school_name });
+
+                    return (
+                      <Card className="overflow-hidden border-border/60">
+                        <div className="bg-gradient-to-r from-primary/5 via-primary/[0.02] to-transparent px-5 py-3 border-b border-border/60 flex items-center gap-2">
+                          <div className="h-7 w-7 rounded-md bg-primary/10 flex items-center justify-center">
+                            <BookOpen className="h-3.5 w-3.5 text-primary" />
+                          </div>
                           <h3 className="text-sm font-semibold">Job Requirements</h3>
                         </div>
-                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-2 text-xs">
-                          {selectedJob.class_level && (
-                            <div><span className="text-muted-foreground">Class Level:</span> <span className="font-medium">{selectedJob.class_level}</span></div>
-                          )}
-                          {(selectedJob.budget_min || selectedJob.budget_max) && (
-                            <div><span className="text-muted-foreground">Budget:</span> <span className="font-medium">৳{selectedJob.budget_min || '—'} - ৳{selectedJob.budget_max || '—'}</span></div>
-                          )}
-                          {selectedJob.teaching_mode && (
-                            <div><span className="text-muted-foreground">Mode:</span> <span className="font-medium capitalize">{String(selectedJob.teaching_mode).replace('_', ' ')}</span></div>
-                          )}
-                          {selectedJob.days_per_week && (
-                            <div><span className="text-muted-foreground">Days/Week:</span> <span className="font-medium">{selectedJob.days_per_week}</span></div>
-                          )}
-                          {selectedJob.duration_hours && (
-                            <div><span className="text-muted-foreground">Duration:</span> <span className="font-medium">{selectedJob.duration_hours} hr</span></div>
-                          )}
-                          {(selectedJob.preferred_time || selectedJob.fixed_time) && (
-                            <div><span className="text-muted-foreground">Time:</span> <span className="font-medium">{selectedJob.fixed_time || selectedJob.preferred_time}</span></div>
-                          )}
-                          {selectedJob.start_date && (
-                            <div><span className="text-muted-foreground">Start:</span> <span className="font-medium">{new Date(selectedJob.start_date).toLocaleDateString()}</span></div>
-                          )}
-                          {selectedJob.number_of_students && (
-                            <div><span className="text-muted-foreground">Students:</span> <span className="font-medium">{selectedJob.number_of_students}</span></div>
-                          )}
-                          {selectedJob.student_age && (
-                            <div><span className="text-muted-foreground">Age:</span> <span className="font-medium">{selectedJob.student_age}</span></div>
-                          )}
-                          {selectedJob.student_gender && (
-                            <div><span className="text-muted-foreground">Student Gender:</span> <span className="font-medium capitalize">{selectedJob.student_gender}</span></div>
-                          )}
-                          {selectedJob.preferred_tutor_gender && selectedJob.preferred_tutor_gender !== 'any' && (
-                            <div><span className="text-muted-foreground">Preferred Tutor:</span> <span className="font-medium capitalize">{selectedJob.preferred_tutor_gender}</span></div>
-                          )}
-                          {selectedJob.student_school_name && (
-                            <div><span className="text-muted-foreground">School:</span> <span className="font-medium">{selectedJob.student_school_name}</span></div>
-                          )}
-                          {(selectedJob.districts?.name_en || selectedJob.areas?.name_en) && (
-                            <div className="col-span-2"><span className="text-muted-foreground">Location:</span> <span className="font-medium">{[selectedJob.areas?.name_en, selectedJob.districts?.name_en].filter(Boolean).join(', ')}</span></div>
-                          )}
-                        </div>
-                        {selectedJob.location_details && (
-                          <div className="text-xs"><span className="text-muted-foreground">Location Details:</span> <span className="font-medium">{selectedJob.location_details}</span></div>
-                        )}
-                        {selectedJob.description && (
-                          <div className="text-xs pt-2 border-t">
-                            <div className="text-muted-foreground mb-1">Description</div>
-                            <p className="whitespace-pre-wrap leading-relaxed">{selectedJob.description}</p>
-                          </div>
-                        )}
-                        {selectedJob.special_requirements && (
-                          <div className="text-xs pt-2 border-t">
-                            <div className="text-muted-foreground mb-1">Special Requirements</div>
-                            <p className="whitespace-pre-wrap leading-relaxed">{selectedJob.special_requirements}</p>
-                          </div>
-                        )}
-                        {/* Subjects */}
-                        {Array.isArray(selectedJob.job_subjects) && selectedJob.job_subjects.length > 0 && (
-                          <div className="text-xs pt-2 border-t">
-                            <div className="text-muted-foreground mb-1.5">Subjects</div>
-                            <div className="flex flex-wrap gap-1.5">
-                              {selectedJob.job_subjects.map((js: any, i: number) => (
-                                <Badge key={js?.subjects?.id || i} variant="secondary" className="text-xs">
-                                  {js?.subjects?.name_en || '—'}
-                                </Badge>
+                        <CardContent className="p-5 space-y-5">
+                          {/* Field grid */}
+                          {fields.length > 0 && (
+                            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-3.5">
+                              {fields.map((f) => (
+                                <div key={f.label} className="min-w-0">
+                                  <div className="text-[10px] uppercase tracking-wider text-muted-foreground/80 font-medium">{f.label}</div>
+                                  <div className="text-sm font-medium text-foreground mt-0.5 truncate">{f.value}</div>
+                                </div>
                               ))}
                             </div>
+                          )}
+
+                          {/* Location */}
+                          {(selectedJob.districts?.name_en || selectedJob.areas?.name_en || selectedJob.location_details) && (
+                            <div className="flex items-start gap-2.5 p-3 rounded-lg bg-muted/40 border border-border/40">
+                              <MapPin className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+                              <div className="text-sm min-w-0">
+                                <div className="font-medium">
+                                  {[selectedJob.areas?.name_en, selectedJob.districts?.name_en].filter(Boolean).join(', ') || '—'}
+                                </div>
+                                {selectedJob.location_details && (
+                                  <div className="text-xs text-muted-foreground mt-0.5">{selectedJob.location_details}</div>
+                                )}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Subjects */}
+                          {Array.isArray(selectedJob.job_subjects) && selectedJob.job_subjects.length > 0 && (
+                            <div>
+                              <div className="text-[10px] uppercase tracking-wider text-muted-foreground/80 font-medium mb-2">Subjects</div>
+                              <div className="flex flex-wrap gap-1.5">
+                                {selectedJob.job_subjects.map((js: any, i: number) => (
+                                  <Badge key={js?.subjects?.id || i} className="text-xs bg-primary/10 text-primary border-primary/20 hover:bg-primary/15">
+                                    {js?.subjects?.name_en || '—'}
+                                  </Badge>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Description / requirements split */}
+                          <div className="grid md:grid-cols-2 gap-4">
+                            {selectedJob.description && (
+                              <div className="p-3.5 rounded-lg bg-muted/30 border border-border/40">
+                                <div className="text-[10px] uppercase tracking-wider text-muted-foreground/80 font-medium mb-1.5">Description</div>
+                                <p className="text-xs whitespace-pre-wrap leading-relaxed">{selectedJob.description}</p>
+                              </div>
+                            )}
+                            {selectedJob.special_requirements && (
+                              <div className="p-3.5 rounded-lg bg-amber-500/5 border border-amber-500/20">
+                                <div className="text-[10px] uppercase tracking-wider text-amber-700 dark:text-amber-400 font-medium mb-1.5">Special Requirements</div>
+                                <p className="text-xs whitespace-pre-wrap leading-relaxed">{selectedJob.special_requirements}</p>
+                              </div>
+                            )}
                           </div>
-                        )}
-                        {/* Parent contact */}
-                        {jobApps[0]?.parent_profile && (
-                          <div className="text-xs pt-2 border-t">
-                            <div className="text-muted-foreground mb-1.5">Posted By (Parent)</div>
-                            <div className="flex items-center gap-3 flex-wrap">
-                              <Avatar className="h-8 w-8">
-                                <AvatarImage src={jobApps[0].parent_profile.avatar_url || ''} />
-                                <AvatarFallback className="text-xs">{jobApps[0].parent_profile.full_name?.charAt(0) || 'P'}</AvatarFallback>
-                              </Avatar>
-                              <div className="space-y-0.5">
-                                <div className="font-medium">{jobApps[0].parent_profile.full_name || '—'}</div>
-                                <div className="text-muted-foreground flex items-center gap-3 flex-wrap">
-                                  {jobApps[0].parent_profile.user_reference && (<span className="font-mono">{jobApps[0].parent_profile.user_reference}</span>)}
-                                  {jobApps[0].parent_profile.phone && (<span>📞 {jobApps[0].parent_profile.phone}</span>)}
-                                  {jobApps[0].parent_profile.email && (<span>✉ {jobApps[0].parent_profile.email}</span>)}
+
+                          {/* Parent contact */}
+                          {jobApps[0]?.parent_profile && (
+                            <div className="pt-4 border-t border-border/60">
+                              <div className="text-[10px] uppercase tracking-wider text-muted-foreground/80 font-medium mb-2.5">Posted By (Parent)</div>
+                              <div className="flex items-center gap-3 flex-wrap p-3 rounded-lg bg-muted/30 border border-border/40">
+                                <Avatar className="h-10 w-10 ring-2 ring-background shadow-sm">
+                                  <AvatarImage src={jobApps[0].parent_profile.avatar_url || ''} />
+                                  <AvatarFallback className="text-xs bg-primary/10 text-primary">{jobApps[0].parent_profile.full_name?.charAt(0) || 'P'}</AvatarFallback>
+                                </Avatar>
+                                <div className="space-y-0.5 min-w-0">
+                                  <div className="text-sm font-semibold flex items-center gap-2">
+                                    {jobApps[0].parent_profile.full_name || '—'}
+                                    {jobApps[0].parent_profile.user_reference && (
+                                      <span className="font-mono text-[10px] px-1.5 py-0.5 rounded bg-background border text-muted-foreground">{jobApps[0].parent_profile.user_reference}</span>
+                                    )}
+                                  </div>
+                                  <div className="text-xs text-muted-foreground flex items-center gap-3 flex-wrap">
+                                    {jobApps[0].parent_profile.phone && (
+                                      <a href={`tel:${jobApps[0].parent_profile.phone}`} className="flex items-center gap-1 hover:text-primary"><Phone className="h-3 w-3" />{jobApps[0].parent_profile.phone}</a>
+                                    )}
+                                    {jobApps[0].parent_profile.email && (
+                                      <a href={`mailto:${jobApps[0].parent_profile.email}`} className="flex items-center gap-1 hover:text-primary"><Mail className="h-3 w-3" />{jobApps[0].parent_profile.email}</a>
+                                    )}
+                                  </div>
                                 </div>
                               </div>
                             </div>
-                          </div>
-                        )}
-                      </CardContent>
-                    </Card>
-                  )}
+                          )}
+                        </CardContent>
+                      </Card>
+                    );
+                  })()}
 
                   {/* Status filter chips scoped to this job */}
                   <div className="flex items-center gap-2 flex-wrap">
