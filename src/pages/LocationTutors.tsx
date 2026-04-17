@@ -165,7 +165,7 @@ export default function LocationTutors() {
           ) : tutors.length > 0 ? (
             <div className="grid md:grid-cols-3 lg:grid-cols-4 gap-6">
               {tutors.map(tutor => (
-                <Link key={tutor.id} to={`/tutor/${tutor.id}`}>
+                <Link key={tutor.id} to={`/tutor/${(tutor as any).slug || tutor.id}`}>
                   <Card className="hover-lift h-full">
                     <CardContent className="p-6 text-center">
                       <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4 overflow-hidden">
