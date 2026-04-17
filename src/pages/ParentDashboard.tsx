@@ -862,8 +862,22 @@ export default function ParentDashboard() {
                 values={jobForm.subject_ids}
                 onValuesChange={(v) => setJobForm({ ...jobForm, subject_ids: v })}
                 placeholder="Select subjects..."
-                searchPlaceholder="Type to search subjects..."
+                searchPlaceholder="Type to search or add a subject..."
                 emptyText="No subjects found."
+                createLabel="Add subject"
+                onCreateOption={async (name) => {
+                  const { data, error } = await supabase
+                    .from('subjects')
+                    .insert({ name_en: name, name_bn: name })
+                    .select('id, name_en, category_en')
+                    .single();
+                  if (error || !data) {
+                    toast({ title: 'Could not add subject', description: error?.message, variant: 'destructive' });
+                    return null;
+                  }
+                  setSubjects(prev => [...prev, data as typeof subjects[number]]);
+                  return data.id;
+                }}
               />
             </div>
             <div>
