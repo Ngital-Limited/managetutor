@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { formatExactDate } from '@/lib/date';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,7 +14,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Search, GraduationCap, Briefcase, Plus, Trash2, Pencil, CheckCircle2, BookOpen, X, FileText } from 'lucide-react';
 import { MultiSearchableSelect } from '@/components/MultiSearchableSelect';
-import { formatDistanceToNow } from 'date-fns';
 
 interface Props {
   toast: (opts: { title: string; description?: string; variant?: 'default' | 'destructive' }) => void;
@@ -484,7 +484,7 @@ export function AdminTutorEditTab({ toast }: Props) {
                             n.category === 'behavior' ? 'border-warning text-warning' : ''
                           }`}>{n.category}</Badge>
                           <span className="text-xs text-muted-foreground">by {n.admin_name}</span>
-                          <span className="text-xs text-muted-foreground">· {formatDistanceToNow(new Date(n.created_at), { addSuffix: true })}</span>
+                          <span className="text-xs text-muted-foreground">· {formatExactDate(new Date(n.created_at))}</span>
                         </div>
                         <p className="text-sm">{n.note}</p>
                       </div>

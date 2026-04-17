@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { formatExactDate } from '@/lib/date';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -11,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { formatDistanceToNow, format } from 'date-fns';
+import { format } from 'date-fns';
 import { DollarSign, CheckCircle2, XCircle, Clock, TrendingUp, ArrowDownRight, ArrowUpRight, Wallet } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
@@ -204,7 +205,7 @@ export function RevenuePayoutTab({ toast }: { toast: any }) {
                           {p.bank_name && <p className="text-xs text-muted-foreground">{p.bank_name}</p>}
                         </TableCell>
                         <TableCell>{statusBadge(p.status)}</TableCell>
-                        <TableCell className="text-xs text-muted-foreground">{formatDistanceToNow(new Date(p.created_at), { addSuffix: true })}</TableCell>
+                        <TableCell className="text-xs text-muted-foreground">{formatExactDate(new Date(p.created_at))}</TableCell>
                         <TableCell>
                           {p.status === 'pending' && (
                             <div className="flex gap-1">
@@ -259,7 +260,7 @@ export function RevenuePayoutTab({ toast }: { toast: any }) {
                           ) : '—'}
                         </TableCell>
                         <TableCell>{statusBadge(r.status)}</TableCell>
-                        <TableCell className="text-xs text-muted-foreground">{formatDistanceToNow(new Date(r.created_at), { addSuffix: true })}</TableCell>
+                        <TableCell className="text-xs text-muted-foreground">{formatExactDate(new Date(r.created_at))}</TableCell>
                         <TableCell>
                           {r.status === 'pending' && (
                             <Button size="sm" onClick={() => { setSelectedRefund(r); setAdminNotes(''); }}>Review</Button>

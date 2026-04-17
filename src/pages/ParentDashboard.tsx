@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
+import { formatExactDate } from '@/lib/date';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
@@ -25,7 +26,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { formatDistanceToNow, differenceInHours, format } from 'date-fns';
+import { differenceInHours, format } from 'date-fns';
 import {
   Sidebar,
   SidebarContent,
@@ -1663,7 +1664,7 @@ export default function ParentDashboard() {
                             <div className="flex items-center gap-2">
                               <Badge variant="outline">৳{job.budget_min}-{job.budget_max}/mo</Badge>
                               <span className="text-xs text-muted-foreground">
-                                {formatDistanceToNow(new Date(job.created_at), { addSuffix: true })}
+                                {formatExactDate(new Date(job.created_at))}
                               </span>
                             </div>
                           </div>

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { formatExactDate } from '@/lib/date';
 import { Bell, CheckCheck, Briefcase, UserCheck, XCircle, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -10,7 +11,6 @@ import {
 } from '@/components/ui/popover';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { formatDistanceToNow } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 
 interface Notification {
@@ -186,7 +186,7 @@ export function NotificationBell() {
                       </p>
                       <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{n.message}</p>
                       <p className="text-[10px] text-muted-foreground/70 mt-1">
-                        {formatDistanceToNow(new Date(n.created_at), { addSuffix: true })}
+                        {formatExactDate(new Date(n.created_at))}
                       </p>
                     </div>
                     {!n.is_read && (

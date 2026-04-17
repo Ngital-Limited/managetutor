@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { formatExactDate } from '@/lib/date';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { useParams, useNavigate, Link } from 'react-router-dom';
@@ -15,7 +16,6 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { formatDistanceToNow } from 'date-fns';
 import {
   GraduationCap, ArrowLeft, Globe, MapPin, BookOpen, Calendar, Users, User,
   DollarSign, Clock, CheckCircle2, XCircle, Send, Star, MessageSquare,
@@ -320,7 +320,7 @@ export default function JobDetails() {
                       <MapPin className="h-4 w-4" />
                       {job.districts?.name_en}
                       <span className="text-border">•</span>
-                      Posted {formatDistanceToNow(new Date(job.created_at), { addSuffix: true })}
+                      Posted {formatExactDate(new Date(job.created_at))}
                     </p>
                   </div>
                 </div>
@@ -500,7 +500,7 @@ export default function JobDetails() {
                             <div className="text-xs text-muted-foreground mt-1 flex items-center gap-2 flex-wrap">
                               {subj && <span className="flex items-center gap-1"><BookOpen className="h-3 w-3" />{subj}</span>}
                               {rj.class_level && <span className="flex items-center gap-1"><GraduationCap className="h-3 w-3" />{rj.class_level}</span>}
-                              <span>{formatDistanceToNow(new Date(rj.created_at), { addSuffix: true })}</span>
+                              <span>{formatExactDate(new Date(rj.created_at))}</span>
                             </div>
                           </div>
                           {(rj.budget_min || rj.budget_max) && (
@@ -559,7 +559,7 @@ export default function JobDetails() {
                                   <div className="flex items-center gap-2 text-sm">
                                     <Badge variant="outline">Proposed: ৳{app.proposed_rate}/month</Badge>
                                     <span className="text-muted-foreground">
-                                      Applied {formatDistanceToNow(new Date(app.created_at), { addSuffix: true })}
+                                      Applied {formatExactDate(new Date(app.created_at))}
                                     </span>
                                   </div>
                                 </div>

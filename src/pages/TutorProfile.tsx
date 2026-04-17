@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import { formatExactDate } from '@/lib/date';
 import { Logo } from '@/components/Logo';
 import { TutorSidebarLayout } from '@/components/TutorSidebarLayout';
 import { useNavigate, Link, useParams } from 'react-router-dom';
@@ -25,7 +26,6 @@ import {
 import { Progress } from '@/components/ui/progress';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { formatDistanceToNow } from 'date-fns';
 
 interface Subject { id: string; name_en: string; name_bn: string; }
 interface District { id: string; name_en: string; name_bn: string; division_en: string; }
@@ -1184,7 +1184,7 @@ export default function TutorProfile() {
                             <div className="flex items-center justify-between mb-1">
                               <span className="font-medium">{review.profiles?.full_name}</span>
                               <span className="text-xs text-muted-foreground">
-                                {formatDistanceToNow(new Date(review.created_at), { addSuffix: true })}
+                                {formatExactDate(new Date(review.created_at))}
                               </span>
                             </div>
                             <div className="flex items-center gap-1 mb-2">

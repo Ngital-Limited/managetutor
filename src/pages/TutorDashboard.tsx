@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { formatExactDate } from '@/lib/date';
 import { Logo } from '@/components/Logo';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -11,7 +12,6 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { formatDistanceToNow } from 'date-fns';
 import {
   Sidebar,
   SidebarContent,
@@ -805,7 +805,7 @@ export default function TutorDashboard() {
                                 </p>
                               )}
                               <p className="text-xs text-muted-foreground">
-                                {formatDistanceToNow(new Date(job.created_at), { addSuffix: true })}
+                                {formatExactDate(new Date(job.created_at))}
                               </p>
                             </div>
                           </div>
@@ -964,7 +964,7 @@ export default function TutorDashboard() {
                               <div className="flex items-center gap-2">
                                 <Badge variant="outline">Your Rate: ৳{app.proposed_rate}/mo</Badge>
                                 <span className="text-xs text-muted-foreground">
-                                  Applied {formatDistanceToNow(new Date(app.created_at), { addSuffix: true })}
+                                  Applied {formatExactDate(new Date(app.created_at))}
                                 </span>
                               </div>
                               

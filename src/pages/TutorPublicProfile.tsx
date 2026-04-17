@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { formatExactDate } from '@/lib/date';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { useParams, Link, useNavigate } from 'react-router-dom';
@@ -11,7 +12,6 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { formatDistanceToNow } from 'date-fns';
 import {
   GraduationCap, Globe, MapPin, Star, CheckCircle2, Clock, Heart,
   Briefcase, BookOpen, User, Calendar, DollarSign,
@@ -459,7 +459,7 @@ export default function TutorPublicProfile() {
                             <div className="flex items-center justify-between mb-1">
                               <span className="font-medium">{review.profiles?.full_name}</span>
                               <span className="text-xs text-muted-foreground">
-                                {formatDistanceToNow(new Date(review.created_at), { addSuffix: true })}
+                                {formatExactDate(new Date(review.created_at))}
                               </span>
                             </div>
                             <div className="flex items-center gap-1 mb-2">
@@ -561,7 +561,7 @@ export default function TutorPublicProfile() {
                   <div className="flex items-center justify-between">
                     <span className="text-muted-foreground">Member Since</span>
                     <span className="font-medium">
-                      {formatDistanceToNow(new Date(tutor.created_at), { addSuffix: true })}
+                      {formatExactDate(new Date(tutor.created_at))}
                     </span>
                   </div>
                 </div>

@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { formatExactDate } from '@/lib/date';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { useNavigate, Link, useSearchParams } from 'react-router-dom';
@@ -12,7 +13,6 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { formatDistanceToNow } from 'date-fns';
 import {
   GraduationCap, ArrowLeft, Globe, Send, MessageSquare, Search, Circle
 } from 'lucide-react';
@@ -291,7 +291,7 @@ export default function Messages() {
                           <div className="flex items-center justify-between">
                             <span className="font-medium truncate">{conv.full_name}</span>
                             <span className="text-xs text-muted-foreground">
-                              {formatDistanceToNow(new Date(conv.last_message_time), { addSuffix: false })}
+                              {formatExactDate(new Date(conv.last_message_time))}
                             </span>
                           </div>
                           <p className="text-sm text-muted-foreground truncate">{conv.last_message}</p>
@@ -347,7 +347,7 @@ export default function Messages() {
                             <p className={`text-xs mt-1 ${
                               msg.sender_id === user?.id ? 'text-primary-foreground/70' : 'text-muted-foreground'
                             }`}>
-                              {formatDistanceToNow(new Date(msg.created_at), { addSuffix: true })}
+                              {formatExactDate(new Date(msg.created_at))}
                             </p>
                           </div>
                         </div>

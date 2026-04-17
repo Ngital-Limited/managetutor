@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import { formatExactDate } from '@/lib/date';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
@@ -18,7 +19,6 @@ import {
   Users, ArrowRight, ChevronLeft, ChevronRight, Send, Loader2,
   Clock, Filter, X, Sparkles, Tag, GraduationCap
 } from 'lucide-react';
-import { formatDistanceToNow } from 'date-fns';
 import { JOB_CATEGORIES, STUDENT_BACKGROUNDS } from '@/constants/jobCategories';
 
 interface District {
@@ -610,7 +610,7 @@ export default function BrowseJobs() {
                           <span className="text-border">·</span>
                           <span className="flex items-center gap-1">
                             <Clock className="h-3.5 w-3.5" />
-                            {formatDistanceToNow(new Date(job.created_at), { addSuffix: true })}
+                            {formatExactDate(new Date(job.created_at))}
                           </span>
                         </div>
 

@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { formatExactDate } from '@/lib/date';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -10,7 +11,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { formatDistanceToNow } from 'date-fns';
 import { MessageSquare, Clock, CheckCircle2, AlertTriangle, Send } from 'lucide-react';
 
 export function SupportTicketsTab({ toast }: { toast: any }) {
@@ -156,7 +156,7 @@ export function SupportTicketsTab({ toast }: { toast: any }) {
                     <TableCell>{categoryBadge(t.category)}</TableCell>
                     <TableCell>{priorityBadge(t.priority)}</TableCell>
                     <TableCell>{statusBadge(t.status)}</TableCell>
-                    <TableCell className="text-xs text-muted-foreground">{formatDistanceToNow(new Date(t.created_at), { addSuffix: true })}</TableCell>
+                    <TableCell className="text-xs text-muted-foreground">{formatExactDate(new Date(t.created_at))}</TableCell>
                     <TableCell>
                       <Button size="sm" variant="ghost" onClick={(e) => { e.stopPropagation(); openTicket(t); }}>
                         <MessageSquare className="h-4 w-4" />
@@ -217,7 +217,7 @@ export function SupportTicketsTab({ toast }: { toast: any }) {
                       <div className={`max-w-[80%] p-3 rounded-lg text-sm ${m.is_admin ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
                         <p className="text-xs font-medium mb-1 opacity-70">{m.is_admin ? 'Admin' : m.profiles?.full_name}</p>
                         <p>{m.message}</p>
-                        <p className="text-[10px] mt-1 opacity-50">{formatDistanceToNow(new Date(m.created_at), { addSuffix: true })}</p>
+                        <p className="text-[10px] mt-1 opacity-50">{formatExactDate(new Date(m.created_at))}</p>
                       </div>
                     </div>
                   ))}
