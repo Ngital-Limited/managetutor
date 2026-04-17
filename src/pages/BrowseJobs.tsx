@@ -82,8 +82,7 @@ export default function BrowseJobs() {
   // Application modal
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const [showApplyModal, setShowApplyModal] = useState(false);
-  const [coverMessage, setCoverMessage] = useState('');
-  const [proposedRate, setProposedRate] = useState('');
+  const [applying2Removed] = useState(false); void applying2Removed;
   const [applying, setApplying] = useState(false);
   const [tutorProfileId, setTutorProfileId] = useState<string | null>(null);
   const [tutorProfileCompleteness, setTutorProfileCompleteness] = useState(0);
