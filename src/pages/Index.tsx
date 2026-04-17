@@ -412,7 +412,7 @@ export default function Index() {
                 ).filter(Boolean).slice(0, 3) || [];
 
                 return (
-                  <Link key={tutor.id} to={`/tutor/${tutor.id}`} className="group block animate-fade-in" style={{ animationDelay: `${i * 60}ms` }}>
+                  <Link key={tutor.id} to={`/tutor/${(tutor as any).slug || tutor.id}`} className="group block animate-fade-in" style={{ animationDelay: `${i * 60}ms` }}>
                     <div className="bg-card rounded-xl border border-border/60 p-5 h-full transition-all hover:border-primary/30 hover:shadow-[0_4px_24px_-8px_hsl(var(--primary)/0.15)]">
                       <div className="flex items-start gap-3 mb-4">
                         <Avatar className="h-12 w-12 border border-border/60">

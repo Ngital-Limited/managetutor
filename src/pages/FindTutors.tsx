@@ -327,7 +327,7 @@ export default function FindTutors() {
 
     if (viewMode === 'list') {
       return (
-        <Link to={`/tutor/${tutor.id}`}>
+        <Link to={`/tutor/${tutor.slug || tutor.id}`}>
           <Card className={`hover:shadow-md transition-all group ${isFeatured ? 'border-accent/50 bg-accent/[0.02]' : ''}`}>
             <CardContent className="p-4 flex gap-4 items-center">
               {/* Avatar */}
@@ -390,7 +390,7 @@ export default function FindTutors() {
 
     // Grid view
     return (
-      <Link to={`/tutor/${tutor.id}`}>
+      <Link to={`/tutor/${tutor.slug || tutor.id}`}>
         <Card className={`hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 overflow-hidden group h-full ${isFeatured ? 'border-accent/50 ring-1 ring-accent/20' : 'border-border'}`}>
           {isFeatured && (
             <div className="bg-gradient-to-r from-accent/10 to-primary/5 px-4 py-1.5 flex items-center gap-1.5 border-b border-accent/20">
