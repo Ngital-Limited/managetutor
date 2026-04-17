@@ -850,28 +850,43 @@ export default function AdminDashboard() {
           preferred_time, fixed_time, start_date, number_of_students, student_age,
           student_gender, preferred_tutor_gender, student_school_name,
           location_details, special_requirements, created_at,
-          districts ( name_en ), areas ( name_en )
+          districts ( name_en ), areas ( name_en ),
+          job_subjects ( subjects ( id, name_en ) )
         ),
-        tutor_profiles!inner ( id, user_id, gender, experience_years, verification_status )
+        tutor_profiles!inner ( id, user_id, gender, experience_years, verification_status, bio, monthly_salary_min, monthly_salary_max )
       `)
       .order('created_at', { ascending: false })
       .limit(200);
     // Note: do NOT filter by status in the query — chips and drill-down need full counts.
     const { data } = await query;
     if (!data) { setAllApplications([]); setLoadingAllApps(false); return; }
+    const tutorProfileIds = Array.from(new Set(data.map((a: any) => (a.tutor_profiles as any)?.id).filter(Boolean)));
     const tutorUserIds = Array.from(new Set(data.map((a: any) => (a.tutor_profiles as any)?.user_id).filter(Boolean)));
     const parentIds = Array.from(new Set(data.map((a: any) => (a.jobs as any)?.parent_id).filter(Boolean)));
     const allUserIds = Array.from(new Set([...tutorUserIds, ...parentIds]));
     let profs: any[] = [];
     if (allUserIds.length > 0) {
-      const { data: profData } = await supabase.from('profiles').select('id, full_name, email, phone').in('id', allUserIds as string[]);
+      const { data: profData } = await supabase.from('profiles').select('id, full_name, email, phone, avatar_url, user_reference').in('id', allUserIds as string[]);
       profs = profData || [];
     }
     const profMap = new Map(profs.map((p: any) => [p.id, p]));
+    // Fetch latest education per tutor
+    const eduMap = new Map<string, any>();
+    if (tutorProfileIds.length > 0) {
+      const { data: eduData } = await supabase
+        .from('tutor_education')
+        .select('tutor_id, degree, institution, field_of_study, passing_year')
+        .in('tutor_id', tutorProfileIds as string[])
+        .order('passing_year', { ascending: false });
+      for (const e of eduData || []) {
+        if (!eduMap.has(e.tutor_id)) eduMap.set(e.tutor_id, e);
+      }
+    }
     setAllApplications(data.map((a: any) => ({
       ...a,
       tutor_profile: profMap.get((a.tutor_profiles as any)?.user_id) || null,
       parent_profile: profMap.get((a.jobs as any)?.parent_id) || null,
+      tutor_last_education: eduMap.get((a.tutor_profiles as any)?.id) || null,
     })));
     setLoadingAllApps(false);
   }, []);
