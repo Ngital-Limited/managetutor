@@ -443,6 +443,36 @@ export default function BrowseJobs({ embedded = false }: { embedded?: boolean } 
         </section>
       )}
 
+      {/* Profile-matched banner (embedded tutor view) */}
+      {embedded && tutorPrefilterApplied && (tutorClassLevels.length > 0 || tutorSubjectIds.length > 0 || selectedDistrict !== 'all') && (
+        <div className="container mx-auto px-4 pt-3">
+          <div className="flex items-center justify-between gap-3 rounded-xl border border-primary/20 bg-primary/5 px-4 py-2.5">
+            <div className="flex items-center gap-2 text-sm text-foreground">
+              <Sparkles className="h-4 w-4 text-primary shrink-0" />
+              <span>Showing jobs matched to your profile</span>
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 text-xs"
+              onClick={() => {
+                setTutorClassLevels([]);
+                setTutorSubjectIds([]);
+                setSelectedDistrict('all');
+                setSelectedArea('all');
+                setSelectedCategory('all');
+                setSelectedBackground('all');
+                setSelectedTime('all');
+                setCurrentPage(1);
+              }}
+            >
+              <X className="h-3.5 w-3.5 mr-1" />
+              Clear filters
+            </Button>
+          </div>
+        </div>
+      )}
+
       {/* Search Bar - Floating */}
       <div className={`container mx-auto px-4 relative z-20 ${embedded ? 'pt-2' : '-mt-7'}`}>
         <div className="bg-card rounded-2xl shadow-xl border border-border p-4">
