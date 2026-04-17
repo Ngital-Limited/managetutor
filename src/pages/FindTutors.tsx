@@ -234,6 +234,12 @@ export default function FindTutors() {
     if (selectedDistrict && selectedDistrict !== 'all') {
       result = result.filter(t => t.district_id === selectedDistrict || t.profiles?.district_id === selectedDistrict);
     }
+    if (selectedArea) {
+      const area = areas.find(a => a.id === selectedArea);
+      if (area) {
+        result = result.filter(t => t.district_id === area.district_id || t.profiles?.district_id === area.district_id);
+      }
+    }
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
       result = result.filter(t =>
