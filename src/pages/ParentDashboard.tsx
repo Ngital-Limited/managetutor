@@ -1667,6 +1667,7 @@ export default function ParentDashboard() {
             </div>
           )}
         </CardContent>
+      </Card>
     </>
   );
 
