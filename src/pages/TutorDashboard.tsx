@@ -607,25 +607,92 @@ export default function TutorDashboard() {
           </Card>
         </div>
 
-        {/* Quick Actions */}
-        <div className="grid sm:grid-cols-3 gap-4 mb-8">
-          <Link to="/jobs">
-            <Card className="hover-lift cursor-pointer h-32">
-              <CardContent className="p-6 flex flex-col items-center justify-center text-center h-full">
-                <Briefcase className="h-8 w-8 text-primary mb-2" />
-                <h3 className="font-bold">Browse Jobs</h3>
-                <p className="text-xs text-muted-foreground">Find new opportunities</p>
+        {/* Compact Summary Widgets */}
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+          {/* Boost Status Widget */}
+          <Link to="/tutor/boost">
+            <Card className="hover-lift cursor-pointer h-full">
+              <CardContent className="p-4 flex items-center gap-3">
+                <div className="h-10 w-10 rounded-lg bg-accent/10 flex items-center justify-center shrink-0">
+                  <Zap className="h-5 w-5 text-accent" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between gap-2">
+                    <h3 className="font-semibold text-sm">Profile Boost</h3>
+                    {activeFeatured ? (
+                      <Badge className="bg-accent text-accent-foreground text-[10px] h-5">
+                        <Sparkles className="h-3 w-3 mr-1" />Active
+                      </Badge>
+                    ) : (
+                      <Badge variant="outline" className="text-[10px] h-5">Inactive</Badge>
+                    )}
+                  </div>
+                  <p className="text-xs text-muted-foreground truncate mt-0.5">
+                    {activeFeatured
+                      ? `Until ${new Date(activeFeatured.end_date).toLocaleDateString()}`
+                      : 'Boost visibility to get more views'}
+                  </p>
+                </div>
+                <ArrowRight className="h-4 w-4 text-muted-foreground shrink-0" />
               </CardContent>
             </Card>
           </Link>
 
+          {/* Verification Status Widget */}
+          <Link to="/tutor/verify-badge">
+            <Card className="hover-lift cursor-pointer h-full">
+              <CardContent className="p-4 flex items-center gap-3">
+                <div className="h-10 w-10 rounded-lg bg-success/10 flex items-center justify-center shrink-0">
+                  <CheckCircle2 className="h-5 w-5 text-success" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between gap-2">
+                    <h3 className="font-semibold text-sm">Verification</h3>
+                    {profile?.verification_status === 'approved' && profile?.verification_paid ? (
+                      <Badge className="bg-success text-[10px] h-5">
+                        <CheckCircle2 className="h-3 w-3 mr-1" />Verified
+                      </Badge>
+                    ) : profile?.verification_status === 'pending' ? (
+                      <Badge className="bg-warning text-warning-foreground text-[10px] h-5">
+                        <Clock className="h-3 w-3 mr-1" />Pending
+                      </Badge>
+                    ) : (
+                      <Badge variant="outline" className="text-[10px] h-5">Not started</Badge>
+                    )}
+                  </div>
+                  <p className="text-xs text-muted-foreground truncate mt-0.5">
+                    {profile?.verification_status === 'approved' && profile?.verification_paid
+                      ? 'Your badge is live on your profile'
+                      : `Pay ৳${verificationFee} to get verified`}
+                  </p>
+                </div>
+                <ArrowRight className="h-4 w-4 text-muted-foreground shrink-0" />
+              </CardContent>
+            </Card>
+          </Link>
 
-          <Link to="/tutor/profile">
-            <Card className="hover-lift cursor-pointer h-32">
-              <CardContent className="p-6 flex flex-col items-center justify-center text-center h-full">
-                <User className="h-8 w-8 text-tutor mb-2" />
-                <h3 className="font-bold">My Profile</h3>
-                <p className="text-xs text-muted-foreground">Update your info</p>
+          {/* Top Recommended Job Widget */}
+          <Link to="/tutor/recommendations" className="sm:col-span-2 lg:col-span-1">
+            <Card className="hover-lift cursor-pointer h-full">
+              <CardContent className="p-4 flex items-center gap-3">
+                <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                  <Sparkles className="h-5 w-5 text-primary" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between gap-2">
+                    <h3 className="font-semibold text-sm">Top Recommendation</h3>
+                    <Badge variant="outline" className="text-[10px] h-5">{recommendedJobs.length}</Badge>
+                  </div>
+                  {recommendedJobs[0] ? (
+                    <p className="text-xs text-muted-foreground truncate mt-0.5">
+                      {recommendedJobs[0].title}
+                      {recommendedJobs[0].districts?.name_en && ` • ${recommendedJobs[0].districts.name_en}`}
+                    </p>
+                  ) : (
+                    <p className="text-xs text-muted-foreground truncate mt-0.5">No matches yet — browse jobs</p>
+                  )}
+                </div>
+                <ArrowRight className="h-4 w-4 text-muted-foreground shrink-0" />
               </CardContent>
             </Card>
           </Link>
