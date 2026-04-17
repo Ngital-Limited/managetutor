@@ -18,6 +18,14 @@ interface TutorRow {
 
 const clean = (v?: string) => (v && v !== "NULL" && v.trim() !== "" ? v.trim() : null);
 
+function normalizePhotoUrl(p?: string): string | null {
+  const c = clean(p);
+  if (!c) return null;
+  // Accept absolute http(s) URLs only; ignore filenames or relative paths
+  if (/^https?:\/\//i.test(c)) return c;
+  return null;
+}
+
 function buildBio(r: TutorRow): string {
   const parts: string[] = [];
   if (clean(r.t_experience)) parts.push(`Experience: ${clean(r.t_experience)}`);
@@ -165,6 +173,7 @@ Deno.serve(async (req) => {
         const loc = matchLocation([r.pre_area, r.p_address, r.per_address].filter(Boolean).join(" "));
 
         // handle_new_user trigger creates profiles row. Update it.
+        const avatar_url = normalizePhotoUrl(r.photo);
         const { error: profErr } = await admin
           .from("profiles")
           .update({
@@ -174,6 +183,7 @@ Deno.serve(async (req) => {
             is_approved: true, // imported tutors are pre-approved
             district_id: loc.district_id,
             area_id: loc.area_id,
+            avatar_url,
           })
           .eq("id", uid);
         if (profErr) {
