@@ -22,6 +22,8 @@ import {
   Clock, XCircle, AlertCircle, Video, Star, MessageSquare, Send,
   Plus, Trash2, Briefcase, BookOpen, Users, Sparkles
 } from 'lucide-react';
+import { Progress } from '@/components/ui/progress';
+import { useMemo } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { formatDistanceToNow } from 'date-fns';
