@@ -66,8 +66,10 @@ interface TutorProfile {
   total_students: number;
   display_name: string | null;
   district_id: string | null;
+  area_id: string | null;
   class_levels: string[] | null;
   districts: { name_en: string; name_bn: string; division_en: string } | null;
+  areas: { name_en: string; name_bn: string } | null;
   profiles: {
     full_name: string;
     avatar_url: string;
@@ -185,7 +187,7 @@ export default function FindTutors() {
     setLoading(true);
     let query = supabase
       .from('tutor_profiles')
-      .select(`*, districts (name_en, name_bn, division_en), tutor_subjects (subjects (*))`)
+      .select(`*, districts (name_en, name_bn, division_en), areas (name_en, name_bn), tutor_subjects (subjects (*))`)
       .eq('is_available', true);
 
     if (selectedGender && selectedGender !== 'any') query = query.eq('gender', selectedGender as 'male' | 'female');
