@@ -214,17 +214,21 @@ export default function TutorProfile() {
         supabase.from('review_update_requests').select('*').eq('tutor_id', td.id),
       ]);
 
-      if (eduRes.data) {
-        setEducationEntries(eduRes.data.map((e: any) => ({
-          id: e.id,
-          institution: e.institution,
-          degree: e.degree,
-          field_of_study: e.field_of_study || '',
-          passing_year: e.passing_year,
-          result: e.result || '',
-          is_current: e.is_current || false,
-        })));
-      }
+      // Always seed 4 fixed education slots: SSC, HSC, Bachelor, Masters
+      const FIXED_DEGREES = ['SSC', 'HSC', 'Bachelor', 'Masters'];
+      const existing = eduRes.data || [];
+      setEducationEntries(FIXED_DEGREES.map((deg) => {
+        const match = existing.find((e: any) => (e.degree || '').toLowerCase() === deg.toLowerCase());
+        return {
+          id: match?.id,
+          institution: match?.institution || '',
+          degree: deg,
+          field_of_study: match?.field_of_study || '',
+          passing_year: match?.passing_year ?? null,
+          result: match?.result || '',
+          is_current: match?.is_current || false,
+        };
+      }));
       if (jobRes.data) {
         setJobExperiences(jobRes.data.map((j: any) => ({
           id: j.id,
