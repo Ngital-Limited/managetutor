@@ -133,6 +133,24 @@ export function SubAdminRBACTab({ toast }: { toast: any }) {
     return Object.keys(PERMISSION_LABELS).filter(k => p[k]).length;
   };
 
+  const removeAdmin = async (userId: string) => {
+    if (userId === currentUserId) {
+      toast({ title: "You can't remove yourself", variant: 'destructive' });
+      setRemoveTarget(null);
+      return;
+    }
+    const { error: roleErr } = await supabase.from('user_roles')
+      .delete().eq('user_id', userId).eq('role', 'admin');
+    if (roleErr) {
+      toast({ title: 'Error', description: roleErr.message, variant: 'destructive' });
+      return;
+    }
+    await supabase.from('admin_permissions').delete().eq('user_id', userId);
+    toast({ title: 'Admin role removed' });
+    setRemoveTarget(null);
+    if (selectedAdmin?.id === userId) setSelectedAdmin(null);
+    fetchData();
+  };
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
