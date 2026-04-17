@@ -200,7 +200,7 @@ export default function Index() {
                     options={districts.map(d => ({ value: d.id, label: d.name_en }))}
                     value={selectedDistrict}
                     onValueChange={setSelectedDistrict}
-                    placeholder="📍 Location"
+                    placeholder="📍 City"
                     className="h-11 rounded-lg border-border/60 bg-background"
                   />
                   <SearchableSelect
