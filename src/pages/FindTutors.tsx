@@ -50,6 +50,7 @@ interface TutorProfile {
   user_id: string;
   slug: string | null;
   bio: string;
+  ai_overview: string | null;
   education: string;
   experience_years: number;
   monthly_salary_min: number;
