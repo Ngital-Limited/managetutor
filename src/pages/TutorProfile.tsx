@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Logo } from '@/components/Logo';
 import { TutorSidebarLayout } from '@/components/TutorSidebarLayout';
 import { useNavigate, Link, useParams } from 'react-router-dom';
@@ -23,7 +23,6 @@ import {
   Plus, Trash2, Briefcase, BookOpen, Users, Sparkles
 } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
-import { useMemo } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { formatDistanceToNow } from 'date-fns';
