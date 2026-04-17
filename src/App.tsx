@@ -20,7 +20,6 @@ import TutorAppliedJobs from "./pages/TutorAppliedJobs";
 import ParentDashboard from "./pages/ParentDashboard";
 import ParentProfileEdit from "./pages/ParentProfileEdit";
 
-import WriteReview from "./pages/WriteReview";
 import TutorPublicProfile from "./pages/TutorPublicProfile";
 import LocationTutors from "./pages/LocationTutors";
 import Favorites from "./pages/Favorites";
@@ -61,8 +60,6 @@ const App = () => (
               <Route path="/tutor/applications" element={<TutorAppliedJobs />} />
               <Route path="/tutor/profile" element={<TutorProfile />} />
               <Route path="/admin/tutor/:userId" element={<TutorProfile />} />
-              
-              <Route path="/review/:tutorId" element={<WriteReview />} />
               <Route path="/favorites" element={<Favorites />} />
               <Route path="/pricing" element={<Pricing />} />
               <Route path="/payment/success" element={<PaymentSuccess />} />
