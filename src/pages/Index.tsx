@@ -82,7 +82,7 @@ export default function Index() {
         supabase.from('subjects').select('id, name_en, name_bn, category_en, category_bn').order('name_en'),
         supabase.from('tutor_profiles')
           .select(`
-            id, bio, education, experience_years, average_rating, total_reviews,
+            id, slug, bio, education, experience_years, average_rating, total_reviews,
             verification_status, teaching_mode, monthly_salary_min, monthly_salary_max, is_available,
             profiles:user_id (full_name, avatar_url),
             districts (name_en, name_bn),

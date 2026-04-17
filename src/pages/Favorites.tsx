@@ -20,6 +20,7 @@ interface Favorite {
   tutor_profiles: {
     id: string;
     user_id: string;
+    slug: string | null;
     average_rating: number;
     total_reviews: number;
     experience_years: number;
@@ -55,7 +56,7 @@ export default function Favorites() {
       .select(`
         *,
         tutor_profiles (
-          id, user_id, average_rating, total_reviews, experience_years, monthly_salary_min, monthly_salary_max, verification_status,
+          id, user_id, slug, average_rating, total_reviews, experience_years, monthly_salary_min, monthly_salary_max, verification_status,
           profiles:user_id (full_name, avatar_url, districts (name_en)),
           tutor_subjects (subjects (name_en))
         )
@@ -102,7 +103,7 @@ export default function Favorites() {
               <Card key={fav.id} className="hover-lift">
                 <CardContent className="p-4">
                   <div className="flex items-center gap-4">
-                    <Link to={`/tutor/${fav.tutor_id}`}>
+                    <Link to={`/tutor/${fav.tutor_profiles?.slug || fav.tutor_id}`}>
                       <Avatar className="h-16 w-16 ring-2 ring-primary/10">
                         <AvatarImage src={fav.tutor_profiles?.profiles?.avatar_url} />
                         <AvatarFallback>{fav.tutor_profiles?.profiles?.full_name?.charAt(0) || 'T'}</AvatarFallback>
@@ -110,7 +111,7 @@ export default function Favorites() {
                     </Link>
 
                     <div className="flex-1">
-                      <Link to={`/tutor/${fav.tutor_id}`} className="hover:text-primary">
+                      <Link to={`/tutor/${fav.tutor_profiles?.slug || fav.tutor_id}`} className="hover:text-primary">
                         <h3 className="font-bold text-lg">{fav.tutor_profiles?.profiles?.full_name}</h3>
                       </Link>
                       <div className="flex items-center gap-3 text-sm text-muted-foreground mb-2">
