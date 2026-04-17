@@ -33,7 +33,12 @@ export function SubAdminRBACTab({ toast }: { toast: any }) {
   const [searchEmail, setSearchEmail] = useState('');
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [searching, setSearching] = useState(false);
+  const [removeTarget, setRemoveTarget] = useState<any>(null);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => setCurrentUserId(data.user?.id ?? null));
+  }, []);
   const fetchData = useCallback(async () => {
     setLoading(true);
     // Get all admin users
