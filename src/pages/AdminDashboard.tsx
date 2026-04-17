@@ -2190,7 +2190,116 @@ export default function AdminDashboard() {
             )}
 
             {/* ═══════ APPLICATIONS TAB ═══════ */}
-            {activeTab === 'applications' && (
+            {activeTab === 'applications' && (() => {
+              // Filtered view used by table, bulk-actions and CSV export
+              const filteredApps = allApplications.filter((a) => {
+                if (!allAppsSearch.trim()) return true;
+                const s = allAppsSearch.toLowerCase();
+                return (
+                  a.tutor_profile?.full_name?.toLowerCase().includes(s) ||
+                  a.tutor_profile?.email?.toLowerCase().includes(s) ||
+                  a.jobs?.title?.toLowerCase().includes(s) ||
+                  a.jobs?.job_reference?.toLowerCase().includes(s) ||
+                  a.parent_profile?.full_name?.toLowerCase().includes(s)
+                );
+              });
+
+              const toggleSelect = (id: string, checked: boolean) => {
+                setSelectedAppIds(prev => {
+                  const next = new Set(prev);
+                  if (checked) next.add(id); else next.delete(id);
+                  return next;
+                });
+              };
+
+              const toggleSelectAll = (checked: boolean) => {
+                if (checked) setSelectedAppIds(new Set(filteredApps.map(a => a.id)));
+                else setSelectedAppIds(new Set());
+              };
+
+              const allVisibleSelected = filteredApps.length > 0 && filteredApps.every(a => selectedAppIds.has(a.id));
+              const someVisibleSelected = filteredApps.some(a => selectedAppIds.has(a.id)) && !allVisibleSelected;
+
+              const handleBulkAction = async (status: 'shortlisted' | 'rejected') => {
+                const ids = Array.from(selectedAppIds);
+                if (ids.length === 0) return;
+                const confirmMsg = `${status === 'shortlisted' ? 'Shortlist' : 'Reject'} ${ids.length} selected application${ids.length > 1 ? 's' : ''}?`;
+                if (!window.confirm(confirmMsg)) return;
+                setBulkProcessing(true);
+                // Only update apps whose current status is pending (or pending/shortlisted for reject)
+                const eligible = filteredApps.filter(a =>
+                  ids.includes(a.id) && (a.status === 'pending' || (status === 'rejected' && a.status === 'shortlisted'))
+                );
+                const eligibleIds = eligible.map(a => a.id);
+                if (eligibleIds.length === 0) {
+                  toast({ title: 'Nothing to update', description: 'Selected applications are not in an updatable state.', variant: 'destructive' });
+                  setBulkProcessing(false);
+                  return;
+                }
+                const { error } = await supabase.from('applications').update({ status: status as any }).in('id', eligibleIds);
+                if (error) {
+                  toast({ title: 'Bulk update failed', description: error.message, variant: 'destructive' });
+                  setBulkProcessing(false);
+                  return;
+                }
+                // Best-effort tutor notifications
+                const notifPayloads = eligible
+                  .map(a => a.tutor_profiles?.user_id)
+                  .filter(Boolean)
+                  .map((uid: string, idx: number) => ({
+                    user_id: uid,
+                    title: status === 'shortlisted' ? 'You have been shortlisted!' : 'Application not selected',
+                    message: status === 'shortlisted'
+                      ? `You've been shortlisted for "${eligible[idx].jobs?.title || ''}".`
+                      : `Your application for "${eligible[idx].jobs?.title || ''}" was not selected.`,
+                    type: status === 'shortlisted' ? 'application_shortlisted' : 'application_rejected',
+                    reference_id: eligible[idx].job_id,
+                  }));
+                if (notifPayloads.length > 0) {
+                  await supabase.from('notifications').insert(notifPayloads);
+                }
+                toast({ title: 'Bulk update complete', description: `${eligibleIds.length} application${eligibleIds.length > 1 ? 's' : ''} updated.` });
+                setSelectedAppIds(new Set());
+                setBulkProcessing(false);
+                fetchAllApplications();
+              };
+
+              const exportCsv = () => {
+                if (filteredApps.length === 0) {
+                  toast({ title: 'Nothing to export', description: 'No applications match the current filters.' });
+                  return;
+                }
+                const headers = ['Tutor Name','Tutor Email','Job Title','Job Reference','Guardian','Proposed Rate (BDT)','Status','Applied At'];
+                const escape = (v: any) => {
+                  const s = v == null ? '' : String(v);
+                  return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+                };
+                const rows = filteredApps.map(a => [
+                  a.tutor_profile?.full_name || '',
+                  a.tutor_profile?.email || '',
+                  a.jobs?.title || '',
+                  a.jobs?.job_reference || '',
+                  a.parent_profile?.full_name || '',
+                  a.proposed_rate ?? '',
+                  a.status || '',
+                  a.created_at ? new Date(a.created_at).toISOString() : '',
+                ].map(escape).join(','));
+                const csv = [headers.join(','), ...rows].join('\n');
+                const blob = new Blob([`\ufeff${csv}`], { type: 'text/csv;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                const stamp = format(new Date(), 'yyyyMMdd-HHmmss');
+                const filterTag = allAppsStatusFilter === 'all' ? 'all' : allAppsStatusFilter;
+                link.download = `applications-${filterTag}-${stamp}.csv`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+                toast({ title: 'Export ready', description: `${filteredApps.length} row${filteredApps.length > 1 ? 's' : ''} exported.` });
+              };
+
+              return (
               <div className="space-y-6">
                 <div className="flex items-center justify-between flex-wrap gap-3">
                   <div>
@@ -2204,7 +2313,7 @@ export default function AdminDashboard() {
                       onChange={(e) => setAllAppsSearch(e.target.value)}
                       className="w-64 h-9"
                     />
-                    <Select value={allAppsStatusFilter} onValueChange={setAllAppsStatusFilter}>
+                    <Select value={allAppsStatusFilter} onValueChange={(v) => { setAllAppsStatusFilter(v); setSelectedAppIds(new Set()); }}>
                       <SelectTrigger className="w-40 h-9"><SelectValue /></SelectTrigger>
                       <SelectContent>
                         <SelectItem value="all">All Status</SelectItem>
@@ -2216,14 +2325,43 @@ export default function AdminDashboard() {
                         <SelectItem value="withdrawn">Withdrawn</SelectItem>
                       </SelectContent>
                     </Select>
+                    <Button variant="outline" size="sm" className="h-9 gap-1.5" onClick={exportCsv} title="Export filtered list to CSV">
+                      <Download className="h-4 w-4" /> Export CSV
+                    </Button>
                   </div>
                 </div>
+
+                {/* Bulk action bar */}
+                {selectedAppIds.size > 0 && (
+                  <div className="flex items-center justify-between gap-3 px-4 py-2.5 rounded-lg border bg-accent/30">
+                    <div className="text-sm font-medium">
+                      {selectedAppIds.size} selected
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button size="sm" variant="outline" className="h-8 gap-1.5" disabled={bulkProcessing} onClick={() => handleBulkAction('shortlisted')}>
+                        <Star className="h-3.5 w-3.5" /> Bulk Shortlist
+                      </Button>
+                      <Button size="sm" variant="outline" className="h-8 gap-1.5" disabled={bulkProcessing} onClick={() => handleBulkAction('rejected')}>
+                        <XCircle className="h-3.5 w-3.5" /> Bulk Reject
+                      </Button>
+                      <Button size="sm" variant="ghost" className="h-8" onClick={() => setSelectedAppIds(new Set())}>Clear</Button>
+                    </div>
+                  </div>
+                )}
+
                 <Card>
                   <CardContent className="p-0">
                     <ScrollArea className="w-full">
                       <Table>
                         <TableHeader>
                           <TableRow>
+                            <TableHead className="w-10">
+                              <Checkbox
+                                checked={allVisibleSelected ? true : someVisibleSelected ? 'indeterminate' as any : false}
+                                onCheckedChange={(c) => toggleSelectAll(!!c)}
+                                aria-label="Select all"
+                              />
+                            </TableHead>
                             <TableHead>Tutor</TableHead>
                             <TableHead>Job</TableHead>
                             <TableHead>Guardian</TableHead>
@@ -2235,23 +2373,18 @@ export default function AdminDashboard() {
                         </TableHeader>
                         <TableBody>
                           {loadingAllApps ? (
-                            <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">Loading…</TableCell></TableRow>
-                          ) : allApplications.length === 0 ? (
-                            <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">No applications found</TableCell></TableRow>
-                          ) : allApplications
-                            .filter((a) => {
-                              if (!allAppsSearch.trim()) return true;
-                              const s = allAppsSearch.toLowerCase();
-                              return (
-                                a.tutor_profile?.full_name?.toLowerCase().includes(s) ||
-                                a.tutor_profile?.email?.toLowerCase().includes(s) ||
-                                a.jobs?.title?.toLowerCase().includes(s) ||
-                                a.jobs?.job_reference?.toLowerCase().includes(s) ||
-                                a.parent_profile?.full_name?.toLowerCase().includes(s)
-                              );
-                            })
-                            .map((app) => (
-                            <TableRow key={app.id}>
+                            <TableRow><TableCell colSpan={8} className="text-center py-8 text-muted-foreground">Loading…</TableCell></TableRow>
+                          ) : filteredApps.length === 0 ? (
+                            <TableRow><TableCell colSpan={8} className="text-center py-8 text-muted-foreground">No applications found</TableCell></TableRow>
+                          ) : filteredApps.map((app) => (
+                            <TableRow key={app.id} data-state={selectedAppIds.has(app.id) ? 'selected' : undefined}>
+                              <TableCell>
+                                <Checkbox
+                                  checked={selectedAppIds.has(app.id)}
+                                  onCheckedChange={(c) => toggleSelect(app.id, !!c)}
+                                  aria-label={`Select application ${app.id}`}
+                                />
+                              </TableCell>
                               <TableCell>
                                 <div className="text-sm font-medium">{app.tutor_profile?.full_name || 'Unknown'}</div>
                                 <div className="text-xs text-muted-foreground">{app.tutor_profile?.email}</div>
@@ -2297,7 +2430,8 @@ export default function AdminDashboard() {
                   </CardContent>
                 </Card>
               </div>
-            )}
+              );
+            })()}
 
 
             {activeTab === 'reports' && (
