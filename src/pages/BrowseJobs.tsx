@@ -431,7 +431,7 @@ export default function BrowseJobs() {
           {/* Expandable Filters */}
           {showFilters && (
             <div className="mt-4 pt-4 border-t border-border">
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3">
                 <div>
                   <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Division</label>
                   <Select value={selectedDivision} onValueChange={(v) => { setSelectedDivision(v); setSelectedDistrict('all'); setCurrentPage(1); }}>
@@ -488,6 +488,21 @@ export default function BrowseJobs() {
                       <SelectItem value="online">Online</SelectItem>
                       <SelectItem value="in_person">In-Person</SelectItem>
                       <SelectItem value="hybrid">Hybrid</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Preferred Time</label>
+                  <Select value={selectedTime} onValueChange={(v) => { setSelectedTime(v); setCurrentPage(1); }}>
+                    <SelectTrigger className="h-10 rounded-lg">
+                      <Clock className="h-3.5 w-3.5 mr-1.5 text-muted-foreground" />
+                      <SelectValue placeholder="Any Time" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Any Time</SelectItem>
+                      {TIME_OPTIONS.map(t => (
+                        <SelectItem key={t} value={t}>{t}</SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
