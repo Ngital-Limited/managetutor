@@ -27,6 +27,13 @@ const typeIcons: Record<string, typeof Bell> = {
   application_received: FileText,
   application_accepted: UserCheck,
   application_rejected: XCircle,
+  application_shortlisted: UserCheck,
+  application_invited_to_demo: Briefcase,
+  demo_approved: Briefcase,
+  demo_result_confirmed: UserCheck,
+  demo_result_cancelled: XCircle,
+  interview_invite: Briefcase,
+  hire: UserCheck,
   new_job: Briefcase,
 };
 
