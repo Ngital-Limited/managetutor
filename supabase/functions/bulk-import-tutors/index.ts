@@ -14,6 +14,13 @@ interface TutorRow {
   t_experience?: string; background?: string; medium?: string;
   fb_link?: string; pre_class?: string; pre_subject?: string; pre_area?: string;
   status?: string; photo?: string;
+  nid_url?: string; student_id_url?: string;
+}
+
+function normalizeUrl(u?: string): string | null {
+  const c = u && u !== "NULL" && u.trim() !== "" ? u.trim() : null;
+  if (!c) return null;
+  return /^https?:\/\//i.test(c) ? c : null;
 }
 
 const clean = (v?: string) => (v && v !== "NULL" && v.trim() !== "" ? v.trim() : null);
