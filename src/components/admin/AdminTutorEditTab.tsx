@@ -358,6 +358,29 @@ export function AdminTutorEditTab({ toast }: Props) {
             </CardContent>
           </Card>
 
+          {/* Featured blurb (manual, shown on public profile) */}
+          <Card className="md:col-span-2">
+            <CardHeader>
+              <CardTitle className="text-base flex items-center gap-2"><FileText className="h-4 w-4 text-primary" /> Featured Tutor Blurb</CardTitle>
+              <CardDescription>A short hand-written highlight (1–3 sentences) shown on this tutor's public profile.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <Textarea
+                value={blurb}
+                onChange={e => setBlurb(e.target.value.slice(0, 500))}
+                placeholder="e.g. Top-rated math tutor with 5+ years helping HSC students score A+. Patient, structured, and exam-focused."
+                rows={4}
+                maxLength={500}
+              />
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-muted-foreground">{blurb.length}/500</span>
+                <Button size="sm" onClick={handleSaveBlurb} disabled={savingBlurb}>
+                  {savingBlurb ? 'Saving...' : 'Save Blurb'}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
           {/* Education */}
           <Card className="md:col-span-2">
             <CardHeader>
