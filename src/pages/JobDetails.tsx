@@ -24,6 +24,7 @@ import {
 
 interface Job {
   id: string;
+  slug?: string | null;
   title: string;
   description: string;
   class_level: string;
@@ -122,7 +123,7 @@ export default function JobDetails() {
       // Fetch related job posts (same district, open status, exclude current)
       const { data: related } = await supabase
         .from('jobs')
-        .select(`id, title, job_reference, budget_min, budget_max, class_level, created_at,
+        .select(`id, slug, title, job_reference, budget_min, budget_max, class_level, created_at,
           districts (name_en),
           subjects (name_en),
           job_subjects (subjects (name_en))`)
@@ -144,7 +145,7 @@ export default function JobDetails() {
               profiles:user_id (full_name, avatar_url, phone)
             )
           `)
-          .eq('job_id', id)
+          .eq('job_id', jobData.id)
           .order('created_at', { ascending: false });
 
         if (apps) setApplications(apps as unknown as Application[]);
@@ -162,7 +163,7 @@ export default function JobDetails() {
           const { data: app } = await supabase
             .from('applications')
             .select('*')
-            .eq('job_id', id)
+            .eq('job_id', jobData.id)
             .eq('tutor_id', tutorProfile.id)
             .single();
 
@@ -490,7 +491,7 @@ export default function JobDetails() {
                     return (
                       <Link
                         key={rj.id}
-                        to={`/jobs/${rj.id}`}
+                        to={`/jobs/${(rj as any).slug || rj.id}`}
                         className="block p-3 rounded-lg border hover:border-primary hover:bg-accent/30 transition-colors"
                       >
                         <div className="flex items-start justify-between gap-3">
