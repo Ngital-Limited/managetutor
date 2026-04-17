@@ -274,7 +274,9 @@ export default function Index() {
               <div>
                 <span className="text-xs uppercase tracking-[0.2em] text-muted-foreground font-medium">Categories</span>
                 <h2 className="text-3xl md:text-4xl font-semibold tracking-tight mt-2 mb-2">Browse by Subject</h2>
-                <p className="text-sm text-muted-foreground">Find tuition jobs across 50+ subjects in every category</p>
+                <p className="text-sm text-muted-foreground max-w-xl">
+                  Explore 50+ subjects across every academic category — from primary school basics to advanced university coursework, language learning, music, art, programming, and competitive exam preparation. Pick a category to discover qualified tutors and active tuition jobs in your area.
+                </p>
               </div>
               <Link to="/jobs">
                 <Button variant="ghost" className="hidden sm:flex gap-1 text-sm text-muted-foreground hover:text-foreground">
