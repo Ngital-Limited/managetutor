@@ -122,7 +122,9 @@ export default function TutorProfile() {
     email: '',
     district_id: '',
     area_id: '',
+    avatar_url: '',
   });
+  const [avatarUploading, setAvatarUploading] = useState(false);
 
   useEffect(() => {
     if (!authLoading) {
@@ -160,6 +162,7 @@ export default function TutorProfile() {
         email: profileRes.data.email || user?.email || '',
         district_id: profileRes.data.district_id || '',
         area_id: profileRes.data.area_id || '',
+        avatar_url: profileRes.data.avatar_url || '',
       });
       // Set initial division
       if (profileRes.data.district_id && districtsRes.data) {
@@ -257,6 +260,10 @@ export default function TutorProfile() {
       toast({ title: 'Name Required', description: 'Full name is mandatory.', variant: 'destructive' });
       return;
     }
+    if (!userProfile.avatar_url) {
+      toast({ title: 'Profile Picture Required', description: 'Please upload a profile picture. It is mandatory for tutors.', variant: 'destructive' });
+      return;
+    }
     const phoneFields = [
       { value: profile.father_phone, label: "Father's Phone" },
       { value: profile.mother_phone, label: "Mother's Phone" },
@@ -275,6 +282,7 @@ export default function TutorProfile() {
       phone: userProfile.phone,
       district_id: userProfile.district_id || null,
       area_id: userProfile.area_id || null,
+      avatar_url: userProfile.avatar_url || null,
     }).eq('id', targetUserId);
 
     if (profileError) {
@@ -411,9 +419,33 @@ export default function TutorProfile() {
     setSaving(false);
   };
 
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !targetUserId) return;
+    if (file.size > 5 * 1024 * 1024) {
+      toast({ title: 'File too large', description: 'Profile picture must be under 5MB.', variant: 'destructive' });
+      return;
+    }
+    setAvatarUploading(true);
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${targetUserId}/avatar-${Date.now()}.${fileExt}`;
+    const { error: uploadError } = await supabase.storage.from('avatars').upload(fileName, file, { upsert: true });
+    if (uploadError) {
+      toast({ title: 'Upload failed', description: uploadError.message, variant: 'destructive' });
+      setAvatarUploading(false);
+      return;
+    }
+    const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(fileName);
+    setUserProfile((p) => ({ ...p, avatar_url: urlData.publicUrl }));
+    await supabase.from('profiles').update({ avatar_url: urlData.publicUrl }).eq('id', targetUserId);
+    setAvatarUploading(false);
+    toast({ title: 'Profile picture updated' });
+  };
+
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, docType: string) => {
     const file = e.target.files?.[0];
     if (!file || !user) return;
+
 
     setUploading(true);
     const fileExt = file.name.split('.').pop();
@@ -546,6 +578,25 @@ export default function TutorProfile() {
         <TabsContent value="personal" className="space-y-6 mt-0">
           <Card className="rounded-2xl border-border/60 shadow-sm">
             <CardContent className="p-6 space-y-5">
+              {/* Profile Picture - Mandatory */}
+              <div className="flex items-center gap-5 pb-5 border-b border-border/60">
+                <Avatar className="h-20 w-20 ring-2 ring-border">
+                  <AvatarImage src={userProfile.avatar_url} />
+                  <AvatarFallback className="text-2xl">{userProfile.full_name?.charAt(0) || 'T'}</AvatarFallback>
+                </Avatar>
+                <div className="flex-1">
+                  <Label className="font-medium">Profile Picture <span className="text-destructive">*</span></Label>
+                  <p className="text-xs text-muted-foreground mt-0.5 mb-2">Required. JPG/PNG, max 5MB.</p>
+                  <label htmlFor="tutor-avatar-upload" className="cursor-pointer inline-flex">
+                    <div className="flex items-center gap-2 px-4 py-2 border rounded-xl hover:bg-muted transition-colors text-sm">
+                      <Upload className="h-4 w-4" />
+                      {avatarUploading ? 'Uploading...' : (userProfile.avatar_url ? 'Replace Photo' : 'Upload Photo')}
+                    </div>
+                  </label>
+                  <input id="tutor-avatar-upload" type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} disabled={avatarUploading} />
+                </div>
+              </div>
+
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
                   <Label>Full Name <span className="text-destructive">*</span></Label>
