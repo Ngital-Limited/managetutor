@@ -159,28 +159,19 @@ export default function BrowseJobs() {
   };
 
   const fetchData = async () => {
-    const [districtsRes, subjectsRes] = await Promise.all([
+    const [districtsRes, areasRes] = await Promise.all([
       supabase.from('districts').select('id, name_en, name_bn, division_en').order('name_en'),
-      supabase.from('subjects').select('*').order('name_en'),
+      supabase.from('areas').select('id, name_en, district_id').order('name_en'),
     ]);
-    
+
     if (districtsRes.data) setDistricts(districtsRes.data);
-    if (subjectsRes.data) setSubjects(subjectsRes.data);
-    
+    if (areasRes.data) setAreas(areasRes.data as Area[]);
+
     await fetchJobs();
   };
 
   const fetchJobs = async () => {
     setLoading(true);
-    
-    let subjectJobIds: string[] | null = null;
-    if (selectedSubject && selectedSubject !== 'all') {
-      const { data: jsData } = await supabase
-        .from('job_subjects')
-        .select('job_id')
-        .eq('subject_id', selectedSubject);
-      subjectJobIds = jsData?.map(js => js.job_id) || [];
-    }
 
     let countQuery = supabase
       .from('jobs')
@@ -190,24 +181,12 @@ export default function BrowseJobs() {
     if (selectedDistrict && selectedDistrict !== 'all') {
       countQuery = countQuery.eq('district_id', selectedDistrict);
     }
-    if (subjectJobIds !== null) {
-      if (subjectJobIds.length === 0) {
-        setTotalCount(0);
-        setJobs([]);
-        setLoading(false);
-        return;
-      }
-      countQuery = countQuery.in('id', subjectJobIds);
-    }
-    if (selectedMode && selectedMode !== 'all') {
-      countQuery = countQuery.eq('teaching_mode', selectedMode as 'online' | 'in_person' | 'hybrid');
+    if (selectedArea && selectedArea !== 'all') {
+      countQuery = countQuery.eq('area_id', selectedArea);
     }
     if (selectedTime && selectedTime !== 'all') {
       countQuery = countQuery.eq('preferred_time', selectedTime);
     }
-
-    const { count } = await countQuery;
-    setTotalCount(count || 0);
 
     const from = (currentPage - 1) * JOBS_PER_PAGE;
     const to = from + JOBS_PER_PAGE - 1;
@@ -222,38 +201,60 @@ export default function BrowseJobs() {
       `)
       .eq('status', 'open')
       .order('is_featured', { ascending: false })
-      .order('created_at', { ascending: false })
-      .range(from, to);
+      .order('created_at', { ascending: false });
 
     if (selectedDistrict && selectedDistrict !== 'all') {
       query = query.eq('district_id', selectedDistrict);
     }
-    if (subjectJobIds !== null) {
-      query = query.in('id', subjectJobIds);
-    }
-    if (selectedMode && selectedMode !== 'all') {
-      query = query.eq('teaching_mode', selectedMode as 'online' | 'in_person' | 'hybrid');
+    if (selectedArea && selectedArea !== 'all') {
+      query = query.eq('area_id', selectedArea);
     }
     if (selectedTime && selectedTime !== 'all') {
       query = query.eq('preferred_time', selectedTime);
     }
 
-    const { data } = await query;
-    
-    if (data) {
-      let filtered = data as unknown as Job[];
-      
-      if (searchQuery) {
-        const q = searchQuery.toLowerCase();
-        filtered = filtered.filter(j => 
-          j.title?.toLowerCase().includes(q) ||
-          j.description?.toLowerCase().includes(q)
-        );
-      }
-      
-      setJobs(filtered);
+    // Category & Background filters apply client-side (matched against title, description, class_level, special_requirements)
+    const needsClientFilter = (selectedCategory && selectedCategory !== 'all') || (selectedBackground && selectedBackground !== 'all') || !!searchQuery;
+
+    if (!needsClientFilter) {
+      const { count } = await countQuery;
+      setTotalCount(count || 0);
+      const { data } = await query.range(from, to);
+      setJobs((data as unknown as Job[]) || []);
+      setLoading(false);
+      return;
     }
-    
+
+    // Fetch full set then filter+paginate locally
+    const { data } = await query.limit(500);
+    let filtered = (data as unknown as Job[]) || [];
+
+    const matchesText = (j: Job, kw: string) => {
+      const k = kw.toLowerCase();
+      return (
+        j.title?.toLowerCase().includes(k) ||
+        j.description?.toLowerCase().includes(k) ||
+        j.class_level?.toLowerCase().includes(k) ||
+        (j as any).special_requirements?.toLowerCase().includes(k)
+      );
+    };
+
+    if (selectedCategory && selectedCategory !== 'all') {
+      filtered = filtered.filter(j => matchesText(j, selectedCategory));
+    }
+    if (selectedBackground && selectedBackground !== 'all') {
+      filtered = filtered.filter(j => matchesText(j, selectedBackground));
+    }
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      filtered = filtered.filter(j =>
+        j.title?.toLowerCase().includes(q) ||
+        j.description?.toLowerCase().includes(q)
+      );
+    }
+
+    setTotalCount(filtered.length);
+    setJobs(filtered.slice(from, to + 1));
     setLoading(false);
   };
 
