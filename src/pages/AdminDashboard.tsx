@@ -1331,7 +1331,7 @@ export default function AdminDashboard() {
       .select('id, amount, currency, status, transaction_id, created_at, completed_at, listing_type, user_id')
       .eq('listing_type', 'verification_badge')
       .order('created_at', { ascending: false })
-      .limit(50);
+      .limit(1000);
     if (vPayments) {
       const uids = [...new Set(vPayments.map(p => p.user_id))];
       const { data: profs } = await supabase.from('profiles').select('id, full_name, email').in('id', uids);
