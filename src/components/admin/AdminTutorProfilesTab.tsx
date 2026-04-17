@@ -827,7 +827,7 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="w-48">
                           <DropdownMenuItem asChild>
-                            <Link to={`/tutor/${t.user_id}`} className="flex items-center gap-2">
+                            <Link to={`/tutor/${(t as any).slug || t.user_id}`} className="flex items-center gap-2">
                               <Eye className="h-3.5 w-3.5" /> View Profile
                             </Link>
                           </DropdownMenuItem>
