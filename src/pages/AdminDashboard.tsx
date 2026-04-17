@@ -2385,6 +2385,8 @@ export default function AdminDashboard() {
                               <TableRow>
                                 <TableHead className="font-mono">Ref ID</TableHead>
                                 <TableHead>Job Name</TableHead>
+                                <TableHead>Guardian</TableHead>
+                                <TableHead>Phone</TableHead>
                                 <TableHead>Posted</TableHead>
                                 <TableHead>Job Status</TableHead>
                                 <TableHead>Applicants</TableHead>
