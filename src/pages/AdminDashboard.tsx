@@ -3524,7 +3524,7 @@ export default function AdminDashboard() {
                   {app.status === 'pending' && (
                     <div className="flex gap-2 flex-wrap">
                       <Button size="sm" variant="outline" className="border-primary text-primary hover:bg-primary/10" onClick={() => handleAdminUpdateAppStatus(app.id, 'shortlisted' as any, viewingJobApps!.jobId)} disabled={processing}>
-                        <Star className="h-3.5 w-3.5 mr-1" /> Shortlist
+                        <CheckCircle2 className="h-3.5 w-3.5 mr-1" /> Shortlist
                       </Button>
                       <Button size="sm" variant="outline" className="border-warning text-warning hover:bg-warning/10" onClick={() => handleAdminUpdateAppStatus(app.id, 'waiting' as any, viewingJobApps!.jobId)} disabled={processing}>
                         <Clock className="h-3.5 w-3.5 mr-1" /> Waiting
@@ -3556,7 +3556,7 @@ export default function AdminDashboard() {
                   {app.status === 'waiting' && (
                     <div className="flex gap-2 flex-wrap">
                       <Button size="sm" variant="outline" className="border-primary text-primary hover:bg-primary/10" onClick={() => handleAdminUpdateAppStatus(app.id, 'shortlisted' as any, viewingJobApps!.jobId)} disabled={processing}>
-                        <Star className="h-3.5 w-3.5 mr-1" /> Shortlist
+                        <CheckCircle2 className="h-3.5 w-3.5 mr-1" /> Shortlist
                       </Button>
                       <Button size="sm" className="bg-success hover:bg-success/90" onClick={() => handleAdminUpdateAppStatus(app.id, 'accepted', viewingJobApps!.jobId)} disabled={processing}>
                         <CheckCircle2 className="h-3.5 w-3.5 mr-1" /> Accept
