@@ -363,7 +363,6 @@ export default function TutorPublicProfile() {
             })()}
 
             {/* Teaching Philosophy and Success Stories removed */}
-            )}
 
             {/* Reviews */}
             <Card>
