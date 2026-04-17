@@ -831,6 +831,9 @@ export default function AdminDashboard() {
   const [allApplications, setAllApplications] = useState<any[]>([]);
   const [allAppsStatusFilter, setAllAppsStatusFilter] = useState('all');
   const [allAppsSearch, setAllAppsSearch] = useState('');
+  const [appsView, setAppsView] = useState<'jobs' | 'applicants'>('jobs');
+  const [selectedAppsJobId, setSelectedAppsJobId] = useState<string | null>(null);
+  const [appsJobsSearch, setAppsJobsSearch] = useState('');
   const [loadingAllApps, setLoadingAllApps] = useState(false);
   const [selectedAppIds, setSelectedAppIds] = useState<Set<string>>(new Set());
   const [bulkProcessing, setBulkProcessing] = useState(false);
