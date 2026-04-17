@@ -35,6 +35,7 @@ interface Area {
   name_en: string;
   name_bn: string;
   district_id: string;
+  district_name?: string;
 }
 
 interface Subject {
