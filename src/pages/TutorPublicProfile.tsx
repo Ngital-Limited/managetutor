@@ -17,6 +17,7 @@ import {
   Briefcase, BookOpen, User, Users, Share2, Video, Award, Monitor, Home, Sparkles,
 } from 'lucide-react';
 import BookDemoClassDialog from '@/components/BookDemoClassDialog';
+import { AiOverview, stripAiOverviewMarkdown } from '@/components/AiOverview';
 
 interface TutorProfile {
   id: string;
