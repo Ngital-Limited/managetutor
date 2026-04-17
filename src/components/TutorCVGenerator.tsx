@@ -69,6 +69,13 @@ export async function generateTutorCV(userId: string): Promise<void> {
     classLevels: tutor.class_levels || [],
     districtName: profile.districts?.name_en || null,
     presentAddress: tutor.present_address,
+    educationEntries: (eduData || []).filter((e: any) => e.institution?.trim()).map((e: any) => ({
+      degree: e.degree,
+      institution: e.institution,
+      field_of_study: e.field_of_study,
+      passing_year: e.passing_year,
+      result: e.result,
+    })),
   };
 
   openCVPrintWindow(data);
