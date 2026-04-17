@@ -3440,6 +3440,55 @@ export default function AdminDashboard() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Admin direct demo schedule dialog */}
+      <Dialog open={!!demoScheduleApp} onOpenChange={(o) => !o && setDemoScheduleApp(null)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Schedule Demo Class</DialogTitle>
+          </DialogHeader>
+          {demoScheduleApp && (
+            <div className="space-y-4">
+              <div className="text-sm text-muted-foreground">
+                Inviting <span className="font-medium text-foreground">{demoScheduleApp.tutorName}</span> for
+                <span className="font-medium text-foreground"> "{demoScheduleApp.jobTitle}"</span>. The tutor will be notified immediately (admin-direct, no further approval needed).
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs font-medium mb-1 block">Date *</label>
+                  <Input type="date" value={demoScheduleDate} min={new Date(Date.now() + 86400000).toISOString().split('T')[0]} onChange={(e) => setDemoScheduleDate(e.target.value)} />
+                </div>
+                <div>
+                  <label className="text-xs font-medium mb-1 block">Time *</label>
+                  <Input type="time" value={demoScheduleTime} onChange={(e) => setDemoScheduleTime(e.target.value)} />
+                </div>
+              </div>
+              <div>
+                <label className="text-xs font-medium mb-1 block">Duration</label>
+                <Select value={demoScheduleDuration} onValueChange={setDemoScheduleDuration}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="30">30 minutes</SelectItem>
+                    <SelectItem value="45">45 minutes</SelectItem>
+                    <SelectItem value="60">1 hour</SelectItem>
+                    <SelectItem value="90">1.5 hours</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="text-xs font-medium mb-1 block">Notes (optional)</label>
+                <Textarea rows={2} maxLength={500} placeholder="Any specific topics, link, or instructions..." value={demoScheduleNotes} onChange={(e) => setDemoScheduleNotes(e.target.value)} />
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDemoScheduleApp(null)} disabled={demoScheduling}>Cancel</Button>
+            <Button onClick={handleAdminScheduleDemo} disabled={demoScheduling || !demoScheduleDate || !demoScheduleTime}>
+              {demoScheduling ? 'Scheduling...' : 'Schedule & Notify Tutor'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </SidebarProvider>
   );
 }
