@@ -13,8 +13,6 @@ interface TutorCVData {
   teachingMode: string | null;
   monthlySalaryMin: number | null;
   monthlySalaryMax: number | null;
-  averageRating: number;
-  totalReviews: number;
   totalStudents: number;
   verificationStatus: string;
   teachingPhilosophy: string | null;
@@ -59,8 +57,6 @@ export async function generateTutorCV(userId: string): Promise<void> {
     teachingMode: tutor.teaching_mode,
     monthlySalaryMin: tutor.monthly_salary_min,
     monthlySalaryMax: tutor.monthly_salary_max,
-    averageRating: tutor.average_rating || 0,
-    totalReviews: tutor.total_reviews || 0,
     totalStudents: tutor.total_students || 0,
     verificationStatus: tutor.verification_status || 'pending',
     teachingPhilosophy: tutor.teaching_philosophy,
@@ -129,7 +125,6 @@ function openCVPrintWindow(data: TutorCVData) {
 
 <div class="section">
   <div class="stats">
-    <div class="stat"><div class="val">⭐ ${data.averageRating}</div><div class="lbl">Rating (${data.totalReviews} reviews)</div></div>
     <div class="stat"><div class="val">${data.experienceYears}</div><div class="lbl">Years Experience</div></div>
     <div class="stat"><div class="val">${data.totalStudents}</div><div class="lbl">Students Taught</div></div>
   </div>

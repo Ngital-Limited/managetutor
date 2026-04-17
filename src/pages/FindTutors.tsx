@@ -17,7 +17,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { JOB_CATEGORIES, STUDENT_BACKGROUNDS } from '@/constants/jobCategories';
 import { 
-  Search, MapPin, Star, Filter, 
+  Search, MapPin, Filter, 
   User, Clock, CheckCircle2, X, ChevronDown, Heart, Award, ArrowRight, ChevronLeft, ChevronRight,
   BookOpen, Monitor, Users, SlidersHorizontal, LayoutGrid, LayoutList, GraduationCap
 } from 'lucide-react';
@@ -57,8 +57,6 @@ interface TutorProfile {
   is_featured: boolean;
   verification_status: string;
   verification_paid: boolean;
-  average_rating: number;
-  total_reviews: number;
   total_students: number;
   display_name: string | null;
   district_id: string | null;
@@ -76,7 +74,7 @@ interface TutorProfile {
   tutor_subjects: { subjects: Subject }[];
 }
 
-type SortOption = 'rating' | 'experience' | 'price_low' | 'price_high' | 'reviews';
+type SortOption = 'newest' | 'experience' | 'price_low' | 'price_high';
 
 export default function FindTutors() {
   const [searchParams] = useSearchParams();
@@ -93,7 +91,7 @@ export default function FindTutors() {
   const [currentPage, setCurrentPage] = useState(1);
   const [showFilters, setShowFilters] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  const [sortBy, setSortBy] = useState<SortOption>('rating');
+  const [sortBy, setSortBy] = useState<SortOption>('newest');
 
   const TUTORS_PER_PAGE = 12;
 
@@ -188,7 +186,7 @@ export default function FindTutors() {
     if (priceRange[1] < 10000) query = query.lte('monthly_salary_max', priceRange[1]);
     if (verifiedOnly) query = query.eq('verification_status', 'approved');
 
-    const { data } = await query.order('is_featured', { ascending: false }).order('average_rating', { ascending: false });
+    const { data } = await query.order('is_featured', { ascending: false }).order('created_at', { ascending: false });
     
     if (data && data.length > 0) {
       const userIds = data.map((t: any) => t.user_id);
@@ -253,11 +251,10 @@ export default function FindTutors() {
       if (!a.is_featured && b.is_featured) return 1;
       
       switch (sortBy) {
-        case 'rating': return (b.average_rating || 0) - (a.average_rating || 0);
+        case 'newest': return new Date(b.id).getTime() - new Date(a.id).getTime();
         case 'experience': return (b.experience_years || 0) - (a.experience_years || 0);
         case 'price_low': return (a.monthly_salary_min || 0) - (b.monthly_salary_min || 0);
         case 'price_high': return (b.monthly_salary_max || 0) - (a.monthly_salary_max || 0);
-        case 'reviews': return (b.total_reviews || 0) - (a.total_reviews || 0);
         default: return 0;
       }
     });

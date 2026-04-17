@@ -28,7 +28,7 @@ import {
 import { NavLink } from '@/components/NavLink';
 import { NotificationBell } from '@/components/NotificationBell';
 import {
-  GraduationCap, LogOut, Globe, Briefcase, Star, User,
+  GraduationCap, LogOut, Globe, Briefcase, User,
   CheckCircle2, Clock, XCircle, DollarSign, TrendingUp, Calendar, MapPin,
   BookOpen, Settings, Eye, ArrowRight, AlertCircle, Phone, Mail, Zap, Sparkles, Crown,
   Home, Search, CreditCard, FileText
@@ -74,8 +74,7 @@ interface TutorProfile {
   experience_years: number;
   monthly_salary_min: number;
   monthly_salary_max: number;
-  average_rating: number;
-  total_reviews: number;
+  // rating fields removed
   total_students: number;
   is_available: boolean;
   is_featured: boolean;
@@ -591,20 +590,6 @@ export default function TutorDashboard() {
             </CardContent>
           </Card>
 
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">Avg Rating</p>
-                  <p className="text-3xl font-bold text-accent">{profile?.average_rating || 0}</p>
-                </div>
-                <div className="h-12 w-12 rounded-xl bg-accent/10 flex items-center justify-center">
-                  <Star className="h-6 w-6 text-accent" />
-                </div>
-              </div>
-              <p className="text-xs text-muted-foreground mt-2">{profile?.total_reviews || 0} reviews</p>
-            </CardContent>
-          </Card>
         </div>
 
         {/* Compact Summary Widgets */}
