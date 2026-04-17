@@ -271,6 +271,27 @@ export function SubAdminRBACTab({ toast }: { toast: any }) {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Remove Admin Confirmation */}
+      <AlertDialog open={!!removeTarget} onOpenChange={(o) => !o && setRemoveTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remove admin role?</AlertDialogTitle>
+            <AlertDialogDescription>
+              <span className="font-medium text-foreground">{removeTarget?.full_name}</span> ({removeTarget?.email}) will lose all admin access and permissions. This action does not delete their user account.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => removeTarget && removeAdmin(removeTarget.id)}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Remove Admin
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
