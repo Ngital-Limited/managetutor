@@ -271,7 +271,7 @@ export default function Index() {
       {subjectCategories.length > 0 && (
         <section className="relative py-20 bg-gradient-to-b from-primary/[0.04] via-muted/30 to-background overflow-hidden">
           <div className="absolute top-0 right-0 w-[500px] h-[400px] bg-primary/5 rounded-full blur-[120px] pointer-events-none" />
-          <div className="container mx-auto px-4">
+          <div className="container mx-auto px-4 relative z-10">
             <div className="flex items-end justify-between mb-12 max-w-5xl">
               <div>
                 <span className="text-xs uppercase tracking-[0.2em] text-muted-foreground font-medium">Categories</span>
