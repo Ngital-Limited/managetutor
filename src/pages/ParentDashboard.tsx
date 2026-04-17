@@ -1848,9 +1848,9 @@ export default function ParentDashboard() {
           <div className="space-y-4">
             {demoBookings.map((booking: any) => (
               <div key={booking.id} className="p-4 border rounded-xl hover:bg-muted/50 transition-colors">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1 flex-wrap">
                       <h4 className="font-bold">
                         {booking.tutor_profiles?.profiles?.full_name || 'Tutor'}
                       </h4>
@@ -1861,7 +1861,7 @@ export default function ParentDashboard() {
                         </Badge>
                       )}
                     </div>
-                    <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                    <div className="flex items-center gap-3 text-sm text-muted-foreground flex-wrap">
                       <span className="flex items-center gap-1">
                         <Calendar className="h-3 w-3" />
                         {new Date(booking.preferred_date).toLocaleDateString()}
@@ -1872,17 +1872,42 @@ export default function ParentDashboard() {
                       </span>
                       <span className="font-medium text-success">Free</span>
                     </div>
+                    {booking.notes && (
+                      <p className="text-xs text-muted-foreground mt-2 italic">Note: {booking.notes}</p>
+                    )}
+                    {booking.cancellation_reason && (
+                      <p className="text-xs text-destructive mt-2">Cancelled: {booking.cancellation_reason}</p>
+                    )}
                   </div>
-                  <Badge className={
-                    booking.status === 'confirmed' ? 'bg-success' :
-                    booking.status === 'completed' ? 'bg-primary' :
-                    booking.status === 'cancelled' ? 'bg-destructive' :
-                    'bg-warning text-warning-foreground'
-                  }>
-                    {booking.status === 'pending' && <Clock className="h-3 w-3 mr-1" />}
-                    {booking.status === 'confirmed' && <CheckCircle2 className="h-3 w-3 mr-1" />}
-                    {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
-                  </Badge>
+                  <div className="flex flex-col items-end gap-2 shrink-0">
+                    <Badge className={
+                      booking.status === 'confirmed' ? 'bg-success' :
+                      booking.status === 'completed' ? 'bg-primary' :
+                      booking.status === 'cancelled' ? 'bg-destructive' :
+                      booking.status === 'approved' ? 'bg-accent text-accent-foreground' :
+                      'bg-warning text-warning-foreground'
+                    }>
+                      {booking.status === 'pending' && <Clock className="h-3 w-3 mr-1" />}
+                      {booking.status === 'confirmed' && <CheckCircle2 className="h-3 w-3 mr-1" />}
+                      {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
+                    </Badge>
+                    {(booking.status === 'confirmed' || booking.status === 'completed') && booking.status !== 'completed' && (
+                      <div className="flex flex-col gap-1.5 items-end">
+                        <span className="text-[10px] text-muted-foreground uppercase tracking-wide">After demo</span>
+                        <div className="flex gap-1.5">
+                          <Button size="sm" className="h-7 text-xs" onClick={() => handleDemoResult(booking, 'confirmed')}>
+                            <CheckCircle2 className="h-3 w-3 mr-1" /> Confirmed (Hire)
+                          </Button>
+                          <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => {
+                            const reason = window.prompt('Reason for cancelling?') || '';
+                            if (reason !== null) handleDemoResult(booking, 'cancelled', reason);
+                          }}>
+                            <XCircle className="h-3 w-3 mr-1" /> Cancel
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             ))}
