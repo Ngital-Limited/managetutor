@@ -1069,21 +1069,44 @@ export default function AdminDashboard() {
 
   // ── Fetch functions per tab ──
   const fetchUsers = useCallback(async () => {
-    let query = supabase.from('profiles').select('id, full_name, email, phone, avatar_url, is_banned, is_approved, created_at').order('created_at', { ascending: false }).limit(100);
-    if (userSearch) query = query.or(`full_name.ilike.%${userSearch}%,email.ilike.%${userSearch}%,phone.ilike.%${userSearch}%`);
+    let query = supabase
+      .from('profiles')
+      .select('id, full_name, email, phone, avatar_url, is_banned, is_approved, created_at, user_reference, district_id, area_id')
+      .order('created_at', { ascending: false })
+      .limit(200);
+    if (userSearch) query = query.or(`full_name.ilike.%${userSearch}%,email.ilike.%${userSearch}%,phone.ilike.%${userSearch}%,user_reference.ilike.%${userSearch}%`);
+    if (guardianDistrictFilter !== 'all') query = query.eq('district_id', guardianDistrictFilter);
+    if (guardianAreaFilter.length > 0) query = query.in('area_id', guardianAreaFilter);
+    if (guardianStatusFilter === 'banned') query = query.eq('is_banned', true);
+    else if (guardianStatusFilter === 'pending') query = query.eq('is_approved', false).eq('is_banned', false);
+    else if (guardianStatusFilter === 'approved') query = query.eq('is_approved', true).eq('is_banned', false);
+
     const { data } = await query;
     if (!data) { setUsers([]); return; }
 
-    // Fetch roles for these users
     const ids = data.map(u => u.id);
-    const { data: roles } = await supabase.from('user_roles').select('user_id, role').in('user_id', ids);
+    const [{ data: roles }, { data: jobsRows }] = await Promise.all([
+      supabase.from('user_roles').select('user_id, role').in('user_id', ids),
+      supabase.from('jobs').select('parent_id').in('parent_id', ids),
+    ]);
     const roleMap = new Map(roles?.map(r => [r.user_id, r.role]) || []);
+    const jobsCountMap = new Map<string, number>();
+    jobsRows?.forEach(j => jobsCountMap.set(j.parent_id, (jobsCountMap.get(j.parent_id) || 0) + 1));
 
-    let result = data.map(u => ({ ...u, role: roleMap.get(u.id) || 'unknown' })) as UserRow[];
+    const districtMap = new Map(guardianDistricts.map(d => [d.id, d.name_en]));
+    const areaMap = new Map(guardianAreas.map(a => [a.id, a.name_en]));
+
+    let result = data.map(u => ({
+      ...u,
+      role: roleMap.get(u.id) || 'unknown',
+      district_name: u.district_id ? districtMap.get(u.district_id) || null : null,
+      area_name: u.area_id ? areaMap.get(u.area_id) || null : null,
+      jobs_count: jobsCountMap.get(u.id) || 0,
+    })) as UserRow[];
     // Filter to show only parents/guardians
     result = result.filter(u => u.role === 'parent');
     setUsers(result);
-  }, [userSearch]);
+  }, [userSearch, guardianDistrictFilter, guardianAreaFilter, guardianStatusFilter, guardianDistricts, guardianAreas]);
 
   const fetchVerifications = useCallback(async () => {
     let query = supabase
