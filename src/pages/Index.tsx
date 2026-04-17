@@ -504,64 +504,64 @@ export default function Index() {
         </div>
       </section>
 
-      {/* Features */}
-      <section className="py-24 gradient-soft">
-        <div className="container mx-auto px-4">
-          <div className="grid md:grid-cols-2 gap-16 items-center max-w-6xl mx-auto">
-            <div>
-              <h2 className="text-3xl md:text-4xl font-extrabold mb-6">Why Choose Manage Tutor?</h2>
-              <div className="space-y-5">
-                {[
-                  { icon: Shield, title: 'Verified Tutors', desc: 'All tutors go through our verification process' },
-                  { icon: Clock, title: 'Flexible Scheduling', desc: 'Find tutors available when you need them' },
-                  { icon: Award, title: 'Trusted Platform', desc: 'Secure platform connecting parents with qualified tutors' },
-                  { icon: Star, title: 'Reviews & Ratings', desc: 'Read genuine reviews from other parents' },
-                ].map((feature, i) => (
-                  <div key={i} className="flex gap-4 items-start animate-fade-in" style={{ animationDelay: `${i * 100}ms` }}>
-                    <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
-                      <feature.icon className="h-6 w-6 text-primary" />
-                    </div>
-                    <div>
-                      <h4 className="font-bold text-foreground mb-1">{feature.title}</h4>
-                      <p className="text-muted-foreground text-sm">{feature.desc}</p>
-                    </div>
-                  </div>
-                ))}
+      {/* Features — minimal premium */}
+      <section className="relative py-24 bg-gradient-to-b from-background via-muted/20 to-background overflow-hidden">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[500px] bg-primary/[0.04] rounded-full blur-[140px] pointer-events-none" />
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="text-center mb-16 max-w-2xl mx-auto">
+            <span className="text-xs uppercase tracking-[0.2em] text-muted-foreground font-medium">Why Us</span>
+            <h2 className="text-3xl md:text-4xl font-semibold tracking-tight mt-2 mb-3">Why Choose Manage Tutor?</h2>
+            <p className="text-sm text-muted-foreground">Built for trust, designed for results</p>
+          </div>
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4 max-w-6xl mx-auto">
+            {[
+              { icon: Shield, title: 'Verified Tutors', desc: 'All tutors go through our verification process' },
+              { icon: Clock, title: 'Flexible Scheduling', desc: 'Find tutors available when you need them' },
+              { icon: Award, title: 'Trusted Platform', desc: 'Secure platform connecting parents with qualified tutors' },
+              { icon: Star, title: 'Reviews & Ratings', desc: 'Read genuine reviews from other parents' },
+            ].map((feature, i) => (
+              <div
+                key={i}
+                className="group relative bg-card rounded-xl border border-border/60 p-6 transition-all hover:border-primary/30 hover:shadow-[0_4px_24px_-8px_hsl(var(--primary)/0.15)] animate-fade-in"
+                style={{ animationDelay: `${i * 80}ms` }}
+              >
+                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/15 transition-colors">
+                  <feature.icon className="h-5 w-5 text-primary" />
+                </div>
+                <h4 className="font-medium text-sm tracking-tight text-foreground mb-1.5">{feature.title}</h4>
+                <p className="text-muted-foreground text-xs leading-relaxed">{feature.desc}</p>
               </div>
-            </div>
-            <div className="bg-gradient-to-br from-primary/10 via-secondary/10 to-accent/10 rounded-3xl p-10">
-              <div className="grid grid-cols-2 gap-4">
-                {[
-                  { label: 'Active Tutors', value: '1L+' },
-                  { label: 'Districts', value: '64' },
-                  { label: 'Subjects', value: '50+' },
-                  { label: 'Happy Parents', value: '4K+' },
-                ].map((stat, i) => (
-                  <div key={i} className="bg-card rounded-2xl p-5 text-center shadow-lg">
-                    <div className="text-2xl font-extrabold text-primary">{stat.value}</div>
-                    <div className="text-xs text-muted-foreground font-medium">{stat.label}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="py-20 gradient-hero text-primary-foreground">
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl md:text-4xl font-extrabold mb-4">Ready to Get Started?</h2>
-          <p className="text-lg opacity-90 mb-8 max-w-lg mx-auto">Join thousands of families who found their perfect tutor through Manage Tutor</p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+      {/* CTA — minimal premium */}
+      <section className="relative py-24 bg-foreground text-background overflow-hidden">
+        <div
+          className="absolute inset-0 opacity-[0.04] pointer-events-none"
+          style={{
+            backgroundImage:
+              'linear-gradient(hsl(var(--background)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--background)) 1px, transparent 1px)',
+            backgroundSize: '48px 48px',
+          }}
+        />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[400px] bg-primary/20 rounded-full blur-[140px] pointer-events-none" />
+        <div className="container mx-auto px-4 text-center relative z-10 max-w-2xl">
+          <span className="text-xs uppercase tracking-[0.2em] text-background/60 font-medium">Get Started</span>
+          <h2 className="text-3xl md:text-5xl font-semibold tracking-tight mt-3 mb-5 leading-[1.1]">Ready to Get Started?</h2>
+          <p className="text-base text-background/70 mb-10 max-w-lg mx-auto leading-relaxed">
+            Join thousands of families who found their perfect tutor through Manage Tutor
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link to="/auth?mode=signup&role=parent">
-              <Button size="lg" className="bg-secondary hover:bg-secondary/90 text-secondary-foreground h-14 px-8 rounded-xl text-lg">
-                I Need a Tutor <ArrowRight className="ml-2 h-5 w-5" />
+              <Button size="lg" className="bg-background text-foreground hover:bg-background/90 h-12 px-7 rounded-lg text-sm font-semibold gap-2 shadow-lg">
+                I Need a Tutor <ArrowRight className="h-4 w-4" />
               </Button>
             </Link>
             <Link to="/auth?mode=signup&role=tutor">
-              <Button size="lg" variant="outline" className="border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10 h-14 px-8 rounded-xl text-lg">
-                I'm a Tutor <GraduationCap className="ml-2 h-5 w-5" />
+              <Button size="lg" variant="outline" className="border-background/30 bg-transparent text-background hover:bg-background/10 hover:text-background h-12 px-7 rounded-lg text-sm font-semibold gap-2">
+                I'm a Tutor <GraduationCap className="h-4 w-4" />
               </Button>
             </Link>
           </div>
