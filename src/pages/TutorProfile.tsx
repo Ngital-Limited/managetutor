@@ -442,8 +442,10 @@ export default function TutorProfile() {
     toast({ title: 'Profile picture updated' });
   };
 
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, docType: string) => {
     const file = e.target.files?.[0];
     if (!file || !user) return;
+
 
     setUploading(true);
     const fileExt = file.name.split('.').pop();
