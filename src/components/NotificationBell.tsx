@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { formatExactDate } from '@/lib/date';
 import { Bell, CheckCheck, Briefcase, UserCheck, XCircle, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -10,7 +11,6 @@ import {
 } from '@/components/ui/popover';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { formatDistanceToNow } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 
 interface Notification {

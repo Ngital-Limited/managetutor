@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { formatExactDate } from '@/lib/date';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { useParams, useNavigate, Link } from 'react-router-dom';
@@ -15,7 +16,6 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { formatDistanceToNow } from 'date-fns';
 import {
   GraduationCap, ArrowLeft, Globe, MapPin, BookOpen, Calendar, Users, User,
   DollarSign, Clock, CheckCircle2, XCircle, Send, Star, MessageSquare,

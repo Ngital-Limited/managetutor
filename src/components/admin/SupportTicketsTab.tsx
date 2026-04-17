@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { formatExactDate } from '@/lib/date';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -10,7 +11,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { formatDistanceToNow } from 'date-fns';
 import { MessageSquare, Clock, CheckCircle2, AlertTriangle, Send } from 'lucide-react';
 
 export function SupportTicketsTab({ toast }: { toast: any }) {

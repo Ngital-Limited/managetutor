@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { formatExactDate } from '@/lib/date';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,7 +14,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Search, GraduationCap, Briefcase, Plus, Trash2, Pencil, CheckCircle2, BookOpen, X, FileText } from 'lucide-react';
 import { MultiSearchableSelect } from '@/components/MultiSearchableSelect';
-import { formatDistanceToNow } from 'date-fns';
 
 interface Props {
   toast: (opts: { title: string; description?: string; variant?: 'default' | 'destructive' }) => void;

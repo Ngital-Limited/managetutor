@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { formatExactDate } from '@/lib/date';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -11,7 +12,6 @@ import { SearchableSelect } from '@/components/SearchableSelect';
 import { Logo } from '@/components/Logo';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
-import { formatDistanceToNow } from 'date-fns';
 import {
   GraduationCap, Users, MapPin, Star, Search, FileText,
   Globe, ArrowRight, Shield, BookOpen, Clock, Award,

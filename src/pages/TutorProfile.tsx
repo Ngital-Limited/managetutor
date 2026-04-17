@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import { formatExactDate } from '@/lib/date';
 import { Logo } from '@/components/Logo';
 import { TutorSidebarLayout } from '@/components/TutorSidebarLayout';
 import { useNavigate, Link, useParams } from 'react-router-dom';
@@ -25,7 +26,6 @@ import {
 import { Progress } from '@/components/ui/progress';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { formatDistanceToNow } from 'date-fns';
 
 interface Subject { id: string; name_en: string; name_bn: string; }
 interface District { id: string; name_en: string; name_bn: string; division_en: string; }
