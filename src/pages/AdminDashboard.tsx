@@ -2181,7 +2181,102 @@ export default function AdminDashboard() {
               </div>
             )}
 
-            {/* ═══════ REPORTS TAB ═══════ */}
+            {/* ═══════ APPLICATIONS TAB ═══════ */}
+            {activeTab === 'applications' && (
+              <div className="space-y-6">
+                <div className="flex items-center justify-between flex-wrap gap-3">
+                  <div>
+                    <h1 className="text-xl font-semibold">Applications</h1>
+                    <p className="text-sm text-muted-foreground mt-0.5">All tutor applications across every job</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Input
+                      placeholder="Search tutor, job, reference…"
+                      value={allAppsSearch}
+                      onChange={(e) => setAllAppsSearch(e.target.value)}
+                      className="w-64 h-9"
+                    />
+                    <Select value={allAppsStatusFilter} onValueChange={setAllAppsStatusFilter}>
+                      <SelectTrigger className="w-40 h-9"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Status</SelectItem>
+                        <SelectItem value="pending">Pending</SelectItem>
+                        <SelectItem value="shortlisted">Shortlisted</SelectItem>
+                        <SelectItem value="waiting">Waiting</SelectItem>
+                        <SelectItem value="accepted">Accepted</SelectItem>
+                        <SelectItem value="rejected">Rejected</SelectItem>
+                        <SelectItem value="withdrawn">Withdrawn</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <Card>
+                  <CardContent className="p-0">
+                    <ScrollArea className="w-full">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Tutor</TableHead>
+                            <TableHead>Job</TableHead>
+                            <TableHead>Guardian</TableHead>
+                            <TableHead>Rate</TableHead>
+                            <TableHead>Status</TableHead>
+                            <TableHead>Applied</TableHead>
+                            <TableHead className="text-right">Actions</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {loadingAllApps ? (
+                            <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">Loading…</TableCell></TableRow>
+                          ) : allApplications.length === 0 ? (
+                            <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">No applications found</TableCell></TableRow>
+                          ) : allApplications
+                            .filter((a) => {
+                              if (!allAppsSearch.trim()) return true;
+                              const s = allAppsSearch.toLowerCase();
+                              return (
+                                a.tutor_profile?.full_name?.toLowerCase().includes(s) ||
+                                a.tutor_profile?.email?.toLowerCase().includes(s) ||
+                                a.jobs?.title?.toLowerCase().includes(s) ||
+                                a.jobs?.job_reference?.toLowerCase().includes(s) ||
+                                a.parent_profile?.full_name?.toLowerCase().includes(s)
+                              );
+                            })
+                            .map((app) => (
+                            <TableRow key={app.id}>
+                              <TableCell>
+                                <div className="text-sm font-medium">{app.tutor_profile?.full_name || 'Unknown'}</div>
+                                <div className="text-xs text-muted-foreground">{app.tutor_profile?.email}</div>
+                              </TableCell>
+                              <TableCell>
+                                <div className="text-sm font-medium max-w-[220px] truncate">{app.jobs?.title || '—'}</div>
+                                <div className="text-xs font-mono text-muted-foreground">{app.jobs?.job_reference || '—'}</div>
+                              </TableCell>
+                              <TableCell className="text-sm">{app.parent_profile?.full_name || '—'}</TableCell>
+                              <TableCell className="text-sm">{app.proposed_rate ? `৳${app.proposed_rate}` : '—'}</TableCell>
+                              <TableCell><Badge className={`text-xs capitalize ${statusColor(app.status)}`}>{app.status}</Badge></TableCell>
+                              <TableCell className="text-xs text-muted-foreground">{formatDistanceToNow(new Date(app.created_at), { addSuffix: true })}</TableCell>
+                              <TableCell className="text-right">
+                                <div className="flex gap-1 justify-end flex-wrap">
+                                  <Button variant="ghost" size="sm" asChild title="View Job">
+                                    <Link to={`/jobs/${app.job_id}`}><Eye className="h-4 w-4" /></Link>
+                                  </Button>
+                                  <Button variant="outline" size="sm" className="text-xs gap-1" onClick={() => { setViewingJobApps({ jobId: app.job_id, jobTitle: app.jobs?.title || '' }); fetchJobApplications(app.job_id); }} title="Open job applications">
+                                    <UserCheck className="h-3.5 w-3.5" /> Manage
+                                  </Button>
+                                </div>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </ScrollArea>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
+
+
             {activeTab === 'reports' && (
               <div className="space-y-6">
                 <h1 className="text-xl font-semibold">User Reports</h1>
