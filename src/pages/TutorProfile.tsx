@@ -29,8 +29,8 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 
 
-interface Subject { id: string; name_en: string; name_bn: string; }
-interface District { id: string; name_en: string; name_bn: string; division_en: string; }
+interface Subject { id: string; name_en: string; }
+interface District { id: string; name_en: string; division_en: string; }
 interface EducationEntry {
   id?: string;
   institution: string;
@@ -71,7 +71,7 @@ export default function TutorProfile() {
   const [minCompleteness, setMinCompleteness] = useState(70);
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [districts, setDistricts] = useState<District[]>([]);
-  const [areas, setAreas] = useState<{ id: string; name_en: string; name_bn: string; district_id: string }[]>([]);
+  const [areas, setAreas] = useState<{ id: string; name_en: string; district_id: string }[]>([]);
   
   const [selectedSubjects, setSelectedSubjects] = useState<string[]>([]);
   const [documents, setDocuments] = useState<VerificationDoc[]>([]);
@@ -151,7 +151,7 @@ export default function TutorProfile() {
   const fetchData = async () => {
     const [subjectsRes, districtsRes, profileRes, tutorRes, areasRes] = await Promise.all([
       supabase.from('subjects').select('*').order('name_en'),
-      supabase.from('districts').select('id, name_en, name_bn, division_en').order('name_en'),
+      supabase.from('districts').select('id, name_en, division_en').order('name_en'),
       supabase.from('profiles').select('*').eq('id', targetUserId).single(),
       supabase.from('tutor_profiles').select('*').eq('user_id', targetUserId).single(),
       supabase.from('areas').select('*').order('name_en'),

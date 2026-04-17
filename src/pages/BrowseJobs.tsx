@@ -26,7 +26,6 @@ import { getMinProfileCompleteness } from '@/lib/profileCompleteness';
 interface District {
   id: string;
   name_en: string;
-  name_bn: string;
   division_en: string;
 }
 
@@ -57,10 +56,10 @@ interface Job {
   location_details: string | null;
   job_reference: string | null;
   is_featured: boolean;
-  districts: { name_en: string; name_bn: string } | null;
-  areas: { name_en: string; name_bn: string } | null;
-  subjects: { name_en: string; name_bn: string } | null;
-  job_subjects?: { subjects: { name_en: string; name_bn: string } }[];
+  districts: { name_en: string; : string } | null;
+  areas: { name_en: string; : string } | null;
+  subjects: { name_en: string; : string } | null;
+  job_subjects?: { subjects: { name_en: string; : string } }[];
 }
 
 const JOBS_PER_PAGE = 10;
@@ -190,7 +189,7 @@ export default function BrowseJobs({ embedded = false }: { embedded?: boolean } 
   const fetchData = async () => {
     const [areasRes, districtsRes] = await Promise.all([
       supabase.from('areas').select('id, name_en, district_id, districts (name_en)').order('name_en'),
-      supabase.from('districts').select('id, name_en, name_bn, division_en').order('name_en'),
+      supabase.from('districts').select('id, name_en, division_en').order('name_en'),
     ]);
 
     if (areasRes.data) {
@@ -231,10 +230,10 @@ export default function BrowseJobs({ embedded = false }: { embedded?: boolean } 
       .from('jobs')
       .select(`
         *,
-        districts (name_en, name_bn),
-        areas (name_en, name_bn),
-        subjects (id, name_en, name_bn),
-        job_subjects (subjects (id, name_en, name_bn))
+        districts (name_en),
+        areas (name_en),
+        subjects (id, name_en),
+        job_subjects (subjects (id, name_en))
       `)
       .eq('status', 'open')
       .order('is_featured', { ascending: false })

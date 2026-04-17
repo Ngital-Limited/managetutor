@@ -45,8 +45,8 @@ interface TutorProfile {
   teaching_philosophy: string | null;
   success_stories: string | null;
   featured_blurb: string | null;
-  districts: { name_en: string; name_bn: string } | null;
-  areas: { name_en: string; name_bn: string } | null;
+  districts: { name_en: string; : string } | null;
+  areas: { name_en: string; : string } | null;
 }
 
 interface Profile {
@@ -54,11 +54,11 @@ interface Profile {
   avatar_url: string;
   district_id: string;
   user_reference: string | null;
-  districts: { name_en: string; name_bn: string } | null;
-  areas: { name_en: string; name_bn: string } | null;
+  districts: { name_en: string; : string } | null;
+  areas: { name_en: string; : string } | null;
 }
 
-interface Subject { id: string; name_en: string; name_bn: string; }
+interface Subject { id: string; name_en: string; }
 interface Review {
   id: string;
   rating: number;
@@ -103,7 +103,7 @@ export default function TutorPublicProfile() {
     setLoading(true);
 
     let tutorData: any = null;
-    const selectCols = '*, districts (name_en, name_bn), areas (name_en, name_bn)';
+    const selectCols = '*, districts (name_en), areas (name_en)';
 
     if (UUID_REGEX.test(id)) {
       // Try id, then user_id
@@ -134,9 +134,9 @@ export default function TutorPublicProfile() {
 
     const [profileRes, subjectsRes, reviewsRes, eduRes] = await Promise.all([
       supabase.from('profiles')
-        .select('full_name, avatar_url, district_id, user_reference, districts (name_en, name_bn), areas (name_en, name_bn)')
+        .select('full_name, avatar_url, district_id, user_reference, districts (name_en), areas (name_en)')
         .eq('id', tutorData.user_id).maybeSingle(),
-      supabase.from('tutor_subjects').select('subjects (id, name_en, name_bn)').eq('tutor_profile_id', tutorData.id),
+      supabase.from('tutor_subjects').select('subjects (id, name_en)').eq('tutor_profile_id', tutorData.id),
       supabase.from('reviews')
         .select('*, profiles:parent_id (full_name, avatar_url)')
         .eq('tutor_id', tutorData.id).eq('is_approved', true)

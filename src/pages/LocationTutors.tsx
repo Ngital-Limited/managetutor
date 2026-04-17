@@ -14,7 +14,6 @@ import {
 interface District {
   id: string;
   name_en: string;
-  name_bn: string;
 }
 
 interface TutorProfile {
@@ -31,9 +30,9 @@ interface TutorProfile {
     full_name: string;
     avatar_url: string;
     district_id: string;
-    districts?: { name_en: string; name_bn: string };
+    districts?: { name_en: string; : string };
   };
-  tutor_subjects: { subjects: { name_en: string; name_bn: string } }[];
+  tutor_subjects: { subjects: { name_en: string; : string } }[];
 }
 
 // SEO-optimized location landing page
@@ -65,8 +64,8 @@ export default function LocationTutors() {
         .from('tutor_profiles')
         .select(`
           *,
-          profiles!inner (full_name, avatar_url, district_id, districts (name_en, name_bn)),
-          tutor_subjects (subjects (name_en, name_bn))
+          profiles!inner (full_name, avatar_url, district_id, districts (name_en)),
+          tutor_subjects (subjects (name_en))
         `, { count: 'exact' })
         .eq('is_available', true)
         .eq('profiles.district_id', districts[0].id)

@@ -26,15 +26,12 @@ import {
 interface District {
   id: string;
   name_en: string;
-  name_bn: string;
   division_en: string;
-  division_bn: string;
 }
 
 interface Area {
   id: string;
   name_en: string;
-  name_bn: string;
   district_id: string;
   district_name?: string;
 }
@@ -42,7 +39,6 @@ interface Area {
 interface Subject {
   id: string;
   name_en: string;
-  name_bn: string;
   category_en: string;
 }
 
@@ -68,14 +64,14 @@ interface TutorProfile {
   district_id: string | null;
   area_id: string | null;
   class_levels: string[] | null;
-  districts: { name_en: string; name_bn: string; division_en: string } | null;
-  areas: { name_en: string; name_bn: string } | null;
+  districts: { name_en: string; division_en: string } | null;
+  areas: { name_en: string; : string } | null;
   profiles: {
     full_name: string;
     avatar_url: string;
     district_id: string;
-    districts?: { name_en: string; name_bn: string };
-    areas?: { name_en: string; name_bn: string } | null;
+    districts?: { name_en: string; : string };
+    areas?: { name_en: string; : string } | null;
   } | null;
   tutor_subjects: { subjects: Subject }[];
 }
@@ -120,7 +116,7 @@ export default function FindTutors() {
     const divSet = new Map<string, string>();
     districts.forEach(d => {
       if (!divSet.has(d.division_en)) {
-        divSet.set(d.division_en, d.division_bn);
+        divSet.set(d.division_en, d.);
       }
     });
     return Array.from(divSet.entries()).map(([en, bn]) => ({ en, bn })).sort((a, b) => a.en.localeCompare(b.en));
@@ -131,7 +127,7 @@ export default function FindTutors() {
     if (selectedDivision) list = list.filter(d => d.division_en === selectedDivision);
     if (districtSearch) {
       const q = districtSearch.toLowerCase();
-      list = list.filter(d => d.name_en.toLowerCase().includes(q) || d.name_bn.includes(q));
+      list = list.filter(d => d.name_en.toLowerCase().includes(q) || d..includes(q));
     }
     return list.sort((a, b) => a.name_en.localeCompare(b.name_en));
   }, [districts, selectedDivision, districtSearch]);
@@ -141,7 +137,7 @@ export default function FindTutors() {
     if (selectedDistrict) list = list.filter(a => a.district_id === selectedDistrict);
     if (areaSearch) {
       const q = areaSearch.toLowerCase();
-      list = list.filter(a => a.name_en.toLowerCase().includes(q) || a.name_bn.includes(q));
+      list = list.filter(a => a.name_en.toLowerCase().includes(q) || a..includes(q));
     }
     return list.sort((a, b) => a.name_en.localeCompare(b.name_en));
   }, [areas, selectedDistrict, areaSearch]);
@@ -161,7 +157,7 @@ export default function FindTutors() {
     const [districtsRes, subjectsRes, areasRes] = await Promise.all([
       supabase.from('districts').select('*').order('name_en'),
       supabase.from('subjects').select('*').order('name_en'),
-      supabase.from('areas').select('id, name_en, name_bn, district_id, districts (name_en)').order('name_en'),
+      supabase.from('areas').select('id, name_en, district_id, districts (name_en)').order('name_en'),
     ]);
     if (districtsRes.data) setDistricts(districtsRes.data);
     if (subjectsRes.data) setSubjects(subjectsRes.data);
@@ -169,7 +165,6 @@ export default function FindTutors() {
       setAreas(areasRes.data.map((a: any) => ({
         id: a.id,
         name_en: a.name_en,
-        name_bn: a.name_bn,
         district_id: a.district_id,
         district_name: a.districts?.name_en || '',
       })));
@@ -187,7 +182,7 @@ export default function FindTutors() {
     setLoading(true);
     let query = supabase
       .from('tutor_profiles')
-      .select(`*, districts (name_en, name_bn, division_en), areas (name_en, name_bn), tutor_subjects (subjects (*))`)
+      .select(`*, districts (name_en, division_en), areas (name_en), tutor_subjects (subjects (*))`)
       .eq('is_available', true);
 
     if (selectedGender && selectedGender !== 'any') query = query.eq('gender', selectedGender as 'male' | 'female');
@@ -201,7 +196,7 @@ export default function FindTutors() {
       const userIds = data.map((t: any) => t.user_id);
       const { data: profilesData } = await supabase
         .from('profiles')
-        .select('id, full_name, avatar_url, district_id, districts (name_en, name_bn), areas (name_en, name_bn)')
+        .select('id, full_name, avatar_url, district_id, districts (name_en), areas (name_en)')
         .in('id', userIds);
 
       const profilesMap = new Map<string, any>();

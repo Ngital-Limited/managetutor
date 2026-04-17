@@ -13,7 +13,6 @@ import { Check, Crown, Zap, Star, ArrowLeft, Loader2 } from 'lucide-react';
 interface Plan {
   id: string;
   name: string;
-  name_bn: string | null;
   description: string | null;
   price_monthly: number;
   price_quarterly: number | null;
