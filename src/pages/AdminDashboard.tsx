@@ -854,7 +854,7 @@ export default function AdminDashboard() {
           districts ( name_en ), areas ( name_en ),
           job_subjects ( subjects ( id, name_en ) )
         ),
-        tutor_profiles!inner ( id, user_id, gender, experience_years, verification_status, bio, monthly_salary_min, monthly_salary_max )
+        tutor_profiles!inner ( id, user_id, gender, experience_years, verification_status, bio, monthly_salary_min, monthly_salary_max, average_rating, total_reviews )
       `)
       .order('created_at', { ascending: false })
       .limit(200);
