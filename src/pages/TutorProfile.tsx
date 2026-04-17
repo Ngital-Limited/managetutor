@@ -338,6 +338,8 @@ export default function TutorProfile() {
         religion: profile.religion || null,
         height: profile.height || null,
         weight: profile.weight || null,
+        district_id: userProfile.district_id || null,
+        area_id: userProfile.area_id || null,
       } as any).eq('id', tutorData.id);
 
       // Update subjects

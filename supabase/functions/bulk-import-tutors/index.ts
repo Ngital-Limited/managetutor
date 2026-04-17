@@ -199,6 +199,7 @@ Deno.serve(async (req) => {
           bio: buildBio(r) || null,
           education_detail: buildEducationDetail(r),
           district_id: loc.district_id,
+          area_id: loc.area_id,
           present_address: clean(r.p_address),
           permanent_address: clean(r.per_address),
           father_phone: normalizePhone(r.f_phone),
