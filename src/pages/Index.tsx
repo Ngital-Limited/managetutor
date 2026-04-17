@@ -620,7 +620,7 @@ export default function Index() {
           <span className="text-xs uppercase tracking-[0.2em] text-background/60 font-medium">Get Started</span>
           <h2 className="text-3xl md:text-5xl font-semibold tracking-tight mt-3 mb-5 leading-[1.1]">Ready to Get Started?</h2>
           <p className="text-base text-background/70 mb-10 max-w-lg mx-auto leading-relaxed">
-            Join thousands of families who found their perfect tutor through Manage Tutor
+            Whether you're a parent searching for the perfect tutor for your child or an educator ready to grow your teaching career, Manage Tutor connects you with the right opportunity in minutes. Sign up free, get verified, and start your journey today.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link to="/auth?mode=signup&role=parent">
