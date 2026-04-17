@@ -385,29 +385,31 @@ export default function BrowseJobs({ embedded = false }: { embedded?: boolean } 
       {!embedded && <Header />}
 
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-primary via-primary/90 to-blue-700 text-primary-foreground">
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-10 left-10 w-72 h-72 bg-white rounded-full blur-3xl" />
-          <div className="absolute bottom-10 right-10 w-96 h-96 bg-blue-300 rounded-full blur-3xl" />
-        </div>
-        <div className="container mx-auto px-4 py-14 relative z-10">
-          <div className="max-w-3xl">
-            <div className="inline-flex items-center gap-2 bg-white/15 backdrop-blur-sm rounded-full px-4 py-1.5 text-sm font-medium mb-5">
-              <Sparkles className="h-4 w-4" />
-              {totalCount} Active Opportunities
-            </div>
-            <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight mb-4 leading-tight">
-              Find Your Perfect<br />Tuition Job
-            </h1>
-            <p className="text-lg opacity-85 max-w-xl leading-relaxed">
-              Discover tuition opportunities across Bangladesh. Apply instantly and start teaching today.
-            </p>
+      {!embedded && (
+        <section className="relative overflow-hidden bg-gradient-to-br from-primary via-primary/90 to-blue-700 text-primary-foreground">
+          <div className="absolute inset-0 opacity-10">
+            <div className="absolute top-10 left-10 w-72 h-72 bg-white rounded-full blur-3xl" />
+            <div className="absolute bottom-10 right-10 w-96 h-96 bg-blue-300 rounded-full blur-3xl" />
           </div>
-        </div>
-      </section>
+          <div className="container mx-auto px-4 py-14 relative z-10">
+            <div className="max-w-3xl">
+              <div className="inline-flex items-center gap-2 bg-white/15 backdrop-blur-sm rounded-full px-4 py-1.5 text-sm font-medium mb-5">
+                <Sparkles className="h-4 w-4" />
+                {totalCount} Active Opportunities
+              </div>
+              <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight mb-4 leading-tight">
+                Find Your Perfect<br />Tuition Job
+              </h1>
+              <p className="text-lg opacity-85 max-w-xl leading-relaxed">
+                Discover tuition opportunities across Bangladesh. Apply instantly and start teaching today.
+              </p>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Search Bar - Floating */}
-      <div className="container mx-auto px-4 -mt-7 relative z-20">
+      <div className={`container mx-auto px-4 relative z-20 ${embedded ? 'pt-2' : '-mt-7'}`}>
         <div className="bg-card rounded-2xl shadow-xl border border-border p-4">
           <div className="flex flex-col md:flex-row gap-3">
             <div className="flex-1 relative">
