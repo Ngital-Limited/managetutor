@@ -5,6 +5,10 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -105,6 +109,8 @@ export default function TutorAppliedJobs() {
   const [loading, setLoading] = useState(true);
   const [applications, setApplications] = useState<Application[]>([]);
   const [stats, setStats] = useState({ total: 0, pending: 0, accepted: 0, rejected: 0, withdrawn: 0, shortlisted: 0, waiting: 0 });
+  const [withdrawId, setWithdrawId] = useState<string | null>(null);
+  const [withdrawing, setWithdrawing] = useState(false);
 
   useEffect(() => {
     if (!authLoading && !user) { navigate('/auth'); return; }
@@ -142,14 +148,18 @@ export default function TutorAppliedJobs() {
     setLoading(false);
   };
 
-  const withdrawApplication = async (appId: string) => {
-    const { error } = await supabase.from('applications').update({ status: 'withdrawn' }).eq('id', appId);
+  const confirmWithdraw = async () => {
+    if (!withdrawId) return;
+    setWithdrawing(true);
+    const { error } = await supabase.from('applications').update({ status: 'withdrawn' }).eq('id', withdrawId);
+    setWithdrawing(false);
     if (error) {
       toast({ title: 'Error', description: error.message, variant: 'destructive' });
     } else {
       toast({ title: 'Withdrawn', description: 'Application withdrawn successfully.' });
       fetchApplications();
     }
+    setWithdrawId(null);
   };
 
   if (authLoading || loading) {
