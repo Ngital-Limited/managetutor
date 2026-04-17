@@ -13,8 +13,9 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { format } from 'date-fns';
-import { DollarSign, CheckCircle2, XCircle, Clock, TrendingUp, ArrowDownRight, ArrowUpRight, Wallet } from 'lucide-react';
+import { DollarSign, CheckCircle2, XCircle, Clock, TrendingUp, ArrowDownRight, ArrowUpRight, Wallet, Percent } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { getPlatformCommissionPct } from '@/lib/commission';
 
 export function RevenuePayoutTab({ toast }: { toast: any }) {
   const { user } = useAuth();
@@ -27,6 +28,9 @@ export function RevenuePayoutTab({ toast }: { toast: any }) {
   const [adminNotes, setAdminNotes] = useState('');
   const [processing, setProcessing] = useState(false);
   const [revenueData, setRevenueData] = useState<any[]>([]);
+  const [commissionPct, setCommissionPct] = useState<number>(20);
+
+  useEffect(() => { getPlatformCommissionPct().then(setCommissionPct); }, []);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -96,7 +100,12 @@ export function RevenuePayoutTab({ toast }: { toast: any }) {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-3xl font-extrabold">Revenue & Payouts</h1>
+      <div className="flex items-center justify-between flex-wrap gap-3">
+        <h1 className="text-3xl font-extrabold">Revenue & Payouts</h1>
+        <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20 gap-1.5 text-sm py-1.5 px-3">
+          <Percent className="h-3.5 w-3.5" /> Platform commission: {commissionPct}%
+        </Badge>
+      </div>
 
       {/* Summary Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

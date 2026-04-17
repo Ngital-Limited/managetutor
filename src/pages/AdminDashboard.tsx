@@ -46,6 +46,7 @@ import { AdminPostJobTab } from '@/components/admin/AdminPostJobTab';
 import { AdminTutorEditTab } from '@/components/admin/AdminTutorEditTab';
 import { AdminTutorProfilesTab } from '@/components/admin/AdminTutorProfilesTab';
 import { ReferralAnalyticsTab } from '@/components/admin/ReferralAnalyticsTab';
+import { getPlatformCommissionPct, computeFeeSplit } from '@/lib/commission';
 
 // ──────────── Types ────────────
 interface Stats {
@@ -865,6 +866,8 @@ export default function AdminDashboard() {
   const [demoScheduleTime, setDemoScheduleTime] = useState('');
   const [demoScheduleDuration, setDemoScheduleDuration] = useState('60');
   const [demoScheduleNotes, setDemoScheduleNotes] = useState('');
+  const [demoScheduleFee, setDemoScheduleFee] = useState('0');
+  const [demoScheduleCommissionPct, setDemoScheduleCommissionPct] = useState(20);
   const [demoScheduling, setDemoScheduling] = useState(false);
 
   const openDemoSchedule = (app: { id: string; tutor_user_id: string; tutor_id: string; tutor_name: string }, jobId: string, jobTitle: string) => {
@@ -880,6 +883,8 @@ export default function AdminDashboard() {
     setDemoScheduleTime('');
     setDemoScheduleDuration('60');
     setDemoScheduleNotes('');
+    setDemoScheduleFee('0');
+    getPlatformCommissionPct().then(setDemoScheduleCommissionPct);
   };
 
   const handleAdminScheduleDemo = async () => {
@@ -893,6 +898,7 @@ export default function AdminDashboard() {
       if (!jobRow?.parent_id) throw new Error('Job parent not found');
 
       // Admin-direct: status starts as 'approved' (no further admin approval gate needed)
+      const split = computeFeeSplit(Number(demoScheduleFee) || 0, demoScheduleCommissionPct);
       const { error: bookingError } = await supabase.from('demo_bookings').insert({
         parent_id: jobRow.parent_id,
         tutor_id: demoScheduleApp.tutorProfileId,
@@ -901,9 +907,9 @@ export default function AdminDashboard() {
         preferred_date: demoScheduleDate,
         preferred_time: demoScheduleTime,
         duration_minutes: parseInt(demoScheduleDuration),
-        class_fee: 0,
-        platform_commission: 0,
-        tutor_payout: 0,
+        class_fee: split.classFee,
+        platform_commission: split.platformCommission,
+        tutor_payout: split.tutorPayout,
         notes: demoScheduleNotes || null,
         status: 'approved',
       } as any);
@@ -3141,22 +3147,17 @@ export default function AdminDashboard() {
                   <Card>
                     <CardHeader>
                       <CardTitle>Commission & Pricing</CardTitle>
-                      <CardDescription>Configure platform fees</CardDescription>
+                      <CardDescription>Platform fees are configured in Platform Data</CardDescription>
                     </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div>
-                        <label className="text-sm font-medium">Commission Rate (%)</label>
-                        <Input type="number" defaultValue="10" className="mt-1" />
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium">Featured Tutor Daily Rate (৳)</label>
-                        <Input type="number" defaultValue="50" className="mt-1" />
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium">Featured Job Daily Rate (৳)</label>
-                        <Input type="number" defaultValue="30" className="mt-1" />
-                      </div>
-                      <Button className="w-full">Save Settings</Button>
+                    <CardContent className="space-y-3">
+                      <p className="text-sm text-muted-foreground">
+                        Commission percentage, verification fee, and featured listing prices are managed centrally
+                        under <strong>Platform Data → Pricing & Fees</strong>. They are read live by the demo booking,
+                        boost, and verification flows.
+                      </p>
+                      <Button variant="outline" className="w-full" onClick={() => setActiveTab('platform_data')}>
+                        Open Platform Data
+                      </Button>
                     </CardContent>
                   </Card>
                   <Card>
@@ -3648,6 +3649,20 @@ export default function AdminDashboard() {
                     <SelectItem value="90">1.5 hours</SelectItem>
                   </SelectContent>
                 </Select>
+              </div>
+              <div>
+                <label className="text-xs font-medium mb-1 block">Class Fee (৳) — leave 0 for free demo</label>
+                <Input type="number" min={0} step={10} value={demoScheduleFee} onChange={(e) => setDemoScheduleFee(e.target.value)} />
+                {Number(demoScheduleFee) > 0 && (() => {
+                  const s = computeFeeSplit(Number(demoScheduleFee), demoScheduleCommissionPct);
+                  return (
+                    <div className="mt-2 rounded-md border border-border bg-muted/40 p-2 text-xs space-y-1">
+                      <div className="font-medium text-foreground">Split ({s.commissionPct}% commission)</div>
+                      <div className="flex justify-between"><span className="text-muted-foreground">Platform commission</span><span>৳{s.platformCommission}</span></div>
+                      <div className="flex justify-between font-semibold"><span>Tutor payout</span><span>৳{s.tutorPayout}</span></div>
+                    </div>
+                  );
+                })()}
               </div>
               <div>
                 <label className="text-xs font-medium mb-1 block">Notes (optional)</label>

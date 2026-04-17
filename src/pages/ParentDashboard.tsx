@@ -26,6 +26,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { getPlatformCommissionPct, computeFeeSplit } from '@/lib/commission';
 import { differenceInHours, format } from 'date-fns';
 import {
   Sidebar,
@@ -264,6 +265,8 @@ export default function ParentDashboard() {
   const [interviewDate, setInterviewDate] = useState<Date | undefined>(undefined);
   const [interviewTime, setInterviewTime] = useState('');
   const [interviewNotes, setInterviewNotes] = useState('');
+  const [interviewFee, setInterviewFee] = useState('0');
+  const [interviewCommissionPct, setInterviewCommissionPct] = useState(20);
   const [schedulingInterview, setSchedulingInterview] = useState(false);
 
   const [jobForm, setJobForm] = useState({
@@ -804,6 +807,8 @@ export default function ParentDashboard() {
     setInterviewDate(undefined);
     setInterviewTime('');
     setInterviewNotes('');
+    setInterviewFee('0');
+    getPlatformCommissionPct().then(setInterviewCommissionPct);
     setInterviewDialogOpen(true);
   };
 
@@ -815,6 +820,7 @@ export default function ParentDashboard() {
     setSchedulingInterview(true);
     const formattedDate = format(interviewDate, 'yyyy-MM-dd');
 
+    const split = computeFeeSplit(Number(interviewFee) || 0, interviewCommissionPct);
     // Create a demo booking for the interview, linked to the application
     const { error: bookingError } = await supabase.from('demo_bookings').insert({
       parent_id: user!.id,
@@ -822,7 +828,9 @@ export default function ParentDashboard() {
       preferred_date: formattedDate,
       preferred_time: interviewTime,
       notes: interviewNotes || null,
-      class_fee: 0,
+      class_fee: split.classFee,
+      platform_commission: split.platformCommission,
+      tutor_payout: split.tutorPayout,
       status: 'pending',
       subject_id: selectedJob.subject_ids?.[0] || null,
       application_id: interviewApp.id,
@@ -1431,6 +1439,20 @@ export default function ParentDashboard() {
                 <SelectItem value="9:00 PM">9:00 PM</SelectItem>
               </SelectContent>
             </Select>
+          </div>
+          <div>
+            <Label className="mb-2 block">Class Fee (৳) — leave 0 for free demo</Label>
+            <Input type="number" min={0} step={10} value={interviewFee} onChange={(e) => setInterviewFee(e.target.value)} />
+            {Number(interviewFee) > 0 && (() => {
+              const s = computeFeeSplit(Number(interviewFee), interviewCommissionPct);
+              return (
+                <div className="mt-2 rounded-md border border-border bg-muted/40 p-2 text-xs space-y-1">
+                  <div className="font-medium text-foreground">Split ({s.commissionPct}% commission)</div>
+                  <div className="flex justify-between"><span className="text-muted-foreground">Platform commission</span><span>৳{s.platformCommission}</span></div>
+                  <div className="flex justify-between font-semibold"><span>Tutor payout</span><span>৳{s.tutorPayout}</span></div>
+                </div>
+              );
+            })()}
           </div>
           <div>
             <Label className="mb-2 block">Notes (optional)</Label>
