@@ -864,7 +864,7 @@ export default function AdminDashboard() {
       parent_profile: profMap.get((a.jobs as any)?.parent_id) || null,
     })));
     setLoadingAllApps(false);
-  }, [allAppsStatusFilter]);
+  }, []);
 
 
   const fetchJobApplications = async (jobId: string) => {
