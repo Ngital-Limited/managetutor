@@ -1732,28 +1732,41 @@ export default function ParentDashboard() {
                                           <Badge className={
                                             app.status === 'accepted' ? 'bg-success' :
                                             app.status === 'rejected' ? 'bg-destructive' :
+                                            app.status === 'shortlisted' ? 'bg-primary' :
+                                            app.status === 'invited_to_demo' ? 'bg-accent text-accent-foreground' :
                                             'bg-warning text-warning-foreground'
                                           }>
-                                            {app.status.charAt(0).toUpperCase() + app.status.slice(1)}
+                                            {app.status === 'invited_to_demo' ? 'Invited' : app.status.charAt(0).toUpperCase() + app.status.slice(1)}
                                           </Badge>
                                         </td>
                                         <td className="py-2 px-2">
                                           <div className="flex items-center gap-1 justify-center flex-wrap">
-                                            {app.status === 'pending' && (
+                                            {(app.status === 'pending' || app.status === 'shortlisted') && (
                                               <>
+                                                {app.status === 'pending' && (
+                                                  <Button size="sm" variant="outline" className="h-8 text-xs" onClick={() => handleApplicationAction(app.id, 'shortlisted')} title="Shortlist">
+                                                    <Star className="h-3.5 w-3.5 mr-1" />
+                                                    Shortlist
+                                                  </Button>
+                                                )}
+                                                <Button size="sm" variant="secondary" className="h-8 text-xs" onClick={() => handleInviteToInterview(app)}>
+                                                  <Send className="h-3.5 w-3.5 mr-1" />
+                                                  Invite to Demo
+                                                </Button>
                                                 <Button size="sm" className="h-8 text-xs" onClick={() => handleApplicationAction(app.id, 'accepted')}>
                                                   <CheckCircle2 className="h-3.5 w-3.5 mr-1" />
                                                   Hire
-                                                </Button>
-                                                <Button size="sm" variant="secondary" className="h-8 text-xs" onClick={() => handleInviteToInterview(app)}>
-                                                  <Send className="h-3.5 w-3.5 mr-1" />
-                                                  Invite
                                                 </Button>
                                                 <Button size="sm" variant="outline" className="h-8 text-xs" onClick={() => handleApplicationAction(app.id, 'rejected')}>
                                                   <XCircle className="h-3.5 w-3.5 mr-1" />
                                                   Reject
                                                 </Button>
                                               </>
+                                            )}
+                                            {app.status === 'invited_to_demo' && (
+                                              <Badge className="bg-accent/20 text-accent-foreground border-accent/30">
+                                                <Send className="h-3 w-3 mr-1" /> Demo Invited
+                                              </Badge>
                                             )}
                                             {app.status === 'accepted' && (
                                               <Badge className="bg-success/10 text-success border-success/20">
