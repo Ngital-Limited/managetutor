@@ -320,7 +320,7 @@ export default function JobDetails() {
                     </div>
                     <p className="text-muted-foreground flex items-center gap-2">
                       <MapPin className="h-4 w-4" />
-                      {job.districts?.name_en}
+                      {[job.areas?.name_en, job.districts?.name_en].filter(Boolean).join(', ')}
                       <span className="text-border">•</span>
                       Posted {formatExactDate(new Date(job.created_at))}
                     </p>
