@@ -161,6 +161,18 @@ export default function TutorPublicProfile() {
       setIsFavorite(!!favData);
     }
 
+    // Related tutors: same district, available, exclude current
+    if (tutorData.district_id) {
+      const { data: relData } = await supabase
+        .from('tutor_profiles')
+        .select('id, slug, user_id, display_name, monthly_salary_min, monthly_salary_max, experience_years, teaching_mode, ai_overview, bio, profiles:user_id(full_name, avatar_url)')
+        .eq('district_id', tutorData.district_id)
+        .eq('is_available', true)
+        .neq('id', tutorData.id)
+        .limit(4);
+      setRelatedTutors(relData || []);
+    }
+
     setLoading(false);
   };
 
