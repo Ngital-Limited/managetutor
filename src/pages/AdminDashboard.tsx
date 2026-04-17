@@ -448,6 +448,14 @@ function DemoRequestsTab({ toast }: { toast: ReturnType<typeof useToast>['toast'
     const request = requests.find(r => r.id === id);
     if (request) {
       if (status === 'approved') {
+        // Format the schedule for the notification message
+        const scheduleStr = `${request.preferred_date} at ${request.preferred_time}${request.duration_minutes ? ` (${request.duration_minutes} min)` : ''}`;
+
+        // Sync the linked application status to 'invited_to_demo' if present
+        if (request.application_id) {
+          await supabase.from('applications').update({ status: 'invited_to_demo' as any }).eq('id', request.application_id);
+        }
+
         const { data: tp } = await supabase
           .from('tutor_profiles')
           .select('user_id')
@@ -456,8 +464,8 @@ function DemoRequestsTab({ toast }: { toast: ReturnType<typeof useToast>['toast'
         if (tp) {
           await supabase.from('notifications').insert({
             user_id: tp.user_id,
-            title: 'New Demo Class Request',
-            message: 'A parent has requested a demo class with you. Check your dashboard for details.',
+            title: 'Demo Class Scheduled',
+            message: `A guardian has invited you to a demo class on ${scheduleStr}. Approved by admin.${request.notes ? ' Notes: ' + request.notes : ''}`,
             type: 'demo_approved',
             reference_id: id,
           });
@@ -465,7 +473,7 @@ function DemoRequestsTab({ toast }: { toast: ReturnType<typeof useToast>['toast'
         await supabase.from('notifications').insert({
           user_id: request.parent_id,
           title: 'Demo Class Approved',
-          message: 'Your demo class request has been approved! The tutor has been notified.',
+          message: `Your demo class invitation for ${scheduleStr} has been approved! The tutor has been notified.`,
           type: 'demo_approved',
           reference_id: id,
         });
@@ -838,6 +846,89 @@ export default function AdminDashboard() {
   const [loadingAllApps, setLoadingAllApps] = useState(false);
   const [selectedAppIds, setSelectedAppIds] = useState<Set<string>>(new Set());
   const [bulkProcessing, setBulkProcessing] = useState(false);
+
+  // Admin direct demo schedule dialog
+  const [demoScheduleApp, setDemoScheduleApp] = useState<{ appId: string; jobId: string; jobTitle: string; tutorUserId: string; tutorProfileId: string; tutorName: string } | null>(null);
+  const [demoScheduleDate, setDemoScheduleDate] = useState('');
+  const [demoScheduleTime, setDemoScheduleTime] = useState('');
+  const [demoScheduleDuration, setDemoScheduleDuration] = useState('60');
+  const [demoScheduleNotes, setDemoScheduleNotes] = useState('');
+  const [demoScheduling, setDemoScheduling] = useState(false);
+
+  const openDemoSchedule = (app: { id: string; tutor_user_id: string; tutor_id: string; tutor_name: string }, jobId: string, jobTitle: string) => {
+    setDemoScheduleApp({
+      appId: app.id,
+      jobId,
+      jobTitle,
+      tutorUserId: app.tutor_user_id,
+      tutorProfileId: app.tutor_id,
+      tutorName: app.tutor_name,
+    });
+    setDemoScheduleDate('');
+    setDemoScheduleTime('');
+    setDemoScheduleDuration('60');
+    setDemoScheduleNotes('');
+  };
+
+  const handleAdminScheduleDemo = async () => {
+    if (!demoScheduleApp || !demoScheduleDate || !demoScheduleTime) {
+      toast({ title: 'Missing info', description: 'Please pick a date and time', variant: 'destructive' });
+      return;
+    }
+    setDemoScheduling(true);
+    try {
+      const { data: jobRow } = await supabase.from('jobs').select('parent_id, subject_id').eq('id', demoScheduleApp.jobId).maybeSingle();
+      if (!jobRow?.parent_id) throw new Error('Job parent not found');
+
+      // Admin-direct: status starts as 'approved' (no further admin approval gate needed)
+      const { error: bookingError } = await supabase.from('demo_bookings').insert({
+        parent_id: jobRow.parent_id,
+        tutor_id: demoScheduleApp.tutorProfileId,
+        application_id: demoScheduleApp.appId,
+        subject_id: jobRow.subject_id || null,
+        preferred_date: demoScheduleDate,
+        preferred_time: demoScheduleTime,
+        duration_minutes: parseInt(demoScheduleDuration),
+        class_fee: 0,
+        platform_commission: 0,
+        tutor_payout: 0,
+        notes: demoScheduleNotes || null,
+        status: 'approved',
+      } as any);
+      if (bookingError) throw bookingError;
+
+      // Sync application status
+      await supabase.from('applications').update({ status: 'invited_to_demo' as any }).eq('id', demoScheduleApp.appId);
+
+      const scheduleStr = `${demoScheduleDate} at ${demoScheduleTime} (${demoScheduleDuration} min)`;
+
+      if (demoScheduleApp.tutorUserId) {
+        await supabase.from('notifications').insert({
+          user_id: demoScheduleApp.tutorUserId,
+          title: 'Demo Class Scheduled by Admin',
+          message: `You have been scheduled for a demo class for "${demoScheduleApp.jobTitle}" on ${scheduleStr}.${demoScheduleNotes ? ' Notes: ' + demoScheduleNotes : ''}`,
+          type: 'application_invited_to_demo',
+          reference_id: demoScheduleApp.jobId,
+        });
+      }
+      await supabase.from('notifications').insert({
+        user_id: jobRow.parent_id,
+        title: 'Demo Class Scheduled',
+        message: `Admin has scheduled a demo class with ${demoScheduleApp.tutorName} for "${demoScheduleApp.jobTitle}" on ${scheduleStr}.`,
+        type: 'demo_approved',
+        reference_id: demoScheduleApp.jobId,
+      });
+
+      toast({ title: 'Demo scheduled', description: `${scheduleStr}. Tutor notified.` });
+      setDemoScheduleApp(null);
+      fetchJobApplications(demoScheduleApp.jobId);
+      fetchAllApplications();
+    } catch (err: any) {
+      toast({ title: 'Error', description: err.message, variant: 'destructive' });
+    } finally {
+      setDemoScheduling(false);
+    }
+  };
 
   const fetchAllApplications = useCallback(async () => {
     setLoadingAllApps(true);
@@ -2651,7 +2742,7 @@ export default function AdminDashboard() {
                                         </Button>
                                       )}
                                       {!isFinal && (app.status === 'pending' || app.status === 'shortlisted') && (
-                                        <Button variant="outline" size="sm" className="h-8 text-xs gap-1" onClick={() => handleAdminUpdateAppStatus(app.id, 'invited_to_demo', app.job_id)} title="Invite to Demo">
+                                        <Button variant="outline" size="sm" className="h-8 text-xs gap-1" onClick={() => openDemoSchedule({ id: app.id, tutor_user_id: (app.tutor_profiles as any)?.user_id || '', tutor_id: (app.tutor_profiles as any)?.id || app.tutor_id, tutor_name: app.tutor_profile?.full_name || 'Tutor' }, app.job_id, (app.jobs as any)?.title || 'this job')} title="Schedule Demo Class">
                                           <Send className="h-3.5 w-3.5" /> Invite
                                         </Button>
                                       )}
@@ -3347,6 +3438,55 @@ export default function AdminDashboard() {
               ))
             )}
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Admin direct demo schedule dialog */}
+      <Dialog open={!!demoScheduleApp} onOpenChange={(o) => !o && setDemoScheduleApp(null)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Schedule Demo Class</DialogTitle>
+          </DialogHeader>
+          {demoScheduleApp && (
+            <div className="space-y-4">
+              <div className="text-sm text-muted-foreground">
+                Inviting <span className="font-medium text-foreground">{demoScheduleApp.tutorName}</span> for
+                <span className="font-medium text-foreground"> "{demoScheduleApp.jobTitle}"</span>. The tutor will be notified immediately (admin-direct, no further approval needed).
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs font-medium mb-1 block">Date *</label>
+                  <Input type="date" value={demoScheduleDate} min={new Date(Date.now() + 86400000).toISOString().split('T')[0]} onChange={(e) => setDemoScheduleDate(e.target.value)} />
+                </div>
+                <div>
+                  <label className="text-xs font-medium mb-1 block">Time *</label>
+                  <Input type="time" value={demoScheduleTime} onChange={(e) => setDemoScheduleTime(e.target.value)} />
+                </div>
+              </div>
+              <div>
+                <label className="text-xs font-medium mb-1 block">Duration</label>
+                <Select value={demoScheduleDuration} onValueChange={setDemoScheduleDuration}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="30">30 minutes</SelectItem>
+                    <SelectItem value="45">45 minutes</SelectItem>
+                    <SelectItem value="60">1 hour</SelectItem>
+                    <SelectItem value="90">1.5 hours</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="text-xs font-medium mb-1 block">Notes (optional)</label>
+                <Textarea rows={2} maxLength={500} placeholder="Any specific topics, link, or instructions..." value={demoScheduleNotes} onChange={(e) => setDemoScheduleNotes(e.target.value)} />
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDemoScheduleApp(null)} disabled={demoScheduling}>Cancel</Button>
+            <Button onClick={handleAdminScheduleDemo} disabled={demoScheduling || !demoScheduleDate || !demoScheduleTime}>
+              {demoScheduling ? 'Scheduling...' : 'Schedule & Notify Tutor'}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </SidebarProvider>
