@@ -1,63 +1,55 @@
 
-The user wants a shortlist → invite-to-demo → demo result workflow shared between Admins and Guardians.
+The user wants to restructure the Admin Applications tab from a flat list of all applications into a **two-level drill-down view**:
 
-Looking at the schema:
-- `applications.status` is an enum `application_status` (currently uses 'pending', 'accepted', 'rejected'). I need to check if 'shortlisted' and 'invited' values exist.
-- `demo_bookings` already exists with statuses pending/approved/confirmed/completed/cancelled and links parent_id + tutor_id.
-- Admin Applications tab and Parent inline applicants list already exist.
+**Level 1 — Jobs list**: Show jobs that have applications, with columns: Ref ID, Job Name, Posted Date, Status, # Applicants. Click a row to drill in.
 
-I'll need to:
-1. Extend `application_status` enum with `shortlisted` and `invited_to_demo`.
-2. Add UI actions on both Admin Applications tab and Parent dashboard applicant rows.
-3. "Invite to demo" opens a small dialog → creates a `demo_bookings` row (status `pending` if guardian-initiated requires admin approval per existing demo workflow memory; admin-initiated can go straight to `approved`). Application moves to `invited_to_demo`.
-4. Guardian confirms result after demo (Confirmed → hire / Cancelled → reject) from a "Demo Classes" view in Parent dashboard. This already partly exists via `demo_bookings` but no parent-side result UI.
-5. Admin sees demo bookings + can take action (approve invite, mark completed, refund, etc.) — admin already has SupportTickets/Revenue tabs but no dedicated Demo Bookings tab. Add one.
-6. Notifications to tutor at each step (shortlisted, invited, demo approved, demo result).
+**Level 2 — Applicants for that job**: Show the list of tutors who applied to the selected job, with action buttons per row (Shortlist, Hire/Accept, Reject, Withdraw, Invite, etc.) and the existing status filter chips (All, Pending, Shortlisted, Invited, Waiting, Accepted, Rejected, Withdrawn) scoped to just this job.
 
 ## Plan
 
-### 1. Database (migration)
-- Add values to `application_status` enum: `shortlisted`, `invited_to_demo`.
-- (Optional) Add `application_id` nullable column to `demo_bookings` to link the invite back to the application.
+### 1. Restructure Admin Applications tab (`src/pages/AdminDashboard.tsx`)
 
-### 2. Workflow
-
-```text
-[pending] --shortlist--> [shortlisted] --invite--> [invited_to_demo] --hire--> [accepted]
-                                                                  \-reject--> [rejected]
+Add view state:
+```ts
+const [appsView, setAppsView] = useState<'jobs' | 'applicants'>('jobs');
+const [selectedAppsJob, setSelectedAppsJob] = useState<any>(null);
 ```
 
-Demo lifecycle (existing `demo_bookings.status`):
-`pending → approved (admin) → confirmed (tutor) → completed/cancelled (parent result)`
+**Jobs list view** (default):
+- Group `allApplications` by `job_id` to derive a job list with `{ job, applicantCount, pendingCount, shortlistedCount }`.
+- Render a table: Ref ID (`job_reference`) | Job Name | Posted Date | Job Status | Applicants (with pending/shortlisted sub-counts) | Action (View Applicants button).
+- Search box filters by job title / reference.
+- Sort by newest first.
 
-### 3. Parent Dashboard (`src/pages/ParentDashboard.tsx`)
-- Inline applicants list + "All Applicants" table: add buttons
-  - **Shortlist** (when status = pending) → updates application to `shortlisted` + notifies tutor.
-  - **Invite to Demo** (when status = pending or shortlisted) → opens dialog (date, time, duration, fee). Creates `demo_bookings` row (status `pending` for admin approval, per platform vetting memory) and sets application to `invited_to_demo` + notifies tutor.
-  - Existing **Hire** / **Reject** buttons remain.
-- New sidebar item **Demo Classes**: lists this parent's `demo_bookings`. After status = `completed` or `confirmed`, parent sees:
-  - **Mark Result: Confirmed (Hire Tutor)** → sets demo_booking `completed`, application `accepted`, job `in_progress`.
-  - **Mark Result: Cancelled** → opens reason field → demo `cancelled`, application stays.
-  - Optionally **Request Refund** → creates `refund_requests` row.
+**Applicants drill-in view** (when a job is selected):
+- Header: "← Back to Jobs", job title, ref ID, posted date, job status badge.
+- Status filter chips (existing All/Pending/Shortlisted/Invited/Waiting/Accepted/Rejected/Withdrawn), but counts scoped to the selected job.
+- Applicants table: Tutor name + ref + avatar | Applied Date | Proposed Rate | Cover Message (truncated) | Status badge | Actions.
+- Action buttons per row, conditional on current status:
+  - Shortlist (if pending)
+  - Invite to Demo (if shortlisted/pending)
+  - Accept / Hire (any non-final)
+  - Reject (any non-final)
+  - Mark Withdrawn (admin override)
+- Each action calls existing update logic on `applications.status` and refreshes data.
 
-### 4. Admin Dashboard (`src/pages/AdminDashboard.tsx`)
-- Applications tab: same shortlist / invite-to-demo / hire / reject buttons (admin acts on behalf of parent).
-- New sidebar item **Demo Classes** with badge for pending demo approvals:
-  - Pending invites → **Approve** / **Reject** the demo invite (sets demo_booking `approved`/`cancelled`).
-  - Confirmed/completed demos → review parent's reported result; can take action (issue refund, ban tutor via existing tools, mark dispute).
+### 2. Reuse existing infrastructure
 
-### 5. Notifications (client-side inserts to `notifications` table)
-- Tutor on shortlist: "You've been shortlisted for {job}".
-- Tutor on demo invite: "Demo class invitation for {job} on {date} at {time}".
-- Parent + Tutor when admin approves the demo invite.
-- Tutor on parent-reported demo result (confirmed/cancelled).
+- Existing `allApplications` fetch already pulls jobs + tutor + profile data — no new query needed.
+- Existing real-time channel will refresh both views automatically.
+- Status update mutations and chip styling already exist; just scope them to `selectedAppsJob.id`.
 
-### 6. Files to edit/create
-- New migration: alter `application_status` enum.
-- `src/pages/ParentDashboard.tsx` — new buttons, invite-to-demo dialog, "Demo Classes" sidebar section + result UI.
-- `src/pages/AdminDashboard.tsx` — same action buttons in Applications tab + new "Demo Classes" sidebar section with admin actions.
-- Reuse existing `BookDemoClassDialog.tsx` styling/structure but a slimmer parent-initiated invite form.
+### 3. UX polish
 
-### 7. Out of scope (won't do unless asked)
-- Tutor-side accept/decline of demo invite UI (tutors already have demo_bookings RLS to update status, but a polished UI is separate work).
-- Automated payment for demo at invite time — keeping fee field manual; payment handled by existing PayStation flow elsewhere.
+- Breadcrumb-style back button at top of Level 2.
+- Empty states ("No applications yet" on jobs list, "No applicants match this filter" on drill-in).
+- Preserve currently-selected status chip when switching jobs (default to All).
+
+### Files to edit
+- `src/pages/AdminDashboard.tsx` (only file)
+
+### Out of scope (ask if wanted)
+- URL persistence of selected job / filter
+- Bulk actions on the drill-in view (already discussed earlier)
+- CSV export of applicants per job
+
