@@ -46,6 +46,7 @@ interface Job {
   location_details: string | null;
   job_reference: string | null;
   districts: { name_en: string; name_bn: string } | null;
+  areas: { name_en: string; name_bn: string } | null;
   subjects: { name_en: string; name_bn: string } | null;
   job_subjects?: { subjects: { name_en: string; name_bn: string } }[];
 }
