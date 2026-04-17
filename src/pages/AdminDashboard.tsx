@@ -1399,6 +1399,49 @@ export default function AdminDashboard() {
     toast({ title: 'Impersonation Active', description: 'You are now operating as this user. All actions use their real permissions.' });
   };
 
+  // Open dialog to view jobs posted by a parent
+  const handleViewParentJobs = async (parentId: string, parentName: string) => {
+    setViewingParentJobs({ id: parentId, name: parentName });
+    setLoadingParentJobs(true);
+    setParentJobs([]);
+    const { data } = await supabase
+      .from('jobs')
+      .select('id, title, job_reference, status, total_applications, created_at, districts (name_en), subjects (name_en)')
+      .eq('parent_id', parentId)
+      .order('created_at', { ascending: false });
+    setParentJobs(data || []);
+    setLoadingParentJobs(false);
+  };
+
+  // Export filtered guardians to CSV
+  const handleExportGuardiansCSV = () => {
+    const esc = (v: string | number | null | undefined) => {
+      const s = (v ?? '').toString().replace(/"/g, '""');
+      return `"${s}"`;
+    };
+    const headers = ['Reference', 'Name', 'Email', 'Phone', 'District', 'Area/Thana', 'Status', 'Jobs Posted', 'Joined'];
+    const rows = users.map(u => [
+      esc(u.user_reference || ''),
+      esc(u.full_name),
+      esc(u.email),
+      esc(u.phone || ''),
+      esc(u.district_name || ''),
+      esc(u.area_name || ''),
+      esc(u.is_banned ? 'Banned' : u.is_approved ? 'Approved' : 'Pending'),
+      esc(u.jobs_count || 0),
+      esc(format(new Date(u.created_at), 'yyyy-MM-dd')),
+    ].join(','));
+    const csv = [headers.join(','), ...rows].join('\n');
+    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `guardians-${format(new Date(), 'yyyy-MM-dd')}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast({ title: 'Export complete', description: `${users.length} guardians exported.` });
+  };
+
   if (loading || role !== 'admin') {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
