@@ -81,6 +81,7 @@ interface Job {
   districts: { name_en: string; name_bn: string };
   subjects: { name_en: string; name_bn: string } | null;
   job_subjects?: { subjects: { name_en: string; name_bn: string } }[];
+  is_featured?: boolean;
 }
 
 interface Application {
@@ -292,6 +293,16 @@ export default function ParentDashboard() {
   });
 
   const [userProfile, setUserProfile] = useState<UserProfileFull | null>(null);
+  const [featuredJobPrice, setFeaturedJobPrice] = useState<number>(300);
+  const [boostingJobId, setBoostingJobId] = useState<string | null>(null);
+
+  useEffect(() => {
+    supabase.from('platform_settings').select('value').eq('key', 'featured_job_price').maybeSingle()
+      .then(({ data }) => {
+        const n = Number(data?.value);
+        if (Number.isFinite(n) && n >= 0) setFeaturedJobPrice(n);
+      });
+  }, []);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -516,6 +527,40 @@ export default function ParentDashboard() {
     await supabase.from('notifications').insert(
       userIds.map((uid) => ({ user_id: uid, title, message, type, reference_id: jobId }))
     );
+  };
+
+  const handleBoostJob = async (job: Job) => {
+    if (!user || !userProfile) return;
+    if (job.is_featured) {
+      toast({ title: 'Already boosted', description: 'This job is already featured.' });
+      return;
+    }
+    setBoostingJobId(job.id);
+    try {
+      const { data, error } = await supabase.functions.invoke('sslcommerz-init', {
+        body: {
+          amount: featuredJobPrice,
+          productName: `Featured Job: ${job.title}`,
+          productCategory: 'Featured Listing',
+          customerName: userProfile.full_name,
+          customerEmail: user.email,
+          customerPhone: userProfile.phone || '01700000000',
+          userId: user.id,
+          listingType: 'job_post',
+          jobId: job.id,
+        },
+      });
+      if (error) throw error;
+      if (data?.gatewayUrl) {
+        window.location.href = data.gatewayUrl;
+      } else {
+        throw new Error('No gateway URL returned');
+      }
+    } catch (e: any) {
+      toast({ title: 'Error', description: e.message, variant: 'destructive' });
+    } finally {
+      setBoostingJobId(null);
+    }
   };
 
   const deleteJob = async (jobId: string) => {
@@ -1632,6 +1677,23 @@ export default function ParentDashboard() {
                               <div className="text-xs text-muted-foreground">applicants</div>
                             </div>
                             <div className="flex gap-1">
+                              {job.status !== 'completed' && !job.is_featured && (
+                                <Button
+                                  size="icon"
+                                  variant="ghost"
+                                  title={`Boost (Featured for 30 days) — ৳${featuredJobPrice}`}
+                                  className="text-accent"
+                                  disabled={boostingJobId === job.id}
+                                  onClick={(e) => { e.stopPropagation(); handleBoostJob(job); }}
+                                >
+                                  <Zap className="h-4 w-4" />
+                                </Button>
+                              )}
+                              {job.is_featured && (
+                                <Badge className="bg-accent text-accent-foreground gap-1">
+                                  <Zap className="h-3 w-3" />Featured
+                                </Badge>
+                              )}
                               {job.status !== 'completed' && (
                                 <Button size="icon" variant="ghost" title="Edit" onClick={(e) => { e.stopPropagation(); startEditJob(job); }}>
                                   <Edit className="h-4 w-4" />
