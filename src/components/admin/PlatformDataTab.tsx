@@ -309,21 +309,19 @@ function DistrictsManager({ toast }: { toast: any }) {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Name (EN)</TableHead>
-                  <TableHead>Name (BN)</TableHead>
+                  <TableHead>Name</TableHead>
                   <TableHead>Division</TableHead>
                   <TableHead className="text-right w-24">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {loading ? (
-                  <TableRow><TableCell colSpan={4} className="text-center py-8 text-muted-foreground">Loading...</TableCell></TableRow>
+                  <TableRow><TableCell colSpan={3} className="text-center py-8 text-muted-foreground">Loading...</TableCell></TableRow>
                 ) : districts.length === 0 ? (
-                  <TableRow><TableCell colSpan={4} className="text-center py-8 text-muted-foreground">No districts found</TableCell></TableRow>
+                  <TableRow><TableCell colSpan={3} className="text-center py-8 text-muted-foreground">No districts found</TableCell></TableRow>
                 ) : districts.map(d => (
                   <TableRow key={d.id}>
                     <TableCell className="font-medium text-sm">{d.name_en}</TableCell>
-                    <TableCell className="text-sm">{d.name_bn}</TableCell>
                     <TableCell><Badge variant="outline" className="text-xs">{d.division_en}</Badge></TableCell>
                     <TableCell className="text-right">
                       <div className="flex gap-1 justify-end">
