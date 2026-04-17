@@ -840,6 +840,19 @@ export default function TutorProfile() {
                         <Checkbox id={`edu-current-${index}`} checked={entry.is_current} onCheckedChange={(checked) => updateEducation(index, 'is_current', !!checked)} />
                         <Label htmlFor={`edu-current-${index}`} className="text-sm">Currently studying / ongoing</Label>
                       </div>
+                      {entry.is_current && (entry.degree === 'Bachelor' || entry.degree === 'Masters') && (
+                        <div>
+                          <Label>Current Semester / Year <span className="text-destructive">*</span></Label>
+                          <Input
+                            className="rounded-xl mt-1.5 h-11"
+                            value={entry.current_semester}
+                            onChange={(e) => updateEducation(index, 'current_semester', e.target.value)}
+                            placeholder={entry.degree === 'Bachelor' ? 'e.g., 3rd Year / 5th Semester' : 'e.g., 1st Year / 2nd Semester'}
+                            maxLength={50}
+                          />
+                          <p className="text-xs text-muted-foreground mt-1">Required since you are currently studying.</p>
+                        </div>
+                      )}
                     </div>
                   );
                 })}
