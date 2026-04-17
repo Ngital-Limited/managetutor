@@ -13,8 +13,8 @@ import { useToast } from '@/hooks/use-toast';
 import { PhoneInput, isValidBDPhone } from '@/components/PhoneInput';
 import { ArrowLeft, Save, Upload, User, MapPin, Phone, Mail } from 'lucide-react';
 
-interface District { id: string; name_en: string; name_bn: string; division_en: string; }
-interface Area { id: string; name_en: string; name_bn: string; district_id: string; }
+interface District { id: string; name_en: string; division_en: string; }
+interface Area { id: string; name_en: string; district_id: string; }
 
 export default function ParentProfileEdit() {
   const { user, role, loading: authLoading } = useAuth();
@@ -33,7 +33,6 @@ export default function ParentProfileEdit() {
   
   const [form, setForm] = useState({
     full_name: '',
-    full_name_bn: '',
     phone: '',
     email: '',
     district_id: '',
@@ -55,14 +54,13 @@ export default function ParentProfileEdit() {
 
   const fetchData = async () => {
     const [profileRes, districtsRes, areasRes] = await Promise.all([
-      supabase.from('profiles').select('full_name, full_name_bn, phone, email, district_id, area_id, avatar_url').eq('id', targetUserId).single(),
-      supabase.from('districts').select('id, name_en, name_bn, division_en').order('name_en'),
+      supabase.from('profiles').select('full_name, phone, email, district_id, area_id, avatar_url').eq('id', targetUserId).single(),
+      supabase.from('districts').select('id, name_en, division_en').order('name_en'),
       supabase.from('areas').select('*').order('name_en'),
     ]);
     if (profileRes.data) {
       setForm({
         full_name: profileRes.data.full_name || '',
-        full_name_bn: profileRes.data.full_name_bn || '',
         phone: profileRes.data.phone || '',
         email: profileRes.data.email || user?.email || '',
         district_id: profileRes.data.district_id || '',
@@ -98,7 +96,6 @@ export default function ParentProfileEdit() {
     setSaving(true);
     const { error } = await supabase.from('profiles').update({
       full_name: form.full_name,
-      full_name_bn: form.full_name_bn || null,
       phone: form.phone,
       district_id: form.district_id || null,
       area_id: form.area_id || null,
@@ -198,12 +195,8 @@ export default function ParentProfileEdit() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <Label>Full Name (English) <span className="text-destructive">*</span></Label>
+                <Label>Full Name <span className="text-destructive">*</span></Label>
                 <Input value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} />
-              </div>
-              <div>
-                <Label>Full Name (Bangla)</Label>
-                <Input value={form.full_name_bn} onChange={(e) => setForm({ ...form, full_name_bn: e.target.value })} placeholder="বাংলা নাম" />
               </div>
               <div>
                 <Label className="flex items-center gap-1"><Phone className="h-3 w-3" /> Phone Number <span className="text-destructive">*</span></Label>
