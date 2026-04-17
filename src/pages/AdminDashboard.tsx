@@ -844,7 +844,14 @@ export default function AdminDashboard() {
       .from('applications')
       .select(`
         id, status, proposed_rate, cover_message, created_at, tutor_id, job_id,
-        jobs!inner ( id, title, job_reference, parent_id, status ),
+        jobs!inner (
+          id, title, job_reference, parent_id, status, description, class_level,
+          budget_min, budget_max, teaching_mode, days_per_week, duration_hours,
+          preferred_time, fixed_time, start_date, number_of_students, student_age,
+          student_gender, preferred_tutor_gender, student_school_name,
+          location_details, special_requirements, created_at,
+          districts ( name_en ), areas ( name_en )
+        ),
         tutor_profiles!inner ( id, user_id, gender, experience_years, verification_status )
       `)
       .order('created_at', { ascending: false })
