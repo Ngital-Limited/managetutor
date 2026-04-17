@@ -9,7 +9,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { supabase } from '@/integrations/supabase/client';
-import { Search, CheckCircle2, Clock, Plus } from 'lucide-react';
+import { Search, CheckCircle2, Clock, Plus, XCircle } from 'lucide-react';
 import { MultiSearchableSelect } from '@/components/MultiSearchableSelect';
 import { SearchableSelect } from '@/components/SearchableSelect';
 import { CLASS_LEVELS } from '@/constants/classLevels';
@@ -487,14 +487,14 @@ export function AdminPostJobTab({ toast }: Props) {
             <div className="grid md:grid-cols-3 gap-4">
               <div>
                 <Label>Number of Students</Label>
-                <Select value={String(jobForm.number_of_students)} onValueChange={(v) => setJobForm({ ...jobForm, number_of_students: Number(v) })}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    {[1, 2, 3, 4, 5].map(n => (
-                      <SelectItem key={n} value={String(n)}>{n} student{n > 1 ? 's' : ''}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Input
+                  type="number"
+                  min={1}
+                  max={50}
+                  value={jobForm.number_of_students}
+                  onChange={(e) => setJobForm({ ...jobForm, number_of_students: Math.max(1, Number(e.target.value) || 1) })}
+                  placeholder="Type number of students"
+                />
               </div>
               <div>
                 <Label>Student Age (Optional)</Label>
