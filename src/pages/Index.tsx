@@ -15,8 +15,10 @@ import { formatDistanceToNow } from 'date-fns';
 import {
   GraduationCap, Users, MapPin, Star, Search, FileText,
   Globe, ArrowRight, Shield, BookOpen, Clock, Award,
-  Briefcase, CheckCircle2, DollarSign, ChevronRight
+  Briefcase, CheckCircle2, DollarSign, ChevronRight, Layers, UserCircle2
 } from 'lucide-react';
+import { CLASS_LEVELS } from '@/constants/classLevels';
+import { JOB_CATEGORIES, STUDENT_BACKGROUNDS } from '@/constants/jobCategories';
 
 interface FeaturedTutor {
   id: string;
@@ -64,8 +66,9 @@ export default function Index() {
   const [districts, setDistricts] = useState<{ id: string; name_en: string; name_bn: string }[]>([]);
   const [subjectsList, setSubjectsList] = useState<{ id: string; name_en: string; name_bn: string }[]>([]);
   const [selectedDistrict, setSelectedDistrict] = useState('');
-  const [selectedSubject, setSelectedSubject] = useState('');
-  const [selectedMode, setSelectedMode] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('');
+  const [selectedBackground, setSelectedBackground] = useState('');
+  const [selectedGender, setSelectedGender] = useState('');
   const [searchType, setSearchType] = useState<'tutors' | 'jobs'>('tutors');
 
   const [featuredTutors, setFeaturedTutors] = useState<FeaturedTutor[]>([]);
@@ -121,8 +124,9 @@ export default function Index() {
   const handleSearch = () => {
     const params = new URLSearchParams();
     if (selectedDistrict) params.set('district', selectedDistrict);
-    if (selectedSubject) params.set('subject', selectedSubject);
-    if (selectedMode) params.set('mode', selectedMode);
+    if (selectedCategory) params.set('category', selectedCategory);
+    if (selectedBackground) params.set('background', selectedBackground);
+    if (selectedGender) params.set('gender', selectedGender);
     navigate(`/${searchType === 'tutors' ? 'tutors' : 'jobs'}?${params.toString()}`);
   };
 
@@ -169,18 +173,46 @@ export default function Index() {
               </button>
             </div>
             <div className="p-5 md:p-6">
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
                 <div className="space-y-1.5">
                   <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5"><MapPin className="h-3.5 w-3.5" /> Location</label>
-                  <SearchableSelect options={districts.map(d => ({ value: d.id, label: d.name_en }))} value={selectedDistrict} onValueChange={setSelectedDistrict} placeholder="All Districts" className="h-11 rounded-xl bg-muted/50 border-border/60 focus:bg-card" />
+                  <SearchableSelect
+                    options={districts.map(d => ({ value: d.id, label: d.name_en }))}
+                    value={selectedDistrict}
+                    onValueChange={setSelectedDistrict}
+                    placeholder="Type a district…"
+                    className="h-11 rounded-xl bg-muted/50 border-border/60 focus:bg-card"
+                  />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5"><BookOpen className="h-3.5 w-3.5" /> Subject</label>
-                  <SearchableSelect options={subjectsList.map(s => ({ value: s.id, label: s.name_en }))} value={selectedSubject} onValueChange={setSelectedSubject} placeholder="All Subjects" className="h-11 rounded-xl bg-muted/50 border-border/60 focus:bg-card" />
+                  <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5"><GraduationCap className="h-3.5 w-3.5" /> Background</label>
+                  <SearchableSelect
+                    options={STUDENT_BACKGROUNDS.map(b => ({ value: b, label: b }))}
+                    value={selectedBackground}
+                    onValueChange={setSelectedBackground}
+                    placeholder="Any background"
+                    className="h-11 rounded-xl bg-muted/50 border-border/60 focus:bg-card"
+                  />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5"><Globe className="h-3.5 w-3.5" /> Mode</label>
-                  <SearchableSelect options={[{ value: 'online', label: 'Online' }, { value: 'in_person', label: 'In-Person' }, { value: 'hybrid', label: 'Both' }]} value={selectedMode} onValueChange={setSelectedMode} placeholder="Any Mode" className="h-11 rounded-xl bg-muted/50 border-border/60 focus:bg-card" />
+                  <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5"><BookOpen className="h-3.5 w-3.5" /> Category</label>
+                  <SearchableSelect
+                    options={JOB_CATEGORIES.map(c => ({ value: c, label: c }))}
+                    value={selectedCategory}
+                    onValueChange={setSelectedCategory}
+                    placeholder="Any category"
+                    className="h-11 rounded-xl bg-muted/50 border-border/60 focus:bg-card"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5"><UserCircle2 className="h-3.5 w-3.5" /> Gender</label>
+                  <SearchableSelect
+                    options={[{ value: 'male', label: 'Male' }, { value: 'female', label: 'Female' }, { value: 'any', label: 'Any' }]}
+                    value={selectedGender}
+                    onValueChange={setSelectedGender}
+                    placeholder="Any gender"
+                    className="h-11 rounded-xl bg-muted/50 border-border/60 focus:bg-card"
+                  />
                 </div>
               </div>
               <Button onClick={handleSearch} className="w-full h-12 rounded-xl text-base font-bold gap-2 shadow-lg shadow-primary/20">

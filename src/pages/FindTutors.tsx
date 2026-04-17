@@ -97,12 +97,12 @@ export default function FindTutors() {
 
   // Filters
   const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '');
-  const [selectedCategory, setSelectedCategory] = useState<string>('');
-  const [selectedBackground, setSelectedBackground] = useState<string>('');
+  const [selectedCategory, setSelectedCategory] = useState<string>(searchParams.get('category') || '');
+  const [selectedBackground, setSelectedBackground] = useState<string>(searchParams.get('background') || '');
   const [selectedGender, setSelectedGender] = useState<string>(searchParams.get('gender') || '');
   const [priceRange, setPriceRange] = useState<number[]>([0, 10000]);
   const [selectedDivision, setSelectedDivision] = useState<string>('');
-  const [selectedDistrict, setSelectedDistrict] = useState<string>('');
+  const [selectedDistrict, setSelectedDistrict] = useState<string>(searchParams.get('district') || '');
   const [selectedArea, setSelectedArea] = useState<string>('');
   const [districtSearch, setDistrictSearch] = useState('');
   const [areaSearch, setAreaSearch] = useState('');

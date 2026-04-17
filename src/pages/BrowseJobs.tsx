@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
@@ -74,11 +74,12 @@ export default function BrowseJobs() {
   const [showFilters, setShowFilters] = useState(false);
 
   // Filters
+  const [searchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedDistrict, setSelectedDistrict] = useState<string>('all');
+  const [selectedDistrict, setSelectedDistrict] = useState<string>(searchParams.get('district') || 'all');
   const [selectedArea, setSelectedArea] = useState<string>('all');
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
-  const [selectedBackground, setSelectedBackground] = useState<string>('all');
+  const [selectedCategory, setSelectedCategory] = useState<string>(searchParams.get('category') || 'all');
+  const [selectedBackground, setSelectedBackground] = useState<string>(searchParams.get('background') || 'all');
   const [selectedTime, setSelectedTime] = useState<string>('all');
 
   const TIME_OPTIONS = [
