@@ -29,8 +29,8 @@ const tutorSidebarItems = [
 ];
 
 function TutorSidebarInner() {
-  const { state } = useSidebar();
-  const collapsed = state === 'collapsed';
+  const { state, isMobile } = useSidebar();
+  const collapsed = state === 'collapsed' && !isMobile;
   const { profile, user } = useAuth();
 
   const initials = profile?.full_name
@@ -38,7 +38,7 @@ function TutorSidebarInner() {
     : user?.email?.[0]?.toUpperCase() || '?';
 
   return (
-    <Sidebar collapsible="none">
+    <Sidebar collapsible="offcanvas">
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel>
@@ -99,17 +99,17 @@ export function TutorSidebarLayout({ children, title }: TutorSidebarLayoutProps)
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-background">
         <TutorSidebarInner />
-        <div className="flex-1 flex flex-col min-w-0">
-          <header className="sticky top-0 z-50 h-14 flex items-center justify-between border-b border-border bg-card/80 backdrop-blur-xl px-4">
-            <div className="flex items-center gap-2">
+        <div className="flex-1 flex flex-col min-w-0 w-full">
+          <header className="sticky top-0 z-40 h-14 flex items-center justify-between border-b border-border bg-card/80 backdrop-blur-xl px-3 sm:px-4">
+            <div className="flex items-center gap-2 min-w-0">
               <SidebarTrigger />
-              <span className="text-lg font-bold hidden sm:inline">{title}</span>
+              <span className="text-base sm:text-lg font-bold truncate">{title}</span>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3 shrink-0">
               <NotificationBell />
-              <Button variant="outline" size="sm" onClick={handleSignOut}>
-                <LogOut className="h-4 w-4 mr-2" />
-                Logout
+              <Button variant="outline" size="sm" onClick={handleSignOut} className="px-2 sm:px-3">
+                <LogOut className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">Logout</span>
               </Button>
             </div>
           </header>
