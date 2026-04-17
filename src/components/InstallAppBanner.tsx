@@ -43,16 +43,42 @@ export const InstallAppBanner = () => {
     const ios = /iPad|iPhone|iPod/.test(ua) && !(window as any).MSStream;
     setIsIOS(ios);
 
-    if (ios) {
-      // iOS has no beforeinstallprompt — show banner with link to /install
-      setVisible(true);
-      return;
-    }
+    let promptReady = ios; // iOS has no event; treat as ready
+    let engaged = false;
+    let timer: ReturnType<typeof setTimeout> | null = null;
+
+    const tryShow = () => {
+      if (promptReady && engaged) setVisible(true);
+    };
+
+    const markEngaged = () => {
+      if (engaged) return;
+      engaged = true;
+      cleanupEngagement();
+      tryShow();
+    };
+
+    const onScroll = () => {
+      if (window.scrollY > 100) markEngaged();
+    };
+
+    const cleanupEngagement = () => {
+      window.removeEventListener("scroll", onScroll);
+      if (timer) {
+        clearTimeout(timer);
+        timer = null;
+      }
+    };
+
+    // Engagement triggers: 10s timer OR meaningful scroll
+    timer = setTimeout(markEngaged, 10000);
+    window.addEventListener("scroll", onScroll, { passive: true });
 
     const handler = (e: Event) => {
       e.preventDefault();
       setDeferredPrompt(e as BeforeInstallPromptEvent);
-      setVisible(true);
+      promptReady = true;
+      tryShow();
     };
     window.addEventListener("beforeinstallprompt", handler);
 
@@ -63,6 +89,7 @@ export const InstallAppBanner = () => {
     window.addEventListener("appinstalled", installedHandler);
 
     return () => {
+      cleanupEngagement();
       window.removeEventListener("beforeinstallprompt", handler);
       window.removeEventListener("appinstalled", installedHandler);
     };
