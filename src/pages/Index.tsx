@@ -243,20 +243,24 @@ export default function Index() {
         </div>
       </section>
 
-      {/* Stats */}
-      <section className="py-16 bg-background">
+      {/* Stats — minimal premium */}
+      <section className="py-20 bg-background border-y border-border/40">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-px bg-border/40 rounded-2xl overflow-hidden border border-border/40">
             {[
-              { icon: Users, value: '1,00,000+', label: t('stats.tutors'), color: 'text-primary' },
-              { icon: Award, value: '4,000+', label: t('stats.matches'), color: 'text-secondary' },
-              { icon: MapPin, value: '64', label: t('stats.cities'), color: 'text-tutor' },
-              { icon: Star, value: '98%', label: t('stats.satisfaction'), color: 'text-accent' },
+              { icon: Users, value: '1,00,000+', label: t('stats.tutors') },
+              { icon: Award, value: '4,000+', label: t('stats.matches') },
+              { icon: MapPin, value: '64', label: t('stats.cities') },
+              { icon: Star, value: '98%', label: t('stats.satisfaction') },
             ].map((stat, i) => (
-              <div key={i} className="bg-card rounded-2xl p-6 shadow-lg shadow-foreground/5 text-center hover-lift animate-fade-in card-shine" style={{ animationDelay: `${i * 100}ms` }}>
-                <stat.icon className={`h-8 w-8 mx-auto mb-3 ${stat.color}`} />
-                <div className="text-3xl md:text-4xl font-extrabold text-foreground mb-1">{stat.value}</div>
-                <div className="text-muted-foreground text-sm font-medium">{stat.label}</div>
+              <div
+                key={i}
+                className="bg-background px-6 py-10 text-center group transition-colors hover:bg-muted/30 animate-fade-in"
+                style={{ animationDelay: `${i * 80}ms` }}
+              >
+                <stat.icon className="h-5 w-5 mx-auto mb-4 text-muted-foreground/70 group-hover:text-primary transition-colors" />
+                <div className="text-3xl md:text-4xl font-semibold tracking-tight text-foreground mb-1.5">{stat.value}</div>
+                <div className="text-muted-foreground text-xs uppercase tracking-wider font-medium">{stat.label}</div>
               </div>
             ))}
           </div>
