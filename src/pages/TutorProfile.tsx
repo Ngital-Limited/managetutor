@@ -131,6 +131,8 @@ export default function TutorProfile() {
   });
   const [avatarUploading, setAvatarUploading] = useState(false);
 
+  useEffect(() => { getMinProfileCompleteness().then(setMinCompleteness); }, []);
+
   useEffect(() => {
     if (!authLoading) {
       if (!user) {
