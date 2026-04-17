@@ -30,9 +30,9 @@ interface TutorProfile {
     full_name: string;
     avatar_url: string;
     district_id: string;
-    districts?: { name_en: string; : string };
+    districts?: { name_en: string};
   };
-  tutor_subjects: { subjects: { name_en: string; : string } }[];
+  tutor_subjects: { subjects: { name_en: string} }[];
 }
 
 // SEO-optimized location landing page

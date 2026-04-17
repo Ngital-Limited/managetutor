@@ -62,8 +62,8 @@ interface RecommendedJob {
   teaching_mode: string;
   class_level: string;
   created_at: string;
-  districts: { name_en: string; : string } | null;
-  subjects: { name_en: string; : string } | null;
+  districts: { name_en: string} | null;
+  subjects: { name_en: string} | null;
 }
 
 interface TutorProfile {

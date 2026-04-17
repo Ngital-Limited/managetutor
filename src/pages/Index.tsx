@@ -34,8 +34,8 @@ interface FeaturedTutor {
   monthly_salary_max: number | null;
   is_available: boolean;
   profiles: { full_name: string; avatar_url: string | null };
-  districts: { name_en: string; : string } | null;
-  tutor_subjects: { subjects: { name_en: string; : string } }[];
+  districts: { name_en: string} | null;
+  tutor_subjects: { subjects: { name_en: string} }[];
 }
 
 interface LatestJob {
@@ -48,14 +48,14 @@ interface LatestJob {
   days_per_week: number | null;
   job_reference: string | null;
   created_at: string;
-  districts: { name_en: string; : string };
-  areas: { name_en: string; : string } | null;
-  subjects: { name_en: string; : string } | null;
+  districts: { name_en: string};
+  areas: { name_en: string} | null;
+  subjects: { name_en: string} | null;
 }
 
 interface SubjectCategory {
   category_en: string;
-  subjects: { id: string; name_en: string; : string }[];
+  subjects: { id: string; name_en: string}[];
 }
 
 export default function Index() {
@@ -64,7 +64,7 @@ export default function Index() {
   const navigate = useNavigate();
 
   const [areas, setAreas] = useState<{ id: string; name_en: string; district_name: string }[]>([]);
-  const [subjectsList, setSubjectsList] = useState<{ id: string; name_en: string; : string }[]>([]);
+  const [subjectsList, setSubjectsList] = useState<{ id: string; name_en: string}[]>([]);
   const [selectedArea, setSelectedArea] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedBackground, setSelectedBackground] = useState('');

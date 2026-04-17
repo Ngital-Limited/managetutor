@@ -65,13 +65,13 @@ interface TutorProfile {
   area_id: string | null;
   class_levels: string[] | null;
   districts: { name_en: string; division_en: string } | null;
-  areas: { name_en: string; : string } | null;
+  areas: { name_en: string} | null;
   profiles: {
     full_name: string;
     avatar_url: string;
     district_id: string;
-    districts?: { name_en: string; : string };
-    areas?: { name_en: string; : string } | null;
+    districts?: { name_en: string};
+    areas?: { name_en: string} | null;
   } | null;
   tutor_subjects: { subjects: Subject }[];
 }

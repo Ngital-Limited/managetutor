@@ -79,9 +79,9 @@ interface Job {
   student_age: string | null;
   start_date: string | null;
   location_details: string | null;
-  districts: { name_en: string; : string };
-  subjects: { name_en: string; : string } | null;
-  job_subjects?: { subjects: { name_en: string; : string } }[];
+  districts: { name_en: string};
+  subjects: { name_en: string} | null;
+  job_subjects?: { subjects: { name_en: string} }[];
   is_featured?: boolean;
 }
 
@@ -109,9 +109,9 @@ interface Application {
     monthly_salary_max: number | null;
     is_available: boolean;
     district_id: string | null;
-    districts: { name_en: string; : string } | null;
+    districts: { name_en: string} | null;
     profiles: { full_name: string; avatar_url: string };
-    tutor_subjects: { subjects: { name_en: string; : string } }[];
+    tutor_subjects: { subjects: { name_en: string} }[];
   };
 }
 

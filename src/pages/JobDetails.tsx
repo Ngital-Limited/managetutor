@@ -48,10 +48,10 @@ interface Job {
   start_date: string | null;
   location_details: string | null;
   job_reference: string | null;
-  districts: { name_en: string; : string } | null;
-  areas: { name_en: string; : string } | null;
-  subjects: { name_en: string; : string } | null;
-  job_subjects?: { subjects: { name_en: string; : string } }[];
+  districts: { name_en: string} | null;
+  areas: { name_en: string} | null;
+  subjects: { name_en: string} | null;
+  job_subjects?: { subjects: { name_en: string} }[];
 }
 
 interface Application {

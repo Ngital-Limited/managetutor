@@ -45,8 +45,8 @@ interface TutorProfile {
   teaching_philosophy: string | null;
   success_stories: string | null;
   featured_blurb: string | null;
-  districts: { name_en: string; : string } | null;
-  areas: { name_en: string; : string } | null;
+  districts: { name_en: string} | null;
+  areas: { name_en: string} | null;
 }
 
 interface Profile {
@@ -54,8 +54,8 @@ interface Profile {
   avatar_url: string;
   district_id: string;
   user_reference: string | null;
-  districts: { name_en: string; : string } | null;
-  areas: { name_en: string; : string } | null;
+  districts: { name_en: string} | null;
+  areas: { name_en: string} | null;
 }
 
 interface Subject { id: string; name_en: string; }

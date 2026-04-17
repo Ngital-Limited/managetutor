@@ -56,10 +56,10 @@ interface Job {
   location_details: string | null;
   job_reference: string | null;
   is_featured: boolean;
-  districts: { name_en: string; : string } | null;
-  areas: { name_en: string; : string } | null;
-  subjects: { name_en: string; : string } | null;
-  job_subjects?: { subjects: { name_en: string; : string } }[];
+  districts: { name_en: string} | null;
+  areas: { name_en: string} | null;
+  subjects: { name_en: string} | null;
+  job_subjects?: { subjects: { name_en: string} }[];
 }
 
 const JOBS_PER_PAGE = 10;
