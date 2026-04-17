@@ -325,6 +325,22 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
     return arr;
   }, [tutors, sortBy, sortDir]);
 
+  const totalPages = Math.max(1, Math.ceil(sortedTutors.length / pageSize));
+  const paginatedTutors = useMemo(
+    () => sortedTutors.slice((currentPage - 1) * pageSize, currentPage * pageSize),
+    [sortedTutors, currentPage, pageSize]
+  );
+
+  // Reset to page 1 when filters/sorting/page-size change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, filterAreas, filterGender, filterMedium, filterEducation, filterUniversity, filterVerification, filterAvailability, filterClassLevel, filterSubject, filterCategory, filterLastEducation, sortBy, sortDir, pageSize]);
+
+  // Clamp page if it overflows after data change
+  useEffect(() => {
+    if (currentPage > totalPages) setCurrentPage(totalPages);
+  }, [currentPage, totalPages]);
+
   const toggleSelect = (userId: string) => {
     setSelectedIds(prev => {
       const next = new Set(prev);
