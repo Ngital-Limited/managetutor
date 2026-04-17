@@ -2401,14 +2401,14 @@ export default function AdminDashboard() {
                   </CardContent>
                 </Card>
 
-                {jobs.length > 0 && (() => {
-                  const totalPages = Math.max(1, Math.ceil(jobs.length / jobPageSize));
+                {filteredJobs.length > 0 && (() => {
+                  const totalPages = Math.max(1, Math.ceil(filteredJobs.length / jobPageSize));
                   const page = Math.min(jobPage, totalPages);
                   const start = (page - 1) * jobPageSize + 1;
-                  const end = Math.min(page * jobPageSize, jobs.length);
+                  const end = Math.min(page * jobPageSize, filteredJobs.length);
                   return (
                     <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-1">
-                      <div className="text-xs text-muted-foreground">Showing {start}–{end} of {jobs.length}</div>
+                      <div className="text-xs text-muted-foreground">Showing {start}–{end} of {filteredJobs.length}</div>
                       <div className="flex items-center gap-2 flex-wrap">
                         <Select value={String(jobPageSize)} onValueChange={(v) => { setJobPageSize(Number(v)); setJobPage(1); }}>
                           <SelectTrigger className="h-8 w-[100px] text-xs"><SelectValue /></SelectTrigger>
@@ -2426,7 +2426,8 @@ export default function AdminDashboard() {
                   );
                 })()}
               </div>
-            )}
+              );
+            })()}
 
             {/* ═══════ APPLICATIONS TAB (Two-level drill-down) ═══════ */}
             {activeTab === 'applications' && (() => {
