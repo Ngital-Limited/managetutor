@@ -104,17 +104,25 @@ export default function BrowseJobs() {
   const [tutorProfileCompleteness, setTutorProfileCompleteness] = useState(0);
 
   const sortedAreas = useMemo(() => {
-    return [...areas].sort((a, b) => a.name_en.localeCompare(b.name_en));
-  }, [areas]);
+    const filtered = selectedDistrict && selectedDistrict !== 'all'
+      ? areas.filter(a => a.district_id === selectedDistrict)
+      : areas;
+    return [...filtered].sort((a, b) => a.name_en.localeCompare(b.name_en));
+  }, [areas, selectedDistrict]);
+
+  const sortedDistricts = useMemo(() => {
+    return [...districts].sort((a, b) => a.name_en.localeCompare(b.name_en));
+  }, [districts]);
 
   const activeFilterCount = useMemo(() => {
     let count = 0;
+    if (selectedDistrict !== 'all') count++;
     if (selectedArea !== 'all') count++;
     if (selectedCategory !== 'all') count++;
     if (selectedBackground !== 'all') count++;
     if (selectedTime !== 'all') count++;
     return count;
-  }, [selectedArea, selectedCategory, selectedBackground, selectedTime]);
+  }, [selectedDistrict, selectedArea, selectedCategory, selectedBackground, selectedTime]);
 
   useEffect(() => {
     fetchData();
@@ -122,7 +130,7 @@ export default function BrowseJobs() {
 
   useEffect(() => {
     fetchJobs();
-  }, [selectedArea, selectedCategory, selectedBackground, selectedTime, currentPage]);
+  }, [selectedDistrict, selectedArea, selectedCategory, selectedBackground, selectedTime, currentPage]);
 
   useEffect(() => {
     if (user && role === 'tutor') {
@@ -156,19 +164,20 @@ export default function BrowseJobs() {
   };
 
   const fetchData = async () => {
-    const { data: areasRes } = await supabase
-      .from('areas')
-      .select('id, name_en, district_id, districts (name_en)')
-      .order('name_en');
+    const [areasRes, districtsRes] = await Promise.all([
+      supabase.from('areas').select('id, name_en, district_id, districts (name_en)').order('name_en'),
+      supabase.from('districts').select('id, name_en, name_bn, division_en').order('name_en'),
+    ]);
 
-    if (areasRes) {
-      setAreas(areasRes.map((a: any) => ({
+    if (areasRes.data) {
+      setAreas(areasRes.data.map((a: any) => ({
         id: a.id,
         name_en: a.name_en,
         district_id: a.district_id,
         district_name: a.districts?.name_en || '',
       })));
     }
+    if (districtsRes.data) setDistricts(districtsRes.data);
 
     await fetchJobs();
   };
@@ -181,6 +190,9 @@ export default function BrowseJobs() {
       .select('*', { count: 'exact', head: true })
       .eq('status', 'open');
 
+    if (selectedDistrict && selectedDistrict !== 'all') {
+      countQuery = countQuery.eq('district_id', selectedDistrict);
+    }
     if (selectedArea && selectedArea !== 'all') {
       countQuery = countQuery.eq('area_id', selectedArea);
     }
@@ -204,6 +216,9 @@ export default function BrowseJobs() {
       .order('is_featured', { ascending: false })
       .order('created_at', { ascending: false });
 
+    if (selectedDistrict && selectedDistrict !== 'all') {
+      query = query.eq('district_id', selectedDistrict);
+    }
     if (selectedArea && selectedArea !== 'all') {
       query = query.eq('area_id', selectedArea);
     }
@@ -356,6 +371,7 @@ export default function BrowseJobs() {
   };
 
   const clearFilters = () => {
+    setSelectedDistrict('all');
     setSelectedArea('all');
     setSelectedCategory('all');
     setSelectedBackground('all');
