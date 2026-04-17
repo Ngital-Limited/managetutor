@@ -551,7 +551,9 @@ export default function ParentDashboard() {
     if (!user || !editingJob) return;
 
     setSubmitting(true);
-    const { error } = await supabase.from('jobs').update({
+    // If the job was previously approved (open or in_progress), send it back for admin re-review
+    const needsReReview = editingJob.status === 'open' || editingJob.status === 'in_progress';
+    const updatePayload: any = {
       title: jobForm.title,
       description: jobForm.description,
       subject_id: jobForm.subject_ids.length > 0 ? jobForm.subject_ids[0] : null,
@@ -573,7 +575,10 @@ export default function ParentDashboard() {
       start_date: jobForm.start_date || null,
       location_details: jobForm.location_details || null,
       student_school_name: jobForm.student_school_name || null,
-    }).eq('id', editingJob.id);
+    };
+    if (needsReReview) updatePayload.status = 'pending_approval';
+
+    const { error } = await supabase.from('jobs').update(updatePayload).eq('id', editingJob.id);
 
     if (error) {
       toast({ title: 'Error', description: error.message, variant: 'destructive' });
@@ -585,7 +590,12 @@ export default function ParentDashboard() {
           jobForm.subject_ids.map(sid => ({ job_id: editingJob.id, subject_id: sid }))
         );
       }
-      toast({ title: 'Updated!', description: 'Job updated successfully' });
+      toast({
+        title: 'Updated!',
+        description: needsReReview
+          ? 'Job updated and resubmitted for admin approval.'
+          : 'Job updated successfully',
+      });
       setShowPostJob(false);
       setEditingJob(null);
       resetJobForm();
