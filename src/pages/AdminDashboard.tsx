@@ -2369,6 +2369,74 @@ export default function AdminDashboard() {
                     />
                   </div>
 
+                  {/* Job requirement details panel */}
+                  {selectedJob && (
+                    <Card>
+                      <CardContent className="p-4 space-y-3">
+                        <div className="flex items-center gap-2">
+                          <BookOpen className="h-4 w-4 text-primary" />
+                          <h3 className="text-sm font-semibold">Job Requirements</h3>
+                        </div>
+                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-2 text-xs">
+                          {selectedJob.class_level && (
+                            <div><span className="text-muted-foreground">Class Level:</span> <span className="font-medium">{selectedJob.class_level}</span></div>
+                          )}
+                          {(selectedJob.budget_min || selectedJob.budget_max) && (
+                            <div><span className="text-muted-foreground">Budget:</span> <span className="font-medium">৳{selectedJob.budget_min || '—'} - ৳{selectedJob.budget_max || '—'}</span></div>
+                          )}
+                          {selectedJob.teaching_mode && (
+                            <div><span className="text-muted-foreground">Mode:</span> <span className="font-medium capitalize">{String(selectedJob.teaching_mode).replace('_', ' ')}</span></div>
+                          )}
+                          {selectedJob.days_per_week && (
+                            <div><span className="text-muted-foreground">Days/Week:</span> <span className="font-medium">{selectedJob.days_per_week}</span></div>
+                          )}
+                          {selectedJob.duration_hours && (
+                            <div><span className="text-muted-foreground">Duration:</span> <span className="font-medium">{selectedJob.duration_hours} hr</span></div>
+                          )}
+                          {(selectedJob.preferred_time || selectedJob.fixed_time) && (
+                            <div><span className="text-muted-foreground">Time:</span> <span className="font-medium">{selectedJob.fixed_time || selectedJob.preferred_time}</span></div>
+                          )}
+                          {selectedJob.start_date && (
+                            <div><span className="text-muted-foreground">Start:</span> <span className="font-medium">{new Date(selectedJob.start_date).toLocaleDateString()}</span></div>
+                          )}
+                          {selectedJob.number_of_students && (
+                            <div><span className="text-muted-foreground">Students:</span> <span className="font-medium">{selectedJob.number_of_students}</span></div>
+                          )}
+                          {selectedJob.student_age && (
+                            <div><span className="text-muted-foreground">Age:</span> <span className="font-medium">{selectedJob.student_age}</span></div>
+                          )}
+                          {selectedJob.student_gender && (
+                            <div><span className="text-muted-foreground">Student Gender:</span> <span className="font-medium capitalize">{selectedJob.student_gender}</span></div>
+                          )}
+                          {selectedJob.preferred_tutor_gender && selectedJob.preferred_tutor_gender !== 'any' && (
+                            <div><span className="text-muted-foreground">Preferred Tutor:</span> <span className="font-medium capitalize">{selectedJob.preferred_tutor_gender}</span></div>
+                          )}
+                          {selectedJob.student_school_name && (
+                            <div><span className="text-muted-foreground">School:</span> <span className="font-medium">{selectedJob.student_school_name}</span></div>
+                          )}
+                          {(selectedJob.districts?.name_en || selectedJob.areas?.name_en) && (
+                            <div className="col-span-2"><span className="text-muted-foreground">Location:</span> <span className="font-medium">{[selectedJob.areas?.name_en, selectedJob.districts?.name_en].filter(Boolean).join(', ')}</span></div>
+                          )}
+                        </div>
+                        {selectedJob.location_details && (
+                          <div className="text-xs"><span className="text-muted-foreground">Location Details:</span> <span className="font-medium">{selectedJob.location_details}</span></div>
+                        )}
+                        {selectedJob.description && (
+                          <div className="text-xs pt-2 border-t">
+                            <div className="text-muted-foreground mb-1">Description</div>
+                            <p className="whitespace-pre-wrap leading-relaxed">{selectedJob.description}</p>
+                          </div>
+                        )}
+                        {selectedJob.special_requirements && (
+                          <div className="text-xs pt-2 border-t">
+                            <div className="text-muted-foreground mb-1">Special Requirements</div>
+                            <p className="whitespace-pre-wrap leading-relaxed">{selectedJob.special_requirements}</p>
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  )}
+
                   {/* Status filter chips scoped to this job */}
                   <div className="flex items-center gap-2 flex-wrap">
                     {STATUS_OPTS.map(opt => {
