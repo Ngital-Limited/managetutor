@@ -2359,7 +2359,11 @@ export default function AdminDashboard() {
                 const s = allAppsSearch.toLowerCase();
                 return (
                   a.tutor_profile?.full_name?.toLowerCase().includes(s) ||
-                  a.tutor_profile?.email?.toLowerCase().includes(s)
+                  a.tutor_profile?.email?.toLowerCase().includes(s) ||
+                  (a.tutor_profile?.phone || '').toLowerCase().includes(s) ||
+                  (a.tutor_profile?.user_reference || '').toLowerCase().includes(s) ||
+                  (a.jobs?.title || '').toLowerCase().includes(s) ||
+                  (a.jobs?.job_reference || '').toLowerCase().includes(s)
                 );
               });
 
