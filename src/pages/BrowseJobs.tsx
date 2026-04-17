@@ -82,7 +82,7 @@ export default function BrowseJobs() {
   // Application modal
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const [showApplyModal, setShowApplyModal] = useState(false);
-  const [applying2Removed] = useState(false); void applying2Removed;
+  
   const [applying, setApplying] = useState(false);
   const [tutorProfileId, setTutorProfileId] = useState<string | null>(null);
   const [tutorProfileCompleteness, setTutorProfileCompleteness] = useState(0);
@@ -274,8 +274,6 @@ export default function BrowseJobs() {
       return;
     }
     setSelectedJob(job);
-    setCoverMessage('');
-    setProposedRate(job.budget_min?.toString() || '');
     setShowApplyModal(true);
   };
 
