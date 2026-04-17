@@ -139,11 +139,11 @@ function SubjectsManager({ toast }: { toast: any }) {
   };
 
   const handleSave = async () => {
-    if (!form.name_en.trim() || !form.name_bn.trim()) { toast({ title: 'Name (EN & BN) required', variant: 'destructive' }); return; }
+    if (!form.name_en.trim()) { toast({ title: 'Name required', variant: 'destructive' }); return; }
     setSaving(true);
     const payload = {
-      name_en: form.name_en.trim(), name_bn: form.name_bn.trim(),
-      category_en: form.category_en.trim() || null, category_bn: form.category_bn.trim() || null,
+      name_en: form.name_en.trim(), name_bn: form.name_en.trim(),
+      category_en: form.category_en.trim() || null, category_bn: form.category_en.trim() || null,
     };
     const { error } = editingId
       ? await supabase.from('subjects').update(payload).eq('id', editingId)
