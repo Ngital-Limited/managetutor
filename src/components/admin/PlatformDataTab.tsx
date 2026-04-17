@@ -369,7 +369,7 @@ function AreasManager({ toast }: { toast: any }) {
   const [districtFilter, setDistrictFilter] = useState('all');
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [form, setForm] = useState({ name_en: '', name_bn: '', district_id: '' });
+  const [form, setForm] = useState({ name_en: '', district_id: '' });
   const [saving, setSaving] = useState(false);
 
   const fetchDistricts = useCallback(async () => {
