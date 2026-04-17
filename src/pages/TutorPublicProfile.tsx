@@ -64,6 +64,15 @@ interface Review {
   profiles: { full_name: string; avatar_url: string };
 }
 
+interface EducationEntry {
+  id: string;
+  degree: string;
+  institution: string;
+  field_of_study: string | null;
+  passing_year: number | null;
+  result: string | null;
+}
+
 export default function TutorPublicProfile() {
   const { id } = useParams();
   const { user, role } = useAuth();
