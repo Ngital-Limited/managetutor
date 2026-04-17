@@ -1693,14 +1693,80 @@ export default function AdminDashboard() {
             {/* ═══════ GUARDIANS / PARENTS TAB ═══════ */}
             {activeTab === 'guardians' && (
               <div className="space-y-6">
-                <h1 className="text-xl font-semibold">Guardians / Parents</h1>
-                <div className="flex flex-col sm:flex-row gap-3">
-                  <div className="relative flex-1">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input placeholder="Search by name, email, or phone..." className="pl-10" value={userSearch} onChange={(e) => setUserSearch(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && fetchUsers()} />
-                  </div>
-                  <Button onClick={fetchUsers}><Search className="h-4 w-4 mr-1" /> Search</Button>
+                <div className="flex items-center justify-between flex-wrap gap-3">
+                  <h1 className="text-xl font-semibold">Guardians / Parents <span className="text-sm font-normal text-muted-foreground">({users.length})</span></h1>
+                  <Button onClick={handleExportGuardiansCSV} variant="outline" size="sm" disabled={users.length === 0}>
+                    <Download className="h-4 w-4 mr-1" /> Export CSV
+                  </Button>
                 </div>
+
+                {/* Filters */}
+                <Card>
+                  <CardContent className="p-4 space-y-3">
+                    <div className="flex flex-col lg:flex-row gap-3">
+                      <div className="relative flex-1 min-w-[200px]">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Input
+                          placeholder="Search by name, email, phone, or reference..."
+                          className="pl-10"
+                          value={userSearch}
+                          onChange={(e) => setUserSearch(e.target.value)}
+                          onKeyDown={(e) => e.key === 'Enter' && fetchUsers()}
+                        />
+                      </div>
+                      <Select
+                        value={guardianDistrictFilter}
+                        onValueChange={(v) => { setGuardianDistrictFilter(v); setGuardianAreaFilter([]); }}
+                      >
+                        <SelectTrigger className="w-full lg:w-48"><SelectValue placeholder="District" /></SelectTrigger>
+                        <SelectContent className="max-h-72">
+                          <SelectItem value="all">All Districts</SelectItem>
+                          {guardianDistricts.map(d => (
+                            <SelectItem key={d.id} value={d.id}>{d.name_en}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <Select value={guardianStatusFilter} onValueChange={setGuardianStatusFilter}>
+                        <SelectTrigger className="w-full lg:w-44"><SelectValue placeholder="Status" /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">All Status</SelectItem>
+                          <SelectItem value="approved">Approved</SelectItem>
+                          <SelectItem value="pending">Pending</SelectItem>
+                          <SelectItem value="banned">Banned</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <Button onClick={fetchUsers}><Search className="h-4 w-4 mr-1" /> Apply</Button>
+                    </div>
+                    <div className="flex flex-col lg:flex-row gap-3 items-start">
+                      <div className="flex-1 w-full">
+                        <label className="text-xs font-medium text-muted-foreground mb-1 block">Area / Thana (multi-select)</label>
+                        <MultiSearchableSelect
+                          options={guardianAreas
+                            .filter(a => guardianDistrictFilter === 'all' || a.district_id === guardianDistrictFilter)
+                            .map(a => ({ value: a.id, label: a.name_en }))}
+                          values={guardianAreaFilter}
+                          onValuesChange={setGuardianAreaFilter}
+                          placeholder={guardianDistrictFilter === 'all' ? 'Select district first or search all areas' : 'Select areas/thanas'}
+                          searchPlaceholder="Search area..."
+                        />
+                      </div>
+                      {(guardianDistrictFilter !== 'all' || guardianAreaFilter.length > 0 || guardianStatusFilter !== 'all' || userSearch) && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            setGuardianDistrictFilter('all');
+                            setGuardianAreaFilter([]);
+                            setGuardianStatusFilter('all');
+                            setUserSearch('');
+                          }}
+                        >
+                          <XCircle className="h-4 w-4 mr-1" /> Clear filters
+                        </Button>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
 
                 <Card>
                   <CardContent className="p-0">
@@ -1708,10 +1774,11 @@ export default function AdminDashboard() {
                       <Table>
                         <TableHeader>
                           <TableRow>
+                            <TableHead>Reference</TableHead>
                             <TableHead>User</TableHead>
-                            <TableHead>Email</TableHead>
-                            <TableHead>Phone</TableHead>
-                            <TableHead>Role</TableHead>
+                            <TableHead>Contact</TableHead>
+                            <TableHead>Location</TableHead>
+                            <TableHead>Jobs</TableHead>
                             <TableHead>Status</TableHead>
                             <TableHead>Joined</TableHead>
                             <TableHead className="text-right">Actions</TableHead>
@@ -1719,9 +1786,10 @@ export default function AdminDashboard() {
                         </TableHeader>
                         <TableBody>
                           {users.length === 0 ? (
-                            <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">Search users to see results</TableCell></TableRow>
+                            <TableRow><TableCell colSpan={8} className="text-center py-8 text-muted-foreground">No guardians match your filters</TableCell></TableRow>
                           ) : users.map((u) => (
                             <TableRow key={u.id}>
+                              <TableCell className="text-xs font-mono text-muted-foreground">{u.user_reference || '—'}</TableCell>
                               <TableCell>
                                 <div className="flex items-center gap-2">
                                   <Avatar className="h-8 w-8">
@@ -1731,41 +1799,56 @@ export default function AdminDashboard() {
                                   <span className="font-medium text-sm">{u.full_name}</span>
                                 </div>
                               </TableCell>
-                              <TableCell className="text-sm">{u.email}</TableCell>
-                              <TableCell className="text-sm">{u.phone || '—'}</TableCell>
-                              <TableCell><Badge variant="outline" className="capitalize text-xs">{u.role}</Badge></TableCell>
+                              <TableCell className="text-xs">
+                                <div>{u.email}</div>
+                                <div className="text-muted-foreground">{u.phone || '—'}</div>
+                              </TableCell>
+                              <TableCell className="text-xs">
+                                <div>{u.district_name || '—'}</div>
+                                <div className="text-muted-foreground">{u.area_name || '—'}</div>
+                              </TableCell>
+                              <TableCell>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-7 px-2 text-xs"
+                                  onClick={() => handleViewParentJobs(u.id, u.full_name)}
+                                  disabled={!u.jobs_count}
+                                  title="View posted jobs"
+                                >
+                                  <Briefcase className="h-3 w-3 mr-1" />
+                                  {u.jobs_count || 0}
+                                </Button>
+                              </TableCell>
                               <TableCell>
                                 {u.is_banned ? (
                                   <Badge variant="destructive" className="text-xs">Banned</Badge>
                                 ) : !u.is_approved ? (
-                                  <Badge className="bg-warning/10 text-warning border-warning/20 text-xs">Pending Approval</Badge>
+                                  <Badge className="bg-warning/10 text-warning border-warning/20 text-xs">Pending</Badge>
                                 ) : (
                                   <Badge className="bg-success/10 text-success border-success/20 text-xs">Approved</Badge>
                                 )}
                               </TableCell>
-                              <TableCell className="text-xs text-muted-foreground">{formatDistanceToNow(new Date(u.created_at), { addSuffix: true })}</TableCell>
+                              <TableCell className="text-xs text-muted-foreground whitespace-nowrap">{formatDistanceToNow(new Date(u.created_at), { addSuffix: true })}</TableCell>
                               <TableCell className="text-right">
                                 <div className="flex gap-1 justify-end">
-                                  {(u.role === 'tutor' || u.role === 'parent') && (
-                                    <Button variant="ghost" size="sm" onClick={() => handleImpersonate(u.id)} title={`Login as ${u.full_name}`}>
-                                      <LogIn className="h-4 w-4 text-primary" />
-                                    </Button>
-                                  )}
-                                   {u.role === 'tutor' && (
-                                    <>
-                                      <Button variant="ghost" size="sm" asChild><Link to={`/tutor/${u.id}`}><Eye className="h-4 w-4" /></Link></Button>
-                                      <Button variant="ghost" size="sm" asChild title="Edit Tutor Profile"><Link to={`/admin/tutor/${u.id}`}><Pencil className="h-4 w-4" /></Link></Button>
-                                    </>
-                                   )}
-                                   {u.role === 'parent' && (
-                                    <Button variant="ghost" size="sm" asChild title="Edit Parent Profile"><Link to={`/admin/parent/${u.id}`}><Pencil className="h-4 w-4" /></Link></Button>
-                                   )}
-                                   {!u.is_approved && (
+                                  <Button variant="ghost" size="sm" onClick={() => handleImpersonate(u.id)} title={`Login as ${u.full_name}`}>
+                                    <LogIn className="h-4 w-4 text-primary" />
+                                  </Button>
+                                  <Button variant="ghost" size="sm" asChild title="Edit Parent Profile">
+                                    <Link to={`/admin/parent/${u.id}`}><Pencil className="h-4 w-4" /></Link>
+                                  </Button>
+                                  {!u.is_approved && !u.is_banned && (
                                     <Button variant="ghost" size="sm" onClick={() => handleApproveUser(u.id)} title="Approve User">
                                       <UserCheck className="h-4 w-4 text-success" />
                                     </Button>
                                   )}
-                                  <Button variant="ghost" size="sm" onClick={() => { setSelectedUser(u); setAdminNotes(''); }}>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => { setSelectedUser(u); setAdminNotes(''); }}
+                                    title={u.is_banned ? 'Unban user' : 'Ban user'}
+                                  >
                                     {u.is_banned ? <CheckCircle2 className="h-4 w-4 text-success" /> : <Ban className="h-4 w-4 text-destructive" />}
                                   </Button>
                                 </div>
@@ -1779,6 +1862,54 @@ export default function AdminDashboard() {
                 </Card>
               </div>
             )}
+
+            {/* Parent posted jobs dialog */}
+            <Dialog open={!!viewingParentJobs} onOpenChange={() => setViewingParentJobs(null)}>
+              <DialogContent className="max-w-3xl">
+                <DialogHeader>
+                  <DialogTitle>Jobs posted by {viewingParentJobs?.name}</DialogTitle>
+                </DialogHeader>
+                {loadingParentJobs ? (
+                  <div className="py-8 text-center text-muted-foreground text-sm">Loading…</div>
+                ) : parentJobs.length === 0 ? (
+                  <div className="py-8 text-center text-muted-foreground text-sm">No jobs posted yet.</div>
+                ) : (
+                  <ScrollArea className="max-h-[60vh]">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Reference</TableHead>
+                          <TableHead>Title</TableHead>
+                          <TableHead>District</TableHead>
+                          <TableHead>Subject</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead>Apps</TableHead>
+                          <TableHead>Posted</TableHead>
+                          <TableHead></TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {parentJobs.map(j => (
+                          <TableRow key={j.id}>
+                            <TableCell className="text-xs font-mono">{j.job_reference || '—'}</TableCell>
+                            <TableCell className="text-sm font-medium">{j.title}</TableCell>
+                            <TableCell className="text-xs">{j.districts?.name_en || '—'}</TableCell>
+                            <TableCell className="text-xs">{j.subjects?.name_en || '—'}</TableCell>
+                            <TableCell><Badge variant="outline" className="text-xs capitalize">{j.status?.replace('_', ' ')}</Badge></TableCell>
+                            <TableCell className="text-xs">{j.total_applications || 0}</TableCell>
+                            <TableCell className="text-xs text-muted-foreground whitespace-nowrap">{formatDistanceToNow(new Date(j.created_at), { addSuffix: true })}</TableCell>
+                            <TableCell>
+                              <Button variant="ghost" size="sm" asChild><Link to={`/jobs/${j.id}`}><Eye className="h-4 w-4" /></Link></Button>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </ScrollArea>
+                )}
+              </DialogContent>
+            </Dialog>
+
 
             {/* ═══════ VERIFICATIONS TAB ═══════ */}
             {activeTab === 'verifications' && (
