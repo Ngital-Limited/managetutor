@@ -810,17 +810,6 @@ export default function TutorProfile() {
                   <Input type="number" className="rounded-xl mt-1.5 h-11" value={profile.experience_years} onChange={(e) => setProfile({ ...profile, experience_years: parseInt(e.target.value) || 0 })} />
                 </div>
               </div>
-
-              <div className="border-t border-border/60 pt-6 space-y-4">
-                <div>
-                  <Label>Teaching Philosophy</Label>
-                  <Textarea className="rounded-xl mt-1.5" value={profile.teaching_philosophy} onChange={(e) => setProfile({ ...profile, teaching_philosophy: e.target.value })} placeholder="What's your approach to teaching?" rows={3} />
-                </div>
-                <div>
-                  <Label>Success Stories</Label>
-                  <Textarea className="rounded-xl mt-1.5" value={profile.success_stories} onChange={(e) => setProfile({ ...profile, success_stories: e.target.value })} placeholder="Share notable student achievements..." rows={3} />
-                </div>
-              </div>
             </CardContent>
           </Card>
         </TabsContent>

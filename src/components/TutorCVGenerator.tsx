@@ -138,9 +138,6 @@ ${data.classLevels.length > 0 ? `<div class="section"><h2>Class Levels</h2><div 
   ${data.presentAddress ? `<div class="section"><h2>Address</h2><p>${data.presentAddress}</p></div>` : ''}
 </div>
 
-${data.teachingPhilosophy ? `<div class="section"><h2>Teaching Philosophy</h2><p>${data.teachingPhilosophy}</p></div>` : ''}
-
-${data.successStories ? `<div class="section"><h2>Success Stories</h2><p>${data.successStories}</p></div>` : ''}
 
 <div class="footer">Generated from Manage Tutor • managetutor.lovable.app</div>
 </body></html>`;
