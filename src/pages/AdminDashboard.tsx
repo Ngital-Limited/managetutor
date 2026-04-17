@@ -817,7 +817,9 @@ export default function AdminDashboard() {
   const [vPaymentsPage, setVPaymentsPage] = useState(1);
   const [vPaymentsPageSize, setVPaymentsPageSize] = useState(25);
   const [reports, setReports] = useState<Report[]>([]);
+  const [reportsSearch, setReportsSearch] = useState('');
   const [reviews, setReviews] = useState<ReviewRow[]>([]);
+  const [reviewsSearch, setReviewsSearch] = useState('');
   const [payments, setPayments] = useState<PaymentRow[]>([]);
   const [chartData, setChartData] = useState<{ signups: any[]; jobs: any[]; revenue: any[] }>({ signups: [], jobs: [], revenue: [] });
 
