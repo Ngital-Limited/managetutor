@@ -50,6 +50,8 @@ const HEADER_ALIASES: Record<string, string> = {
   prearea: 'pre_area', preferredarea: 'pre_area', preferredareas: 'pre_area', areapreference: 'pre_area', area: 'pre_area', location: 'pre_area', district: 'pre_area',
   status: 'status',
   photo: 'photo', photourl: 'photo', picture: 'photo', avatar: 'photo', avatarurl: 'photo', image: 'photo', imageurl: 'photo', profilepicture: 'photo', profilephoto: 'photo',
+  nid: 'nid_url', nidcard: 'nid_url', nidurl: 'nid_url', nidcardurl: 'nid_url', nidcardattachmenturl: 'nid_url', nationalid: 'nid_url', nationalidcard: 'nid_url',
+  studentid: 'student_id_url', universityid: 'student_id_url', universityidcard: 'student_id_url', universityidcardattachedurl: 'student_id_url', universityidurl: 'student_id_url', studentidcard: 'student_id_url',
 };
 
 const normalizeHeader = (h: string) => h.toLowerCase().replace(/[\s_\-./()'’":,]+/g, '');
