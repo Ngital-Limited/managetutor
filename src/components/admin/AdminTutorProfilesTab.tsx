@@ -455,12 +455,12 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
   // ─── CSV Export ───
   const handleExportCSV = () => {
     if (tutors.length === 0) { toast({ title: 'No data to export', variant: 'destructive' }); return; }
-    const headers = ['Reference', 'Name', 'Email', 'Phone', 'Gender', 'District', 'Area/Thana', 'Education', 'Experience (yrs)', 'Teaching Mode', 'Verification', 'Available', 'Rating', 'Class Levels', 'Approved', 'Banned', 'Joined'];
+    const headers = ['Reference', 'Name', 'Email', 'Phone', 'Gender', 'District', 'Area/Thana', 'Education', 'Last Education', 'Experience (yrs)', 'Teaching Mode', 'Verification', 'Available', 'Rating', 'Class Levels', 'Approved', 'Banned', 'Joined'];
     const esc = (v: string) => `"${(v || '').replace(/"/g, '""')}"`;
     const rows = tutors.map(t => [
       esc(t.user_reference || ''), esc(t.name), esc(t.email), esc(t.phone || ''),
       esc(t.gender), esc(t.district_name || ''), esc(t.area_name || ''),
-      esc(t.education || ''), String(t.experience_years), esc(t.teaching_mode || ''),
+      esc(t.education || ''), esc(t.last_education || ''), String(t.experience_years), esc(t.teaching_mode || ''),
       esc(t.verification_status), t.is_available ? 'Yes' : 'No',
       String(t.average_rating ?? ''), esc((t.class_levels || []).join(', ')),
       t.is_approved ? 'Yes' : 'No', t.is_banned ? 'Yes' : 'No',
