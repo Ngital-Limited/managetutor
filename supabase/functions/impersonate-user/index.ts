@@ -24,7 +24,6 @@ Deno.serve(async (req) => {
     const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
-    // Verify caller using getUser (not getClaims)
     const callerClient = createClient(supabaseUrl, supabaseAnonKey, {
       global: { headers: { Authorization: authHeader } },
     });
@@ -38,8 +37,6 @@ Deno.serve(async (req) => {
     }
 
     const adminUserId = userData.user.id;
-
-    // Check admin role using service role client
     const adminClient = createClient(supabaseUrl, serviceRoleKey);
 
     const { data: adminRole } = await adminClient
@@ -56,7 +53,6 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Parse request body
     const { targetUserId } = await req.json();
     if (!targetUserId || typeof targetUserId !== "string") {
       return new Response(
@@ -65,7 +61,6 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Prevent impersonating another admin
     const { data: targetRole } = await adminClient
       .from("user_roles")
       .select("role")
@@ -80,19 +75,67 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Get target user's email
-    const { data: targetUser, error: targetUserError } = await adminClient.auth.admin.getUserById(targetUserId);
-    if (targetUserError || !targetUser?.user) {
+    // Try to fetch the target auth user
+    let targetEmail: string | null = null;
+    const { data: targetUser } = await adminClient.auth.admin.getUserById(targetUserId);
+
+    if (targetUser?.user) {
+      targetEmail = targetUser.user.email ?? null;
+    } else {
+      // No auth user — fetch the profile to recover email/full name
+      const { data: prof } = await adminClient
+        .from("profiles")
+        .select("id, email, full_name, phone")
+        .eq("id", targetUserId)
+        .maybeSingle();
+
+      if (!prof) {
+        return new Response(
+          JSON.stringify({ error: "Target user not found" }),
+          { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      // Generate a usable email if the stored one is a placeholder
+      const safeEmail = prof.email && !prof.email.endsWith("@placeholder.local")
+        ? prof.email
+        : `user-${targetUserId.slice(0, 8)}@managetutor.local`;
+
+      // Create an auth user with the EXACT same id as the profile so RLS keeps working
+      const { data: created, error: createErr } = await adminClient.auth.admin.createUser({
+        id: targetUserId,
+        email: safeEmail,
+        email_confirm: true,
+        user_metadata: { full_name: prof.full_name },
+        password: crypto.randomUUID(),
+      } as any);
+
+      if (createErr || !created?.user) {
+        console.error("createUser error:", createErr);
+        return new Response(
+          JSON.stringify({ error: "This account has no login credentials and could not be auto-provisioned. Please reset the user from Cloud → Users." }),
+          { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      // Sync profile email if it was a placeholder
+      if (prof.email !== safeEmail) {
+        await adminClient.from("profiles").update({ email: safeEmail }).eq("id", targetUserId);
+      }
+
+      targetEmail = safeEmail;
+    }
+
+    if (!targetEmail) {
       return new Response(
-        JSON.stringify({ error: "Target user not found" }),
-        { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        JSON.stringify({ error: "Target user has no email" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    // Generate a magic link for the target user
     const { data: generatedLink, error: genError } = await adminClient.auth.admin.generateLink({
       type: "magiclink",
-      email: targetUser.user.email!,
+      email: targetEmail,
     });
 
     if (genError || !generatedLink) {
@@ -103,7 +146,6 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Extract the token hash and use verifyOtp to get a session
     const tokenHash = generatedLink.properties?.hashed_token;
     if (!tokenHash) {
       return new Response(
@@ -112,7 +154,6 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Verify the OTP to get a real session
     const verifyClient = createClient(supabaseUrl, supabaseAnonKey);
     const { data: sessionData, error: verifyError } = await verifyClient.auth.verifyOtp({
       token_hash: tokenHash,
@@ -127,19 +168,17 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Get the target user's role
     const { data: userRoleData } = await adminClient
       .from("user_roles")
       .select("role")
       .eq("user_id", targetUserId)
-      .single();
+      .maybeSingle();
 
-    // Get target profile
     const { data: profileData } = await adminClient
       .from("profiles")
       .select("full_name, avatar_url, phone")
       .eq("id", targetUserId)
-      .single();
+      .maybeSingle();
 
     return new Response(
       JSON.stringify({
@@ -152,7 +191,7 @@ Deno.serve(async (req) => {
   } catch (err) {
     console.error("Impersonation error:", err);
     return new Response(
-      JSON.stringify({ error: "Internal server error" }),
+      JSON.stringify({ error: (err as Error).message || "Internal server error" }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
