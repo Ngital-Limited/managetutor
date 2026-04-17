@@ -21,7 +21,9 @@ export default function TutorBoost() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [tutorId, setTutorId] = useState<string | null>(null);
+  const [userProfile, setUserProfile] = useState<{ full_name: string; phone: string | null } | null>(null);
   const [active, setActive] = useState<FeaturedListing | null>(null);
+  const [boostPrice, setBoostPrice] = useState<number>(500);
   const [boostLoading, setBoostLoading] = useState(false);
 
   useEffect(() => {
@@ -32,8 +34,18 @@ export default function TutorBoost() {
     }
   }, [user, authLoading]);
 
+  useEffect(() => {
+    supabase.from('platform_settings').select('value').eq('key', 'featured_tutor_price').maybeSingle()
+      .then(({ data }) => {
+        const n = Number(data?.value);
+        if (Number.isFinite(n) && n >= 0) setBoostPrice(n);
+      });
+  }, []);
+
   const load = async () => {
     if (!user) return;
+    const { data: prof } = await supabase.from('profiles').select('full_name, phone').eq('id', user.id).single();
+    if (prof) setUserProfile(prof);
     const { data: tutorData } = await supabase
       .from('tutor_profiles')
       .select('id')
@@ -53,25 +65,28 @@ export default function TutorBoost() {
     if (featured) setActive(featured as FeaturedListing);
   };
 
-  const handleBoost = async (days: number, price: number) => {
-    if (!tutorId) return;
+  const handleBoost = async () => {
+    if (!user || !tutorId || !userProfile) return;
     setBoostLoading(true);
     try {
-      const startDate = new Date();
-      const endDate = new Date();
-      endDate.setDate(endDate.getDate() + days);
-      const { error } = await supabase.from('featured_listings').insert({
-        tutor_id: tutorId,
-        listing_type: 'tutor_profile',
-        start_date: startDate.toISOString(),
-        end_date: endDate.toISOString(),
-        amount_paid: price,
-        is_active: true,
+      const { data, error } = await supabase.functions.invoke('sslcommerz-init', {
+        body: {
+          amount: boostPrice,
+          productName: 'Featured Tutor Profile (30 days)',
+          productCategory: 'Featured Listing',
+          customerName: userProfile.full_name,
+          customerEmail: user.email,
+          customerPhone: userProfile.phone || '01700000000',
+          userId: user.id,
+          listingType: 'tutor_profile',
+        },
       });
       if (error) throw error;
-      await supabase.from('tutor_profiles').update({ is_featured: true }).eq('id', tutorId);
-      toast({ title: 'Profile Boosted!', description: `Your profile is now featured for ${days} days.` });
-      load();
+      if (data?.gatewayUrl) {
+        window.location.href = data.gatewayUrl;
+      } else {
+        throw new Error('No gateway URL returned');
+      }
     } catch (e: any) {
       toast({ title: 'Error', description: e.message, variant: 'destructive' });
     } finally {
@@ -88,7 +103,7 @@ export default function TutorBoost() {
               <Sparkles className="h-5 w-5 text-accent" />
               Boost Your Profile
             </CardTitle>
-            <CardDescription>Get featured at the top of search results and attract more students</CardDescription>
+            <CardDescription>Get featured at the top of search results for 30 days and attract more students</CardDescription>
           </CardHeader>
           <CardContent>
             {active ? (
@@ -103,40 +118,18 @@ export default function TutorBoost() {
                 <Badge className="bg-accent text-accent-foreground"><Zap className="h-3 w-3 mr-1" />Active</Badge>
               </div>
             ) : (
-              <div className="grid sm:grid-cols-3 gap-4">
-                <Card className="border-border hover:border-primary/50 transition-colors">
-                  <CardContent className="p-5 text-center">
-                    <p className="text-2xl font-bold text-primary">৳199</p>
-                    <p className="text-sm text-muted-foreground mb-1">7 Days</p>
-                    <p className="text-xs text-muted-foreground mb-4">~৳28/day</p>
-                    <Button className="w-full" variant="outline" disabled={boostLoading} onClick={() => handleBoost(7, 199)}>
-                      <Zap className="h-4 w-4 mr-1" />Boost 7 Days
-                    </Button>
-                  </CardContent>
-                </Card>
-                <Card className="border-accent shadow-md shadow-accent/10 relative">
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                    <Badge className="bg-accent text-accent-foreground px-3">Best Value</Badge>
-                  </div>
-                  <CardContent className="p-5 text-center">
-                    <p className="text-2xl font-bold text-accent">৳499</p>
-                    <p className="text-sm text-muted-foreground mb-1">30 Days</p>
-                    <p className="text-xs text-muted-foreground mb-4">~৳17/day</p>
-                    <Button className="w-full bg-accent hover:bg-accent/90 text-accent-foreground" disabled={boostLoading} onClick={() => handleBoost(30, 499)}>
-                      <Sparkles className="h-4 w-4 mr-1" />Boost 30 Days
-                    </Button>
-                  </CardContent>
-                </Card>
-                <Card className="border-border hover:border-primary/50 transition-colors">
-                  <CardContent className="p-5 text-center">
-                    <p className="text-2xl font-bold text-primary">৳1,299</p>
-                    <p className="text-sm text-muted-foreground mb-1">90 Days</p>
-                    <p className="text-xs text-muted-foreground mb-4">~৳14/day</p>
-                    <Button className="w-full" variant="outline" disabled={boostLoading} onClick={() => handleBoost(90, 1299)}>
-                      <Crown className="h-4 w-4 mr-1" />Boost 90 Days
-                    </Button>
-                  </CardContent>
-                </Card>
+              <div className="flex flex-col sm:flex-row sm:items-center gap-4 p-5 rounded-lg bg-card border">
+                <Sparkles className="h-10 w-10 text-accent flex-shrink-0" />
+                <div className="flex-1">
+                  <p className="font-bold text-xl">৳{boostPrice} <span className="text-sm font-normal text-muted-foreground">/ 30 days</span></p>
+                  <p className="text-sm text-muted-foreground">
+                    Featured at the top of search results, marked with a "Featured" badge, and shown to more parents.
+                  </p>
+                </div>
+                <Button size="lg" className="bg-accent hover:bg-accent/90 text-accent-foreground" disabled={boostLoading} onClick={handleBoost}>
+                  <Zap className="h-4 w-4 mr-1" />
+                  {boostLoading ? 'Processing...' : `Pay ৳${boostPrice} & Boost`}
+                </Button>
               </div>
             )}
           </CardContent>
