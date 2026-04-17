@@ -198,8 +198,6 @@ export default function JobDetails() {
     const { error } = await supabase.from('applications').insert({
       job_id: job.id,
       tutor_id: tutorProfile.id,
-      cover_message: applicationForm.cover_message,
-      proposed_rate: applicationForm.proposed_rate,
     });
 
     if (error) {
@@ -549,27 +547,14 @@ export default function JobDetails() {
                             <DialogTitle>Apply for this job</DialogTitle>
                           </DialogHeader>
                           <form onSubmit={handleApply} className="space-y-4 mt-4">
-                            <div>
-                              <Label>Cover Message</Label>
-                              <Textarea
-                                placeholder="Introduce yourself and explain why you're a good fit..."
-                                value={applicationForm.cover_message}
-                                onChange={(e) => setApplicationForm({ ...applicationForm, cover_message: e.target.value })}
-                                rows={4}
-                                required
-                              />
-                            </div>
-                            <div>
-                              <Label>Your Proposed Rate (৳/month)</Label>
-                              <Input
-                                type="number"
-                                value={applicationForm.proposed_rate}
-                                onChange={(e) => setApplicationForm({ ...applicationForm, proposed_rate: Number(e.target.value) })}
-                                required
-                              />
-                            </div>
+                            <p className="text-sm text-muted-foreground">
+                              You're about to apply for <span className="font-medium text-foreground">{job.title}</span>. The guardian will review your profile and contact you if shortlisted.
+                            </p>
+                            <p className="text-sm">
+                              Parent's budget: <span className="font-medium">৳{job.budget_min?.toLocaleString()} - ৳{job.budget_max?.toLocaleString()}</span> / month
+                            </p>
                             <Button type="submit" className="w-full" disabled={applying}>
-                              {applying ? 'Sending...' : 'Submit Application'}
+                              {applying ? 'Sending...' : 'Confirm Apply'}
                             </Button>
                           </form>
                         </DialogContent>

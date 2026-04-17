@@ -82,8 +82,7 @@ export default function BrowseJobs() {
   // Application modal
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const [showApplyModal, setShowApplyModal] = useState(false);
-  const [coverMessage, setCoverMessage] = useState('');
-  const [proposedRate, setProposedRate] = useState('');
+  
   const [applying, setApplying] = useState(false);
   const [tutorProfileId, setTutorProfileId] = useState<string | null>(null);
   const [tutorProfileCompleteness, setTutorProfileCompleteness] = useState(0);
@@ -275,8 +274,6 @@ export default function BrowseJobs() {
       return;
     }
     setSelectedJob(job);
-    setCoverMessage('');
-    setProposedRate(job.budget_min?.toString() || '');
     setShowApplyModal(true);
   };
 
@@ -291,8 +288,6 @@ export default function BrowseJobs() {
     const { error } = await supabase.from('applications').insert({
       job_id: selectedJob.id,
       tutor_id: tutorProfileId,
-      cover_message: coverMessage,
-      proposed_rate: parseInt(proposedRate) || null,
       status: 'pending'
     });
 
@@ -735,43 +730,21 @@ export default function BrowseJobs() {
 
       {/* Application Modal */}
       <Dialog open={showApplyModal} onOpenChange={setShowApplyModal}>
-        <DialogContent className="sm:max-w-[500px] rounded-2xl">
+        <DialogContent className="sm:max-w-[440px] rounded-2xl">
           <DialogHeader>
-            <DialogTitle className="text-xl">Apply for Tuition Job</DialogTitle>
+            <DialogTitle className="text-xl">Confirm Application</DialogTitle>
             <DialogDescription>{selectedJob?.title}</DialogDescription>
           </DialogHeader>
-          
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="coverMessage">Cover Message</Label>
-              <Textarea
-                id="coverMessage"
-                placeholder="Introduce yourself and explain why you're a great fit..."
-                value={coverMessage}
-                onChange={(e) => setCoverMessage(e.target.value)}
-                rows={4}
-                className="rounded-xl"
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="proposedRate">Proposed Monthly Rate (৳)</Label>
-              <Input
-                id="proposedRate"
-                type="number"
-                placeholder="Enter your proposed rate"
-                value={proposedRate}
-                onChange={(e) => setProposedRate(e.target.value)}
-                className="rounded-xl"
-              />
-              {selectedJob && (
-                <p className="text-xs text-muted-foreground">
-                  Parent's budget: ৳{selectedJob.budget_min?.toLocaleString()} - ৳{selectedJob.budget_max?.toLocaleString()}
-                </p>
-              )}
-            </div>
+
+          <div className="py-2 text-sm text-muted-foreground">
+            You're about to apply for this tuition job. The guardian will review your profile and contact you if shortlisted.
+            {selectedJob && (
+              <p className="mt-3 text-foreground">
+                Parent's budget: <span className="font-medium">৳{selectedJob.budget_min?.toLocaleString()} - ৳{selectedJob.budget_max?.toLocaleString()}</span>
+              </p>
+            )}
           </div>
-          
+
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowApplyModal(false)} className="rounded-xl">
               Cancel
@@ -785,7 +758,7 @@ export default function BrowseJobs() {
               ) : (
                 <>
                   <Send className="h-4 w-4 mr-2" />
-                  Submit Application
+                  Confirm Apply
                 </>
               )}
             </Button>
