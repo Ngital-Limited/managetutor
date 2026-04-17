@@ -216,20 +216,12 @@ function SubjectsManager({ toast }: { toast: any }) {
           <DialogHeader><DialogTitle>{editingId ? 'Edit Subject' : 'Add Subject'}</DialogTitle></DialogHeader>
           <div className="space-y-3">
             <div>
-              <label className="text-sm font-medium">Name (English) *</label>
+              <label className="text-sm font-medium">Name *</label>
               <Input value={form.name_en} onChange={e => setForm(p => ({ ...p, name_en: e.target.value }))} placeholder="e.g. Mathematics" className="mt-1" />
             </div>
             <div>
-              <label className="text-sm font-medium">Name (Bangla) *</label>
-              <Input value={form.name_bn} onChange={e => setForm(p => ({ ...p, name_bn: e.target.value }))} placeholder="e.g. গণিত" className="mt-1" />
-            </div>
-            <div>
-              <label className="text-sm font-medium">Category (English)</label>
+              <label className="text-sm font-medium">Category</label>
               <Input value={form.category_en} onChange={e => setForm(p => ({ ...p, category_en: e.target.value }))} placeholder="e.g. Science" className="mt-1" />
-            </div>
-            <div>
-              <label className="text-sm font-medium">Category (Bangla)</label>
-              <Input value={form.category_bn} onChange={e => setForm(p => ({ ...p, category_bn: e.target.value }))} placeholder="e.g. বিজ্ঞান" className="mt-1" />
             </div>
           </div>
           <DialogFooter>
