@@ -9,79 +9,106 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Plus, Pencil, Trash2, Search, BookOpen, MapPin, Map, GraduationCap, Settings as SettingsIcon, BadgeCheck } from 'lucide-react';
+import { Plus, Pencil, Trash2, Search, BookOpen, MapPin, Map, GraduationCap, Settings as SettingsIcon, BadgeCheck, Percent, Star, Briefcase, UserCheck } from 'lucide-react';
 
 // ─── Settings Manager ───
+type SettingDef = {
+  key: string;
+  label: string;
+  description: string;
+  unit: '৳' | '%';
+  defaultValue: string;
+  icon: any;
+  max?: number;
+};
+
+const SETTING_DEFS: SettingDef[] = [
+  { key: 'verification_fee', label: 'Tutor Verification Badge Fee', description: 'Fee charged to tutors when they purchase the Verified Badge.', unit: '৳', defaultValue: '50', icon: BadgeCheck },
+  { key: 'platform_commission_pct', label: 'Platform Commission', description: 'Percentage commission deducted from tutor earnings on matches and demo classes.', unit: '%', defaultValue: '20', icon: Percent, max: 100 },
+  { key: 'featured_tutor_price', label: 'Featured Tutor Listing Price', description: 'One-time price for boosting a tutor profile to featured.', unit: '৳', defaultValue: '500', icon: Star },
+  { key: 'featured_job_price', label: 'Featured Job Listing Price', description: 'One-time price for boosting a parent job post to featured.', unit: '৳', defaultValue: '300', icon: Briefcase },
+  { key: 'min_profile_completeness', label: 'Minimum Profile Completeness', description: 'Minimum tutor profile completeness % required before applying to jobs.', unit: '%', defaultValue: '70', icon: UserCheck, max: 100 },
+];
+
 function SettingsManager({ toast }: { toast: any }) {
-  const [verificationFee, setVerificationFee] = useState<string>('');
+  const [values, setValues] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
+  const [savingKey, setSavingKey] = useState<string | null>(null);
 
   const fetchSettings = useCallback(async () => {
     setLoading(true);
     const { data } = await supabase
       .from('platform_settings')
       .select('key, value')
-      .eq('key', 'verification_fee')
-      .maybeSingle();
-    setVerificationFee(data?.value ?? '50');
+      .in('key', SETTING_DEFS.map(s => s.key));
+    const map: Record<string, string> = {};
+    SETTING_DEFS.forEach(s => { map[s.key] = s.defaultValue; });
+    (data || []).forEach((row: any) => { map[row.key] = row.value; });
+    setValues(map);
     setLoading(false);
   }, []);
 
   useEffect(() => { fetchSettings(); }, [fetchSettings]);
 
-  const handleSave = async () => {
-    const n = Number(verificationFee);
-    if (!Number.isFinite(n) || n < 0) {
-      toast({ title: 'Enter a valid non-negative number', variant: 'destructive' });
+  const handleSave = async (def: SettingDef) => {
+    const raw = values[def.key];
+    const n = Number(raw);
+    if (!Number.isFinite(n) || n < 0 || (def.max !== undefined && n > def.max)) {
+      toast({ title: `Enter a valid number${def.max !== undefined ? ` (0–${def.max})` : ' (≥ 0)'}`, variant: 'destructive' });
       return;
     }
-    setSaving(true);
+    setSavingKey(def.key);
     const { error } = await supabase
       .from('platform_settings')
       .upsert(
-        { key: 'verification_fee', value: String(Math.round(n)), description: 'Tutor verification badge fee in BDT (৳)' },
+        { key: def.key, value: String(def.unit === '%' ? n : Math.round(n)), description: def.description },
         { onConflict: 'key' }
       );
     if (error) toast({ title: 'Error', description: error.message, variant: 'destructive' });
-    else toast({ title: 'Verification fee updated' });
-    setSaving(false);
+    else toast({ title: `${def.label} updated` });
+    setSavingKey(null);
   };
 
   return (
     <div className="space-y-4 max-w-xl">
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-sm flex items-center gap-2">
-            <BadgeCheck className="h-4 w-4 text-primary" />
-            Tutor Verification Badge Fee
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <p className="text-xs text-muted-foreground">
-            Fee charged to tutors (in BDT ৳) when they purchase the Verified Badge via PayStation.
-          </p>
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-medium">৳</span>
-            <Input
-              type="number"
-              min={0}
-              step={1}
-              value={loading ? '' : verificationFee}
-              onChange={(e) => setVerificationFee(e.target.value)}
-              placeholder="50"
-              disabled={loading}
-              className="max-w-[160px]"
-            />
-            <Button onClick={handleSave} disabled={saving || loading} size="sm">
-              {saving ? 'Saving...' : 'Save'}
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+      {SETTING_DEFS.map((def) => {
+        const Icon = def.icon;
+        return (
+          <Card key={def.key}>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm flex items-center gap-2">
+                <Icon className="h-4 w-4 text-primary" />
+                {def.label}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <p className="text-xs text-muted-foreground">{def.description}</p>
+              <div className="flex items-center gap-2">
+                {def.unit === '৳' && <span className="text-sm font-medium">৳</span>}
+                <Input
+                  type="number"
+                  min={0}
+                  max={def.max}
+                  step={def.unit === '%' ? 0.1 : 1}
+                  value={loading ? '' : (values[def.key] ?? '')}
+                  onChange={(e) => setValues((v) => ({ ...v, [def.key]: e.target.value }))}
+                  placeholder={def.defaultValue}
+                  disabled={loading}
+                  className="max-w-[160px]"
+                />
+                {def.unit === '%' && <span className="text-sm font-medium">%</span>}
+                <Button onClick={() => handleSave(def)} disabled={savingKey === def.key || loading} size="sm">
+                  {savingKey === def.key ? 'Saving...' : 'Save'}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        );
+      })}
     </div>
   );
 }
+
 
 // ─── Subjects Manager ───
 function SubjectsManager({ toast }: { toast: any }) {
