@@ -796,7 +796,6 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
                         {!t.is_approved && <Badge variant="outline" className="text-[9px] border-warning/30 text-warning">Unapproved</Badge>}
                       </div>
                     </TableCell>
-                    <TableCell className="text-xs">{t.average_rating ? `★ ${t.average_rating}` : '—'}</TableCell>
                     <TableCell className="text-[11px] text-muted-foreground whitespace-nowrap">
                       {t.created_at ? new Date(t.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '—'}
                     </TableCell>

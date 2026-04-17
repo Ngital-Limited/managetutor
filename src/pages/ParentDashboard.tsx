@@ -1700,7 +1700,7 @@ export default function ParentDashboard() {
                                           <div className="flex flex-col">
                                             <span className="font-semibold">{tutor?.profiles?.full_name}</span>
                                             <span className="text-xs text-muted-foreground">
-                                              {tutor?.experience_years || 0} yrs exp · ⭐ {tutor?.average_rating || 0}
+                                              {tutor?.experience_years || 0} yrs exp
                                               {tutor?.verification_status === 'approved' && tutor?.verification_paid && ' · ✓ Verified'}
                                             </span>
                                           </div>
@@ -2141,7 +2141,7 @@ export default function ParentDashboard() {
                         <div className="flex flex-col">
                           <span className="font-semibold">{tutor?.profiles?.full_name}</span>
                           <span className="text-xs text-muted-foreground">
-                            {tutor?.experience_years || 0} yrs · ⭐ {tutor?.average_rating || 0}
+                            {tutor?.experience_years || 0} yrs
                             {tutor?.verification_status === 'approved' && tutor?.verification_paid && ' · ✓'}
                           </span>
                         </div>
