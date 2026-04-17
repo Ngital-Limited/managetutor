@@ -22,6 +22,38 @@ interface BatchResult {
 
 const BATCH_SIZE = 50;
 
+// Aliases → canonical field name expected by the edge function.
+// Keys are normalized (lowercase, no spaces/underscores/dashes/punctuation).
+const HEADER_ALIASES: Record<string, string> = {
+  firstname: 'fname', fname: 'fname', givenname: 'fname',
+  lastname: 'lname', lname: 'lname', surname: 'lname', familyname: 'lname',
+  fullname: 'fname', name: 'fname',
+  email: 'email', emailaddress: 'email', mail: 'email',
+  phone: 'phone', mobile: 'phone', mobilenumber: 'phone', phonenumber: 'phone', contact: 'phone', primaryphone: 'phone',
+  altphone: 'alt_phone', alternatephone: 'alt_phone', alternativephone: 'alt_phone', secondaryphone: 'alt_phone', emergencyphone: 'alt_phone', emergencycontact: 'alt_phone',
+  fphone: 'f_phone', fatherphone: 'f_phone', fathersphone: 'f_phone', fathercontact: 'f_phone',
+  mphone: 'm_phone', motherphone: 'm_phone', mothersphone: 'm_phone', mothercontact: 'm_phone',
+  paddress: 'p_address', presentaddress: 'p_address', currentaddress: 'p_address', address: 'p_address',
+  peraddress: 'per_address', permanentaddress: 'per_address', homeaddress: 'per_address',
+  gender: 'gender', sex: 'gender',
+  school: 'school', schoolname: 'school', ssc: 'school',
+  college: 'college', collegename: 'college', hsc: 'college',
+  university: 'university', universityname: 'university', institution: 'university',
+  department: 'department', subject: 'department', major: 'department', fieldofstudy: 'department',
+  texperience: 't_experience', experience: 't_experience', tuitionexperience: 't_experience', teachingexperience: 't_experience', yearsofexperience: 't_experience',
+  background: 'background', educationbackground: 'background', educationalbackground: 'background',
+  medium: 'medium', languagemedium: 'medium', teachingmedium: 'medium',
+  fblink: 'fb_link', facebook: 'fb_link', facebooklink: 'fb_link', facebookurl: 'fb_link', fburl: 'fb_link',
+  preclass: 'pre_class', preferredclass: 'pre_class', preferredclasses: 'pre_class', classpreference: 'pre_class', classes: 'pre_class',
+  presubject: 'pre_subject', preferredsubject: 'pre_subject', preferredsubjects: 'pre_subject', subjectpreference: 'pre_subject', subjects: 'pre_subject',
+  prearea: 'pre_area', preferredarea: 'pre_area', preferredareas: 'pre_area', areapreference: 'pre_area', area: 'pre_area', location: 'pre_area', district: 'pre_area',
+  status: 'status',
+  photo: 'photo', photourl: 'photo', picture: 'photo', avatar: 'photo', avatarurl: 'photo', image: 'photo', imageurl: 'photo', profilepicture: 'photo', profilephoto: 'photo',
+};
+
+const normalizeHeader = (h: string) => h.toLowerCase().replace(/[\s_\-./()]+/g, '');
+const mapHeader = (h: string) => HEADER_ALIASES[normalizeHeader(h)] || h;
+
 export default function AdminBulkImportTutors() {
   const { role } = useAuth();
   const navigate = useNavigate();
@@ -32,6 +64,7 @@ export default function AdminBulkImportTutors() {
   const [progress, setProgress] = useState(0);
   const [totals, setTotals] = useState({ imported: 0, skipped: 0, errors: 0 });
   const [log, setLog] = useState<{ email: string; status: string; reason?: string }[]>([]);
+  const [mappingInfo, setMappingInfo] = useState<{ original: string; mapped: string; recognized: boolean }[]>([]);
 
   if (role !== 'admin') {
     return (
@@ -45,15 +78,31 @@ export default function AdminBulkImportTutors() {
   const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    const originalHeaders: string[] = [];
+    const canonical = new Set(Object.values(HEADER_ALIASES));
     Papa.parse(file, {
       header: true,
       skipEmptyLines: true,
+      transformHeader: (h) => {
+        const trimmed = h.trim();
+        originalHeaders.push(trimmed);
+        return mapHeader(trimmed);
+      },
       complete: (res) => {
+        const mappedHeaders = (res.meta.fields || []) as string[];
+        setMappingInfo(originalHeaders.map((orig, i) => {
+          const mapped = mappedHeaders[i] ?? orig;
+          return { original: orig, mapped, recognized: canonical.has(mapped) };
+        }));
         setRows(res.data as any[]);
         setLog([]);
         setTotals({ imported: 0, skipped: 0, errors: 0 });
         setProgress(0);
-        toast({ title: 'CSV loaded', description: `${res.data.length} rows ready to import` });
+        const recognizedCount = mappedHeaders.filter(h => canonical.has(h)).length;
+        toast({
+          title: 'CSV loaded',
+          description: `${res.data.length} rows · ${recognizedCount}/${mappedHeaders.length} columns auto-mapped`,
+        });
       },
       error: (err) => toast({ title: 'Parse error', description: err.message, variant: 'destructive' }),
     });
@@ -111,9 +160,10 @@ export default function AdminBulkImportTutors() {
         <CardHeader>
           <CardTitle>Bulk Import Tutors</CardTitle>
           <CardDescription>
-            Upload a CSV with columns: fname, lname, email, phone, gender, school, college, university,
-            department, t_experience, background, medium, p_address, per_address, alt_phone, f_phone,
-            m_phone, fb_link, pre_class, pre_subject, pre_area, status, photo. Imports run in batches of {BATCH_SIZE}.
+            Headers are auto-mapped (case-insensitive, ignores spaces &amp; underscores). Recognized fields:
+            fname, lname, email, phone, gender, school, college, university, department, t_experience,
+            background, medium, p_address, per_address, alt_phone, f_phone, m_phone, fb_link, pre_class,
+            pre_subject, pre_area, status, photo. Imports run in batches of {BATCH_SIZE}.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -124,6 +174,27 @@ export default function AdminBulkImportTutors() {
               <p className="text-xs text-muted-foreground mt-1">{rows.length} rows loaded</p>
             )}
           </div>
+
+          {mappingInfo.length > 0 && (
+            <div className="space-y-2">
+              <h3 className="text-sm font-semibold">Column Mapping</h3>
+              <div className="border rounded-md p-2 max-h-48 overflow-y-auto">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-1 text-xs">
+                  {mappingInfo.map((m, idx) => (
+                    <div key={idx} className="flex items-center gap-2 py-0.5">
+                      <span className="font-mono truncate flex-1" title={m.original}>{m.original}</span>
+                      <span className="text-muted-foreground">→</span>
+                      {m.recognized ? (
+                        <Badge variant="default" className="text-[10px] px-1 py-0 font-mono">{m.mapped}</Badge>
+                      ) : (
+                        <Badge variant="outline" className="text-[10px] px-1 py-0 text-muted-foreground">ignored</Badge>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
 
           <Button onClick={runImport} disabled={!rows.length || running} className="w-full">
             {running ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Importing...</> : <><Upload className="h-4 w-4 mr-2" /> Start Import</>}
