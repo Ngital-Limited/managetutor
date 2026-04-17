@@ -18,7 +18,7 @@ import {
   Briefcase, CheckCircle2, DollarSign, ChevronRight, Layers, UserCircle2
 } from 'lucide-react';
 import { CLASS_LEVELS } from '@/constants/classLevels';
-import { JOB_CATEGORIES } from '@/constants/jobCategories';
+import { JOB_CATEGORIES, STUDENT_BACKGROUNDS } from '@/constants/jobCategories';
 
 interface FeaturedTutor {
   id: string;
