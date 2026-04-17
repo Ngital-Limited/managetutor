@@ -636,29 +636,104 @@ export default function ParentDashboard() {
     setSubmitting(false);
   };
 
-  const handleApplicationAction = async (appId: string, status: 'accepted' | 'rejected') => {
-    const { error } = await supabase.from('applications').update({ status }).eq('id', appId);
+  const handleApplicationAction = async (appId: string, status: 'accepted' | 'rejected' | 'shortlisted') => {
+    const { error } = await supabase.from('applications').update({ status: status as any }).eq('id', appId);
 
     if (error) {
       toast({ title: 'Error', description: error.message, variant: 'destructive' });
-    } else {
-      toast({ title: 'Updated', description: `Application ${status}.` });
-      if (status === 'accepted' && selectedJob) {
-        await supabase.from('jobs').update({ status: 'in_progress' }).eq('id', selectedJob.id);
-        const app = applications.find(a => a.id === appId);
-        if (app?.tutor_profiles?.user_id) {
-          await supabase.from('notifications').insert({
-            user_id: app.tutor_profiles.user_id,
-            title: 'You have been hired!',
-            message: `Congratulations! You have been selected for "${selectedJob.title}".`,
-            type: 'hired',
-            reference_id: selectedJob.id,
-          });
-        }
-        fetchData();
-      }
-      if (selectedJob) fetchApplications(selectedJob.id);
+      return;
     }
+
+    // Find the app & job for this action (works from inline list OR All-Applicants table)
+    const inlineApp = applications.find(a => a.id === appId);
+    const allApp = allApplicants.find((a: any) => a.id === appId);
+    const tutorUserId = inlineApp?.tutor_profiles?.user_id || (allApp as any)?.tutor_profiles?.user_id;
+    const jobTitle = selectedJob?.title || (allApp as any)?.jobs?.title || '';
+    const jobId = selectedJob?.id || (allApp as any)?.jobs?.id;
+
+    toast({ title: 'Updated', description: `Application ${status}.` });
+
+    if (status === 'accepted' && jobId) {
+      await supabase.from('jobs').update({ status: 'in_progress' as any }).eq('id', jobId);
+      if (tutorUserId) {
+        await supabase.from('notifications').insert({
+          user_id: tutorUserId,
+          title: 'You have been hired!',
+          message: `Congratulations! You have been selected for "${jobTitle}".`,
+          type: 'hired',
+          reference_id: jobId,
+        });
+      }
+    } else if (status === 'shortlisted' && tutorUserId) {
+      await supabase.from('notifications').insert({
+        user_id: tutorUserId,
+        title: 'You have been shortlisted!',
+        message: `Great news — you've been shortlisted for "${jobTitle}". The guardian may invite you for a demo class soon.`,
+        type: 'application_shortlisted',
+        reference_id: jobId,
+      });
+    } else if (status === 'rejected' && tutorUserId) {
+      await supabase.from('notifications').insert({
+        user_id: tutorUserId,
+        title: 'Application not selected',
+        message: `Your application for "${jobTitle}" was not selected this time.`,
+        type: 'application_rejected',
+        reference_id: jobId,
+      });
+    }
+
+    fetchData();
+    if (selectedJob) fetchApplications(selectedJob.id);
+  };
+
+  // Mark the result of a demo class (parent-reported)
+  const handleDemoResult = async (booking: any, result: 'confirmed' | 'cancelled', reason?: string) => {
+    if (result === 'confirmed') {
+      // Mark booking as completed and hire the tutor
+      const { error } = await supabase.from('demo_bookings').update({ status: 'completed' }).eq('id', booking.id);
+      if (error) { toast({ title: 'Error', description: error.message, variant: 'destructive' }); return; }
+
+      // If this demo was linked to an application, accept it
+      if (booking.application_id) {
+        await supabase.from('applications').update({ status: 'accepted' as any }).eq('id', booking.application_id);
+        const { data: app } = await supabase.from('applications').select('job_id').eq('id', booking.application_id).maybeSingle();
+        if (app?.job_id) {
+          await supabase.from('jobs').update({ status: 'in_progress' as any }).eq('id', app.job_id);
+        }
+      }
+
+      // Notify tutor
+      const { data: tp } = await supabase.from('tutor_profiles').select('user_id').eq('id', booking.tutor_id).maybeSingle();
+      if (tp?.user_id) {
+        await supabase.from('notifications').insert({
+          user_id: tp.user_id,
+          title: 'Demo confirmed — You have been hired!',
+          message: 'The guardian confirmed the demo class result. Congratulations!',
+          type: 'demo_result_confirmed',
+          reference_id: booking.id,
+        });
+      }
+      toast({ title: 'Demo confirmed', description: 'The tutor has been hired.' });
+    } else {
+      const { error } = await supabase.from('demo_bookings').update({
+        status: 'cancelled',
+        cancellation_reason: reason || 'Cancelled by guardian after demo class',
+      }).eq('id', booking.id);
+      if (error) { toast({ title: 'Error', description: error.message, variant: 'destructive' }); return; }
+
+      const { data: tp } = await supabase.from('tutor_profiles').select('user_id').eq('id', booking.tutor_id).maybeSingle();
+      if (tp?.user_id) {
+        await supabase.from('notifications').insert({
+          user_id: tp.user_id,
+          title: 'Demo result: Cancelled',
+          message: `The guardian did not proceed after the demo class.${reason ? ' Reason: ' + reason : ''}`,
+          type: 'demo_result_cancelled',
+          reference_id: booking.id,
+        });
+      }
+      toast({ title: 'Demo cancelled', description: 'The tutor has been notified.' });
+    }
+    fetchData();
   };
 
   const handleInviteToInterview = (app: Application) => {
