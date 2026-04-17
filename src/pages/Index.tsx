@@ -274,7 +274,9 @@ export default function Index() {
               <div>
                 <span className="text-xs uppercase tracking-[0.2em] text-muted-foreground font-medium">Categories</span>
                 <h2 className="text-3xl md:text-4xl font-semibold tracking-tight mt-2 mb-2">Browse by Subject</h2>
-                <p className="text-sm text-muted-foreground">Find tuition jobs across 50+ subjects in every category</p>
+                <p className="text-sm text-muted-foreground max-w-xl">
+                  Explore 50+ subjects across every academic category — from primary school basics to advanced university coursework, language learning, music, art, programming, and competitive exam preparation. Pick a category to discover qualified tutors and active tuition jobs in your area.
+                </p>
               </div>
               <Link to="/jobs">
                 <Button variant="ghost" className="hidden sm:flex gap-1 text-sm text-muted-foreground hover:text-foreground">
@@ -321,7 +323,9 @@ export default function Index() {
               <div>
                 <span className="text-xs uppercase tracking-[0.2em] text-muted-foreground font-medium">Opportunities</span>
                 <h2 className="text-3xl md:text-4xl font-semibold tracking-tight mt-2 mb-2">Latest Tuition Jobs</h2>
-                <p className="text-sm text-muted-foreground">New opportunities posted by parents and guardians</p>
+                <p className="text-sm text-muted-foreground max-w-xl">
+                  Fresh tuition opportunities posted daily by parents and guardians across Bangladesh. Browse open jobs by location, subject, budget, and schedule — then apply directly to start teaching and earning on your own terms.
+                </p>
               </div>
               <Link to="/jobs">
                 <Button variant="ghost" className="hidden sm:flex gap-1 text-sm text-muted-foreground hover:text-foreground">
@@ -418,7 +422,9 @@ export default function Index() {
               <div>
                 <span className="text-xs uppercase tracking-[0.2em] text-muted-foreground font-medium">Educators</span>
                 <h2 className="text-3xl md:text-4xl font-semibold tracking-tight mt-2 mb-2">Top Rated Tutors</h2>
-                <p className="text-sm text-muted-foreground">Verified and trusted tutors ready to teach</p>
+                <p className="text-sm text-muted-foreground max-w-xl">
+                  Meet our hand-picked, identity-verified educators trusted by thousands of families. Each tutor is screened by our admin team for academic credentials, teaching experience, and professionalism — so you can hire with complete confidence.
+                </p>
               </div>
               <Link to="/tutors">
                 <Button variant="ghost" className="hidden sm:flex gap-1 text-sm text-muted-foreground hover:text-foreground">
@@ -530,7 +536,9 @@ export default function Index() {
           <div className="text-center mb-14 max-w-2xl mx-auto">
             <span className="text-xs uppercase tracking-[0.2em] text-muted-foreground font-medium">Process</span>
             <h2 className="text-3xl md:text-4xl font-semibold tracking-tight mt-2 mb-3">{t('howItWorks.title')}</h2>
-            <p className="text-sm text-muted-foreground">Three simple steps to find your perfect tutor</p>
+            <p className="text-sm text-muted-foreground">
+              From posting your requirement to starting your first lesson — our streamlined process gets you matched with the right tutor in just three simple steps. No middlemen, no hidden fees, just direct connections backed by a fully vetted platform.
+            </p>
           </div>
           <div className="grid md:grid-cols-3 gap-5 max-w-5xl mx-auto relative">
             {/* Connecting line on desktop */}
@@ -570,14 +578,16 @@ export default function Index() {
           <div className="text-center mb-16 max-w-2xl mx-auto">
             <span className="text-xs uppercase tracking-[0.2em] text-muted-foreground font-medium">Why Us</span>
             <h2 className="text-3xl md:text-4xl font-semibold tracking-tight mt-2 mb-3">Why Choose Manage Tutor?</h2>
-            <p className="text-sm text-muted-foreground">Built for trust, designed for results</p>
+            <p className="text-sm text-muted-foreground">
+              Built for trust, designed for results — we combine rigorous tutor vetting, transparent pricing, and a smooth booking experience to deliver the most reliable home-tuition marketplace in Bangladesh.
+            </p>
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4 max-w-6xl mx-auto">
             {[
-              { icon: Shield, title: 'Verified Tutors', desc: 'All tutors go through our verification process' },
-              { icon: Clock, title: 'Flexible Scheduling', desc: 'Find tutors available when you need them' },
-              { icon: Award, title: 'Trusted Platform', desc: 'Secure platform connecting parents with qualified tutors' },
-              { icon: Users, title: 'Trusted Community', desc: 'Join thousands of parents and tutors across Bangladesh' },
+              { icon: Shield, title: 'Verified Tutors', desc: 'Every tutor passes ID, education, and background checks before being approved by our admin team.' },
+              { icon: Clock, title: 'Flexible Scheduling', desc: 'Choose tutors who match your timetable — mornings, evenings, weekends, online, or in-person.' },
+              { icon: Award, title: 'Trusted Platform', desc: 'Secure payments, vetted profiles, and dedicated support keep every booking safe and worry-free.' },
+              { icon: Users, title: 'Trusted Community', desc: 'Join 4,000+ matched families and 1,00,000+ tutors building better learning outcomes nationwide.' },
             ].map((feature, i) => (
               <div
                 key={i}
@@ -610,7 +620,7 @@ export default function Index() {
           <span className="text-xs uppercase tracking-[0.2em] text-background/60 font-medium">Get Started</span>
           <h2 className="text-3xl md:text-5xl font-semibold tracking-tight mt-3 mb-5 leading-[1.1]">Ready to Get Started?</h2>
           <p className="text-base text-background/70 mb-10 max-w-lg mx-auto leading-relaxed">
-            Join thousands of families who found their perfect tutor through Manage Tutor
+            Whether you're a parent searching for the perfect tutor for your child or an educator ready to grow your teaching career, Manage Tutor connects you with the right opportunity in minutes. Sign up free, get verified, and start your journey today.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link to="/auth?mode=signup&role=parent">
