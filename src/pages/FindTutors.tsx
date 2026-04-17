@@ -66,8 +66,10 @@ interface TutorProfile {
   total_students: number;
   display_name: string | null;
   district_id: string | null;
+  area_id: string | null;
   class_levels: string[] | null;
   districts: { name_en: string; name_bn: string; division_en: string } | null;
+  areas: { name_en: string; name_bn: string } | null;
   profiles: {
     full_name: string;
     avatar_url: string;
@@ -185,7 +187,7 @@ export default function FindTutors() {
     setLoading(true);
     let query = supabase
       .from('tutor_profiles')
-      .select(`*, districts (name_en, name_bn, division_en), tutor_subjects (subjects (*))`)
+      .select(`*, districts (name_en, name_bn, division_en), areas (name_en, name_bn), tutor_subjects (subjects (*))`)
       .eq('is_available', true);
 
     if (selectedGender && selectedGender !== 'any') query = query.eq('gender', selectedGender as 'male' | 'female');
@@ -238,10 +240,7 @@ export default function FindTutors() {
       result = result.filter(t => t.district_id === selectedDistrict || t.profiles?.district_id === selectedDistrict);
     }
     if (selectedArea) {
-      const area = areas.find(a => a.id === selectedArea);
-      if (area) {
-        result = result.filter(t => t.district_id === area.district_id || t.profiles?.district_id === area.district_id);
-      }
+      result = result.filter(t => (t as any).area_id === selectedArea || t.profiles?.areas?.name_en === areas.find(a => a.id === selectedArea)?.name_en);
     }
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
@@ -351,7 +350,7 @@ export default function FindTutors() {
                 </div>
                 <div className="flex items-center gap-3 text-xs text-muted-foreground">
                   {(tutor.districts || tutor.profiles?.districts) && (
-                    <span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{tutor.profiles?.areas?.name_en ? `${tutor.profiles.areas.name_en}, ` : ''}{tutor.districts?.name_en || tutor.profiles?.districts?.name_en}</span>
+                    <span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{(tutor.areas?.name_en || tutor.profiles?.areas?.name_en) ? `${tutor.areas?.name_en || tutor.profiles?.areas?.name_en}, ` : ''}{tutor.districts?.name_en || tutor.profiles?.districts?.name_en}</span>
                   )}
                   <span className="flex items-center gap-1"><ModeIcon className="h-3 w-3" />{modeInfo.label}</span>
                   <span className="flex items-center gap-1"><Clock className="h-3 w-3" />{tutor.experience_years || 0}y exp</span>
@@ -412,7 +411,7 @@ export default function FindTutors() {
                     {(tutor.districts || tutor.profiles?.districts) && (
                       <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
                         <MapPin className="h-3 w-3 flex-shrink-0" />
-                        <span className="truncate">{tutor.profiles?.areas?.name_en ? `${tutor.profiles.areas.name_en}, ` : ''}{tutor.districts?.name_en || tutor.profiles?.districts?.name_en}</span>
+                        <span className="truncate">{(tutor.areas?.name_en || tutor.profiles?.areas?.name_en) ? `${tutor.areas?.name_en || tutor.profiles?.areas?.name_en}, ` : ''}{tutor.districts?.name_en || tutor.profiles?.districts?.name_en}</span>
                       </p>
                     )}
                   </div>

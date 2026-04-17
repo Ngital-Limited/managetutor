@@ -78,6 +78,7 @@ export default function BrowseJobs() {
   // Filters
   const [searchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedDistrict, setSelectedDistrict] = useState<string>(searchParams.get('district') || 'all');
   const [selectedArea, setSelectedArea] = useState<string>(searchParams.get('area') || 'all');
   const [selectedCategory, setSelectedCategory] = useState<string>(searchParams.get('category') || 'all');
   const [selectedBackground, setSelectedBackground] = useState<string>(searchParams.get('background') || 'all');
@@ -103,17 +104,25 @@ export default function BrowseJobs() {
   const [tutorProfileCompleteness, setTutorProfileCompleteness] = useState(0);
 
   const sortedAreas = useMemo(() => {
-    return [...areas].sort((a, b) => a.name_en.localeCompare(b.name_en));
-  }, [areas]);
+    const filtered = selectedDistrict && selectedDistrict !== 'all'
+      ? areas.filter(a => a.district_id === selectedDistrict)
+      : areas;
+    return [...filtered].sort((a, b) => a.name_en.localeCompare(b.name_en));
+  }, [areas, selectedDistrict]);
+
+  const sortedDistricts = useMemo(() => {
+    return [...districts].sort((a, b) => a.name_en.localeCompare(b.name_en));
+  }, [districts]);
 
   const activeFilterCount = useMemo(() => {
     let count = 0;
+    if (selectedDistrict !== 'all') count++;
     if (selectedArea !== 'all') count++;
     if (selectedCategory !== 'all') count++;
     if (selectedBackground !== 'all') count++;
     if (selectedTime !== 'all') count++;
     return count;
-  }, [selectedArea, selectedCategory, selectedBackground, selectedTime]);
+  }, [selectedDistrict, selectedArea, selectedCategory, selectedBackground, selectedTime]);
 
   useEffect(() => {
     fetchData();
@@ -121,7 +130,7 @@ export default function BrowseJobs() {
 
   useEffect(() => {
     fetchJobs();
-  }, [selectedArea, selectedCategory, selectedBackground, selectedTime, currentPage]);
+  }, [selectedDistrict, selectedArea, selectedCategory, selectedBackground, selectedTime, currentPage]);
 
   useEffect(() => {
     if (user && role === 'tutor') {
@@ -155,19 +164,20 @@ export default function BrowseJobs() {
   };
 
   const fetchData = async () => {
-    const { data: areasRes } = await supabase
-      .from('areas')
-      .select('id, name_en, district_id, districts (name_en)')
-      .order('name_en');
+    const [areasRes, districtsRes] = await Promise.all([
+      supabase.from('areas').select('id, name_en, district_id, districts (name_en)').order('name_en'),
+      supabase.from('districts').select('id, name_en, name_bn, division_en').order('name_en'),
+    ]);
 
-    if (areasRes) {
-      setAreas(areasRes.map((a: any) => ({
+    if (areasRes.data) {
+      setAreas(areasRes.data.map((a: any) => ({
         id: a.id,
         name_en: a.name_en,
         district_id: a.district_id,
         district_name: a.districts?.name_en || '',
       })));
     }
+    if (districtsRes.data) setDistricts(districtsRes.data);
 
     await fetchJobs();
   };
@@ -180,6 +190,9 @@ export default function BrowseJobs() {
       .select('*', { count: 'exact', head: true })
       .eq('status', 'open');
 
+    if (selectedDistrict && selectedDistrict !== 'all') {
+      countQuery = countQuery.eq('district_id', selectedDistrict);
+    }
     if (selectedArea && selectedArea !== 'all') {
       countQuery = countQuery.eq('area_id', selectedArea);
     }
@@ -203,6 +216,9 @@ export default function BrowseJobs() {
       .order('is_featured', { ascending: false })
       .order('created_at', { ascending: false });
 
+    if (selectedDistrict && selectedDistrict !== 'all') {
+      query = query.eq('district_id', selectedDistrict);
+    }
     if (selectedArea && selectedArea !== 'all') {
       query = query.eq('area_id', selectedArea);
     }
@@ -355,6 +371,7 @@ export default function BrowseJobs() {
   };
 
   const clearFilters = () => {
+    setSelectedDistrict('all');
     setSelectedArea('all');
     setSelectedCategory('all');
     setSelectedBackground('all');
@@ -425,9 +442,24 @@ export default function BrowseJobs() {
           {/* Expandable Filters */}
           {showFilters && (
             <div className="mt-4 pt-4 border-t border-border">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3">
                 <div>
-                  <label className="text-xs font-medium text-muted-foreground mb-1.5 block">City</label>
+                  <label className="text-xs font-medium text-muted-foreground mb-1.5 block">District</label>
+                  <Select value={selectedDistrict} onValueChange={(v) => { setSelectedDistrict(v); setSelectedArea('all'); setCurrentPage(1); }}>
+                    <SelectTrigger className="h-10 rounded-lg">
+                      <MapPin className="h-3.5 w-3.5 mr-1.5 text-muted-foreground" />
+                      <SelectValue placeholder="All Districts" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Districts</SelectItem>
+                      {sortedDistricts.map(d => (
+                        <SelectItem key={d.id} value={d.id}>{d.name_en}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground mb-1.5 block">City (Thana)</label>
                   <Select value={selectedArea} onValueChange={(v) => { setSelectedArea(v); setCurrentPage(1); }}>
                     <SelectTrigger className="h-10 rounded-lg">
                       <MapPin className="h-3.5 w-3.5 mr-1.5 text-muted-foreground" />
@@ -437,7 +469,7 @@ export default function BrowseJobs() {
                       <SelectItem value="all">All Cities</SelectItem>
                       {sortedAreas.map(a => (
                         <SelectItem key={a.id} value={a.id}>
-                          {a.name_en}{a.district_name ? ` (${a.district_name})` : ''}
+                          {a.name_en}{!selectedDistrict || selectedDistrict === 'all' ? (a.district_name ? ` (${a.district_name})` : '') : ''}
                         </SelectItem>
                       ))}
                     </SelectContent>

@@ -49,6 +49,7 @@ interface LatestJob {
   job_reference: string | null;
   created_at: string;
   districts: { name_en: string; name_bn: string };
+  areas: { name_en: string; name_bn: string } | null;
   subjects: { name_en: string; name_bn: string } | null;
 }
 
@@ -92,7 +93,7 @@ export default function Index() {
           .order('average_rating', { ascending: false })
           .limit(6),
         supabase.from('jobs')
-          .select('id, slug, title, description, budget_min, budget_max, teaching_mode, days_per_week, job_reference, created_at, districts (name_en, name_bn), subjects (name_en, name_bn)')
+          .select('id, slug, title, description, budget_min, budget_max, teaching_mode, days_per_week, job_reference, created_at, districts (name_en, name_bn), areas (name_en, name_bn), subjects (name_en, name_bn)')
           .eq('status', 'open')
           .order('created_at', { ascending: false })
           .limit(6),
@@ -351,7 +352,9 @@ export default function Index() {
                     <div className="flex items-center gap-3 text-[11px] text-muted-foreground mb-4 flex-wrap">
                       <span className="flex items-center gap-1">
                         <MapPin className="h-3 w-3" />
-                        {job.districts?.name_en}
+                        {job.areas?.name_en
+                          ? `${job.areas.name_en}, ${job.districts?.name_en || ''}`
+                          : job.districts?.name_en}
                       </span>
                       {job.subjects && (
                         <span className="flex items-center gap-1">

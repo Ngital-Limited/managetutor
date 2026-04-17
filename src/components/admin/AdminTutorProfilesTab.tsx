@@ -79,7 +79,7 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
   const [filterCategory, setFilterCategory] = useState('all');
   const [filterLastEducation, setFilterLastEducation] = useState('all');
   const [showFilters, setShowFilters] = useState(false);
-  const [sortBy, setSortBy] = useState<'last_education' | 'rating' | 'joined' | null>(null);
+  const [sortBy, setSortBy] = useState<'last_education' | 'joined' | null>(null);
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
 
   // ─── Data ───
@@ -314,9 +314,6 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
       if (sortBy === 'last_education') {
         av = DEGREE_RANK[(a.last_education || '').toLowerCase()] ?? 0;
         bv = DEGREE_RANK[(b.last_education || '').toLowerCase()] ?? 0;
-      } else if (sortBy === 'rating') {
-        av = a.average_rating ?? 0;
-        bv = b.average_rating ?? 0;
       } else if (sortBy === 'joined') {
         av = a.created_at ? new Date(a.created_at).getTime() : 0;
         bv = b.created_at ? new Date(b.created_at).getTime() : 0;
@@ -478,14 +475,14 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
   // ─── CSV Export ───
   const handleExportCSV = () => {
     if (tutors.length === 0) { toast({ title: 'No data to export', variant: 'destructive' }); return; }
-    const headers = ['Reference', 'Name', 'Email', 'Phone', 'Gender', 'District', 'Area/Thana', 'Education', 'Last Education', 'Experience (yrs)', 'Teaching Mode', 'Verification', 'Available', 'Rating', 'Class Levels', 'Approved', 'Banned', 'Joined'];
+    const headers = ['Reference', 'Name', 'Email', 'Phone', 'Gender', 'District', 'Area/Thana', 'Education', 'Last Education', 'Experience (yrs)', 'Teaching Mode', 'Verification', 'Available', 'Class Levels', 'Approved', 'Banned', 'Joined'];
     const esc = (v: string) => `"${(v || '').replace(/"/g, '""')}"`;
     const rows = tutors.map(t => [
       esc(t.user_reference || ''), esc(t.name), esc(t.email), esc(t.phone || ''),
       esc(t.gender), esc(t.district_name || ''), esc(t.area_name || ''),
       esc(t.education || ''), esc(t.last_education || ''), String(t.experience_years), esc(t.teaching_mode || ''),
       esc(t.verification_status), t.is_available ? 'Yes' : 'No',
-      String(t.average_rating ?? ''), esc((t.class_levels || []).join(', ')),
+      esc((t.class_levels || []).join(', ')),
       t.is_approved ? 'Yes' : 'No', t.is_banned ? 'Yes' : 'No',
       esc(t.created_at ? new Date(t.created_at).toLocaleDateString() : ''),
     ].join(','));
@@ -737,21 +734,6 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
                     <button
                       type="button"
                       onClick={() => {
-                        if (sortBy === 'rating') setSortDir(d => d === 'asc' ? 'desc' : 'asc');
-                        else { setSortBy('rating'); setSortDir('desc'); }
-                      }}
-                      className="inline-flex items-center gap-1 hover:text-foreground"
-                    >
-                      Rating
-                      {sortBy === 'rating'
-                        ? (sortDir === 'asc' ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />)
-                        : <ArrowUpDown className="h-3 w-3 opacity-50" />}
-                    </button>
-                  </TableHead>
-                  <TableHead>
-                    <button
-                      type="button"
-                      onClick={() => {
                         if (sortBy === 'joined') setSortDir(d => d === 'asc' ? 'desc' : 'asc');
                         else { setSortBy('joined'); setSortDir('desc'); }
                       }}
@@ -814,7 +796,6 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
                         {!t.is_approved && <Badge variant="outline" className="text-[9px] border-warning/30 text-warning">Unapproved</Badge>}
                       </div>
                     </TableCell>
-                    <TableCell className="text-xs">{t.average_rating ? `★ ${t.average_rating}` : '—'}</TableCell>
                     <TableCell className="text-[11px] text-muted-foreground whitespace-nowrap">
                       {t.created_at ? new Date(t.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '—'}
                     </TableCell>
