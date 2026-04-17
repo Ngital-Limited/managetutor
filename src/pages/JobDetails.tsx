@@ -96,7 +96,8 @@ export default function JobDetails() {
   }, [id, user]);
 
   const fetchJob = async () => {
-    const { data: jobData, error } = await supabase
+    const isUuid = !!id && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+    const query = supabase
       .from('jobs')
       .select(`
         *,
@@ -104,9 +105,10 @@ export default function JobDetails() {
         areas (name_en, name_bn),
         subjects (name_en, name_bn),
         job_subjects (subjects (name_en, name_bn))
-      `)
-      .eq('id', id)
-      .single();
+      `);
+    const { data: jobData, error } = await (isUuid
+      ? query.eq('id', id!).single()
+      : query.eq('slug', id!).single());
     
     console.log('Job fetch result:', { jobData, error, id });
 
