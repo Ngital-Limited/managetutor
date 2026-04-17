@@ -426,6 +426,7 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
     setFilterClassLevel('all');
     setFilterSubject('all');
     setFilterCategory('all');
+    setFilterLastEducation('all');
   };
 
   const activeFilterCount = [
@@ -433,6 +434,7 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
     filterEducation !== '', filterUniversity !== '',
     filterVerification !== 'all', filterAvailability !== 'all',
     filterClassLevel !== 'all', filterSubject !== 'all', filterCategory !== 'all',
+    filterLastEducation !== 'all',
   ].filter(Boolean).length;
 
   const statusColor = (s: string) => {
