@@ -2742,7 +2742,7 @@ export default function AdminDashboard() {
                                         </Button>
                                       )}
                                       {!isFinal && (app.status === 'pending' || app.status === 'shortlisted') && (
-                                        <Button variant="outline" size="sm" className="h-8 text-xs gap-1" onClick={() => handleAdminUpdateAppStatus(app.id, 'invited_to_demo', app.job_id)} title="Invite to Demo">
+                                        <Button variant="outline" size="sm" className="h-8 text-xs gap-1" onClick={() => openDemoSchedule({ id: app.id, tutor_user_id: (app.tutor_profiles as any)?.user_id || '', tutor_id: (app.tutor_profiles as any)?.id || app.tutor_id, tutor_name: app.tutor_profile?.full_name || 'Tutor' }, app.job_id, (app.jobs as any)?.title || 'this job')} title="Schedule Demo Class">
                                           <Send className="h-3.5 w-3.5" /> Invite
                                         </Button>
                                       )}
