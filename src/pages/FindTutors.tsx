@@ -367,11 +367,6 @@ export default function FindTutors() {
 
               {/* Rating & Price */}
               <div className="flex items-center gap-4 flex-shrink-0">
-                <div className="flex items-center gap-1 text-sm">
-                  <Star className="h-4 w-4 fill-accent text-accent" />
-                  <span className="font-semibold">{tutor.average_rating?.toFixed(1) || '0.0'}</span>
-                  <span className="text-xs text-muted-foreground">({tutor.total_reviews || 0})</span>
-                </div>
                 <div className="text-right">
                   <span className="font-bold text-primary text-sm">৳{tutor.monthly_salary_min || 500}-{tutor.monthly_salary_max || 1500}</span>
                   <span className="text-[10px] text-muted-foreground">/mo</span>
@@ -467,11 +462,6 @@ export default function FindTutors() {
             {/* Stats row */}
             <div className="flex items-center justify-between pt-3 border-t border-border/60">
               <div className="flex items-center gap-3 text-xs">
-                <span className="flex items-center gap-1">
-                  <Star className="h-3.5 w-3.5 fill-accent text-accent" />
-                  <span className="font-semibold text-foreground">{tutor.average_rating?.toFixed(1) || '0.0'}</span>
-                  <span className="text-muted-foreground">({tutor.total_reviews || 0})</span>
-                </span>
                 <span className="flex items-center gap-1 text-muted-foreground">
                   <Clock className="h-3.5 w-3.5" />{tutor.experience_years || 0}y
                 </span>
@@ -572,9 +562,7 @@ export default function FindTutors() {
                 <SelectValue placeholder="Sort by" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="rating">Highest Rating</SelectItem>
                 <SelectItem value="experience">Most Experienced</SelectItem>
-                <SelectItem value="reviews">Most Reviews</SelectItem>
                 <SelectItem value="price_low">Price: Low to High</SelectItem>
                 <SelectItem value="price_high">Price: High to Low</SelectItem>
               </SelectContent>
