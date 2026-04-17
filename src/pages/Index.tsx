@@ -422,7 +422,9 @@ export default function Index() {
               <div>
                 <span className="text-xs uppercase tracking-[0.2em] text-muted-foreground font-medium">Educators</span>
                 <h2 className="text-3xl md:text-4xl font-semibold tracking-tight mt-2 mb-2">Top Rated Tutors</h2>
-                <p className="text-sm text-muted-foreground">Verified and trusted tutors ready to teach</p>
+                <p className="text-sm text-muted-foreground max-w-xl">
+                  Meet our hand-picked, identity-verified educators trusted by thousands of families. Each tutor is screened by our admin team for academic credentials, teaching experience, and professionalism — so you can hire with complete confidence.
+                </p>
               </div>
               <Link to="/tutors">
                 <Button variant="ghost" className="hidden sm:flex gap-1 text-sm text-muted-foreground hover:text-foreground">
