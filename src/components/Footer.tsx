@@ -4,9 +4,11 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { MapPin, Mail, Phone, MessageCircle, ArrowUpRight, ArrowRight, Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { useIsStandalone } from '@/hooks/use-standalone';
 
 export function Footer() {
   const { t } = useLanguage();
+  const isStandalone = useIsStandalone();
 
   const quickLinks = [
     { to: '/tutors', label: 'Find Tutors' },
@@ -14,7 +16,7 @@ export function Footer() {
     { to: '/about', label: 'About Us' },
     { to: '/contact', label: 'Contact' },
     { to: '/pricing', label: 'Pricing' },
-    { to: '/install', label: 'Install App' },
+    ...(isStandalone ? [] : [{ to: '/install', label: 'Install App' }]),
   ];
 
   const legalLinks = [
