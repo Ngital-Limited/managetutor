@@ -15,10 +15,11 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { 
   Search, MapPin, Briefcase, 
-  BookOpen, Users, ArrowRight, ChevronLeft, ChevronRight, Send, Loader2, Monitor,
-  Clock, Filter, X, Sparkles
+  Users, ArrowRight, ChevronLeft, ChevronRight, Send, Loader2,
+  Clock, Filter, X, Sparkles, Tag, GraduationCap
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
+import { JOB_CATEGORIES, STUDENT_BACKGROUNDS } from '@/constants/jobCategories';
 
 interface District {
   id: string;
