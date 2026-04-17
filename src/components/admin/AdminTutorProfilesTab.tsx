@@ -637,6 +637,20 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
                   </SelectContent>
                 </Select>
               </div>
+
+              <div>
+                <Label className="text-xs font-medium text-muted-foreground">Last Education</Label>
+                <Select value={filterLastEducation} onValueChange={setFilterLastEducation}>
+                  <SelectTrigger className="mt-1 h-9"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Any</SelectItem>
+                    <SelectItem value="Masters">Masters</SelectItem>
+                    <SelectItem value="Bachelor">Bachelor</SelectItem>
+                    <SelectItem value="HSC">HSC</SelectItem>
+                    <SelectItem value="SSC">SSC</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </CardContent>
         </Card>
