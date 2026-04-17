@@ -28,10 +28,10 @@ interface District {
   division_en: string;
 }
 
-interface Subject {
+interface Area {
   id: string;
   name_en: string;
-  name_bn: string;
+  district_id: string;
 }
 
 interface Job {
