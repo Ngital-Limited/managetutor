@@ -286,6 +286,21 @@ export default function BrowseJobs({ embedded = false }: { embedded?: boolean } 
       );
     }
 
+    if (tutorFilterActive) {
+      filtered = filtered.filter(j => {
+        const levelMatch = tutorClassLevels.length === 0
+          || (j.class_level && tutorClassLevels.includes(j.class_level));
+        const jobSubjectIds = [
+          ...(j.job_subjects?.map((js: any) => js.subjects?.id).filter(Boolean) || []),
+          (j as any).subject_id,
+        ].filter(Boolean) as string[];
+        const subjectMatch = tutorSubjectIds.length === 0
+          || jobSubjectIds.length === 0
+          || jobSubjectIds.some(id => tutorSubjectIds.includes(id));
+        return levelMatch && subjectMatch;
+      });
+    }
+
     setTotalCount(filtered.length);
     setJobs(filtered.slice(from, to + 1));
     setLoading(false);
