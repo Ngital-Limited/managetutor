@@ -265,7 +265,6 @@ export default function ParentDashboard() {
   const [interviewNotes, setInterviewNotes] = useState('');
   const [schedulingInterview, setSchedulingInterview] = useState(false);
 
-  const [selectedJobDivision, setSelectedJobDivision] = useState('');
   const [jobForm, setJobForm] = useState({
     title: '',
     description: '',
@@ -462,7 +461,6 @@ export default function ParentDashboard() {
   };
 
   const resetJobForm = () => {
-    setSelectedJobDivision('');
     setPrefilled(false);
     setJobForm({
       title: '', description: '', subject_ids: [] as string[], district_id: '', area_id: '', class_levels: [] as string[],
@@ -484,8 +482,6 @@ export default function ParentDashboard() {
       .maybeSingle();
 
     if (lastJob) {
-      const district = districts.find(d => d.id === lastJob.district_id);
-      if (district) setSelectedJobDivision(district.division_en);
       setJobForm(prev => ({
         ...prev,
         district_id: lastJob.district_id || '',
@@ -571,9 +567,6 @@ export default function ParentDashboard() {
   const startEditJob = async (job: Job) => {
     // Fetch subject IDs from job_subjects
     const { data: jsData } = await supabase.from('job_subjects').select('subject_id').eq('job_id', job.id);
-    // Set division from district
-    const district = districts.find(d => d.id === job.district_id);
-    if (district) setSelectedJobDivision(district.division_en);
     setJobForm({
       title: job.title,
       description: job.description,
@@ -867,22 +860,6 @@ export default function ParentDashboard() {
 
     return { percent: complete, missing };
   };
-
-  const jobDivisions = useMemo(() => {
-    const divSet = new Map<string, string>();
-    districts.forEach(d => {
-      if (!divSet.has(d.division_en)) divSet.set(d.division_en, d.division_bn);
-    });
-    return Array.from(divSet.entries()).map(([en, bn]) => ({ en, bn })).sort((a, b) => a.en.localeCompare(b.en));
-  }, [districts]);
-
-  const districtOptions = useMemo(() => {
-    const filtered = selectedJobDivision ? districts.filter(d => d.division_en === selectedJobDivision) : districts;
-    return filtered.map(d => ({
-      value: d.id,
-      label: d.name_en,
-    })).sort((a, b) => a.label.localeCompare(b.label));
-  }, [districts, selectedJobDivision]);
 
   const subjectOptions = useMemo(() => subjects.map(s => ({
     value: s.id,

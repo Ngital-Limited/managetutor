@@ -30,7 +30,7 @@ export default function ParentProfileEdit() {
   const [uploading, setUploading] = useState(false);
   const [districts, setDistricts] = useState<District[]>([]);
   const [areas, setAreas] = useState<Area[]>([]);
-  const [selectedDivisionState, setSelectedDivisionState] = useState('');
+  
   const [form, setForm] = useState({
     full_name: '',
     full_name_bn: '',
@@ -70,14 +70,7 @@ export default function ParentProfileEdit() {
         avatar_url: profileRes.data.avatar_url || '',
       });
     }
-    if (districtsRes.data) {
-      setDistricts(districtsRes.data);
-      // Set initial division from existing district
-      if (profileRes.data?.district_id) {
-        const dist = districtsRes.data.find(d => d.id === profileRes.data.district_id);
-        if (dist) setSelectedDivisionState(dist.division_en);
-      }
-    }
+    if (districtsRes.data) setDistricts(districtsRes.data);
     if (areasRes.data) setAreas(areasRes.data);
     setLoading(false);
   };

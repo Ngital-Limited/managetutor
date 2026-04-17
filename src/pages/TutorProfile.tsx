@@ -69,7 +69,7 @@ export default function TutorProfile() {
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [districts, setDistricts] = useState<District[]>([]);
   const [areas, setAreas] = useState<{ id: string; name_en: string; name_bn: string; district_id: string }[]>([]);
-  const [selectedDivision, setSelectedDivision] = useState('');
+  
   const [selectedSubjects, setSelectedSubjects] = useState<string[]>([]);
   const [documents, setDocuments] = useState<VerificationDoc[]>([]);
   const [uploading, setUploading] = useState(false);
@@ -166,11 +166,6 @@ export default function TutorProfile() {
         area_id: profileRes.data.area_id || '',
         avatar_url: profileRes.data.avatar_url || '',
       });
-      // Set initial division
-      if (profileRes.data.district_id && districtsRes.data) {
-        const dist = districtsRes.data.find(d => d.id === profileRes.data.district_id);
-        if (dist) setSelectedDivision(dist.division_en);
-      }
     }
     if (tutorRes.data) {
       const td = tutorRes.data as any;

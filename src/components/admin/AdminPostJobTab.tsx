@@ -42,7 +42,6 @@ export function AdminPostJobTab({ toast }: Props) {
   const [areas, setAreas] = useState<Area[]>([]);
   const [subjects, setSubjects] = useState<Subject[]>([]);
 
-  const [selectedJobDivision, setSelectedJobDivision] = useState('');
   const [jobForm, setJobForm] = useState({
     title: '',
     description: '',
@@ -81,19 +80,6 @@ export function AdminPostJobTab({ toast }: Props) {
     });
   }, []);
 
-  const jobDivisions = useMemo(() => {
-    const divSet = new Map<string, string>();
-    districts.forEach(d => {
-      if (!divSet.has(d.division_en)) divSet.set(d.division_en, d.division_bn);
-    });
-    return Array.from(divSet.entries()).map(([en]) => ({ en })).sort((a, b) => a.en.localeCompare(b.en));
-  }, [districts]);
-
-  const districtOptions = useMemo(() => {
-    const filtered = selectedJobDivision ? districts.filter(d => d.division_en === selectedJobDivision) : districts;
-    return filtered.map(d => ({ value: d.id, label: d.name_en })).sort((a, b) => a.label.localeCompare(b.label));
-  }, [districts, selectedJobDivision]);
-
   const subjectOptions = useMemo(() => subjects.map(s => ({
     value: s.id, label: s.name_en, group: s.category_en || 'Other',
   })), [subjects]);
@@ -128,7 +114,6 @@ export function AdminPostJobTab({ toast }: Props) {
   }, []);
 
   const resetAll = () => {
-    setSelectedJobDivision('');
     setPrefilled(false);
     setSelectedParent(null);
     setParentSearch('');
@@ -150,8 +135,6 @@ export function AdminPostJobTab({ toast }: Props) {
       .maybeSingle();
 
     if (lastJob) {
-      const district = districts.find(d => d.id === lastJob.district_id);
-      if (district) setSelectedJobDivision(district.division_en);
       setJobForm(prev => ({
         ...prev,
         district_id: lastJob.district_id || '',
