@@ -17,9 +17,11 @@ import { useToast } from '@/hooks/use-toast';
 import { 
   Search, MapPin, Briefcase, 
   Users, ArrowRight, ChevronLeft, ChevronRight, Send, Loader2,
-  Clock, Filter, X, Sparkles, Tag, GraduationCap
+  Clock, Filter, X, Sparkles, Tag, GraduationCap, AlertTriangle
 } from 'lucide-react';
 import { JOB_CATEGORIES, STUDENT_BACKGROUNDS } from '@/constants/jobCategories';
+import { Progress } from '@/components/ui/progress';
+import { getMinProfileCompleteness } from '@/lib/profileCompleteness';
 
 interface District {
   id: string;
@@ -102,6 +104,7 @@ export default function BrowseJobs({ embedded = false }: { embedded?: boolean } 
   const [applying, setApplying] = useState(false);
   const [tutorProfileId, setTutorProfileId] = useState<string | null>(null);
   const [tutorProfileCompleteness, setTutorProfileCompleteness] = useState(0);
+  const [minCompleteness, setMinCompleteness] = useState(70);
   const [tutorClassLevels, setTutorClassLevels] = useState<string[]>([]);
   const [tutorSubjectIds, setTutorSubjectIds] = useState<string[]>([]);
   const [tutorPrefilterApplied, setTutorPrefilterApplied] = useState(false);
@@ -130,6 +133,7 @@ export default function BrowseJobs({ embedded = false }: { embedded?: boolean } 
 
   useEffect(() => {
     fetchData();
+    getMinProfileCompleteness().then(setMinCompleteness);
   }, []);
 
   useEffect(() => {
@@ -332,10 +336,10 @@ export default function BrowseJobs({ embedded = false }: { embedded?: boolean } 
       navigate('/tutor/profile');
       return;
     }
-    if (tutorProfileCompleteness < 70) {
+    if (tutorProfileCompleteness < minCompleteness) {
       toast({
         title: "Profile Incomplete",
-        description: `Your profile is ${tutorProfileCompleteness}% complete. You need at least 70% to apply.`,
+        description: `Your profile is ${tutorProfileCompleteness}% complete. You need at least ${minCompleteness}% to apply.`,
         variant: "destructive"
       });
       navigate('/tutor/profile');
@@ -863,6 +867,31 @@ export default function BrowseJobs({ embedded = false }: { embedded?: boolean } 
               <p className="mt-3 text-foreground">
                 Parent's budget: <span className="font-medium">৳{selectedJob.budget_min?.toLocaleString()} - ৳{selectedJob.budget_max?.toLocaleString()}</span>
               </p>
+            )}
+          </div>
+
+          {/* Profile completeness gate */}
+          <div className="rounded-xl border border-border bg-muted/30 p-3 space-y-2">
+            <div className="flex items-center justify-between text-xs">
+              <span className="font-medium text-foreground">Profile Completeness</span>
+              <span className={`font-semibold ${tutorProfileCompleteness >= minCompleteness ? 'text-success' : 'text-warning'}`}>
+                {tutorProfileCompleteness}% / {minCompleteness}% required
+              </span>
+            </div>
+            <div className="relative">
+              <Progress value={tutorProfileCompleteness} className="h-2" />
+              {/* Threshold marker */}
+              <div
+                className="absolute top-[-3px] h-[14px] w-0.5 bg-foreground/70"
+                style={{ left: `${minCompleteness}%` }}
+                title={`Required threshold: ${minCompleteness}%`}
+              />
+            </div>
+            {tutorProfileCompleteness < minCompleteness && (
+              <div className="flex items-start gap-1.5 text-[11px] text-warning">
+                <AlertTriangle className="h-3.5 w-3.5 shrink-0 mt-0.5" />
+                <span>Complete your profile to reach the {minCompleteness}% threshold required to apply.</span>
+              </div>
             )}
           </div>
 

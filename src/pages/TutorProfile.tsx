@@ -18,6 +18,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { getMinProfileCompleteness } from '@/lib/profileCompleteness';
 import {
   GraduationCap, ArrowLeft, Save, Upload, FileText, CheckCircle2,
   Clock, XCircle, AlertCircle, Video, Star, MessageSquare, Send,
@@ -67,6 +68,7 @@ export default function TutorProfile() {
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [minCompleteness, setMinCompleteness] = useState(70);
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [districts, setDistricts] = useState<District[]>([]);
   const [areas, setAreas] = useState<{ id: string; name_en: string; name_bn: string; district_id: string }[]>([]);
@@ -128,6 +130,8 @@ export default function TutorProfile() {
     avatar_url: '',
   });
   const [avatarUploading, setAvatarUploading] = useState(false);
+
+  useEffect(() => { getMinProfileCompleteness().then(setMinCompleteness); }, []);
 
   useEffect(() => {
     if (!authLoading) {
@@ -598,15 +602,22 @@ export default function TutorProfile() {
           <div className="flex items-center justify-between gap-3 mb-2">
             <div className="flex items-center gap-2">
               <span className="text-sm font-medium">Profile Completeness</span>
-              <span className={`text-xs font-semibold ${completeness.score >= 70 ? 'text-success' : 'text-warning'}`}>
+              <span className={`text-xs font-semibold ${completeness.score >= minCompleteness ? 'text-success' : 'text-warning'}`}>
                 {completeness.score}%
               </span>
-              {completeness.score < 70 && (
-                <span className="text-[11px] text-muted-foreground">• 70% required to apply for jobs</span>
+              {completeness.score < minCompleteness && (
+                <span className="text-[11px] text-muted-foreground">• {minCompleteness}% required to apply for jobs</span>
               )}
             </div>
           </div>
-          <Progress value={completeness.score} className="h-2" />
+          <div className="relative">
+            <Progress value={completeness.score} className="h-2" />
+            <div
+              className="absolute top-[-3px] h-[14px] w-0.5 bg-foreground/70"
+              style={{ left: `${minCompleteness}%` }}
+              title={`Required threshold: ${minCompleteness}%`}
+            />
+          </div>
           {completeness.missing.length > 0 && (
             <div className="mt-2 flex flex-wrap gap-1.5">
               {completeness.missing.map(m => (

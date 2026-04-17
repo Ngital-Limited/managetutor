@@ -19,8 +19,10 @@ import { useToast } from '@/hooks/use-toast';
 import {
   GraduationCap, ArrowLeft, Globe, MapPin, BookOpen, Calendar, Users, User,
   DollarSign, Clock, CheckCircle2, XCircle, Send, Star, MessageSquare,
-  Briefcase, UserCheck, Phone, Mail
+  Briefcase, UserCheck, Phone, Mail, AlertTriangle
 } from 'lucide-react';
+import { Progress } from '@/components/ui/progress';
+import { getMinProfileCompleteness } from '@/lib/profileCompleteness';
 
 interface Job {
   id: string;
@@ -229,8 +231,9 @@ export default function JobDetails() {
     const { count } = await supabase.from('tutor_subjects').select('*', { count: 'exact', head: true }).eq('tutor_profile_id', tutorProfile.id);
     if (count && count > 0) complete += 10;
 
-    if (complete < 70) {
-      toast({ title: 'Profile Incomplete', description: `Your profile is ${complete}% complete. You need at least 70% to apply.`, variant: 'destructive' });
+    const minRequired = await getMinProfileCompleteness();
+    if (complete < minRequired) {
+      toast({ title: 'Profile Incomplete', description: `Your profile is ${complete}% complete. You need at least ${minRequired}% to apply.`, variant: 'destructive' });
       navigate('/tutor/profile');
       setApplying(false);
       return;
