@@ -279,13 +279,13 @@ function BroadcastTab({ toast }: { toast: ReturnType<typeof useToast>['toast'] }
 
 // ──────────── Subscription Plans Tab ────────────
 interface PlanForm {
-  name: string; name_bn: string; description: string;
+  name: string; description: string;
   price_monthly: number; price_quarterly: number; price_yearly: number;
   max_applications_per_month: number; featured_profile: boolean; priority_support: boolean;
   is_active: boolean;
 }
 const emptyPlan: PlanForm = {
-  name: '', name_bn: '', description: '',
+  name: '', description: '',
   price_monthly: 0, price_quarterly: 0, price_yearly: 0,
   max_applications_per_month: 10, featured_profile: false, priority_support: false,
   is_active: true,
@@ -597,7 +597,7 @@ function SubscriptionPlansTab({ toast }: { toast: ReturnType<typeof useToast>['t
   const openEdit = (plan: any) => {
     setEditingId(plan.id);
     setForm({
-      name: plan.name || '', name_bn: plan.name_bn || '', description: plan.description || '',
+      name: plan.name || '', description: plan.description || '',
       price_monthly: plan.price_monthly || 0, price_quarterly: plan.price_quarterly || 0, price_yearly: plan.price_yearly || 0,
       max_applications_per_month: plan.max_applications_per_month || 0,
       featured_profile: plan.featured_profile || false, priority_support: plan.priority_support || false,
@@ -612,7 +612,7 @@ function SubscriptionPlansTab({ toast }: { toast: ReturnType<typeof useToast>['t
     try {
       if (editingId) {
         const { error } = await supabase.from('subscription_plans').update({
-          name: form.name, name_bn: form.name_bn || null, description: form.description || null,
+          name: form.name, description: form.description || null,
           price_monthly: form.price_monthly, price_quarterly: form.price_quarterly || null, price_yearly: form.price_yearly || null,
           max_applications_per_month: form.max_applications_per_month || null,
           featured_profile: form.featured_profile, priority_support: form.priority_support, is_active: form.is_active,
@@ -621,7 +621,7 @@ function SubscriptionPlansTab({ toast }: { toast: ReturnType<typeof useToast>['t
         toast({ title: 'Plan updated' });
       } else {
         const { error } = await supabase.from('subscription_plans').insert({
-          name: form.name, name_bn: form.name_bn || null, description: form.description || null,
+          name: form.name, description: form.description || null,
           price_monthly: form.price_monthly, price_quarterly: form.price_quarterly || null, price_yearly: form.price_yearly || null,
           max_applications_per_month: form.max_applications_per_month || null,
           featured_profile: form.featured_profile, priority_support: form.priority_support, is_active: form.is_active,
@@ -670,7 +670,6 @@ function SubscriptionPlansTab({ toast }: { toast: ReturnType<typeof useToast>['t
                 <div className="flex items-start justify-between">
                   <div>
                     <CardTitle className="text-lg">{plan.name}</CardTitle>
-                    {plan.name_bn && <p className="text-sm text-muted-foreground">{plan.name_bn}</p>}
                   </div>
                   <Badge variant={plan.is_active ? 'default' : 'secondary'} className="text-xs">
                     {plan.is_active ? 'Active' : 'Inactive'}
@@ -717,15 +716,9 @@ function SubscriptionPlansTab({ toast }: { toast: ReturnType<typeof useToast>['t
         <DialogContent className="max-w-lg">
           <DialogHeader><DialogTitle>{editingId ? 'Edit Plan' : 'Create Plan'}</DialogTitle></DialogHeader>
           <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-1">
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="text-sm font-medium">Plan Name *</label>
-                <Input value={form.name} onChange={e => set('name', e.target.value)} placeholder="e.g. Premium" className="mt-1" />
-              </div>
-              <div>
-                <label className="text-sm font-medium">Name (Bangla)</label>
-                <Input value={form.name_bn} onChange={e => set('name_bn', e.target.value)} placeholder="বাংলা নাম" className="mt-1" />
-              </div>
+            <div>
+              <label className="text-sm font-medium">Plan Name *</label>
+              <Input value={form.name} onChange={e => set('name', e.target.value)} placeholder="e.g. Premium" className="mt-1" />
             </div>
             <div>
               <label className="text-sm font-medium">Description</label>
