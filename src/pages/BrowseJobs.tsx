@@ -226,8 +226,8 @@ export default function BrowseJobs({ embedded = false }: { embedded?: boolean } 
         *,
         districts (name_en, name_bn),
         areas (name_en, name_bn),
-        subjects (name_en, name_bn),
-        job_subjects (subjects (name_en, name_bn))
+        subjects (id, name_en, name_bn),
+        job_subjects (subjects (id, name_en, name_bn))
       `)
       .eq('status', 'open')
       .order('is_featured', { ascending: false })
