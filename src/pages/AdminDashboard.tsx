@@ -817,7 +817,9 @@ export default function AdminDashboard() {
   const [vPaymentsPage, setVPaymentsPage] = useState(1);
   const [vPaymentsPageSize, setVPaymentsPageSize] = useState(25);
   const [reports, setReports] = useState<Report[]>([]);
+  const [reportsSearch, setReportsSearch] = useState('');
   const [reviews, setReviews] = useState<ReviewRow[]>([]);
+  const [reviewsSearch, setReviewsSearch] = useState('');
   const [payments, setPayments] = useState<PaymentRow[]>([]);
   const [chartData, setChartData] = useState<{ signups: any[]; jobs: any[]; revenue: any[] }>({ signups: [], jobs: [], revenue: [] });
 
@@ -2987,18 +2989,38 @@ export default function AdminDashboard() {
 
 
 
-            {activeTab === 'reports' && (
+            {activeTab === 'reports' && (() => {
+              const q = reportsSearch.trim().toLowerCase();
+              const filteredReports = !q ? reports : reports.filter(r =>
+                (r.report_type || '').toLowerCase().includes(q) ||
+                (r.description || '').toLowerCase().includes(q) ||
+                (r.status || '').toLowerCase().includes(q) ||
+                (r.reported?.full_name || '').toLowerCase().includes(q) ||
+                (r.reporter?.full_name || '').toLowerCase().includes(q)
+              );
+              return (
               <div className="space-y-6">
-                <h1 className="text-xl font-semibold">User Reports</h1>
-                {reports.length === 0 ? (
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                  <h1 className="text-xl font-semibold">User Reports</h1>
+                  <div className="relative w-full sm:w-72">
+                    <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      value={reportsSearch}
+                      onChange={(e) => setReportsSearch(e.target.value)}
+                      placeholder="Search type, description, status, or user"
+                      className="pl-8 h-9"
+                    />
+                  </div>
+                </div>
+                {filteredReports.length === 0 ? (
                   <Card><CardContent className="py-16 text-center">
                     <Shield className="h-12 w-12 text-success mx-auto mb-4" />
-                    <h3 className="font-bold mb-2">No reports</h3>
-                    <p className="text-muted-foreground">The community is safe!</p>
+                    <h3 className="font-bold mb-2">{q ? 'No matches' : 'No reports'}</h3>
+                    <p className="text-muted-foreground">{q ? 'Try a different search term.' : 'The community is safe!'}</p>
                   </CardContent></Card>
                 ) : (
                   <div className="space-y-4">
-                    {reports.map((report) => (
+                    {filteredReports.map((report) => (
                       <Card key={report.id} className={report.status === 'pending' ? 'border-warning/30' : ''}>
                         <CardContent className="p-5">
                           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -3029,12 +3051,32 @@ export default function AdminDashboard() {
                   </div>
                 )}
               </div>
-            )}
+              );
+            })()}
 
             {/* ═══════ REVIEWS TAB ═══════ */}
-            {activeTab === 'reviews' && (
+            {activeTab === 'reviews' && (() => {
+              const q = reviewsSearch.trim().toLowerCase();
+              const filteredReviews = !q ? reviews : reviews.filter(r =>
+                ((r.parent as any)?.full_name || '').toLowerCase().includes(q) ||
+                ((r.tutor_profiles as any)?.profiles?.full_name || '').toLowerCase().includes(q) ||
+                (r.comment || '').toLowerCase().includes(q) ||
+                String(r.rating || '').includes(q)
+              );
+              return (
               <div className="space-y-6">
-                <h1 className="text-xl font-semibold">Review Moderation</h1>
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                  <h1 className="text-xl font-semibold">Review Moderation</h1>
+                  <div className="relative w-full sm:w-72">
+                    <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      value={reviewsSearch}
+                      onChange={(e) => setReviewsSearch(e.target.value)}
+                      placeholder="Search parent, tutor, comment, or rating"
+                      className="pl-8 h-9"
+                    />
+                  </div>
+                </div>
                 <Card>
                   <CardContent className="p-0">
                     <ScrollArea className="w-full">
@@ -3051,9 +3093,9 @@ export default function AdminDashboard() {
                           </TableRow>
                         </TableHeader>
                         <TableBody>
-                          {reviews.length === 0 ? (
-                            <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">No reviews yet</TableCell></TableRow>
-                          ) : reviews.map((r) => (
+                          {filteredReviews.length === 0 ? (
+                            <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">{q ? 'No matches' : 'No reviews yet'}</TableCell></TableRow>
+                          ) : filteredReviews.map((r) => (
                             <TableRow key={r.id}>
                               <TableCell className="text-sm">{(r.parent as any)?.full_name}</TableCell>
                               <TableCell className="text-sm">{(r.tutor_profiles as any)?.profiles?.full_name || '—'}</TableCell>
@@ -3083,7 +3125,8 @@ export default function AdminDashboard() {
                   </CardContent>
                 </Card>
               </div>
-            )}
+              );
+            })()}
 
             {/* ═══════ PAYMENTS TAB ═══════ */}
             {activeTab === 'payments' && (
