@@ -364,6 +364,14 @@ export default function TutorPublicProfile() {
               </TabsList>
 
               <TabsContent value="about" className="mt-4 space-y-4">
+                {tutor.featured_blurb && (
+                  <Card className="border-accent/40 bg-accent/5">
+                    <CardContent className="pt-5 pb-5 flex gap-3">
+                      <Sparkles className="h-5 w-5 text-accent shrink-0 mt-0.5" />
+                      <p className="text-sm leading-relaxed font-medium">{tutor.featured_blurb}</p>
+                    </CardContent>
+                  </Card>
+                )}
                 <Card>
                   <CardHeader><CardTitle className="flex items-center gap-2 text-base"><User className="h-4 w-4" />About</CardTitle></CardHeader>
                   <CardContent className="space-y-4">
