@@ -235,6 +235,7 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
         area_id: prof?.area_id || null,
         district_id: t.district_id,
         education: t.education,
+        last_education: null,
         experience_years: t.experience_years || 0,
         teaching_mode: t.teaching_mode,
         verification_status: t.verification_status || 'pending',
@@ -271,10 +272,34 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
       );
     }
 
+    // Compute last_education (highest degree) for displayed tutors
+    const DEGREE_RANK: Record<string, number> = { masters: 4, master: 4, bachelor: 3, hsc: 2, ssc: 1 };
+    const tutorIds = result.map(t => t.tutor_id);
+    if (tutorIds.length > 0) {
+      const { data: allEdu } = await supabase
+        .from('tutor_education')
+        .select('tutor_id, degree, institution')
+        .in('tutor_id', tutorIds);
+      const byTutor = new Map<string, { degree: string; rank: number }>();
+      (allEdu || []).forEach((e: any) => {
+        if (!e.institution?.trim()) return;
+        const key = (e.degree || '').toLowerCase().trim();
+        const rank = DEGREE_RANK[key] ?? 0;
+        const cur = byTutor.get(e.tutor_id);
+        if (!cur || rank > cur.rank) byTutor.set(e.tutor_id, { degree: e.degree, rank });
+      });
+      result = result.map(t => ({ ...t, last_education: byTutor.get(t.tutor_id)?.degree || null }));
+    }
+
+    // Last education filter
+    if (filterLastEducation !== 'all') {
+      result = result.filter(t => (t.last_education || '').toLowerCase() === filterLastEducation.toLowerCase());
+    }
+
     setTutors(result);
     setTotalCount(result.length);
     setLoading(false);
-  }, [search, filterAreas, filterGender, filterMedium, filterEducation, filterUniversity, filterVerification, filterAvailability, filterClassLevel, filterSubject, filterCategory, areas, districts, districtMap, areaMap, subjects]);
+  }, [search, filterAreas, filterGender, filterMedium, filterEducation, filterUniversity, filterVerification, filterAvailability, filterClassLevel, filterSubject, filterCategory, filterLastEducation, areas, districts, districtMap, areaMap, subjects]);
 
   useEffect(() => { fetchTutors(); }, [fetchTutors]);
 
