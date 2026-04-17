@@ -32,7 +32,9 @@ import {
   Eye, Ban, UserCheck, FileCheck,
   LogOut, Home, Star, DollarSign, Trash2, CreditCard, Megaphone, Send, Mail,
   Package, Plus, Pencil, ToggleLeft, ToggleRight, Wallet, MapPin, LifeBuoy, ShieldCheck,
-  LogIn, BookOpen, UserPlus, TrendingUp, ChevronLeft, ArrowLeft
+  LogIn, BookOpen, UserPlus, TrendingUp, ChevronLeft, ArrowLeft,
+  Phone, Calendar, Layers, Timer, Banknote, GraduationCap as GradCap,
+  User as UserIcon, School, Hash, FileText as FileTextIcon
 } from 'lucide-react';
 import { RevenuePayoutTab } from '@/components/admin/RevenuePayoutTab';
 import { SupportTicketsTab } from '@/components/admin/SupportTicketsTab';
