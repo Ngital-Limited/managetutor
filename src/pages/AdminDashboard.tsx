@@ -1980,7 +1980,7 @@ export default function AdminDashboard() {
                         <TableBody>
                           {users.length === 0 ? (
                             <TableRow><TableCell colSpan={8} className="text-center py-8 text-muted-foreground">No guardians match your filters</TableCell></TableRow>
-                          ) : users.map((u) => (
+                          ) : users.slice((guardianPage - 1) * guardianPageSize, guardianPage * guardianPageSize).map((u) => (
                             <TableRow key={u.id}>
                               <TableCell className="text-xs font-mono text-muted-foreground">{u.user_reference || '—'}</TableCell>
                               <TableCell>
@@ -2053,6 +2053,31 @@ export default function AdminDashboard() {
                     </ScrollArea>
                   </CardContent>
                 </Card>
+
+                {users.length > 0 && (() => {
+                  const totalPages = Math.max(1, Math.ceil(users.length / guardianPageSize));
+                  const page = Math.min(guardianPage, totalPages);
+                  const start = (page - 1) * guardianPageSize + 1;
+                  const end = Math.min(page * guardianPageSize, users.length);
+                  return (
+                    <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-1">
+                      <div className="text-xs text-muted-foreground">Showing {start}–{end} of {users.length}</div>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <Select value={String(guardianPageSize)} onValueChange={(v) => { setGuardianPageSize(Number(v)); setGuardianPage(1); }}>
+                          <SelectTrigger className="h-8 w-[100px] text-xs"><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            {[10, 25, 50, 100].map(n => <SelectItem key={n} value={String(n)}>{n} / page</SelectItem>)}
+                          </SelectContent>
+                        </Select>
+                        <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setGuardianPage(1)}>« First</Button>
+                        <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setGuardianPage(page - 1)}>Prev</Button>
+                        <span className="text-xs text-muted-foreground">Page {page} of {totalPages}</span>
+                        <Button variant="outline" size="sm" disabled={page >= totalPages} onClick={() => setGuardianPage(page + 1)}>Next</Button>
+                        <Button variant="outline" size="sm" disabled={page >= totalPages} onClick={() => setGuardianPage(totalPages)}>Last »</Button>
+                      </div>
+                    </div>
+                  );
+                })()}
               </div>
             )}
 
