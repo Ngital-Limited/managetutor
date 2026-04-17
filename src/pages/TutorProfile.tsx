@@ -113,6 +113,9 @@ export default function TutorProfile() {
   });
 
   const [tutorProfileId, setTutorProfileId] = useState<string | null>(null);
+  const [aiOverview, setAiOverview] = useState<string>('');
+  const [aiOverviewUpdatedAt, setAiOverviewUpdatedAt] = useState<string | null>(null);
+  const [generatingOverview, setGeneratingOverview] = useState(false);
   const [reviews, setReviews] = useState<any[]>([]);
   const [reviewRequests, setReviewRequests] = useState<any[]>([]);
   const [reviewUpdateReason, setReviewUpdateReason] = useState('');
@@ -202,6 +205,8 @@ export default function TutorProfile() {
       });
       setSelectedClassLevels(td.class_levels || []);
       setTutorProfileId(td.id);
+      setAiOverview(td.ai_overview || '');
+      setAiOverviewUpdatedAt(td.ai_overview_updated_at || null);
 
       // Fetch education entries and job experiences
       const [eduRes, jobRes, reviewsRes, reqRes] = await Promise.all([
@@ -424,6 +429,34 @@ export default function TutorProfile() {
 
     toast({ title: 'Profile saved!', description: 'Your profile has been updated successfully.' });
     setSaving(false);
+
+    // Trigger AI overview regeneration in the background
+    if (tutorData?.id) {
+      regenerateAiOverview(tutorData.id, true);
+    }
+  };
+
+  const regenerateAiOverview = async (tpId: string, silent = false) => {
+    setGeneratingOverview(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-tutor-overview', {
+        body: { tutor_profile_id: tpId },
+      });
+      if (error) throw error;
+      if (data?.overview) {
+        setAiOverview(data.overview);
+        setAiOverviewUpdatedAt(new Date().toISOString());
+        if (!silent) toast({ title: 'Overview regenerated', description: 'Your AI-generated overview is updated.' });
+      }
+    } catch (e: any) {
+      if (!silent) {
+        toast({ title: 'Could not regenerate overview', description: e.message || 'Please try again later.', variant: 'destructive' });
+      } else {
+        console.warn('AI overview generation failed:', e);
+      }
+    } finally {
+      setGeneratingOverview(false);
+    }
   };
 
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
