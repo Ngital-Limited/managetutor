@@ -537,6 +537,10 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
           <Button size="sm" variant="outline" onClick={() => { setNotifyMode('filtered'); setNotifyDialogOpen(true); }} className="gap-1.5">
             <Bell className="h-3.5 w-3.5" /> Notify All Filtered ({totalCount})
           </Button>
+          <Button size="sm" variant="outline" onClick={handleBulkGenerateOverviews} disabled={bulkAiRunning} className="gap-1.5">
+            {bulkAiRunning ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
+            Generate AI Overviews
+          </Button>
           <Button size="sm" variant="outline" onClick={handleExportCSV} className="gap-1.5">
             <Download className="h-3.5 w-3.5" /> Export CSV
           </Button>
