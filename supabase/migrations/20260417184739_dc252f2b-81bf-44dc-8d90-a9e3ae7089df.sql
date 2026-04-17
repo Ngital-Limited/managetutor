@@ -1,0 +1,1 @@
+ALTER TABLE public.subscription_plans DROP COLUMN IF EXISTS name_bn;

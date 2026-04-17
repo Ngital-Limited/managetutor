@@ -1267,7 +1267,6 @@ export type Database = {
           is_active: boolean | null
           max_applications_per_month: number | null
           name: string
-          name_bn: string | null
           price_monthly: number
           price_quarterly: number | null
           price_yearly: number | null
@@ -1281,7 +1280,6 @@ export type Database = {
           is_active?: boolean | null
           max_applications_per_month?: number | null
           name: string
-          name_bn?: string | null
           price_monthly: number
           price_quarterly?: number | null
           price_yearly?: number | null
@@ -1295,7 +1293,6 @@ export type Database = {
           is_active?: boolean | null
           max_applications_per_month?: number | null
           name?: string
-          name_bn?: string | null
           price_monthly?: number
           price_quarterly?: number | null
           price_yearly?: number | null
