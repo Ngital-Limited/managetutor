@@ -197,9 +197,9 @@ export default function Index() {
               <div className="p-4 md:p-5">
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 mb-3">
                   <SearchableSelect
-                    options={districts.map(d => ({ value: d.id, label: d.name_en }))}
-                    value={selectedDistrict}
-                    onValueChange={setSelectedDistrict}
+                    options={areas.map(a => ({ value: a.id, label: a.district_name ? `${a.name_en} (${a.district_name})` : a.name_en }))}
+                    value={selectedArea}
+                    onValueChange={setSelectedArea}
                     placeholder="📍 City"
                     className="h-11 rounded-lg border-border/60 bg-background"
                   />
