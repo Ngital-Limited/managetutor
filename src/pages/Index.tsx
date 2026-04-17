@@ -63,9 +63,9 @@ export default function Index() {
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  const [districts, setDistricts] = useState<{ id: string; name_en: string; name_bn: string }[]>([]);
+  const [areas, setAreas] = useState<{ id: string; name_en: string; district_name: string }[]>([]);
   const [subjectsList, setSubjectsList] = useState<{ id: string; name_en: string; name_bn: string }[]>([]);
-  const [selectedDistrict, setSelectedDistrict] = useState('');
+  const [selectedArea, setSelectedArea] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedBackground, setSelectedBackground] = useState('');
   const [selectedGender, setSelectedGender] = useState('');
