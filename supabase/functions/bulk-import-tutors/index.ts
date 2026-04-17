@@ -140,7 +140,7 @@ Deno.serve(async (req) => {
             full_name: fullName,
             phone,
             email_verified: true,
-            is_approved: false, // pending vetting
+            is_approved: true, // imported tutors are pre-approved
           })
           .eq("id", uid);
         if (profErr) {
@@ -158,7 +158,7 @@ Deno.serve(async (req) => {
         }
 
         // Tutor profile
-        const verification_status = clean(r.status) === "verified" ? "approved" : "pending";
+        const verification_status = "approved"; // imported tutors auto-approved
         const { error: tpErr } = await admin.from("tutor_profiles").insert({
           user_id: uid,
           gender: normalizeGender(r.gender),
