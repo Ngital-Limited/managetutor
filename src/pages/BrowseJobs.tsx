@@ -102,6 +102,9 @@ export default function BrowseJobs({ embedded = false }: { embedded?: boolean } 
   const [applying, setApplying] = useState(false);
   const [tutorProfileId, setTutorProfileId] = useState<string | null>(null);
   const [tutorProfileCompleteness, setTutorProfileCompleteness] = useState(0);
+  const [tutorClassLevels, setTutorClassLevels] = useState<string[]>([]);
+  const [tutorSubjectIds, setTutorSubjectIds] = useState<string[]>([]);
+  const [tutorPrefilterApplied, setTutorPrefilterApplied] = useState(false);
 
   const sortedAreas = useMemo(() => {
     const filtered = selectedDistrict && selectedDistrict !== 'all'
@@ -121,8 +124,9 @@ export default function BrowseJobs({ embedded = false }: { embedded?: boolean } 
     if (selectedCategory !== 'all') count++;
     if (selectedBackground !== 'all') count++;
     if (selectedTime !== 'all') count++;
+    if (embedded && tutorPrefilterApplied && (tutorClassLevels.length > 0 || tutorSubjectIds.length > 0)) count++;
     return count;
-  }, [selectedDistrict, selectedArea, selectedCategory, selectedBackground, selectedTime]);
+  }, [selectedDistrict, selectedArea, selectedCategory, selectedBackground, selectedTime, embedded, tutorPrefilterApplied, tutorClassLevels, tutorSubjectIds]);
 
   useEffect(() => {
     fetchData();
@@ -130,7 +134,7 @@ export default function BrowseJobs({ embedded = false }: { embedded?: boolean } 
 
   useEffect(() => {
     fetchJobs();
-  }, [selectedDistrict, selectedArea, selectedCategory, selectedBackground, selectedTime, currentPage]);
+  }, [selectedDistrict, selectedArea, selectedCategory, selectedBackground, selectedTime, currentPage, tutorClassLevels, tutorSubjectIds, tutorPrefilterApplied]);
 
   useEffect(() => {
     if (user && role === 'tutor') {
@@ -157,9 +161,22 @@ export default function BrowseJobs({ embedded = false }: { embedded?: boolean } 
       if (data.teaching_mode) complete += 10;
       if (data.class_levels && data.class_levels.length > 0) complete += 10;
       if (data.verification_status === 'approved') complete += 10;
-      const { count } = await supabase.from('tutor_subjects').select('*', { count: 'exact', head: true }).eq('tutor_profile_id', data.id);
-      if (count && count > 0) complete += 10;
+      const subjectsRes = await supabase
+        .from('tutor_subjects')
+        .select('subject_id', { count: 'exact' })
+        .eq('tutor_profile_id', data.id);
+      if (subjectsRes.count && subjectsRes.count > 0) complete += 10;
       setTutorProfileCompleteness(complete);
+
+      // Pre-filter for embedded tutor dashboard view (initial load only; tutor can clear)
+      if (embedded && !tutorPrefilterApplied) {
+        if (data.district_id && selectedDistrict === 'all') {
+          setSelectedDistrict(data.district_id);
+        }
+        setTutorClassLevels(data.class_levels || []);
+        setTutorSubjectIds((subjectsRes.data || []).map((s: any) => s.subject_id));
+        setTutorPrefilterApplied(true);
+      }
     }
   };
 
