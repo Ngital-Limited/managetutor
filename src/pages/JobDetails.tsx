@@ -446,6 +446,56 @@ export default function JobDetails() {
               </CardContent>
             </Card>
 
+            {/* Related Job Posts */}
+            {relatedJobs.length > 0 && (
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="flex items-center gap-2 text-base">
+                    <Briefcase className="h-5 w-5 text-primary" />
+                    Related Job Posts
+                  </CardTitle>
+                  <CardDescription className="text-xs">
+                    Other open jobs in {job.districts?.name_en || 'this area'}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  {relatedJobs.map((rj: any) => {
+                    const subj = rj.job_subjects?.length > 0
+                      ? rj.job_subjects.map((js: any) => js.subjects?.name_en).filter(Boolean).join(', ')
+                      : rj.subjects?.name_en || '';
+                    return (
+                      <Link
+                        key={rj.id}
+                        to={`/jobs/${rj.id}`}
+                        className="block p-3 rounded-lg border hover:border-primary hover:bg-accent/30 transition-colors"
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="font-medium text-sm truncate">{rj.title}</span>
+                              {rj.job_reference && (
+                                <Badge variant="outline" className="text-[10px] font-mono">{rj.job_reference}</Badge>
+                              )}
+                            </div>
+                            <div className="text-xs text-muted-foreground mt-1 flex items-center gap-2 flex-wrap">
+                              {subj && <span className="flex items-center gap-1"><BookOpen className="h-3 w-3" />{subj}</span>}
+                              {rj.class_level && <span className="flex items-center gap-1"><GraduationCap className="h-3 w-3" />{rj.class_level}</span>}
+                              <span>{formatDistanceToNow(new Date(rj.created_at), { addSuffix: true })}</span>
+                            </div>
+                          </div>
+                          {(rj.budget_min || rj.budget_max) && (
+                            <div className="text-xs font-semibold whitespace-nowrap text-primary">
+                              ৳{rj.budget_min}{rj.budget_max && rj.budget_max !== rj.budget_min ? `–${rj.budget_max}` : ''}
+                            </div>
+                          )}
+                        </div>
+                      </Link>
+                    );
+                  })}
+                </CardContent>
+              </Card>
+            )}
+
             {/* Applications - for parent */}
             {isOwner && (
               <Card>
