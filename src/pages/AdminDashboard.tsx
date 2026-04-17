@@ -59,6 +59,7 @@ interface Stats {
   totalRevenue: number;
   pendingJobs: number;
   pendingUsers: number;
+  pendingApplications: number;
 }
 
 interface JobApplication {
@@ -772,6 +773,7 @@ export default function AdminDashboard() {
     totalUsers: 0, totalTutors: 0, totalParents: 0,
     pendingVerifications: 0, activeJobs: 0, totalJobs: 0, completedJobs: 0, acceptedJobs: 0,
     pendingReports: 0, totalReviews: 0, totalRevenue: 0, pendingJobs: 0, pendingUsers: 0,
+    pendingApplications: 0,
   });
 
   // Data states
@@ -1046,6 +1048,7 @@ export default function AdminDashboard() {
       { count: totalReviews },
       { count: pendingJobs },
       { count: pendingUsers },
+      { count: pendingApplications },
     ] = await Promise.all([
       supabase.from('profiles').select('id', { count: 'exact', head: true }),
       supabase.from('tutor_profiles').select('id', { count: 'exact', head: true }),
@@ -1059,6 +1062,7 @@ export default function AdminDashboard() {
       supabase.from('reviews').select('id', { count: 'exact', head: true }),
       supabase.from('jobs').select('id', { count: 'exact', head: true }).eq('status', 'pending_approval' as any),
       supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('is_approved', false),
+      supabase.from('applications').select('id', { count: 'exact', head: true }).eq('status', 'pending' as any),
     ]);
 
     const { data: rev } = await supabase.from('payment_transactions').select('amount').eq('status', 'completed');
@@ -1070,6 +1074,7 @@ export default function AdminDashboard() {
       totalJobs: totalJobs || 0, completedJobs: completedJobs || 0, acceptedJobs: acceptedJobs || 0,
       pendingReports: pendingReports || 0, totalReviews: totalReviews || 0, totalRevenue,
       pendingJobs: pendingJobs || 0, pendingUsers: pendingUsers || 0,
+      pendingApplications: pendingApplications || 0,
     });
   };
 
@@ -1513,7 +1518,7 @@ export default function AdminDashboard() {
       label: 'Jobs & Tutoring',
       items: [
         { title: 'Jobs', value: 'jobs', icon: Briefcase },
-        { title: 'Applications', value: 'applications', icon: FileText },
+        { title: 'Applications', value: 'applications', icon: FileText, badge: stats.pendingApplications },
         { title: 'Post Job', value: 'post_job', icon: Plus },
         { title: 'Demo Requests', value: 'demo_requests', icon: BookOpen },
       ],

@@ -139,7 +139,7 @@ const externalLinks = [
   { title: 'Pricing', url: '/pricing', icon: CreditCard },
 ];
 
-function ParentSidebar({ activeSection, setActiveSection, onPostJob }: { activeSection: SectionKey; setActiveSection: (s: SectionKey) => void; onPostJob: () => void }) {
+function ParentSidebar({ activeSection, setActiveSection, onPostJob, pendingApplicants }: { activeSection: SectionKey; setActiveSection: (s: SectionKey) => void; onPostJob: () => void; pendingApplicants: number }) {
   const { state } = useSidebar();
   const collapsed = state === 'collapsed';
   const { profile, user } = useAuth();
@@ -2084,7 +2084,7 @@ export default function ParentDashboard() {
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-background">
-        <ParentSidebar activeSection={activeSection} setActiveSection={setActiveSection} onPostJob={() => { resetJobForm(); prefillFromLastJob(); setShowPostJob(true); }} />
+        <ParentSidebar activeSection={activeSection} setActiveSection={setActiveSection} onPostJob={() => { resetJobForm(); prefillFromLastJob(); setShowPostJob(true); }} pendingApplicants={allApplicants.filter((a: any) => a.status === 'pending').length} />
 
         <div className="flex-1 flex flex-col min-w-0">
           {/* Top Bar */}
