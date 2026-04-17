@@ -292,6 +292,16 @@ export default function ParentDashboard() {
   });
 
   const [userProfile, setUserProfile] = useState<UserProfileFull | null>(null);
+  const [featuredJobPrice, setFeaturedJobPrice] = useState<number>(300);
+  const [boostingJobId, setBoostingJobId] = useState<string | null>(null);
+
+  useEffect(() => {
+    supabase.from('platform_settings').select('value').eq('key', 'featured_job_price').maybeSingle()
+      .then(({ data }) => {
+        const n = Number(data?.value);
+        if (Number.isFinite(n) && n >= 0) setFeaturedJobPrice(n);
+      });
+  }, []);
 
   useEffect(() => {
     if (!authLoading && !user) {
