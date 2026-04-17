@@ -353,7 +353,6 @@ export default function BrowseJobs() {
   };
 
   const clearFilters = () => {
-    setSelectedDistrict('all');
     setSelectedArea('all');
     setSelectedCategory('all');
     setSelectedBackground('all');
