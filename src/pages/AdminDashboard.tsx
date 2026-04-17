@@ -2774,7 +2774,7 @@ export default function AdminDashboard() {
                                 <Users className="h-8 w-8 mx-auto mb-2 opacity-30" />
                                 <div className="text-sm">No applicants match this filter.</div>
                               </TableCell></TableRow>
-                            ) : visible.map((app) => {
+                            ) : visible.slice((appsApplicantsPage - 1) * appsApplicantsPageSize, appsApplicantsPage * appsApplicantsPageSize).map((app) => {
                               const isFinal = app.status === 'accepted' || app.status === 'rejected' || app.status === 'withdrawn';
                               const tp = app.tutor_profile;
                               const tprof = app.tutor_profiles as any;
