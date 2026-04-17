@@ -134,92 +134,110 @@ export default function Index() {
     <div className="min-h-screen bg-background">
       <Header />
 
-      {/* Hero Section */}
-      <section className="relative overflow-hidden">
-        <div className="gradient-hero text-primary-foreground pt-16 pb-36 md:pt-24 md:pb-48">
-          <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMiIvPjwvZz48L2c+PC9zdmc+')] opacity-50"></div>
-          <div className="absolute top-20 left-10 w-20 h-20 bg-secondary/20 rounded-full blur-2xl animate-pulse"></div>
-          <div className="absolute top-40 right-16 w-32 h-32 bg-accent/15 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
-          <div className="container mx-auto px-4 text-center relative z-10">
-            <div className="inline-flex items-center gap-2 bg-primary-foreground/10 backdrop-blur-sm rounded-full px-5 py-2.5 mb-8 animate-fade-in border border-primary-foreground/10">
-              <Shield className="h-4 w-4 text-accent" />
-              <span className="text-sm font-semibold tracking-wide">Trusted by 4,000+ families across Bangladesh</span>
+      {/* Hero Section — minimal & premium */}
+      <section className="relative overflow-hidden bg-gradient-to-b from-primary/[0.04] via-background to-background">
+        {/* Subtle grid texture */}
+        <div
+          className="absolute inset-0 opacity-[0.025] pointer-events-none"
+          style={{
+            backgroundImage:
+              'linear-gradient(hsl(var(--foreground)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--foreground)) 1px, transparent 1px)',
+            backgroundSize: '48px 48px',
+          }}
+        />
+        {/* Single soft glow accent */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[400px] bg-primary/10 rounded-full blur-[120px] pointer-events-none" />
+
+        <div className="container mx-auto px-4 pt-20 md:pt-28 pb-16 md:pb-20 relative z-10">
+          <div className="max-w-3xl mx-auto text-center">
+            <div className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-card/60 backdrop-blur px-4 py-1.5 mb-7 animate-fade-in">
+              <span className="relative flex h-1.5 w-1.5">
+                <span className="absolute inline-flex h-full w-full rounded-full bg-success opacity-75 animate-ping" />
+                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-success" />
+              </span>
+              <span className="text-xs font-medium text-muted-foreground tracking-wide">
+                Trusted by 4,000+ families across Bangladesh
+              </span>
             </div>
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold mb-4 animate-fade-in animation-delay-100 leading-tight max-w-4xl mx-auto">
+
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-semibold tracking-tight text-foreground mb-5 animate-fade-in animation-delay-100 leading-[1.05]">
               {t('hero.title')}
             </h1>
-            <p className="text-base md:text-lg opacity-80 mb-6 max-w-xl mx-auto animate-fade-in animation-delay-200 leading-relaxed">
+            <p className="text-base md:text-lg text-muted-foreground mb-10 max-w-xl mx-auto animate-fade-in animation-delay-200 leading-relaxed">
               {t('hero.subtitle')}
             </p>
-          </div>
-        </div>
-        <div className="absolute bottom-0 left-0 right-0">
-          <svg viewBox="0 0 1440 100" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full">
-            <path d="M0 100L60 93.3C120 86.7 240 73.3 360 66.7C480 60 600 60 720 66.7C840 73.3 960 86.7 1080 86.7C1200 86.7 1320 73.3 1380 66.7L1440 60V100H1380C1320 100 1200 100 1080 100C960 100 840 100 720 100C600 100 480 100 360 100C240 100 120 100 60 100H0Z" fill="hsl(var(--background))"/>
-          </svg>
-        </div>
-      </section>
 
-      {/* Search Card */}
-      <section className="relative z-20 -mt-28 md:-mt-36 pb-8">
-        <div className="container mx-auto px-4 max-w-4xl">
-          <div className="bg-card rounded-2xl shadow-2xl shadow-primary/15 border border-border overflow-hidden animate-fade-in animation-delay-300">
-            <div className="flex border-b border-border">
-              <button onClick={() => setSearchType('tutors')} className={`flex-1 flex items-center justify-center gap-2.5 px-6 py-4 text-sm font-bold transition-all duration-200 ${searchType === 'tutors' ? 'bg-primary text-primary-foreground' : 'bg-muted/50 text-muted-foreground hover:text-foreground hover:bg-muted'}`}>
-                <Users className="h-4 w-4" /> Find a Tutor
-              </button>
-              <button onClick={() => setSearchType('jobs')} className={`flex-1 flex items-center justify-center gap-2.5 px-6 py-4 text-sm font-bold transition-all duration-200 ${searchType === 'jobs' ? 'bg-primary text-primary-foreground' : 'bg-muted/50 text-muted-foreground hover:text-foreground hover:bg-muted'}`}>
-                <FileText className="h-4 w-4" /> Find Tuition Jobs
-              </button>
-            </div>
-            <div className="p-5 md:p-6">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5"><MapPin className="h-3.5 w-3.5" /> Location</label>
+            {/* Premium minimal search card */}
+            <div className="bg-card/80 backdrop-blur-md rounded-2xl border border-border/70 shadow-[0_8px_40px_-12px_hsl(var(--primary)/0.18)] overflow-hidden animate-fade-in animation-delay-300 text-left">
+              {/* Toggle */}
+              <div className="flex items-center justify-center gap-1 p-1.5 border-b border-border/50 bg-muted/30">
+                <button
+                  onClick={() => setSearchType('tutors')}
+                  className={`flex-1 max-w-[200px] flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-all ${
+                    searchType === 'tutors'
+                      ? 'bg-card text-foreground shadow-sm'
+                      : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  <Users className="h-3.5 w-3.5" /> Find a Tutor
+                </button>
+                <button
+                  onClick={() => setSearchType('jobs')}
+                  className={`flex-1 max-w-[200px] flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-all ${
+                    searchType === 'jobs'
+                      ? 'bg-card text-foreground shadow-sm'
+                      : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  <FileText className="h-3.5 w-3.5" /> Find Jobs
+                </button>
+              </div>
+
+              {/* Filter row */}
+              <div className="p-4 md:p-5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 mb-3">
                   <SearchableSelect
                     options={districts.map(d => ({ value: d.id, label: d.name_en }))}
                     value={selectedDistrict}
                     onValueChange={setSelectedDistrict}
-                    placeholder="Type a district…"
-                    className="h-11 rounded-xl bg-muted/50 border-border/60 focus:bg-card"
+                    placeholder="📍 Location"
+                    className="h-11 rounded-lg border-border/60 bg-background"
                   />
-                </div>
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5"><GraduationCap className="h-3.5 w-3.5" /> Background</label>
                   <SearchableSelect
                     options={STUDENT_BACKGROUNDS.map(b => ({ value: b, label: b }))}
                     value={selectedBackground}
                     onValueChange={setSelectedBackground}
-                    placeholder="Any background"
-                    className="h-11 rounded-xl bg-muted/50 border-border/60 focus:bg-card"
+                    placeholder="🎓 Background"
+                    className="h-11 rounded-lg border-border/60 bg-background"
                   />
-                </div>
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5"><BookOpen className="h-3.5 w-3.5" /> Category</label>
                   <SearchableSelect
                     options={JOB_CATEGORIES.map(c => ({ value: c, label: c }))}
                     value={selectedCategory}
                     onValueChange={setSelectedCategory}
-                    placeholder="Any category"
-                    className="h-11 rounded-xl bg-muted/50 border-border/60 focus:bg-card"
+                    placeholder="📚 Category"
+                    className="h-11 rounded-lg border-border/60 bg-background"
                   />
-                </div>
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5"><UserCircle2 className="h-3.5 w-3.5" /> Gender</label>
                   <SearchableSelect
-                    options={[{ value: 'male', label: 'Male' }, { value: 'female', label: 'Female' }, { value: 'any', label: 'Any' }]}
+                    options={[
+                      { value: 'male', label: 'Male' },
+                      { value: 'female', label: 'Female' },
+                      { value: 'any', label: 'Any' },
+                    ]}
                     value={selectedGender}
                     onValueChange={setSelectedGender}
-                    placeholder="Any gender"
-                    className="h-11 rounded-xl bg-muted/50 border-border/60 focus:bg-card"
+                    placeholder="👤 Gender"
+                    className="h-11 rounded-lg border-border/60 bg-background"
                   />
                 </div>
+                <Button
+                  onClick={handleSearch}
+                  className="w-full h-11 rounded-lg text-sm font-semibold gap-2 shadow-sm"
+                >
+                  <Search className="h-4 w-4" />
+                  {searchType === 'tutors' ? 'Search Tutors' : 'Search Jobs'}
+                  <ArrowRight className="h-4 w-4 ml-0.5" />
+                </Button>
               </div>
-              <Button onClick={handleSearch} className="w-full h-12 rounded-xl text-base font-bold gap-2 shadow-lg shadow-primary/20">
-                <Search className="h-5 w-5" />
-                {searchType === 'tutors' ? 'Search Tutors' : 'Search Tuition Jobs'}
-                <ArrowRight className="h-4 w-4 ml-1" />
-              </Button>
             </div>
           </div>
         </div>
