@@ -1575,6 +1575,8 @@ export type Database = {
       }
       tutor_profiles: {
         Row: {
+          ai_overview: string | null
+          ai_overview_updated_at: string | null
           area_id: string | null
           average_rating: number | null
           bio: string | null
@@ -1625,6 +1627,8 @@ export type Database = {
           weight: string | null
         }
         Insert: {
+          ai_overview?: string | null
+          ai_overview_updated_at?: string | null
           area_id?: string | null
           average_rating?: number | null
           bio?: string | null
@@ -1675,6 +1679,8 @@ export type Database = {
           weight?: string | null
         }
         Update: {
+          ai_overview?: string | null
+          ai_overview_updated_at?: string | null
           area_id?: string | null
           average_rating?: number | null
           bio?: string | null
