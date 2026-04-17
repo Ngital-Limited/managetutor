@@ -159,7 +159,25 @@ export function AdminTutorEditTab({ toast }: Props) {
   const handleSelectTutor = (t: TutorResult) => {
     setSelectedTutor(t);
     setResults([]);
+    setBlurb(t.featured_blurb || '');
     loadTutorData(t.tutor_id);
+  };
+
+  const handleSaveBlurb = async () => {
+    if (!selectedTutor) return;
+    setSavingBlurb(true);
+    const value = blurb.trim() || null;
+    const { error } = await supabase
+      .from('tutor_profiles')
+      .update({ featured_blurb: value } as any)
+      .eq('id', selectedTutor.tutor_id);
+    if (error) {
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+    } else {
+      toast({ title: 'Featured blurb saved' });
+      setSelectedTutor({ ...selectedTutor, featured_blurb: value });
+    }
+    setSavingBlurb(false);
   };
 
   // ─── Subjects ───
