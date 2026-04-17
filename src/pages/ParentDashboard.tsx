@@ -338,6 +338,30 @@ export default function ParentDashboard() {
 
     if (subData) setSubscription(subData);
 
+    // Fetch all applicants across this parent's jobs
+    const jobIds = (jobsRes.data || []).map((j: any) => j.id);
+    if (jobIds.length > 0) {
+      const { data: allAppsData } = await supabase
+        .from('applications')
+        .select(`
+          *,
+          jobs!inner (id, title, job_reference, parent_id),
+          tutor_profiles (
+            id, user_id, bio, education, education_detail, experience_years,
+            average_rating, total_reviews, total_students, verification_status, verification_paid,
+            teaching_mode, gender, monthly_salary_min, monthly_salary_max, is_available,
+            district_id, districts (name_en, name_bn),
+            profiles:user_id (full_name, avatar_url),
+            tutor_subjects (subjects (name_en, name_bn))
+          )
+        `)
+        .in('job_id', jobIds)
+        .order('created_at', { ascending: false });
+      if (allAppsData) setAllApplicants(allAppsData as any);
+    } else {
+      setAllApplicants([]);
+    }
+
     setLoading(false);
   };
 
