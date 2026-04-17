@@ -113,13 +113,11 @@ export default function FindTutors() {
 
   // Derived: unique divisions
   const divisions = useMemo(() => {
-    const divSet = new Map<string, string>();
+    const divSet = new Set<string>();
     districts.forEach(d => {
-      if (!divSet.has(d.division_en)) {
-        divSet.set(d.division_en, d.);
-      }
+      if (d.division_en) divSet.add(d.division_en);
     });
-    return Array.from(divSet.entries()).map(([en, bn]) => ({ en, bn })).sort((a, b) => a.en.localeCompare(b.en));
+    return Array.from(divSet).map(en => ({ en })).sort((a, b) => a.en.localeCompare(b.en));
   }, [districts]);
 
   const filteredDistricts = useMemo(() => {
@@ -127,7 +125,7 @@ export default function FindTutors() {
     if (selectedDivision) list = list.filter(d => d.division_en === selectedDivision);
     if (districtSearch) {
       const q = districtSearch.toLowerCase();
-      list = list.filter(d => d.name_en.toLowerCase().includes(q) || d..includes(q));
+      list = list.filter(d => d.name_en.toLowerCase().includes(q));
     }
     return list.sort((a, b) => a.name_en.localeCompare(b.name_en));
   }, [districts, selectedDivision, districtSearch]);
@@ -137,7 +135,7 @@ export default function FindTutors() {
     if (selectedDistrict) list = list.filter(a => a.district_id === selectedDistrict);
     if (areaSearch) {
       const q = areaSearch.toLowerCase();
-      list = list.filter(a => a.name_en.toLowerCase().includes(q) || a..includes(q));
+      list = list.filter(a => a.name_en.toLowerCase().includes(q));
     }
     return list.sort((a, b) => a.name_en.localeCompare(b.name_en));
   }, [areas, selectedDistrict, areaSearch]);
