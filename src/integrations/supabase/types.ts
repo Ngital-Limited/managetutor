@@ -988,6 +988,7 @@ export type Database = {
           phone: string | null
           phone_verified: boolean | null
           preferred_language: string | null
+          referral_source: string | null
           updated_at: string | null
           user_reference: string | null
         }
@@ -1008,6 +1009,7 @@ export type Database = {
           phone?: string | null
           phone_verified?: boolean | null
           preferred_language?: string | null
+          referral_source?: string | null
           updated_at?: string | null
           user_reference?: string | null
         }
@@ -1028,6 +1030,7 @@ export type Database = {
           phone?: string | null
           phone_verified?: boolean | null
           preferred_language?: string | null
+          referral_source?: string | null
           updated_at?: string | null
           user_reference?: string | null
         }

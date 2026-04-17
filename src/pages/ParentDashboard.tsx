@@ -819,25 +819,39 @@ export default function ParentDashboard() {
           <div className="grid md:grid-cols-2 gap-4">
             <div>
               <Label>Category</Label>
-              <Select value={jobForm.category} onValueChange={(v) => setJobForm({ ...jobForm, category: v })}>
-                <SelectTrigger><SelectValue placeholder="Select category" /></SelectTrigger>
-                <SelectContent>
-                  {JOB_CATEGORIES.map(cat => (
-                    <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <div className="flex gap-2">
+                <Select value={jobForm.category} onValueChange={(v) => setJobForm({ ...jobForm, category: v })}>
+                  <SelectTrigger><SelectValue placeholder="Select category" /></SelectTrigger>
+                  <SelectContent>
+                    {JOB_CATEGORIES.map(cat => (
+                      <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {jobForm.category && (
+                  <Button type="button" variant="outline" size="icon" onClick={() => setJobForm({ ...jobForm, category: '' })} title="Clear category">
+                    <XCircle className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
             </div>
             <div>
               <Label>Background</Label>
-              <Select value={jobForm.background} onValueChange={(v) => setJobForm({ ...jobForm, background: v })}>
-                <SelectTrigger><SelectValue placeholder="Select background" /></SelectTrigger>
-                <SelectContent>
-                  {STUDENT_BACKGROUNDS.map(bg => (
-                    <SelectItem key={bg} value={bg}>{bg}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <div className="flex gap-2">
+                <Select value={jobForm.background} onValueChange={(v) => setJobForm({ ...jobForm, background: v })}>
+                  <SelectTrigger><SelectValue placeholder="Select background" /></SelectTrigger>
+                  <SelectContent>
+                    {STUDENT_BACKGROUNDS.map(bg => (
+                      <SelectItem key={bg} value={bg}>{bg}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {jobForm.background && (
+                  <Button type="button" variant="outline" size="icon" onClick={() => setJobForm({ ...jobForm, background: '' })} title="Clear background">
+                    <XCircle className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
             </div>
           </div>
           <div className="grid md:grid-cols-2 gap-4">
@@ -848,8 +862,22 @@ export default function ParentDashboard() {
                 values={jobForm.subject_ids}
                 onValuesChange={(v) => setJobForm({ ...jobForm, subject_ids: v })}
                 placeholder="Select subjects..."
-                searchPlaceholder="Type to search subjects..."
+                searchPlaceholder="Type to search or add a subject..."
                 emptyText="No subjects found."
+                createLabel="Add subject"
+                onCreateOption={async (name) => {
+                  const { data, error } = await supabase
+                    .from('subjects')
+                    .insert({ name_en: name, name_bn: name })
+                    .select('id, name_en, name_bn, category_en, category_bn, created_at')
+                    .single();
+                  if (error || !data) {
+                    toast({ title: 'Could not add subject', description: error?.message, variant: 'destructive' });
+                    return null;
+                  }
+                  setSubjects(prev => [...prev, data as unknown as typeof subjects[number]]);
+                  return data.id;
+                }}
               />
             </div>
             <div>
@@ -874,14 +902,14 @@ export default function ParentDashboard() {
           <div className="grid md:grid-cols-3 gap-4">
             <div>
               <Label>Number of Students</Label>
-              <Select value={String(jobForm.number_of_students)} onValueChange={(v) => setJobForm({ ...jobForm, number_of_students: Number(v) })}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {[1, 2, 3, 4, 5].map(n => (
-                    <SelectItem key={n} value={String(n)}>{n} student{n > 1 ? 's' : ''}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Input
+                type="number"
+                min={1}
+                max={50}
+                value={jobForm.number_of_students}
+                onChange={(e) => setJobForm({ ...jobForm, number_of_students: Math.max(1, Number(e.target.value) || 1) })}
+                placeholder="Type number of students"
+              />
             </div>
             <div>
               <Label>Student Age (Optional)</Label>

@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
-import { Check, ChevronsUpDown, X } from 'lucide-react';
+import { Check, ChevronsUpDown, X, Plus } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
@@ -21,6 +21,9 @@ interface MultiSearchableSelectProps {
   emptyText?: string;
   grouped?: boolean;
   className?: string;
+  /** When provided, allows creating a new option from the search query. Should return the new option's value (string) once persisted. */
+  onCreateOption?: (label: string) => Promise<string | null> | string | null;
+  createLabel?: string;
 }
 
 export function MultiSearchableSelect({
@@ -32,8 +35,12 @@ export function MultiSearchableSelect({
   emptyText = 'No results found.',
   grouped = false,
   className,
+  onCreateOption,
+  createLabel = 'Add',
 }: MultiSearchableSelectProps) {
   const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState('');
+  const [creating, setCreating] = useState(false);
 
   const selectedLabels = useMemo(() => {
     return values.map(v => options.find(o => o.value === v)?.label).filter(Boolean) as string[];
@@ -62,6 +69,24 @@ export function MultiSearchableSelect({
     e.stopPropagation();
     onValuesChange(values.filter(v => v !== val));
   };
+
+  const handleCreate = async () => {
+    if (!onCreateOption || !query.trim() || creating) return;
+    setCreating(true);
+    try {
+      const newVal = await onCreateOption(query.trim());
+      if (newVal) {
+        onValuesChange([...values, newVal]);
+        setQuery('');
+      }
+    } finally {
+      setCreating(false);
+    }
+  };
+
+  const trimmedQuery = query.trim().toLowerCase();
+  const hasExactMatch = trimmedQuery.length > 0 && options.some(o => o.label.toLowerCase() === trimmedQuery);
+  const showCreate = !!onCreateOption && trimmedQuery.length > 0 && !hasExactMatch;
 
   const renderItems = (items: Option[]) =>
     items.map((option) => (
@@ -103,9 +128,22 @@ export function MultiSearchableSelect({
       </PopoverTrigger>
       <PopoverContent className="w-full p-0" align="start">
         <Command>
-          <CommandInput placeholder={searchPlaceholder} />
+          <CommandInput placeholder={searchPlaceholder} value={query} onValueChange={setQuery} />
           <CommandList>
-            <CommandEmpty>{emptyText}</CommandEmpty>
+            {showCreate && (
+              <CommandGroup>
+                <CommandItem
+                  value={`__create__${query}`}
+                  onSelect={handleCreate}
+                  disabled={creating}
+                  className="text-primary"
+                >
+                  <Plus className="mr-2 h-4 w-4" />
+                  {creating ? 'Adding…' : `${createLabel} "${query.trim()}"`}
+                </CommandItem>
+              </CommandGroup>
+            )}
+            <CommandEmpty>{showCreate ? null : emptyText}</CommandEmpty>
             {grouped && groups ? (
               Array.from(groups.entries()).map(([groupName, items]) => (
                 <CommandGroup key={groupName} heading={groupName}>
