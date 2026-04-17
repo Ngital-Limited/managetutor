@@ -362,34 +362,7 @@ export default function TutorPublicProfile() {
               );
             })()}
 
-            {/* Teaching Philosophy */}
-            {tutor.teaching_philosophy && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Lightbulb className="h-5 w-5" />
-                    Teaching Philosophy
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground whitespace-pre-wrap">{tutor.teaching_philosophy}</p>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Success Stories */}
-            {tutor.success_stories && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Trophy className="h-5 w-5" />
-                    Success Stories
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground whitespace-pre-wrap">{tutor.success_stories}</p>
-                </CardContent>
-              </Card>
+            {/* Teaching Philosophy and Success Stories removed */}
             )}
 
             {/* Reviews */}
