@@ -1172,8 +1172,6 @@ export default function TutorProfile() {
           {saving ? 'Saving...' : 'Save Changes'}
         </Button>
       </div>
-
-      </Dialog>
     </div>
   );
 
