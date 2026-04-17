@@ -2296,21 +2296,41 @@ export default function AdminDashboard() {
             )}
 
             {/* ═══════ JOBS TAB ═══════ */}
-            {activeTab === 'jobs' && (
+            {activeTab === 'jobs' && (() => {
+              const q = jobSearch.trim().toLowerCase();
+              const filteredJobs = q
+                ? jobs.filter(j =>
+                    (j.job_reference || '').toLowerCase().includes(q) ||
+                    (j.title || '').toLowerCase().includes(q) ||
+                    ((j.profiles as any)?.full_name || '').toLowerCase().includes(q)
+                  )
+                : jobs;
+              return (
               <div className="space-y-6">
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                   <h1 className="text-xl font-semibold">Job Management</h1>
-                  <Select value={jobStatusFilter} onValueChange={setJobStatusFilter}>
-                    <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Status</SelectItem>
-                      <SelectItem value="pending_approval">Pending Approval</SelectItem>
-                      <SelectItem value="open">Open</SelectItem>
-                      <SelectItem value="in_progress">In Progress</SelectItem>
-                      <SelectItem value="completed">Completed</SelectItem>
-                      <SelectItem value="cancelled">Cancelled</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                    <div className="relative w-full sm:w-72">
+                      <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        value={jobSearch}
+                        onChange={(e) => setJobSearch(e.target.value)}
+                        placeholder="Search by reference, title, or guardian"
+                        className="pl-8 h-9"
+                      />
+                    </div>
+                    <Select value={jobStatusFilter} onValueChange={setJobStatusFilter}>
+                      <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Status</SelectItem>
+                        <SelectItem value="pending_approval">Pending Approval</SelectItem>
+                        <SelectItem value="open">Open</SelectItem>
+                        <SelectItem value="in_progress">In Progress</SelectItem>
+                        <SelectItem value="completed">Completed</SelectItem>
+                        <SelectItem value="cancelled">Cancelled</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
                 <Card>
                   <CardContent className="p-0">
