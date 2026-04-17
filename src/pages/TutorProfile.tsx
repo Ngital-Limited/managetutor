@@ -214,17 +214,21 @@ export default function TutorProfile() {
         supabase.from('review_update_requests').select('*').eq('tutor_id', td.id),
       ]);
 
-      if (eduRes.data) {
-        setEducationEntries(eduRes.data.map((e: any) => ({
-          id: e.id,
-          institution: e.institution,
-          degree: e.degree,
-          field_of_study: e.field_of_study || '',
-          passing_year: e.passing_year,
-          result: e.result || '',
-          is_current: e.is_current || false,
-        })));
-      }
+      // Always seed 4 fixed education slots: SSC, HSC, Bachelor, Masters
+      const FIXED_DEGREES = ['SSC', 'HSC', 'Bachelor', 'Masters'];
+      const existing = eduRes.data || [];
+      setEducationEntries(FIXED_DEGREES.map((deg) => {
+        const match = existing.find((e: any) => (e.degree || '').toLowerCase() === deg.toLowerCase());
+        return {
+          id: match?.id,
+          institution: match?.institution || '',
+          degree: deg,
+          field_of_study: match?.field_of_study || '',
+          passing_year: match?.passing_year ?? null,
+          result: match?.result || '',
+          is_current: match?.is_current || false,
+        };
+      }));
       if (jobRes.data) {
         setJobExperiences(jobRes.data.map((j: any) => ({
           id: j.id,
@@ -508,13 +512,7 @@ export default function TutorProfile() {
     return null;
   };
 
-  // Education helpers
-  const addEducation = () => {
-    setEducationEntries([...educationEntries, { institution: '', degree: '', field_of_study: '', passing_year: null, result: '', is_current: false }]);
-  };
-  const removeEducation = (index: number) => {
-    setEducationEntries(educationEntries.filter((_, i) => i !== index));
-  };
+  // Education helpers — fixed 4 slots (SSC, HSC, Bachelor, Masters)
   const updateEducation = (index: number, field: keyof EducationEntry, value: any) => {
     const updated = [...educationEntries];
     (updated[index] as any)[field] = value;
@@ -749,51 +747,49 @@ export default function TutorProfile() {
 
               <div className="border-t border-border/60 pt-6">
                 <h3 className="font-semibold mb-1">Educational Qualifications</h3>
-                <p className="text-sm text-muted-foreground mb-4">Add your qualifications (most recent first).</p>
+                <p className="text-sm text-muted-foreground mb-4">Fill in each level you have completed. Leave blank if not applicable.</p>
 
-                {educationEntries.map((entry, index) => (
-                  <div key={index} className="p-4 border border-border rounded-xl space-y-4 mb-4 bg-muted/20">
-                    <div className="flex items-center justify-between">
-                      <h4 className="font-medium text-sm text-muted-foreground">Education #{index + 1}</h4>
-                      <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => removeEducation(index)}>
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                {educationEntries.map((entry, index) => {
+                  const labels: Record<string, { title: string; subtitle: string; institutionPlaceholder: string }> = {
+                    SSC: { title: 'Secondary School Certificate (SSC)', subtitle: 'Class 10 / O-Level equivalent', institutionPlaceholder: 'e.g., Govt. Laboratory High School' },
+                    HSC: { title: 'Higher Secondary Certificate (HSC)', subtitle: 'Class 12 / A-Level equivalent', institutionPlaceholder: 'e.g., Notre Dame College' },
+                    Bachelor: { title: 'Bachelor Degree', subtitle: 'Undergraduate (BSc, BA, BBA, etc.)', institutionPlaceholder: 'e.g., University of Dhaka' },
+                    Masters: { title: 'Masters Degree', subtitle: 'Postgraduate (MSc, MA, MBA, etc.)', institutionPlaceholder: 'e.g., BUET' },
+                  };
+                  const meta = labels[entry.degree] || { title: entry.degree, subtitle: '', institutionPlaceholder: '' };
+                  return (
+                    <div key={entry.degree} className="p-4 border border-border rounded-xl space-y-4 mb-4 bg-muted/20">
+                      <div>
+                        <h4 className="font-semibold text-sm">{meta.title}</h4>
+                        <p className="text-xs text-muted-foreground">{meta.subtitle}</p>
+                      </div>
+                      <div className="grid md:grid-cols-2 gap-4">
+                        <div>
+                          <Label>Institution Name</Label>
+                          <Input className="rounded-xl mt-1.5 h-11" value={entry.institution} onChange={(e) => updateEducation(index, 'institution', e.target.value)} placeholder={meta.institutionPlaceholder} />
+                        </div>
+                        <div>
+                          <Label>{entry.degree === 'SSC' || entry.degree === 'HSC' ? 'Group' : 'Field of Study'}</Label>
+                          <Input className="rounded-xl mt-1.5 h-11" value={entry.field_of_study} onChange={(e) => updateEducation(index, 'field_of_study', e.target.value)} placeholder={entry.degree === 'SSC' || entry.degree === 'HSC' ? 'e.g., Science, Commerce' : 'e.g., Physics, CSE'} />
+                        </div>
+                      </div>
+                      <div className="grid md:grid-cols-2 gap-4">
+                        <div>
+                          <Label>Passing Year</Label>
+                          <Input type="number" className="rounded-xl mt-1.5 h-11" value={entry.passing_year ?? ''} onChange={(e) => updateEducation(index, 'passing_year', e.target.value ? parseInt(e.target.value) : null)} placeholder="e.g., 2020" />
+                        </div>
+                        <div>
+                          <Label>Result / GPA / CGPA</Label>
+                          <Input className="rounded-xl mt-1.5 h-11" value={entry.result} onChange={(e) => updateEducation(index, 'result', e.target.value)} placeholder="e.g., 5.00 / 3.85" />
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Checkbox id={`edu-current-${index}`} checked={entry.is_current} onCheckedChange={(checked) => updateEducation(index, 'is_current', !!checked)} />
+                        <Label htmlFor={`edu-current-${index}`} className="text-sm">Currently studying / ongoing</Label>
+                      </div>
                     </div>
-                    <div className="grid md:grid-cols-2 gap-4">
-                      <div>
-                        <Label>Institution Name *</Label>
-                        <Input className="rounded-xl mt-1.5 h-11" value={entry.institution} onChange={(e) => updateEducation(index, 'institution', e.target.value)} placeholder="e.g., Dhaka University" />
-                      </div>
-                      <div>
-                        <Label>Degree *</Label>
-                        <Input className="rounded-xl mt-1.5 h-11" value={entry.degree} onChange={(e) => updateEducation(index, 'degree', e.target.value)} placeholder="e.g., BSc, MSc, HSC" />
-                      </div>
-                    </div>
-                    <div className="grid md:grid-cols-3 gap-4">
-                      <div>
-                        <Label>Field of Study</Label>
-                        <Input className="rounded-xl mt-1.5 h-11" value={entry.field_of_study} onChange={(e) => updateEducation(index, 'field_of_study', e.target.value)} placeholder="e.g., Physics, CSE" />
-                      </div>
-                      <div>
-                        <Label>Passing Year</Label>
-                        <Input type="number" className="rounded-xl mt-1.5 h-11" value={entry.passing_year ?? ''} onChange={(e) => updateEducation(index, 'passing_year', e.target.value ? parseInt(e.target.value) : null)} placeholder="e.g., 2020" />
-                      </div>
-                      <div>
-                        <Label>Result / GPA</Label>
-                        <Input className="rounded-xl mt-1.5 h-11" value={entry.result} onChange={(e) => updateEducation(index, 'result', e.target.value)} placeholder="e.g., 3.85/4.00" />
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Checkbox id={`edu-current-${index}`} checked={entry.is_current} onCheckedChange={(checked) => updateEducation(index, 'is_current', !!checked)} />
-                      <Label htmlFor={`edu-current-${index}`} className="text-sm">Currently studying here</Label>
-                    </div>
-                  </div>
-                ))}
-
-                <Button variant="outline" onClick={addEducation} className="w-full rounded-xl">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Education
-                </Button>
+                  );
+                })}
               </div>
             </CardContent>
           </Card>
