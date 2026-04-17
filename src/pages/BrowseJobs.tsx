@@ -653,7 +653,7 @@ export default function BrowseJobs() {
                         </div>
 
                         <div className="flex gap-2">
-                          <Link to={`/jobs/${job.id}`}>
+                          <Link to={`/jobs/${(job as any).slug || job.id}`}>
                             <Button variant="outline" size="sm" className="rounded-xl text-xs h-9">
                               Details
                             </Button>
