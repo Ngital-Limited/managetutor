@@ -2392,10 +2392,10 @@ export default function AdminDashboard() {
                       </div>
                     </div>
                     <Input
-                      placeholder="Search tutor name or email…"
+                      placeholder="Search name, email, phone, user ID, job title…"
                       value={allAppsSearch}
                       onChange={(e) => setAllAppsSearch(e.target.value)}
-                      className="w-64 h-9"
+                      className="w-80 h-9"
                     />
                   </div>
 
