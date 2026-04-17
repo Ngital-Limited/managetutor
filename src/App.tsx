@@ -69,6 +69,7 @@ const App = () => (
               <Route path="/payment/failed" element={<PaymentFailed />} />
               <Route path="/payment/cancelled" element={<PaymentCancelled />} />
               <Route path="/admin" element={<AdminDashboard />} />
+              <Route path="/admin/import-tutors" element={<AdminBulkImportTutors />} />
               <Route path="/about" element={<About />} />
               <Route path="/contact" element={<Contact />} />
               <Route path="/privacy" element={<Privacy />} />
