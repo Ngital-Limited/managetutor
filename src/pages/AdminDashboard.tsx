@@ -1289,7 +1289,7 @@ export default function AdminDashboard() {
   useEffect(() => { setGuardianPage(1); }, [userSearch, guardianDistrictFilter, guardianAreaFilter, guardianStatusFilter, guardianPageSize]);
 
   // Reset job pagination when filter or page size changes
-  useEffect(() => { setJobPage(1); }, [jobStatusFilter, jobPageSize]);
+  useEffect(() => { setJobPage(1); }, [jobStatusFilter, jobSearch, jobPageSize]);
 
   // Reset Applications tab pagination when filters/search/selection change
   useEffect(() => { setAppsJobsPage(1); }, [appsJobsSearch, appsJobsPageSize]);
