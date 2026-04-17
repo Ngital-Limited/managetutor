@@ -3106,7 +3106,7 @@ export default function AdminDashboard() {
                         <TableBody>
                           {payments.length === 0 ? (
                             <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">No transactions yet</TableCell></TableRow>
-                          ) : payments.map((p) => (
+                          ) : payments.slice((paymentsPage - 1) * paymentsPageSize, paymentsPage * paymentsPageSize).map((p) => (
                             <TableRow key={p.id}>
                               <TableCell className="font-mono text-xs">{p.transaction_id}</TableCell>
                               <TableCell className="text-sm">{(p.profiles as any)?.full_name}</TableCell>
@@ -3121,6 +3121,30 @@ export default function AdminDashboard() {
                     </ScrollArea>
                   </CardContent>
                 </Card>
+                {payments.length > 0 && (() => {
+                  const totalPages = Math.max(1, Math.ceil(payments.length / paymentsPageSize));
+                  const page = Math.min(paymentsPage, totalPages);
+                  const start = (page - 1) * paymentsPageSize + 1;
+                  const end = Math.min(page * paymentsPageSize, payments.length);
+                  return (
+                    <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-1">
+                      <div className="text-xs text-muted-foreground">Showing {start}–{end} of {payments.length}</div>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <Select value={String(paymentsPageSize)} onValueChange={(v) => { setPaymentsPageSize(Number(v)); setPaymentsPage(1); }}>
+                          <SelectTrigger className="h-8 w-[100px] text-xs"><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            {[10, 25, 50, 100].map(n => <SelectItem key={n} value={String(n)}>{n} / page</SelectItem>)}
+                          </SelectContent>
+                        </Select>
+                        <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPaymentsPage(1)}>« First</Button>
+                        <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPaymentsPage(page - 1)}>Prev</Button>
+                        <span className="text-xs text-muted-foreground">Page {page} of {totalPages}</span>
+                        <Button variant="outline" size="sm" disabled={page >= totalPages} onClick={() => setPaymentsPage(page + 1)}>Next</Button>
+                        <Button variant="outline" size="sm" disabled={page >= totalPages} onClick={() => setPaymentsPage(totalPages)}>Last »</Button>
+                      </div>
+                    </div>
+                  );
+                })()}
               </div>
             )}
 
