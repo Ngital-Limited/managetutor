@@ -307,16 +307,6 @@ export default function TutorPublicProfile() {
               </div>
 
               <div className="flex flex-wrap items-center gap-4 mb-4">
-                <div className="flex items-center gap-1.5">
-                  <Star className="h-5 w-5 fill-accent text-accent" />
-                  <span className="font-bold text-lg">{tutor.average_rating || 0}</span>
-                  <span className="text-muted-foreground text-sm">({tutor.total_reviews} reviews)</span>
-                </div>
-                <Separator orientation="vertical" className="h-5" />
-                <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                  <Users className="h-4 w-4" /> {tutor.total_students} students taught
-                </div>
-                <Separator orientation="vertical" className="h-5 hidden sm:block" />
                 <div className="text-base">
                   <span className="font-bold text-primary text-xl">৳{tutor.monthly_salary_min || 0}–{tutor.monthly_salary_max || 0}</span>
                   <span className="text-muted-foreground text-xs ml-1">/month</span>
@@ -352,7 +342,6 @@ export default function TutorPublicProfile() {
                 <TabsTrigger value="about">About</TabsTrigger>
                 <TabsTrigger value="education">Education</TabsTrigger>
                 {tutor.video_url && <TabsTrigger value="video">Video</TabsTrigger>}
-                <TabsTrigger value="reviews">Reviews ({tutor.total_reviews})</TabsTrigger>
                 <TabsTrigger value="details">Details</TabsTrigger>
               </TabsList>
 
@@ -448,52 +437,12 @@ export default function TutorPublicProfile() {
                 );
               })()}
 
-              <TabsContent value="reviews" className="mt-4">
-                <Card>
-                  <CardHeader><CardTitle className="flex items-center gap-2 text-base"><Star className="h-4 w-4" />Reviews</CardTitle></CardHeader>
-                  <CardContent>
-                    {reviews.length > 0 ? (
-                      <div className="space-y-4">
-                        {reviews.map(review => (
-                          <div key={review.id} className="p-4 bg-muted/40 rounded-xl">
-                            <div className="flex items-start gap-3">
-                              <Avatar className="h-9 w-9">
-                                <AvatarImage src={review.profiles?.avatar_url} />
-                                <AvatarFallback>{review.profiles?.full_name?.charAt(0) || 'P'}</AvatarFallback>
-                              </Avatar>
-                              <div className="flex-1 min-w-0">
-                                <div className="flex items-center justify-between mb-1">
-                                  <span className="font-medium text-sm">{review.profiles?.full_name}</span>
-                                  <span className="text-[11px] text-muted-foreground">{formatExactDate(new Date(review.created_at))}</span>
-                                </div>
-                                <div className="flex items-center gap-0.5 mb-2">
-                                  {[1, 2, 3, 4, 5].map(star => (
-                                    <Star key={star} className={`h-3.5 w-3.5 ${star <= review.rating ? 'fill-accent text-accent' : 'text-muted-foreground'}`} />
-                                  ))}
-                                </div>
-                                {review.comment && <p className="text-sm text-muted-foreground">{review.comment}</p>}
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="text-center py-10">
-                        <Star className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
-                        <p className="text-muted-foreground text-sm">No reviews yet</p>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              </TabsContent>
-
               <TabsContent value="details" className="mt-4">
                 <Card>
                   <CardHeader><CardTitle className="text-base">Quick Details</CardTitle></CardHeader>
                   <CardContent>
                     <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 text-sm">
                       <div className="flex justify-between"><dt className="text-muted-foreground">Experience</dt><dd className="font-medium">{tutor.experience_years} years</dd></div>
-                      <div className="flex justify-between"><dt className="text-muted-foreground">Students Taught</dt><dd className="font-medium">{tutor.total_students}</dd></div>
                       <div className="flex justify-between"><dt className="text-muted-foreground">Teaching Mode</dt><dd className="font-medium">{modeInfo.label}</dd></div>
                       <div className="flex justify-between"><dt className="text-muted-foreground">Gender</dt><dd className="font-medium capitalize">{tutor.gender}</dd></div>
                       <div className="flex justify-between"><dt className="text-muted-foreground">District</dt><dd className="font-medium">{districtName || '—'}</dd></div>

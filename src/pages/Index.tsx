@@ -427,11 +427,6 @@ export default function Index() {
                             )}
                           </div>
                           <p className="text-xs text-muted-foreground truncate">{tutor.education || 'Educator'}</p>
-                          <div className="flex items-center gap-1.5 mt-1">
-                            <Star className="h-3 w-3 text-accent fill-accent" />
-                            <span className="text-xs font-semibold tabular-nums">{tutor.average_rating || 0}</span>
-                            <span className="text-[10px] text-muted-foreground">({tutor.total_reviews})</span>
-                          </div>
                         </div>
                       </div>
                       <div className="flex items-center gap-3 text-[11px] text-muted-foreground mb-3 flex-wrap">
