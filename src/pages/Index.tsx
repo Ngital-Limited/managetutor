@@ -66,8 +66,9 @@ export default function Index() {
   const [districts, setDistricts] = useState<{ id: string; name_en: string; name_bn: string }[]>([]);
   const [subjectsList, setSubjectsList] = useState<{ id: string; name_en: string; name_bn: string }[]>([]);
   const [selectedDistrict, setSelectedDistrict] = useState('');
-  const [selectedSubject, setSelectedSubject] = useState('');
-  const [selectedMode, setSelectedMode] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('');
+  const [selectedBackground, setSelectedBackground] = useState('');
+  const [selectedGender, setSelectedGender] = useState('');
   const [searchType, setSearchType] = useState<'tutors' | 'jobs'>('tutors');
 
   const [featuredTutors, setFeaturedTutors] = useState<FeaturedTutor[]>([]);
