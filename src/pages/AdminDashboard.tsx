@@ -2605,6 +2605,30 @@ export default function AdminDashboard() {
                                     {!bio && !app.cover_message && '—'}
                                   </TableCell>
                                   <TableCell className="align-top"><Badge className={`text-[10px] capitalize ${statusColor(app.status)}`}>{app.status}</Badge></TableCell>
+                                  <TableCell className="align-top">
+                                    <div className="space-y-1.5">
+                                      {(() => {
+                                        const vs = tprof?.verification_status || 'pending';
+                                        const styles: Record<string, string> = {
+                                          approved: 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/30',
+                                          pending: 'bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/30',
+                                          rejected: 'bg-destructive/10 text-destructive border-destructive/30',
+                                        };
+                                        const label = vs === 'approved' ? 'Verified' : vs === 'rejected' ? 'Rejected' : 'Pending';
+                                        const Icon = vs === 'approved' ? ShieldCheck : vs === 'rejected' ? XCircle : Clock;
+                                        return (
+                                          <Badge className={`text-[10px] capitalize gap-1 border ${styles[vs] || styles.pending}`}>
+                                            <Icon className="h-3 w-3" />{label}
+                                          </Badge>
+                                        );
+                                      })()}
+                                      <div className="flex items-center gap-1 text-xs">
+                                        <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
+                                        <span className="font-semibold text-foreground">{tprof?.average_rating ? Number(tprof.average_rating).toFixed(1) : '—'}</span>
+                                        <span className="text-muted-foreground text-[10px]">({tprof?.total_reviews || 0})</span>
+                                      </div>
+                                    </div>
+                                  </TableCell>
                                   <TableCell className="text-right align-top">
                                     <div className="flex gap-1 justify-end flex-wrap">
                                       {!isFinal && app.status === 'pending' && (
