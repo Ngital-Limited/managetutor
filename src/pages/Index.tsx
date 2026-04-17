@@ -267,46 +267,47 @@ export default function Index() {
         </div>
       </section>
 
-      {/* Subject Categories */}
+      {/* Subject Categories — minimal premium */}
       {subjectCategories.length > 0 && (
-        <section className="py-16 gradient-soft">
+        <section className="py-20 bg-muted/20">
           <div className="container mx-auto px-4">
-            <div className="flex items-center justify-between mb-10">
+            <div className="flex items-end justify-between mb-12 max-w-5xl">
               <div>
-                <h2 className="text-3xl md:text-4xl font-extrabold mb-2">Browse by Subject</h2>
-                <p className="text-muted-foreground">Find tuition jobs across 50+ subjects in every category</p>
+                <span className="text-xs uppercase tracking-[0.2em] text-muted-foreground font-medium">Categories</span>
+                <h2 className="text-3xl md:text-4xl font-semibold tracking-tight mt-2 mb-2">Browse by Subject</h2>
+                <p className="text-sm text-muted-foreground">Find tuition jobs across 50+ subjects in every category</p>
               </div>
               <Link to="/jobs">
-                <Button variant="outline" className="hidden sm:flex gap-1">
-                  All Jobs <ChevronRight className="h-4 w-4" />
+                <Button variant="ghost" className="hidden sm:flex gap-1 text-sm text-muted-foreground hover:text-foreground">
+                  All Jobs <ArrowRight className="h-3.5 w-3.5" />
                 </Button>
               </Link>
             </div>
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {subjectCategories.slice(0, 6).map((cat, i) => (
-                <Card key={i} className="hover-lift border-border/50 overflow-hidden">
-                  <CardContent className="p-5">
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                        <BookOpen className="h-5 w-5 text-primary" />
-                      </div>
-                      <h3 className="font-bold text-lg">{cat.category_en}</h3>
-                      <Badge variant="secondary" className="ml-auto">{cat.subjects.length}</Badge>
-                    </div>
-                    <div className="flex flex-wrap gap-1.5">
-                      {cat.subjects.slice(0, 5).map((sub) => (
-                        <Link key={sub.id} to={`/jobs?subject=${sub.id}`}>
-                          <Badge variant="outline" className="cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors text-xs">
-                            {sub.name_en}
-                          </Badge>
-                        </Link>
-                      ))}
-                      {cat.subjects.length > 5 && (
-                        <Badge variant="outline" className="text-xs text-muted-foreground">+{cat.subjects.length - 5} more</Badge>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
+                <div
+                  key={i}
+                  className="group bg-card rounded-xl border border-border/60 p-5 transition-all hover:border-primary/30 hover:shadow-[0_4px_24px_-8px_hsl(var(--primary)/0.15)] animate-fade-in"
+                  style={{ animationDelay: `${i * 60}ms` }}
+                >
+                  <div className="flex items-center gap-3 mb-4">
+                    <BookOpen className="h-4 w-4 text-muted-foreground/70 group-hover:text-primary transition-colors" />
+                    <h3 className="font-medium text-sm tracking-tight">{cat.category_en}</h3>
+                    <span className="ml-auto text-[11px] text-muted-foreground tabular-nums">{cat.subjects.length}</span>
+                  </div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {cat.subjects.slice(0, 5).map((sub) => (
+                      <Link key={sub.id} to={`/jobs?subject=${sub.id}`}>
+                        <Badge variant="outline" className="cursor-pointer border-border/60 hover:bg-foreground hover:text-background hover:border-foreground transition-colors text-[11px] font-normal">
+                          {sub.name_en}
+                        </Badge>
+                      </Link>
+                    ))}
+                    {cat.subjects.length > 5 && (
+                      <Badge variant="outline" className="text-[11px] text-muted-foreground border-border/60 font-normal">+{cat.subjects.length - 5}</Badge>
+                    )}
+                  </div>
+                </div>
               ))}
             </div>
           </div>
