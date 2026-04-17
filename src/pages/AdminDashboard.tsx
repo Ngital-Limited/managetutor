@@ -846,7 +846,7 @@ export default function AdminDashboard() {
       `)
       .order('created_at', { ascending: false })
       .limit(200);
-    if (allAppsStatusFilter !== 'all') query = query.eq('status', allAppsStatusFilter as any);
+    // Note: do NOT filter by status in the query — chips and drill-down need full counts.
     const { data } = await query;
     if (!data) { setAllApplications([]); setLoadingAllApps(false); return; }
     const tutorUserIds = Array.from(new Set(data.map((a: any) => (a.tutor_profiles as any)?.user_id).filter(Boolean)));
