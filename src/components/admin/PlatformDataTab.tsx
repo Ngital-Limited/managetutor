@@ -341,25 +341,13 @@ function DistrictsManager({ toast }: { toast: any }) {
         <DialogContent className="max-w-md">
           <DialogHeader><DialogTitle>{editingId ? 'Edit District' : 'Add District'}</DialogTitle></DialogHeader>
           <div className="space-y-3">
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="text-sm font-medium">Name (English) *</label>
-                <Input value={form.name_en} onChange={e => setForm(p => ({ ...p, name_en: e.target.value }))} placeholder="e.g. Dhaka" className="mt-1" />
-              </div>
-              <div>
-                <label className="text-sm font-medium">Name (Bangla) *</label>
-                <Input value={form.name_bn} onChange={e => setForm(p => ({ ...p, name_bn: e.target.value }))} placeholder="e.g. ঢাকা" className="mt-1" />
-              </div>
+            <div>
+              <label className="text-sm font-medium">Name *</label>
+              <Input value={form.name_en} onChange={e => setForm(p => ({ ...p, name_en: e.target.value }))} placeholder="e.g. Dhaka" className="mt-1" />
             </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="text-sm font-medium">Division (English) *</label>
-                <Input value={form.division_en} onChange={e => setForm(p => ({ ...p, division_en: e.target.value }))} placeholder="e.g. Dhaka" className="mt-1" />
-              </div>
-              <div>
-                <label className="text-sm font-medium">Division (Bangla) *</label>
-                <Input value={form.division_bn} onChange={e => setForm(p => ({ ...p, division_bn: e.target.value }))} placeholder="e.g. ঢাকা" className="mt-1" />
-              </div>
+            <div>
+              <label className="text-sm font-medium">Division *</label>
+              <Input value={form.division_en} onChange={e => setForm(p => ({ ...p, division_en: e.target.value }))} placeholder="e.g. Dhaka" className="mt-1" />
             </div>
           </div>
           <DialogFooter>
