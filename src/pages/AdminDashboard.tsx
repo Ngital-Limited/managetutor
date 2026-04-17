@@ -865,6 +865,8 @@ export default function AdminDashboard() {
   const [demoScheduleTime, setDemoScheduleTime] = useState('');
   const [demoScheduleDuration, setDemoScheduleDuration] = useState('60');
   const [demoScheduleNotes, setDemoScheduleNotes] = useState('');
+  const [demoScheduleFee, setDemoScheduleFee] = useState('0');
+  const [demoScheduleCommissionPct, setDemoScheduleCommissionPct] = useState(20);
   const [demoScheduling, setDemoScheduling] = useState(false);
 
   const openDemoSchedule = (app: { id: string; tutor_user_id: string; tutor_id: string; tutor_name: string }, jobId: string, jobTitle: string) => {
@@ -880,6 +882,8 @@ export default function AdminDashboard() {
     setDemoScheduleTime('');
     setDemoScheduleDuration('60');
     setDemoScheduleNotes('');
+    setDemoScheduleFee('0');
+    getPlatformCommissionPct().then(setDemoScheduleCommissionPct);
   };
 
   const handleAdminScheduleDemo = async () => {
@@ -893,6 +897,7 @@ export default function AdminDashboard() {
       if (!jobRow?.parent_id) throw new Error('Job parent not found');
 
       // Admin-direct: status starts as 'approved' (no further admin approval gate needed)
+      const split = computeFeeSplit(Number(demoScheduleFee) || 0, demoScheduleCommissionPct);
       const { error: bookingError } = await supabase.from('demo_bookings').insert({
         parent_id: jobRow.parent_id,
         tutor_id: demoScheduleApp.tutorProfileId,
@@ -901,9 +906,9 @@ export default function AdminDashboard() {
         preferred_date: demoScheduleDate,
         preferred_time: demoScheduleTime,
         duration_minutes: parseInt(demoScheduleDuration),
-        class_fee: 0,
-        platform_commission: 0,
-        tutor_payout: 0,
+        class_fee: split.classFee,
+        platform_commission: split.platformCommission,
+        tutor_payout: split.tutorPayout,
         notes: demoScheduleNotes || null,
         status: 'approved',
       } as any);

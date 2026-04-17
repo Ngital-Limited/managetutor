@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -8,7 +8,8 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { Calendar, Clock, BookOpen, Phone, Gift } from 'lucide-react';
+import { Calendar, BookOpen, Phone, Gift, Wallet } from 'lucide-react';
+import { getPlatformCommissionPct, computeFeeSplit } from '@/lib/commission';
 
 interface Subject {
   id: string;
@@ -42,6 +43,17 @@ export default function BookDemoClassDialog({
   const [subjectId, setSubjectId] = useState('');
   const [notes, setNotes] = useState('');
   const [parentPhone, setParentPhone] = useState('');
+  const [classFee, setClassFee] = useState('0');
+  const [commissionPct, setCommissionPct] = useState(20);
+
+  useEffect(() => {
+    if (open) getPlatformCommissionPct().then(setCommissionPct);
+  }, [open]);
+
+  const split = useMemo(
+    () => computeFeeSplit(Number(classFee) || 0, commissionPct),
+    [classFee, commissionPct]
+  );
 
   const durationMinutes = parseInt(duration);
 
@@ -63,9 +75,9 @@ export default function BookDemoClassDialog({
         preferred_date: preferredDate,
         preferred_time: preferredTime,
         duration_minutes: durationMinutes,
-        class_fee: 0,
-        platform_commission: 0,
-        tutor_payout: 0,
+        class_fee: split.classFee,
+        platform_commission: split.platformCommission,
+        tutor_payout: split.tutorPayout,
         notes: notes || null,
         parent_phone: parentPhone || null,
         status: 'pending',
@@ -73,7 +85,7 @@ export default function BookDemoClassDialog({
 
       if (error) throw error;
 
-      toast({ title: 'Demo Class Requested!', description: 'Your free demo class request has been submitted for admin approval.' });
+      toast({ title: 'Demo Class Requested!', description: 'Your demo class request has been submitted for admin approval.' });
       setOpen(false);
       resetForm();
       onBooked?.();
@@ -91,35 +103,40 @@ export default function BookDemoClassDialog({
     setSubjectId('');
     setNotes('');
     setParentPhone('');
+    setClassFee('0');
   };
 
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
   const minDate = tomorrow.toISOString().split('T')[0];
 
+  const isPaid = split.classFee > 0;
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button className="w-full" variant="secondary" size="lg">
           <Calendar className="h-4 w-4 mr-2" />
-          Book Free Demo Class
+          Book Demo Class
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <BookOpen className="h-5 w-5 text-primary" />
-            Book a Free Demo Class
+            Book a Demo Class
           </DialogTitle>
           <DialogDescription>
-            Try a free trial lesson with {tutorName} before committing
+            Try a trial lesson with {tutorName} before committing
           </DialogDescription>
         </DialogHeader>
 
-        <div className="bg-success/10 border border-success/20 rounded-lg p-3 flex items-center gap-2 text-sm text-success">
-          <Gift className="h-4 w-4 shrink-0" />
-          <span className="font-medium">Demo classes are completely free!</span>
-        </div>
+        {!isPaid && (
+          <div className="bg-success/10 border border-success/20 rounded-lg p-3 flex items-center gap-2 text-sm text-success">
+            <Gift className="h-4 w-4 shrink-0" />
+            <span className="font-medium">Free demo class — leave fee at ৳0</span>
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {subjects.length > 0 && (
@@ -176,6 +193,28 @@ export default function BookDemoClassDialog({
           </div>
 
           <div>
+            <Label>Class Fee (৳)</Label>
+            <Input
+              type="number"
+              min={0}
+              step={10}
+              value={classFee}
+              onChange={e => setClassFee(e.target.value)}
+              placeholder="0 for free demo"
+            />
+            {isPaid && (
+              <div className="mt-2 rounded-md border border-border bg-muted/40 p-2 text-xs space-y-1">
+                <div className="flex items-center gap-1.5 font-medium text-foreground">
+                  <Wallet className="h-3.5 w-3.5" /> Fee breakdown ({split.commissionPct}% commission)
+                </div>
+                <div className="flex justify-between"><span className="text-muted-foreground">Class fee</span><span>৳{split.classFee}</span></div>
+                <div className="flex justify-between"><span className="text-muted-foreground">Platform commission</span><span>−৳{split.platformCommission}</span></div>
+                <div className="flex justify-between font-semibold"><span>Tutor payout</span><span>৳{split.tutorPayout}</span></div>
+              </div>
+            )}
+          </div>
+
+          <div>
             <Label>Your Phone Number</Label>
             <div className="relative">
               <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -201,7 +240,7 @@ export default function BookDemoClassDialog({
           </div>
 
           <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? 'Booking...' : 'Book Free Demo Class'}
+            {loading ? 'Booking...' : isPaid ? `Book Demo Class (৳${split.classFee})` : 'Book Free Demo Class'}
           </Button>
         </form>
       </DialogContent>
