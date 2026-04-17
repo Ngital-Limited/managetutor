@@ -31,7 +31,7 @@ import {
   GraduationCap, Shield, Users, Briefcase, CheckCircle2, XCircle,
   Clock, AlertTriangle, BarChart3, FileText, Settings, Search,
   Eye, Ban, UserCheck, FileCheck,
-  LogOut, Home, Star, DollarSign, Trash2, CreditCard, Megaphone, Send, Mail,
+  LogOut, Home, DollarSign, Trash2, CreditCard, Megaphone, Send, Mail,
   Package, Plus, Pencil, ToggleLeft, ToggleRight, Wallet, MapPin, LifeBuoy, ShieldCheck,
   LogIn, BookOpen, UserPlus, TrendingUp, ChevronLeft, ArrowLeft,
   Phone, Calendar
@@ -59,7 +59,6 @@ interface Stats {
   completedJobs: number;
   acceptedJobs: number;
   pendingReports: number;
-  totalReviews: number;
   totalRevenue: number;
   pendingJobs: number;
   pendingUsers: number;
@@ -134,16 +133,6 @@ interface Report {
   reported_user_id: string;
   reporter: { full_name: string };
   reported: { full_name: string; email: string };
-}
-
-interface ReviewRow {
-  id: string;
-  rating: number;
-  comment: string | null;
-  is_approved: boolean;
-  created_at: string;
-  parent: { full_name: string };
-  tutor_profiles: { profiles: { full_name: string } };
 }
 
 interface PaymentRow {
@@ -777,7 +766,7 @@ export default function AdminDashboard() {
   const [stats, setStats] = useState<Stats>({
     totalUsers: 0, totalTutors: 0, totalParents: 0,
     pendingVerifications: 0, activeJobs: 0, totalJobs: 0, completedJobs: 0, acceptedJobs: 0,
-    pendingReports: 0, totalReviews: 0, totalRevenue: 0, pendingJobs: 0, pendingUsers: 0,
+    pendingReports: 0, totalRevenue: 0, pendingJobs: 0, pendingUsers: 0,
     pendingApplications: 0,
   });
 
@@ -818,8 +807,6 @@ export default function AdminDashboard() {
   const [vPaymentsPageSize, setVPaymentsPageSize] = useState(25);
   const [reports, setReports] = useState<Report[]>([]);
   const [reportsSearch, setReportsSearch] = useState('');
-  const [reviews, setReviews] = useState<ReviewRow[]>([]);
-  const [reviewsSearch, setReviewsSearch] = useState('');
   const [payments, setPayments] = useState<PaymentRow[]>([]);
   const [chartData, setChartData] = useState<{ signups: any[]; jobs: any[]; revenue: any[] }>({ signups: [], jobs: [], revenue: [] });
 
@@ -964,7 +951,7 @@ export default function AdminDashboard() {
           districts ( name_en ), areas ( name_en ),
           job_subjects ( subjects ( id, name_en ) )
         ),
-        tutor_profiles!inner ( id, user_id, gender, experience_years, verification_status, bio, monthly_salary_min, monthly_salary_max, average_rating, total_reviews )
+        tutor_profiles!inner ( id, user_id, gender, experience_years, verification_status, bio, monthly_salary_min, monthly_salary_max )
       `)
       .order('created_at', { ascending: false })
       .limit(200);
@@ -1082,7 +1069,7 @@ export default function AdminDashboard() {
       if (profs && profs.length > 0) {
         const profIds = profs.map(p => p.id);
         const { data: tutors } = await supabase.from('tutor_profiles')
-          .select('id, user_id, gender, experience_years, average_rating, verification_status, district_id')
+          .select('id, user_id, gender, experience_years, verification_status, district_id')
           .in('user_id', profIds);
         if (tutors && tutors.length > 0) {
           const profMap = new Map(profs.map(p => [p.id, p]));
@@ -1105,7 +1092,7 @@ export default function AdminDashboard() {
               phone: prof?.phone || null,
               email: prof?.email || '',
               district: distId ? (districtMap.get(distId) || null) : null,
-              rating: t.average_rating,
+              rating: null,
               verification: t.verification_status,
               reference: prof?.user_reference || null,
             };
@@ -1185,7 +1172,6 @@ export default function AdminDashboard() {
       { count: completedJobs },
       { count: acceptedJobs },
       { count: pendingReports },
-      { count: totalReviews },
       { count: pendingJobs },
       { count: pendingUsers },
       { count: pendingApplications },
@@ -1199,7 +1185,6 @@ export default function AdminDashboard() {
       supabase.from('jobs').select('id', { count: 'exact', head: true }).eq('status', 'completed'),
       supabase.from('jobs').select('id', { count: 'exact', head: true }).eq('status', 'in_progress' as any),
       supabase.from('reports').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
-      supabase.from('reviews').select('id', { count: 'exact', head: true }),
       supabase.from('jobs').select('id', { count: 'exact', head: true }).eq('status', 'pending_approval' as any),
       supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('is_approved', false),
       supabase.from('applications').select('id', { count: 'exact', head: true }).eq('status', 'pending' as any),
@@ -1212,7 +1197,7 @@ export default function AdminDashboard() {
       totalUsers: totalUsers || 0, totalTutors: totalTutors || 0, totalParents: totalParents || 0,
       pendingVerifications: pendingVerifications || 0, activeJobs: activeJobs || 0,
       totalJobs: totalJobs || 0, completedJobs: completedJobs || 0, acceptedJobs: acceptedJobs || 0,
-      pendingReports: pendingReports || 0, totalReviews: totalReviews || 0, totalRevenue,
+      pendingReports: pendingReports || 0, totalRevenue,
       pendingJobs: pendingJobs || 0, pendingUsers: pendingUsers || 0,
       pendingApplications: pendingApplications || 0,
     });
@@ -1374,32 +1359,6 @@ export default function AdminDashboard() {
     }
   }, []);
 
-  const fetchReviews = useCallback(async () => {
-    const { data } = await supabase
-      .from('reviews')
-      .select('id, rating, comment, is_approved, created_at, parent_id, tutor_id')
-      .order('created_at', { ascending: false }).limit(50);
-    if (data) {
-      const parentIds = [...new Set(data.map(r => r.parent_id))];
-      const tutorIds = [...new Set(data.map(r => r.tutor_id))];
-      const [{ data: parentProfs }, { data: tutorData }] = await Promise.all([
-        supabase.from('profiles').select('id, full_name').in('id', parentIds),
-        supabase.from('tutor_profiles').select('id, user_id').in('id', tutorIds),
-      ]);
-      const parentMap = new Map(parentProfs?.map(p => [p.id, p]) || []);
-      const tutorUserIds = [...new Set(tutorData?.map(t => t.user_id) || [])];
-      const { data: tutorProfs } = await supabase.from('profiles').select('id, full_name').in('id', tutorUserIds);
-      const tutorProfMap = new Map(tutorProfs?.map(p => [p.id, p]) || []);
-      const tutorMap = new Map(tutorData?.map(t => [t.id, tutorProfMap.get(t.user_id)]) || []);
-      
-      setReviews(data.map(r => ({
-        ...r,
-        parent: parentMap.get(r.parent_id) || { full_name: 'Unknown' },
-        tutor_profiles: { profiles: tutorMap.get(r.tutor_id) || { full_name: 'Unknown' } },
-      })) as unknown as ReviewRow[]);
-    }
-  }, []);
-
   const fetchPayments = useCallback(async () => {
     const { data } = await supabase
       .from('payment_transactions')
@@ -1427,10 +1386,9 @@ export default function AdminDashboard() {
       case 'jobs': fetchJobs(); break;
       case 'applications': fetchAllApplications(); break;
       case 'reports': fetchReports(); break;
-      case 'reviews': fetchReviews(); break;
       case 'payments': fetchPayments(); break;
     }
-  }, [activeTab, role, fetchUsers, fetchVerifications, fetchJobs, fetchAllApplications, fetchReports, fetchReviews, fetchPayments]);
+  }, [activeTab, role, fetchUsers, fetchVerifications, fetchJobs, fetchAllApplications, fetchReports, fetchPayments]);
 
   // Load districts/areas once for guardian filters
   useEffect(() => {
@@ -1707,7 +1665,6 @@ export default function AdminDashboard() {
       label: 'Analytics & Reports',
       items: [
         { title: 'Reports', value: 'reports', icon: AlertTriangle, badge: stats.pendingReports },
-        { title: 'Reviews', value: 'reviews', icon: Star },
         { title: 'Geographic Analytics', value: 'geographic', icon: MapPin },
         { title: 'Referral Sources', value: 'referrals', icon: TrendingUp },
       ],
@@ -2911,11 +2868,6 @@ export default function AdminDashboard() {
                                           </Badge>
                                         );
                                       })()}
-                                      <div className="flex items-center gap-1 text-xs">
-                                        <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
-                                        <span className="font-semibold text-foreground">{tprof?.average_rating ? Number(tprof.average_rating).toFixed(1) : '—'}</span>
-                                        <span className="text-muted-foreground text-[10px]">({tprof?.total_reviews || 0})</span>
-                                      </div>
                                     </div>
                                   </TableCell>
                                   <TableCell className="text-right align-top">
