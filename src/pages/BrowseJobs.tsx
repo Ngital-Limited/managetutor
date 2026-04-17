@@ -423,33 +423,20 @@ export default function BrowseJobs() {
           {/* Expandable Filters */}
           {showFilters && (
             <div className="mt-4 pt-4 border-t border-border">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
                 <div>
                   <label className="text-xs font-medium text-muted-foreground mb-1.5 block">City</label>
-                  <Select value={selectedDistrict} onValueChange={(v) => { setSelectedDistrict(v); setSelectedArea('all'); setCurrentPage(1); }}>
+                  <Select value={selectedArea} onValueChange={(v) => { setSelectedArea(v); setCurrentPage(1); }}>
                     <SelectTrigger className="h-10 rounded-lg">
                       <MapPin className="h-3.5 w-3.5 mr-1.5 text-muted-foreground" />
                       <SelectValue placeholder="All Cities" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">All Cities</SelectItem>
-                      {sortedDistricts.map(d => (
-                        <SelectItem key={d.id} value={d.id}>{d.name_en}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Area</label>
-                  <Select value={selectedArea} onValueChange={(v) => { setSelectedArea(v); setCurrentPage(1); }} disabled={selectedDistrict === 'all'}>
-                    <SelectTrigger className="h-10 rounded-lg">
-                      <MapPin className="h-3.5 w-3.5 mr-1.5 text-muted-foreground" />
-                      <SelectValue placeholder={selectedDistrict === 'all' ? 'Pick city first' : 'All Areas'} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Areas</SelectItem>
-                      {filteredAreas.map(a => (
-                        <SelectItem key={a.id} value={a.id}>{a.name_en}</SelectItem>
+                      {sortedAreas.map(a => (
+                        <SelectItem key={a.id} value={a.id}>
+                          {a.name_en}{a.district_name ? ` (${a.district_name})` : ''}
+                        </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
