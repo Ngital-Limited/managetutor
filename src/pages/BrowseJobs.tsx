@@ -358,10 +358,10 @@ export default function BrowseJobs() {
   };
 
   const clearFilters = () => {
-    setSelectedDivision('all');
     setSelectedDistrict('all');
-    setSelectedSubject('all');
-    setSelectedMode('all');
+    setSelectedArea('all');
+    setSelectedCategory('all');
+    setSelectedBackground('all');
     setSelectedTime('all');
     setSearchQuery('');
     setCurrentPage(1);
