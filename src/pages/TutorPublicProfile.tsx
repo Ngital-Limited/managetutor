@@ -513,7 +513,7 @@ export default function TutorPublicProfile() {
             {relatedTutors.map((rt: any) => {
               const name = rt.profiles?.full_name || rt.display_name || 'Tutor';
               const snippet = rt.ai_overview
-                ? rt.ai_overview.split('\n').filter(Boolean).slice(0, 2).join(' ')
+                ? stripAiOverviewMarkdown(rt.ai_overview).split('. ').slice(0, 2).join('. ')
                 : (rt.bio || '');
               return (
                 <Link key={rt.id} to={`/tutor/${rt.slug || rt.id}`} className="group block">
