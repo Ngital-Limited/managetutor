@@ -316,7 +316,7 @@ export function AdminTutorEditTab({ toast }: Props) {
                 <p className="font-medium text-sm">{selectedTutor.name}</p>
                 <p className="text-xs text-muted-foreground">{selectedTutor.email} · {selectedTutor.gender} · {selectedTutor.experience_years} yrs exp</p>
               </div>
-              <Button size="sm" variant="outline" onClick={() => { setSelectedTutor(null); setSearch(''); setTutorSubjectIds([]); setEducations([]); setExperiences([]); }}>Change</Button>
+              <Button size="sm" variant="outline" onClick={() => { setSelectedTutor(null); setSearch(''); setTutorSubjectIds([]); setEducations([]); setExperiences([]); setBlurb(''); }}>Change</Button>
             </div>
           )}
         </CardContent>
