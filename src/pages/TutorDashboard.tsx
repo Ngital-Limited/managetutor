@@ -566,26 +566,6 @@ export default function TutorDashboard() {
           </Card>
         )}
 
-        {/* Get Verified Badge CTA */}
-        {profile?.verification_status !== 'approved' && (
-          <Card className="mb-6 border-primary/50 bg-primary/5">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-4">
-                <CheckCircle2 className="h-8 w-8 text-primary flex-shrink-0" />
-                <div className="flex-1">
-                  <h3 className="font-bold">Get Verified Badge</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Stand out with a verified badge on your profile. Parents trust verified tutors more. Only ৳{verificationFee} one-time fee.
-                  </p>
-                </div>
-                <Button onClick={handlePayForVerification} disabled={verifyLoading}>
-                  {verifyLoading ? 'Processing...' : `Pay ৳${verificationFee} & Verify`}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
         {/* Stats Grid */}
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           <Card>
