@@ -145,14 +145,23 @@ export default function TutorProfile() {
   }, [user, role, authLoading, adminEditUserId]);
 
   const fetchData = async () => {
-    const [subjectsRes, districtsRes, profileRes, tutorRes, docsRes, tutorSubjectsRes, areasRes] = await Promise.all([
+    const [subjectsRes, districtsRes, profileRes, tutorRes, areasRes] = await Promise.all([
       supabase.from('subjects').select('*').order('name_en'),
       supabase.from('districts').select('id, name_en, name_bn, division_en').order('name_en'),
       supabase.from('profiles').select('*').eq('id', targetUserId).single(),
       supabase.from('tutor_profiles').select('*').eq('user_id', targetUserId).single(),
-      supabase.from('verification_documents').select('*').eq('tutor_id', targetUserId),
-      supabase.from('tutor_subjects').select('subject_id').eq('tutor_profile_id', targetUserId),
       supabase.from('areas').select('*').order('name_en'),
+    ]);
+
+    // Fetch docs and tutor_subjects using tutor_profiles.id (not auth user_id)
+    const tutorProfileId = (tutorRes.data as any)?.id;
+    const [docsRes, tutorSubjectsRes] = await Promise.all([
+      tutorProfileId
+        ? supabase.from('verification_documents').select('*').eq('tutor_id', tutorProfileId)
+        : Promise.resolve({ data: [] as any[] }),
+      tutorProfileId
+        ? supabase.from('tutor_subjects').select('subject_id').eq('tutor_profile_id', tutorProfileId)
+        : Promise.resolve({ data: [] as any[] }),
     ]);
 
     if (subjectsRes.data) setSubjects(subjectsRes.data);
