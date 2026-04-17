@@ -160,9 +160,10 @@ export default function AdminBulkImportTutors() {
         <CardHeader>
           <CardTitle>Bulk Import Tutors</CardTitle>
           <CardDescription>
-            Upload a CSV with columns: fname, lname, email, phone, gender, school, college, university,
-            department, t_experience, background, medium, p_address, per_address, alt_phone, f_phone,
-            m_phone, fb_link, pre_class, pre_subject, pre_area, status, photo. Imports run in batches of {BATCH_SIZE}.
+            Headers are auto-mapped (case-insensitive, ignores spaces &amp; underscores). Recognized fields:
+            fname, lname, email, phone, gender, school, college, university, department, t_experience,
+            background, medium, p_address, per_address, alt_phone, f_phone, m_phone, fb_link, pre_class,
+            pre_subject, pre_area, status, photo. Imports run in batches of {BATCH_SIZE}.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -173,6 +174,27 @@ export default function AdminBulkImportTutors() {
               <p className="text-xs text-muted-foreground mt-1">{rows.length} rows loaded</p>
             )}
           </div>
+
+          {mappingInfo.length > 0 && (
+            <div className="space-y-2">
+              <h3 className="text-sm font-semibold">Column Mapping</h3>
+              <div className="border rounded-md p-2 max-h-48 overflow-y-auto">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-1 text-xs">
+                  {mappingInfo.map((m, idx) => (
+                    <div key={idx} className="flex items-center gap-2 py-0.5">
+                      <span className="font-mono truncate flex-1" title={m.original}>{m.original}</span>
+                      <span className="text-muted-foreground">→</span>
+                      {m.recognized ? (
+                        <Badge variant="default" className="text-[10px] px-1 py-0 font-mono">{m.mapped}</Badge>
+                      ) : (
+                        <Badge variant="outline" className="text-[10px] px-1 py-0 text-muted-foreground">ignored</Badge>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
 
           <Button onClick={runImport} disabled={!rows.length || running} className="w-full">
             {running ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Importing...</> : <><Upload className="h-4 w-4 mr-2" /> Start Import</>}
