@@ -832,6 +832,8 @@ export default function AdminDashboard() {
   const [allAppsStatusFilter, setAllAppsStatusFilter] = useState('all');
   const [allAppsSearch, setAllAppsSearch] = useState('');
   const [loadingAllApps, setLoadingAllApps] = useState(false);
+  const [selectedAppIds, setSelectedAppIds] = useState<Set<string>>(new Set());
+  const [bulkProcessing, setBulkProcessing] = useState(false);
 
   const fetchAllApplications = useCallback(async () => {
     setLoadingAllApps(true);
