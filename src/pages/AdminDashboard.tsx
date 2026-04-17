@@ -18,7 +18,8 @@ import {
   SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarTrigger,
 } from '@/components/ui/sidebar';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, Download } from 'lucide-react';
+import { MultiSearchableSelect } from '@/components/MultiSearchableSelect';
 
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -84,6 +85,12 @@ interface UserRow {
   is_approved: boolean;
   created_at: string;
   role?: string;
+  user_reference?: string | null;
+  district_id?: string | null;
+  area_id?: string | null;
+  district_name?: string | null;
+  area_name?: string | null;
+  jobs_count?: number;
 }
 
 interface TutorVerification {
@@ -770,6 +777,15 @@ export default function AdminDashboard() {
   const [users, setUsers] = useState<UserRow[]>([]);
   const [userSearch, setUserSearch] = useState('');
   const [userRoleFilter, setUserRoleFilter] = useState('all');
+  // Guardians/Parents filters
+  const [guardianDistrictFilter, setGuardianDistrictFilter] = useState<string>('all');
+  const [guardianAreaFilter, setGuardianAreaFilter] = useState<string[]>([]);
+  const [guardianStatusFilter, setGuardianStatusFilter] = useState<string>('all');
+  const [guardianDistricts, setGuardianDistricts] = useState<{ id: string; name_en: string }[]>([]);
+  const [guardianAreas, setGuardianAreas] = useState<{ id: string; name_en: string; district_id: string }[]>([]);
+  const [viewingParentJobs, setViewingParentJobs] = useState<{ id: string; name: string } | null>(null);
+  const [parentJobs, setParentJobs] = useState<any[]>([]);
+  const [loadingParentJobs, setLoadingParentJobs] = useState(false);
   const [pendingTutors, setPendingTutors] = useState<TutorVerification[]>([]);
   const [verificationFilter, setVerificationFilter] = useState('pending');
   const [verificationPayments, setVerificationPayments] = useState<PaymentRow[]>([]);
@@ -1053,21 +1069,44 @@ export default function AdminDashboard() {
 
   // ── Fetch functions per tab ──
   const fetchUsers = useCallback(async () => {
-    let query = supabase.from('profiles').select('id, full_name, email, phone, avatar_url, is_banned, is_approved, created_at').order('created_at', { ascending: false }).limit(100);
-    if (userSearch) query = query.or(`full_name.ilike.%${userSearch}%,email.ilike.%${userSearch}%,phone.ilike.%${userSearch}%`);
+    let query = supabase
+      .from('profiles')
+      .select('id, full_name, email, phone, avatar_url, is_banned, is_approved, created_at, user_reference, district_id, area_id')
+      .order('created_at', { ascending: false })
+      .limit(200);
+    if (userSearch) query = query.or(`full_name.ilike.%${userSearch}%,email.ilike.%${userSearch}%,phone.ilike.%${userSearch}%,user_reference.ilike.%${userSearch}%`);
+    if (guardianDistrictFilter !== 'all') query = query.eq('district_id', guardianDistrictFilter);
+    if (guardianAreaFilter.length > 0) query = query.in('area_id', guardianAreaFilter);
+    if (guardianStatusFilter === 'banned') query = query.eq('is_banned', true);
+    else if (guardianStatusFilter === 'pending') query = query.eq('is_approved', false).eq('is_banned', false);
+    else if (guardianStatusFilter === 'approved') query = query.eq('is_approved', true).eq('is_banned', false);
+
     const { data } = await query;
     if (!data) { setUsers([]); return; }
 
-    // Fetch roles for these users
     const ids = data.map(u => u.id);
-    const { data: roles } = await supabase.from('user_roles').select('user_id, role').in('user_id', ids);
+    const [{ data: roles }, { data: jobsRows }] = await Promise.all([
+      supabase.from('user_roles').select('user_id, role').in('user_id', ids),
+      supabase.from('jobs').select('parent_id').in('parent_id', ids),
+    ]);
     const roleMap = new Map(roles?.map(r => [r.user_id, r.role]) || []);
+    const jobsCountMap = new Map<string, number>();
+    jobsRows?.forEach(j => jobsCountMap.set(j.parent_id, (jobsCountMap.get(j.parent_id) || 0) + 1));
 
-    let result = data.map(u => ({ ...u, role: roleMap.get(u.id) || 'unknown' })) as UserRow[];
+    const districtMap = new Map(guardianDistricts.map(d => [d.id, d.name_en]));
+    const areaMap = new Map(guardianAreas.map(a => [a.id, a.name_en]));
+
+    let result = data.map(u => ({
+      ...u,
+      role: roleMap.get(u.id) || 'unknown',
+      district_name: u.district_id ? districtMap.get(u.district_id) || null : null,
+      area_name: u.area_id ? areaMap.get(u.area_id) || null : null,
+      jobs_count: jobsCountMap.get(u.id) || 0,
+    })) as UserRow[];
     // Filter to show only parents/guardians
     result = result.filter(u => u.role === 'parent');
     setUsers(result);
-  }, [userSearch]);
+  }, [userSearch, guardianDistrictFilter, guardianAreaFilter, guardianStatusFilter, guardianDistricts, guardianAreas]);
 
   const fetchVerifications = useCallback(async () => {
     let query = supabase
@@ -1176,6 +1215,7 @@ export default function AdminDashboard() {
     if (role !== 'admin') return;
     switch (activeTab) {
       case 'users': fetchUsers(); break;
+      case 'guardians': fetchUsers(); break;
       case 'verifications': fetchVerifications(); break;
       case 'jobs': fetchJobs(); break;
       case 'reports': fetchReports(); break;
@@ -1183,6 +1223,19 @@ export default function AdminDashboard() {
       case 'payments': fetchPayments(); break;
     }
   }, [activeTab, role, fetchUsers, fetchVerifications, fetchJobs, fetchReports, fetchReviews, fetchPayments]);
+
+  // Load districts/areas once for guardian filters
+  useEffect(() => {
+    if (role !== 'admin') return;
+    (async () => {
+      const [{ data: d }, { data: a }] = await Promise.all([
+        supabase.from('districts').select('id, name_en').order('name_en'),
+        supabase.from('areas').select('id, name_en, district_id').order('name_en'),
+      ]);
+      if (d) setGuardianDistricts(d);
+      if (a) setGuardianAreas(a);
+    })();
+  }, [role]);
 
   // ── Actions ──
   const handleVerifyTutor = async (tutorId: string, status: 'approved' | 'rejected') => {
@@ -1344,6 +1397,49 @@ export default function AdminDashboard() {
       else if (targetRole === 'parent') navigate('/parent/dashboard');
     }
     toast({ title: 'Impersonation Active', description: 'You are now operating as this user. All actions use their real permissions.' });
+  };
+
+  // Open dialog to view jobs posted by a parent
+  const handleViewParentJobs = async (parentId: string, parentName: string) => {
+    setViewingParentJobs({ id: parentId, name: parentName });
+    setLoadingParentJobs(true);
+    setParentJobs([]);
+    const { data } = await supabase
+      .from('jobs')
+      .select('id, title, job_reference, status, total_applications, created_at, districts (name_en), subjects (name_en)')
+      .eq('parent_id', parentId)
+      .order('created_at', { ascending: false });
+    setParentJobs(data || []);
+    setLoadingParentJobs(false);
+  };
+
+  // Export filtered guardians to CSV
+  const handleExportGuardiansCSV = () => {
+    const esc = (v: string | number | null | undefined) => {
+      const s = (v ?? '').toString().replace(/"/g, '""');
+      return `"${s}"`;
+    };
+    const headers = ['Reference', 'Name', 'Email', 'Phone', 'District', 'Area/Thana', 'Status', 'Jobs Posted', 'Joined'];
+    const rows = users.map(u => [
+      esc(u.user_reference || ''),
+      esc(u.full_name),
+      esc(u.email),
+      esc(u.phone || ''),
+      esc(u.district_name || ''),
+      esc(u.area_name || ''),
+      esc(u.is_banned ? 'Banned' : u.is_approved ? 'Approved' : 'Pending'),
+      esc(u.jobs_count || 0),
+      esc(format(new Date(u.created_at), 'yyyy-MM-dd')),
+    ].join(','));
+    const csv = [headers.join(','), ...rows].join('\n');
+    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `guardians-${format(new Date(), 'yyyy-MM-dd')}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast({ title: 'Export complete', description: `${users.length} guardians exported.` });
   };
 
   if (loading || role !== 'admin') {
@@ -1597,14 +1693,80 @@ export default function AdminDashboard() {
             {/* ═══════ GUARDIANS / PARENTS TAB ═══════ */}
             {activeTab === 'guardians' && (
               <div className="space-y-6">
-                <h1 className="text-xl font-semibold">Guardians / Parents</h1>
-                <div className="flex flex-col sm:flex-row gap-3">
-                  <div className="relative flex-1">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input placeholder="Search by name, email, or phone..." className="pl-10" value={userSearch} onChange={(e) => setUserSearch(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && fetchUsers()} />
-                  </div>
-                  <Button onClick={fetchUsers}><Search className="h-4 w-4 mr-1" /> Search</Button>
+                <div className="flex items-center justify-between flex-wrap gap-3">
+                  <h1 className="text-xl font-semibold">Guardians / Parents <span className="text-sm font-normal text-muted-foreground">({users.length})</span></h1>
+                  <Button onClick={handleExportGuardiansCSV} variant="outline" size="sm" disabled={users.length === 0}>
+                    <Download className="h-4 w-4 mr-1" /> Export CSV
+                  </Button>
                 </div>
+
+                {/* Filters */}
+                <Card>
+                  <CardContent className="p-4 space-y-3">
+                    <div className="flex flex-col lg:flex-row gap-3">
+                      <div className="relative flex-1 min-w-[200px]">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Input
+                          placeholder="Search by name, email, phone, or reference..."
+                          className="pl-10"
+                          value={userSearch}
+                          onChange={(e) => setUserSearch(e.target.value)}
+                          onKeyDown={(e) => e.key === 'Enter' && fetchUsers()}
+                        />
+                      </div>
+                      <Select
+                        value={guardianDistrictFilter}
+                        onValueChange={(v) => { setGuardianDistrictFilter(v); setGuardianAreaFilter([]); }}
+                      >
+                        <SelectTrigger className="w-full lg:w-48"><SelectValue placeholder="District" /></SelectTrigger>
+                        <SelectContent className="max-h-72">
+                          <SelectItem value="all">All Districts</SelectItem>
+                          {guardianDistricts.map(d => (
+                            <SelectItem key={d.id} value={d.id}>{d.name_en}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <Select value={guardianStatusFilter} onValueChange={setGuardianStatusFilter}>
+                        <SelectTrigger className="w-full lg:w-44"><SelectValue placeholder="Status" /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">All Status</SelectItem>
+                          <SelectItem value="approved">Approved</SelectItem>
+                          <SelectItem value="pending">Pending</SelectItem>
+                          <SelectItem value="banned">Banned</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <Button onClick={fetchUsers}><Search className="h-4 w-4 mr-1" /> Apply</Button>
+                    </div>
+                    <div className="flex flex-col lg:flex-row gap-3 items-start">
+                      <div className="flex-1 w-full">
+                        <label className="text-xs font-medium text-muted-foreground mb-1 block">Area / Thana (multi-select)</label>
+                        <MultiSearchableSelect
+                          options={guardianAreas
+                            .filter(a => guardianDistrictFilter === 'all' || a.district_id === guardianDistrictFilter)
+                            .map(a => ({ value: a.id, label: a.name_en }))}
+                          values={guardianAreaFilter}
+                          onValuesChange={setGuardianAreaFilter}
+                          placeholder={guardianDistrictFilter === 'all' ? 'Select district first or search all areas' : 'Select areas/thanas'}
+                          searchPlaceholder="Search area..."
+                        />
+                      </div>
+                      {(guardianDistrictFilter !== 'all' || guardianAreaFilter.length > 0 || guardianStatusFilter !== 'all' || userSearch) && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            setGuardianDistrictFilter('all');
+                            setGuardianAreaFilter([]);
+                            setGuardianStatusFilter('all');
+                            setUserSearch('');
+                          }}
+                        >
+                          <XCircle className="h-4 w-4 mr-1" /> Clear filters
+                        </Button>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
 
                 <Card>
                   <CardContent className="p-0">
@@ -1612,10 +1774,11 @@ export default function AdminDashboard() {
                       <Table>
                         <TableHeader>
                           <TableRow>
+                            <TableHead>Reference</TableHead>
                             <TableHead>User</TableHead>
-                            <TableHead>Email</TableHead>
-                            <TableHead>Phone</TableHead>
-                            <TableHead>Role</TableHead>
+                            <TableHead>Contact</TableHead>
+                            <TableHead>Location</TableHead>
+                            <TableHead>Jobs</TableHead>
                             <TableHead>Status</TableHead>
                             <TableHead>Joined</TableHead>
                             <TableHead className="text-right">Actions</TableHead>
@@ -1623,9 +1786,10 @@ export default function AdminDashboard() {
                         </TableHeader>
                         <TableBody>
                           {users.length === 0 ? (
-                            <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">Search users to see results</TableCell></TableRow>
+                            <TableRow><TableCell colSpan={8} className="text-center py-8 text-muted-foreground">No guardians match your filters</TableCell></TableRow>
                           ) : users.map((u) => (
                             <TableRow key={u.id}>
+                              <TableCell className="text-xs font-mono text-muted-foreground">{u.user_reference || '—'}</TableCell>
                               <TableCell>
                                 <div className="flex items-center gap-2">
                                   <Avatar className="h-8 w-8">
@@ -1635,41 +1799,56 @@ export default function AdminDashboard() {
                                   <span className="font-medium text-sm">{u.full_name}</span>
                                 </div>
                               </TableCell>
-                              <TableCell className="text-sm">{u.email}</TableCell>
-                              <TableCell className="text-sm">{u.phone || '—'}</TableCell>
-                              <TableCell><Badge variant="outline" className="capitalize text-xs">{u.role}</Badge></TableCell>
+                              <TableCell className="text-xs">
+                                <div>{u.email}</div>
+                                <div className="text-muted-foreground">{u.phone || '—'}</div>
+                              </TableCell>
+                              <TableCell className="text-xs">
+                                <div>{u.district_name || '—'}</div>
+                                <div className="text-muted-foreground">{u.area_name || '—'}</div>
+                              </TableCell>
+                              <TableCell>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-7 px-2 text-xs"
+                                  onClick={() => handleViewParentJobs(u.id, u.full_name)}
+                                  disabled={!u.jobs_count}
+                                  title="View posted jobs"
+                                >
+                                  <Briefcase className="h-3 w-3 mr-1" />
+                                  {u.jobs_count || 0}
+                                </Button>
+                              </TableCell>
                               <TableCell>
                                 {u.is_banned ? (
                                   <Badge variant="destructive" className="text-xs">Banned</Badge>
                                 ) : !u.is_approved ? (
-                                  <Badge className="bg-warning/10 text-warning border-warning/20 text-xs">Pending Approval</Badge>
+                                  <Badge className="bg-warning/10 text-warning border-warning/20 text-xs">Pending</Badge>
                                 ) : (
                                   <Badge className="bg-success/10 text-success border-success/20 text-xs">Approved</Badge>
                                 )}
                               </TableCell>
-                              <TableCell className="text-xs text-muted-foreground">{formatDistanceToNow(new Date(u.created_at), { addSuffix: true })}</TableCell>
+                              <TableCell className="text-xs text-muted-foreground whitespace-nowrap">{formatDistanceToNow(new Date(u.created_at), { addSuffix: true })}</TableCell>
                               <TableCell className="text-right">
                                 <div className="flex gap-1 justify-end">
-                                  {(u.role === 'tutor' || u.role === 'parent') && (
-                                    <Button variant="ghost" size="sm" onClick={() => handleImpersonate(u.id)} title={`Login as ${u.full_name}`}>
-                                      <LogIn className="h-4 w-4 text-primary" />
-                                    </Button>
-                                  )}
-                                   {u.role === 'tutor' && (
-                                    <>
-                                      <Button variant="ghost" size="sm" asChild><Link to={`/tutor/${u.id}`}><Eye className="h-4 w-4" /></Link></Button>
-                                      <Button variant="ghost" size="sm" asChild title="Edit Tutor Profile"><Link to={`/admin/tutor/${u.id}`}><Pencil className="h-4 w-4" /></Link></Button>
-                                    </>
-                                   )}
-                                   {u.role === 'parent' && (
-                                    <Button variant="ghost" size="sm" asChild title="Edit Parent Profile"><Link to={`/admin/parent/${u.id}`}><Pencil className="h-4 w-4" /></Link></Button>
-                                   )}
-                                   {!u.is_approved && (
+                                  <Button variant="ghost" size="sm" onClick={() => handleImpersonate(u.id)} title={`Login as ${u.full_name}`}>
+                                    <LogIn className="h-4 w-4 text-primary" />
+                                  </Button>
+                                  <Button variant="ghost" size="sm" asChild title="Edit Parent Profile">
+                                    <Link to={`/admin/parent/${u.id}`}><Pencil className="h-4 w-4" /></Link>
+                                  </Button>
+                                  {!u.is_approved && !u.is_banned && (
                                     <Button variant="ghost" size="sm" onClick={() => handleApproveUser(u.id)} title="Approve User">
                                       <UserCheck className="h-4 w-4 text-success" />
                                     </Button>
                                   )}
-                                  <Button variant="ghost" size="sm" onClick={() => { setSelectedUser(u); setAdminNotes(''); }}>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => { setSelectedUser(u); setAdminNotes(''); }}
+                                    title={u.is_banned ? 'Unban user' : 'Ban user'}
+                                  >
                                     {u.is_banned ? <CheckCircle2 className="h-4 w-4 text-success" /> : <Ban className="h-4 w-4 text-destructive" />}
                                   </Button>
                                 </div>
@@ -1683,6 +1862,54 @@ export default function AdminDashboard() {
                 </Card>
               </div>
             )}
+
+            {/* Parent posted jobs dialog */}
+            <Dialog open={!!viewingParentJobs} onOpenChange={() => setViewingParentJobs(null)}>
+              <DialogContent className="max-w-3xl">
+                <DialogHeader>
+                  <DialogTitle>Jobs posted by {viewingParentJobs?.name}</DialogTitle>
+                </DialogHeader>
+                {loadingParentJobs ? (
+                  <div className="py-8 text-center text-muted-foreground text-sm">Loading…</div>
+                ) : parentJobs.length === 0 ? (
+                  <div className="py-8 text-center text-muted-foreground text-sm">No jobs posted yet.</div>
+                ) : (
+                  <ScrollArea className="max-h-[60vh]">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Reference</TableHead>
+                          <TableHead>Title</TableHead>
+                          <TableHead>District</TableHead>
+                          <TableHead>Subject</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead>Apps</TableHead>
+                          <TableHead>Posted</TableHead>
+                          <TableHead></TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {parentJobs.map(j => (
+                          <TableRow key={j.id}>
+                            <TableCell className="text-xs font-mono">{j.job_reference || '—'}</TableCell>
+                            <TableCell className="text-sm font-medium">{j.title}</TableCell>
+                            <TableCell className="text-xs">{j.districts?.name_en || '—'}</TableCell>
+                            <TableCell className="text-xs">{j.subjects?.name_en || '—'}</TableCell>
+                            <TableCell><Badge variant="outline" className="text-xs capitalize">{j.status?.replace('_', ' ')}</Badge></TableCell>
+                            <TableCell className="text-xs">{j.total_applications || 0}</TableCell>
+                            <TableCell className="text-xs text-muted-foreground whitespace-nowrap">{formatDistanceToNow(new Date(j.created_at), { addSuffix: true })}</TableCell>
+                            <TableCell>
+                              <Button variant="ghost" size="sm" asChild><Link to={`/jobs/${j.id}`}><Eye className="h-4 w-4" /></Link></Button>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </ScrollArea>
+                )}
+              </DialogContent>
+            </Dialog>
+
 
             {/* ═══════ VERIFICATIONS TAB ═══════ */}
             {activeTab === 'verifications' && (
