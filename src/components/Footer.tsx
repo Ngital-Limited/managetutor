@@ -14,6 +14,7 @@ export function Footer() {
     { to: '/about', label: 'About Us' },
     { to: '/contact', label: 'Contact' },
     { to: '/pricing', label: 'Pricing' },
+    { to: '/install', label: 'Install App' },
   ];
 
   const legalLinks = [
