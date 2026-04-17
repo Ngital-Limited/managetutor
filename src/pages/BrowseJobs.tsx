@@ -78,6 +78,7 @@ export default function BrowseJobs() {
   // Filters
   const [searchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedDistrict, setSelectedDistrict] = useState<string>(searchParams.get('district') || 'all');
   const [selectedArea, setSelectedArea] = useState<string>(searchParams.get('area') || 'all');
   const [selectedCategory, setSelectedCategory] = useState<string>(searchParams.get('category') || 'all');
   const [selectedBackground, setSelectedBackground] = useState<string>(searchParams.get('background') || 'all');
