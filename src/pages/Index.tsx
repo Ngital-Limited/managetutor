@@ -578,14 +578,16 @@ export default function Index() {
           <div className="text-center mb-16 max-w-2xl mx-auto">
             <span className="text-xs uppercase tracking-[0.2em] text-muted-foreground font-medium">Why Us</span>
             <h2 className="text-3xl md:text-4xl font-semibold tracking-tight mt-2 mb-3">Why Choose Manage Tutor?</h2>
-            <p className="text-sm text-muted-foreground">Built for trust, designed for results</p>
+            <p className="text-sm text-muted-foreground">
+              Built for trust, designed for results — we combine rigorous tutor vetting, transparent pricing, and a smooth booking experience to deliver the most reliable home-tuition marketplace in Bangladesh.
+            </p>
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4 max-w-6xl mx-auto">
             {[
-              { icon: Shield, title: 'Verified Tutors', desc: 'All tutors go through our verification process' },
-              { icon: Clock, title: 'Flexible Scheduling', desc: 'Find tutors available when you need them' },
-              { icon: Award, title: 'Trusted Platform', desc: 'Secure platform connecting parents with qualified tutors' },
-              { icon: Users, title: 'Trusted Community', desc: 'Join thousands of parents and tutors across Bangladesh' },
+              { icon: Shield, title: 'Verified Tutors', desc: 'Every tutor passes ID, education, and background checks before being approved by our admin team.' },
+              { icon: Clock, title: 'Flexible Scheduling', desc: 'Choose tutors who match your timetable — mornings, evenings, weekends, online, or in-person.' },
+              { icon: Award, title: 'Trusted Platform', desc: 'Secure payments, vetted profiles, and dedicated support keep every booking safe and worry-free.' },
+              { icon: Users, title: 'Trusted Community', desc: 'Join 4,000+ matched families and 1,00,000+ tutors building better learning outcomes nationwide.' },
             ].map((feature, i) => (
               <div
                 key={i}
