@@ -183,21 +183,19 @@ function SubjectsManager({ toast }: { toast: any }) {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Name (EN)</TableHead>
-                  <TableHead>Name (BN)</TableHead>
+                  <TableHead>Name</TableHead>
                   <TableHead>Category</TableHead>
                   <TableHead className="text-right w-24">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {loading ? (
-                  <TableRow><TableCell colSpan={4} className="text-center py-8 text-muted-foreground">Loading...</TableCell></TableRow>
+                  <TableRow><TableCell colSpan={3} className="text-center py-8 text-muted-foreground">Loading...</TableCell></TableRow>
                 ) : subjects.length === 0 ? (
-                  <TableRow><TableCell colSpan={4} className="text-center py-8 text-muted-foreground">No subjects found</TableCell></TableRow>
+                  <TableRow><TableCell colSpan={3} className="text-center py-8 text-muted-foreground">No subjects found</TableCell></TableRow>
                 ) : subjects.map(s => (
                   <TableRow key={s.id}>
                     <TableCell className="font-medium text-sm">{s.name_en}</TableCell>
-                    <TableCell className="text-sm">{s.name_bn}</TableCell>
                     <TableCell>{s.category_en ? <Badge variant="outline" className="text-xs">{s.category_en}</Badge> : '—'}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex gap-1 justify-end">
