@@ -122,7 +122,9 @@ export default function TutorProfile() {
     email: '',
     district_id: '',
     area_id: '',
+    avatar_url: '',
   });
+  const [avatarUploading, setAvatarUploading] = useState(false);
 
   useEffect(() => {
     if (!authLoading) {
