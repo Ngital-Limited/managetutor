@@ -46,6 +46,7 @@ interface Job {
   location_details: string | null;
   job_reference: string | null;
   districts: { name_en: string; name_bn: string } | null;
+  areas: { name_en: string; name_bn: string } | null;
   subjects: { name_en: string; name_bn: string } | null;
   job_subjects?: { subjects: { name_en: string; name_bn: string } }[];
 }
@@ -100,6 +101,7 @@ export default function JobDetails() {
       .select(`
         *,
         districts (name_en, name_bn),
+        areas (name_en, name_bn),
         subjects (name_en, name_bn),
         job_subjects (subjects (name_en, name_bn))
       `)
@@ -318,7 +320,7 @@ export default function JobDetails() {
                     </div>
                     <p className="text-muted-foreground flex items-center gap-2">
                       <MapPin className="h-4 w-4" />
-                      {job.districts?.name_en}
+                      {[job.areas?.name_en, job.districts?.name_en].filter(Boolean).join(', ')}
                       <span className="text-border">•</span>
                       Posted {formatExactDate(new Date(job.created_at))}
                     </p>
