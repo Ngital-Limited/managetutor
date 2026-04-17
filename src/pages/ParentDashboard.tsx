@@ -139,7 +139,7 @@ const externalLinks = [
   { title: 'Pricing', url: '/pricing', icon: CreditCard },
 ];
 
-function ParentSidebar({ activeSection, setActiveSection, onPostJob }: { activeSection: SectionKey; setActiveSection: (s: SectionKey) => void; onPostJob: () => void }) {
+function ParentSidebar({ activeSection, setActiveSection, onPostJob, pendingApplicants }: { activeSection: SectionKey; setActiveSection: (s: SectionKey) => void; onPostJob: () => void; pendingApplicants: number }) {
   const { state } = useSidebar();
   const collapsed = state === 'collapsed';
   const { profile, user } = useAuth();
