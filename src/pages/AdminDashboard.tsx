@@ -2509,30 +2509,72 @@ export default function AdminDashboard() {
                         <Table>
                           <TableHeader>
                             <TableRow>
+                              <TableHead>Tutor ID</TableHead>
                               <TableHead>Tutor</TableHead>
-                              <TableHead>Applied</TableHead>
+                              <TableHead>Contact</TableHead>
+                              <TableHead>Last Education</TableHead>
                               <TableHead>Rate</TableHead>
-                              <TableHead>Cover Message</TableHead>
+                              <TableHead>Bio</TableHead>
                               <TableHead>Status</TableHead>
                               <TableHead className="text-right">Actions</TableHead>
                             </TableRow>
                           </TableHeader>
                           <TableBody>
                             {visible.length === 0 ? (
-                              <TableRow><TableCell colSpan={6} className="text-center py-12 text-muted-foreground">No applicants match this filter.</TableCell></TableRow>
+                              <TableRow><TableCell colSpan={8} className="text-center py-12 text-muted-foreground">No applicants match this filter.</TableCell></TableRow>
                             ) : visible.map((app) => {
                               const isFinal = app.status === 'accepted' || app.status === 'rejected' || app.status === 'withdrawn';
+                              const tp = app.tutor_profile;
+                              const tprof = app.tutor_profiles as any;
+                              const edu = app.tutor_last_education;
+                              const bio = tprof?.bio || '';
                               return (
                                 <TableRow key={app.id}>
-                                  <TableCell>
-                                    <div className="text-sm font-medium">{app.tutor_profile?.full_name || 'Unknown'}</div>
-                                    <div className="text-xs text-muted-foreground">{app.tutor_profile?.email}</div>
+                                  <TableCell className="text-xs font-mono text-muted-foreground align-top">
+                                    {tp?.user_reference || '—'}
+                                    <div className="text-[10px] mt-1">{formatDistanceToNow(new Date(app.created_at), { addSuffix: true })}</div>
                                   </TableCell>
-                                  <TableCell className="text-xs text-muted-foreground">{formatDistanceToNow(new Date(app.created_at), { addSuffix: true })}</TableCell>
-                                  <TableCell className="text-sm">{app.proposed_rate ? `৳${app.proposed_rate}` : '—'}</TableCell>
-                                  <TableCell className="text-xs text-muted-foreground max-w-[280px] truncate" title={app.cover_message || ''}>{app.cover_message || '—'}</TableCell>
-                                  <TableCell><Badge className={`text-xs capitalize ${statusColor(app.status)}`}>{app.status}</Badge></TableCell>
-                                  <TableCell className="text-right">
+                                  <TableCell className="align-top">
+                                    <div className="flex items-center gap-2">
+                                      <Avatar className="h-9 w-9">
+                                        <AvatarImage src={tp?.avatar_url || ''} />
+                                        <AvatarFallback className="text-xs">{tp?.full_name?.charAt(0) || 'T'}</AvatarFallback>
+                                      </Avatar>
+                                      <div>
+                                        <div className="text-sm font-medium">{tp?.full_name || 'Unknown'}</div>
+                                        {tprof?.experience_years != null && (
+                                          <div className="text-[11px] text-muted-foreground">{tprof.experience_years} yr exp</div>
+                                        )}
+                                      </div>
+                                    </div>
+                                  </TableCell>
+                                  <TableCell className="text-xs align-top">
+                                    <div className="space-y-0.5">
+                                      {tp?.phone && <div>📞 {tp.phone}</div>}
+                                      {tp?.email && <div className="text-muted-foreground truncate max-w-[180px]" title={tp.email}>{tp.email}</div>}
+                                      {!tp?.phone && !tp?.email && <span className="text-muted-foreground">—</span>}
+                                    </div>
+                                  </TableCell>
+                                  <TableCell className="text-xs align-top max-w-[180px]">
+                                    {edu ? (
+                                      <div>
+                                        <div className="font-medium truncate" title={edu.degree}>{edu.degree}</div>
+                                        <div className="text-muted-foreground truncate" title={edu.institution}>{edu.institution}</div>
+                                        {edu.passing_year && <div className="text-[10px] text-muted-foreground">{edu.passing_year}</div>}
+                                      </div>
+                                    ) : (
+                                      <span className="text-muted-foreground">—</span>
+                                    )}
+                                  </TableCell>
+                                  <TableCell className="text-sm align-top">{app.proposed_rate ? `৳${app.proposed_rate}` : '—'}</TableCell>
+                                  <TableCell className="text-xs text-muted-foreground max-w-[220px] align-top">
+                                    <p className="line-clamp-3" title={bio}>{bio || '—'}</p>
+                                    {app.cover_message && (
+                                      <p className="line-clamp-2 mt-1 italic" title={app.cover_message}>“{app.cover_message}”</p>
+                                    )}
+                                  </TableCell>
+                                  <TableCell className="align-top"><Badge className={`text-xs capitalize ${statusColor(app.status)}`}>{app.status}</Badge></TableCell>
+                                  <TableCell className="text-right align-top">
                                     <div className="flex gap-1 justify-end flex-wrap">
                                       {!isFinal && app.status === 'pending' && (
                                         <Button variant="outline" size="sm" className="h-8 text-xs gap-1" onClick={() => handleAdminUpdateAppStatus(app.id, 'shortlisted', app.job_id)} title="Shortlist">
@@ -2559,8 +2601,8 @@ export default function AdminDashboard() {
                                           Withdraw
                                         </Button>
                                       )}
-                                      <Button variant="ghost" size="sm" asChild title="View Job">
-                                        <Link to={`/jobs/${app.job_id}`}><Eye className="h-4 w-4" /></Link>
+                                      <Button variant="ghost" size="sm" asChild title="View Tutor Profile">
+                                        <Link to={`/tutor/${tprof?.id}`}><Eye className="h-4 w-4" /></Link>
                                       </Button>
                                     </div>
                                   </TableCell>
