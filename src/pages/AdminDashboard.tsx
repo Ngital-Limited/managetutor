@@ -2263,6 +2263,21 @@ export default function AdminDashboard() {
                               <TableCell className="text-xs text-muted-foreground">{formatDistanceToNow(new Date(app.created_at), { addSuffix: true })}</TableCell>
                               <TableCell className="text-right">
                                 <div className="flex gap-1 justify-end flex-wrap">
+                                  {(app.status === 'pending' || app.status === 'shortlisted') && (
+                                    <>
+                                      {app.status === 'pending' && (
+                                        <Button variant="outline" size="sm" className="h-8 text-xs gap-1" onClick={() => handleAdminUpdateAppStatus(app.id, 'shortlisted', app.job_id)} title="Shortlist">
+                                          <Star className="h-3.5 w-3.5" /> Shortlist
+                                        </Button>
+                                      )}
+                                      <Button size="sm" className="h-8 text-xs gap-1" onClick={() => handleAdminUpdateAppStatus(app.id, 'accepted', app.job_id)} title="Hire">
+                                        <CheckCircle2 className="h-3.5 w-3.5" /> Hire
+                                      </Button>
+                                      <Button variant="outline" size="sm" className="h-8 text-xs gap-1" onClick={() => handleAdminUpdateAppStatus(app.id, 'rejected', app.job_id)} title="Reject">
+                                        <XCircle className="h-3.5 w-3.5" />
+                                      </Button>
+                                    </>
+                                  )}
                                   <Button variant="ghost" size="sm" asChild title="View Job">
                                     <Link to={`/jobs/${app.job_id}`}><Eye className="h-4 w-4" /></Link>
                                   </Button>

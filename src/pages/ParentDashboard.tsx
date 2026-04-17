@@ -636,29 +636,104 @@ export default function ParentDashboard() {
     setSubmitting(false);
   };
 
-  const handleApplicationAction = async (appId: string, status: 'accepted' | 'rejected') => {
-    const { error } = await supabase.from('applications').update({ status }).eq('id', appId);
+  const handleApplicationAction = async (appId: string, status: 'accepted' | 'rejected' | 'shortlisted') => {
+    const { error } = await supabase.from('applications').update({ status: status as any }).eq('id', appId);
 
     if (error) {
       toast({ title: 'Error', description: error.message, variant: 'destructive' });
-    } else {
-      toast({ title: 'Updated', description: `Application ${status}.` });
-      if (status === 'accepted' && selectedJob) {
-        await supabase.from('jobs').update({ status: 'in_progress' }).eq('id', selectedJob.id);
-        const app = applications.find(a => a.id === appId);
-        if (app?.tutor_profiles?.user_id) {
-          await supabase.from('notifications').insert({
-            user_id: app.tutor_profiles.user_id,
-            title: 'You have been hired!',
-            message: `Congratulations! You have been selected for "${selectedJob.title}".`,
-            type: 'hired',
-            reference_id: selectedJob.id,
-          });
-        }
-        fetchData();
-      }
-      if (selectedJob) fetchApplications(selectedJob.id);
+      return;
     }
+
+    // Find the app & job for this action (works from inline list OR All-Applicants table)
+    const inlineApp = applications.find(a => a.id === appId);
+    const allApp = allApplicants.find((a: any) => a.id === appId);
+    const tutorUserId = inlineApp?.tutor_profiles?.user_id || (allApp as any)?.tutor_profiles?.user_id;
+    const jobTitle = selectedJob?.title || (allApp as any)?.jobs?.title || '';
+    const jobId = selectedJob?.id || (allApp as any)?.jobs?.id;
+
+    toast({ title: 'Updated', description: `Application ${status}.` });
+
+    if (status === 'accepted' && jobId) {
+      await supabase.from('jobs').update({ status: 'in_progress' as any }).eq('id', jobId);
+      if (tutorUserId) {
+        await supabase.from('notifications').insert({
+          user_id: tutorUserId,
+          title: 'You have been hired!',
+          message: `Congratulations! You have been selected for "${jobTitle}".`,
+          type: 'hired',
+          reference_id: jobId,
+        });
+      }
+    } else if (status === 'shortlisted' && tutorUserId) {
+      await supabase.from('notifications').insert({
+        user_id: tutorUserId,
+        title: 'You have been shortlisted!',
+        message: `Great news — you've been shortlisted for "${jobTitle}". The guardian may invite you for a demo class soon.`,
+        type: 'application_shortlisted',
+        reference_id: jobId,
+      });
+    } else if (status === 'rejected' && tutorUserId) {
+      await supabase.from('notifications').insert({
+        user_id: tutorUserId,
+        title: 'Application not selected',
+        message: `Your application for "${jobTitle}" was not selected this time.`,
+        type: 'application_rejected',
+        reference_id: jobId,
+      });
+    }
+
+    fetchData();
+    if (selectedJob) fetchApplications(selectedJob.id);
+  };
+
+  // Mark the result of a demo class (parent-reported)
+  const handleDemoResult = async (booking: any, result: 'confirmed' | 'cancelled', reason?: string) => {
+    if (result === 'confirmed') {
+      // Mark booking as completed and hire the tutor
+      const { error } = await supabase.from('demo_bookings').update({ status: 'completed' }).eq('id', booking.id);
+      if (error) { toast({ title: 'Error', description: error.message, variant: 'destructive' }); return; }
+
+      // If this demo was linked to an application, accept it
+      if (booking.application_id) {
+        await supabase.from('applications').update({ status: 'accepted' as any }).eq('id', booking.application_id);
+        const { data: app } = await supabase.from('applications').select('job_id').eq('id', booking.application_id).maybeSingle();
+        if (app?.job_id) {
+          await supabase.from('jobs').update({ status: 'in_progress' as any }).eq('id', app.job_id);
+        }
+      }
+
+      // Notify tutor
+      const { data: tp } = await supabase.from('tutor_profiles').select('user_id').eq('id', booking.tutor_id).maybeSingle();
+      if (tp?.user_id) {
+        await supabase.from('notifications').insert({
+          user_id: tp.user_id,
+          title: 'Demo confirmed — You have been hired!',
+          message: 'The guardian confirmed the demo class result. Congratulations!',
+          type: 'demo_result_confirmed',
+          reference_id: booking.id,
+        });
+      }
+      toast({ title: 'Demo confirmed', description: 'The tutor has been hired.' });
+    } else {
+      const { error } = await supabase.from('demo_bookings').update({
+        status: 'cancelled',
+        cancellation_reason: reason || 'Cancelled by guardian after demo class',
+      }).eq('id', booking.id);
+      if (error) { toast({ title: 'Error', description: error.message, variant: 'destructive' }); return; }
+
+      const { data: tp } = await supabase.from('tutor_profiles').select('user_id').eq('id', booking.tutor_id).maybeSingle();
+      if (tp?.user_id) {
+        await supabase.from('notifications').insert({
+          user_id: tp.user_id,
+          title: 'Demo result: Cancelled',
+          message: `The guardian did not proceed after the demo class.${reason ? ' Reason: ' + reason : ''}`,
+          type: 'demo_result_cancelled',
+          reference_id: booking.id,
+        });
+      }
+      toast({ title: 'Demo cancelled', description: 'The tutor has been notified.' });
+    }
+    fetchData();
   };
 
   const handleInviteToInterview = (app: Application) => {
@@ -677,7 +752,7 @@ export default function ParentDashboard() {
     setSchedulingInterview(true);
     const formattedDate = format(interviewDate, 'yyyy-MM-dd');
 
-    // Create a demo booking for the interview
+    // Create a demo booking for the interview, linked to the application
     const { error: bookingError } = await supabase.from('demo_bookings').insert({
       parent_id: user!.id,
       tutor_id: interviewApp.tutor_profiles.id,
@@ -687,23 +762,31 @@ export default function ParentDashboard() {
       class_fee: 0,
       status: 'pending',
       subject_id: selectedJob.subject_ids?.[0] || null,
-    });
+      application_id: interviewApp.id,
+    } as any);
+
+    // Mark the application as invited_to_demo
+    if (!bookingError) {
+      await supabase.from('applications').update({ status: 'invited_to_demo' as any }).eq('id', interviewApp.id);
+    }
 
     // Notify the tutor
     const { error: notifError } = await supabase.from('notifications').insert({
       user_id: interviewApp.tutor_profiles.user_id,
-      title: 'Interview/Demo Class Invitation',
-      message: `You have been invited for a demo class for "${selectedJob.title}" on ${format(interviewDate, 'PPP')} at ${interviewTime}.${interviewNotes ? ' Notes: ' + interviewNotes : ''}`,
-      type: 'interview_invite',
+      title: 'Demo Class Invitation',
+      message: `You have been invited for a demo class for "${selectedJob.title}" on ${format(interviewDate, 'PPP')} at ${interviewTime}. Awaiting admin approval.${interviewNotes ? ' Notes: ' + interviewNotes : ''}`,
+      type: 'demo_invite',
       reference_id: selectedJob.id,
     });
 
     if (bookingError || notifError) {
       toast({ title: 'Error', description: (bookingError || notifError)?.message, variant: 'destructive' });
     } else {
-      toast({ title: 'Interview Scheduled!', description: `Demo class scheduled for ${format(interviewDate, 'PPP')} at ${interviewTime}` });
+      toast({ title: 'Demo Class Invite Sent', description: `Scheduled for ${format(interviewDate, 'PPP')} at ${interviewTime}. Pending admin approval.` });
       setInterviewDialogOpen(false);
       setInterviewApp(null);
+      fetchData();
+      if (selectedJob) fetchApplications(selectedJob.id);
     }
     setSchedulingInterview(false);
   };
@@ -1649,28 +1732,41 @@ export default function ParentDashboard() {
                                           <Badge className={
                                             app.status === 'accepted' ? 'bg-success' :
                                             app.status === 'rejected' ? 'bg-destructive' :
+                                            app.status === 'shortlisted' ? 'bg-primary' :
+                                            app.status === 'invited_to_demo' ? 'bg-accent text-accent-foreground' :
                                             'bg-warning text-warning-foreground'
                                           }>
-                                            {app.status.charAt(0).toUpperCase() + app.status.slice(1)}
+                                            {app.status === 'invited_to_demo' ? 'Invited' : app.status.charAt(0).toUpperCase() + app.status.slice(1)}
                                           </Badge>
                                         </td>
                                         <td className="py-2 px-2">
                                           <div className="flex items-center gap-1 justify-center flex-wrap">
-                                            {app.status === 'pending' && (
+                                            {(app.status === 'pending' || app.status === 'shortlisted') && (
                                               <>
+                                                {app.status === 'pending' && (
+                                                  <Button size="sm" variant="outline" className="h-8 text-xs" onClick={() => handleApplicationAction(app.id, 'shortlisted')} title="Shortlist">
+                                                    <Star className="h-3.5 w-3.5 mr-1" />
+                                                    Shortlist
+                                                  </Button>
+                                                )}
+                                                <Button size="sm" variant="secondary" className="h-8 text-xs" onClick={() => handleInviteToInterview(app)}>
+                                                  <Send className="h-3.5 w-3.5 mr-1" />
+                                                  Invite to Demo
+                                                </Button>
                                                 <Button size="sm" className="h-8 text-xs" onClick={() => handleApplicationAction(app.id, 'accepted')}>
                                                   <CheckCircle2 className="h-3.5 w-3.5 mr-1" />
                                                   Hire
-                                                </Button>
-                                                <Button size="sm" variant="secondary" className="h-8 text-xs" onClick={() => handleInviteToInterview(app)}>
-                                                  <Send className="h-3.5 w-3.5 mr-1" />
-                                                  Invite
                                                 </Button>
                                                 <Button size="sm" variant="outline" className="h-8 text-xs" onClick={() => handleApplicationAction(app.id, 'rejected')}>
                                                   <XCircle className="h-3.5 w-3.5 mr-1" />
                                                   Reject
                                                 </Button>
                                               </>
+                                            )}
+                                            {app.status === 'invited_to_demo' && (
+                                              <Badge className="bg-accent/20 text-accent-foreground border-accent/30">
+                                                <Send className="h-3 w-3 mr-1" /> Demo Invited
+                                              </Badge>
                                             )}
                                             {app.status === 'accepted' && (
                                               <Badge className="bg-success/10 text-success border-success/20">
@@ -1752,9 +1848,9 @@ export default function ParentDashboard() {
           <div className="space-y-4">
             {demoBookings.map((booking: any) => (
               <div key={booking.id} className="p-4 border rounded-xl hover:bg-muted/50 transition-colors">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1 flex-wrap">
                       <h4 className="font-bold">
                         {booking.tutor_profiles?.profiles?.full_name || 'Tutor'}
                       </h4>
@@ -1765,7 +1861,7 @@ export default function ParentDashboard() {
                         </Badge>
                       )}
                     </div>
-                    <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                    <div className="flex items-center gap-3 text-sm text-muted-foreground flex-wrap">
                       <span className="flex items-center gap-1">
                         <Calendar className="h-3 w-3" />
                         {new Date(booking.preferred_date).toLocaleDateString()}
@@ -1776,17 +1872,42 @@ export default function ParentDashboard() {
                       </span>
                       <span className="font-medium text-success">Free</span>
                     </div>
+                    {booking.notes && (
+                      <p className="text-xs text-muted-foreground mt-2 italic">Note: {booking.notes}</p>
+                    )}
+                    {booking.cancellation_reason && (
+                      <p className="text-xs text-destructive mt-2">Cancelled: {booking.cancellation_reason}</p>
+                    )}
                   </div>
-                  <Badge className={
-                    booking.status === 'confirmed' ? 'bg-success' :
-                    booking.status === 'completed' ? 'bg-primary' :
-                    booking.status === 'cancelled' ? 'bg-destructive' :
-                    'bg-warning text-warning-foreground'
-                  }>
-                    {booking.status === 'pending' && <Clock className="h-3 w-3 mr-1" />}
-                    {booking.status === 'confirmed' && <CheckCircle2 className="h-3 w-3 mr-1" />}
-                    {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
-                  </Badge>
+                  <div className="flex flex-col items-end gap-2 shrink-0">
+                    <Badge className={
+                      booking.status === 'confirmed' ? 'bg-success' :
+                      booking.status === 'completed' ? 'bg-primary' :
+                      booking.status === 'cancelled' ? 'bg-destructive' :
+                      booking.status === 'approved' ? 'bg-accent text-accent-foreground' :
+                      'bg-warning text-warning-foreground'
+                    }>
+                      {booking.status === 'pending' && <Clock className="h-3 w-3 mr-1" />}
+                      {booking.status === 'confirmed' && <CheckCircle2 className="h-3 w-3 mr-1" />}
+                      {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
+                    </Badge>
+                    {(booking.status === 'confirmed' || booking.status === 'completed') && booking.status !== 'completed' && (
+                      <div className="flex flex-col gap-1.5 items-end">
+                        <span className="text-[10px] text-muted-foreground uppercase tracking-wide">After demo</span>
+                        <div className="flex gap-1.5">
+                          <Button size="sm" className="h-7 text-xs" onClick={() => handleDemoResult(booking, 'confirmed')}>
+                            <CheckCircle2 className="h-3 w-3 mr-1" /> Confirmed (Hire)
+                          </Button>
+                          <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => {
+                            const reason = window.prompt('Reason for cancelling?') || '';
+                            if (reason !== null) handleDemoResult(booking, 'cancelled', reason);
+                          }}>
+                            <XCircle className="h-3 w-3 mr-1" /> Cancel
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             ))}
@@ -2029,19 +2150,34 @@ export default function ParentDashboard() {
                         <Badge className={
                           app.status === 'accepted' ? 'bg-success' :
                           app.status === 'rejected' ? 'bg-destructive' :
+                          app.status === 'shortlisted' ? 'bg-primary' :
+                          app.status === 'invited_to_demo' ? 'bg-accent text-accent-foreground' :
                           'bg-warning text-warning-foreground'
                         }>
-                          {app.status.charAt(0).toUpperCase() + app.status.slice(1)}
+                          {app.status === 'invited_to_demo' ? 'Invited' : app.status.charAt(0).toUpperCase() + app.status.slice(1)}
                         </Badge>
                       </td>
                       <td className="py-3 px-2">
                         <div className="flex items-center gap-1 justify-center flex-wrap">
-                          {app.status === 'pending' && (
+                          {(app.status === 'pending' || app.status === 'shortlisted') && (
                             <>
-                              <Button size="sm" className="h-8 text-xs" onClick={() => handleApplicationAction(app.id, 'accepted')}>
-                                <CheckCircle2 className="h-3.5 w-3.5 mr-1" />Hire
+                              {app.status === 'pending' && (
+                                <Button size="sm" variant="outline" className="h-8 text-xs" onClick={() => handleApplicationAction(app.id, 'shortlisted')} title="Shortlist">
+                                  <Star className="h-3.5 w-3.5" />
+                                </Button>
+                              )}
+                              <Button size="sm" variant="secondary" className="h-8 text-xs" onClick={() => {
+                                // Make sure selectedJob is set so the demo dialog has context
+                                const job = jobs.find(j => j.id === app.jobs?.id);
+                                if (job) setSelectedJob(job);
+                                handleInviteToInterview(app);
+                              }} title="Invite to demo class">
+                                <Send className="h-3.5 w-3.5" />
                               </Button>
-                              <Button size="sm" variant="outline" className="h-8 text-xs" onClick={() => handleApplicationAction(app.id, 'rejected')}>
+                              <Button size="sm" className="h-8 text-xs" onClick={() => handleApplicationAction(app.id, 'accepted')} title="Hire">
+                                <CheckCircle2 className="h-3.5 w-3.5" />
+                              </Button>
+                              <Button size="sm" variant="outline" className="h-8 text-xs" onClick={() => handleApplicationAction(app.id, 'rejected')} title="Reject">
                                 <XCircle className="h-3.5 w-3.5" />
                               </Button>
                             </>

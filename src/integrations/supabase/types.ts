@@ -322,6 +322,7 @@ export type Database = {
       }
       demo_bookings: {
         Row: {
+          application_id: string | null
           cancellation_reason: string | null
           class_fee: number
           created_at: string
@@ -340,6 +341,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          application_id?: string | null
           cancellation_reason?: string | null
           class_fee: number
           created_at?: string
@@ -358,6 +360,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          application_id?: string | null
           cancellation_reason?: string | null
           class_fee?: number
           created_at?: string
@@ -1914,6 +1917,7 @@ export type Database = {
         | "withdrawn"
         | "shortlisted"
         | "waiting"
+        | "invited_to_demo"
       gender: "male" | "female" | "any"
       job_status:
         | "pending_approval"
@@ -2058,6 +2062,7 @@ export const Constants = {
         "withdrawn",
         "shortlisted",
         "waiting",
+        "invited_to_demo",
       ],
       gender: ["male", "female", "any"],
       job_status: [
