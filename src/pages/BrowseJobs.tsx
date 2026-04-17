@@ -66,7 +66,7 @@ export default function BrowseJobs() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [districts, setDistricts] = useState<District[]>([]);
-  const [subjects, setSubjects] = useState<Subject[]>([]);
+  const [areas, setAreas] = useState<Area[]>([]);
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
   const [totalCount, setTotalCount] = useState(0);
@@ -75,10 +75,10 @@ export default function BrowseJobs() {
 
   // Filters
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedDivision, setSelectedDivision] = useState<string>('all');
   const [selectedDistrict, setSelectedDistrict] = useState<string>('all');
-  const [selectedSubject, setSelectedSubject] = useState<string>('all');
-  const [selectedMode, setSelectedMode] = useState<string>('all');
+  const [selectedArea, setSelectedArea] = useState<string>('all');
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [selectedBackground, setSelectedBackground] = useState<string>('all');
   const [selectedTime, setSelectedTime] = useState<string>('all');
 
   const TIME_OPTIONS = [
@@ -100,28 +100,24 @@ export default function BrowseJobs() {
   const [tutorProfileId, setTutorProfileId] = useState<string | null>(null);
   const [tutorProfileCompleteness, setTutorProfileCompleteness] = useState(0);
 
-  const divisions = useMemo(() => {
-    const divs = [...new Set(districts.map(d => d.division_en))].sort();
-    return divs;
+  const sortedDistricts = useMemo(() => {
+    return [...districts].sort((a, b) => a.name_en.localeCompare(b.name_en));
   }, [districts]);
 
-  const filteredDistricts = useMemo(() => {
-    let list = districts;
-    if (selectedDivision && selectedDivision !== 'all') {
-      list = list.filter(d => d.division_en === selectedDivision);
-    }
-    return list.sort((a, b) => a.name_en.localeCompare(b.name_en));
-  }, [districts, selectedDivision]);
+  const filteredAreas = useMemo(() => {
+    if (!selectedDistrict || selectedDistrict === 'all') return [];
+    return areas.filter(a => a.district_id === selectedDistrict).sort((a, b) => a.name_en.localeCompare(b.name_en));
+  }, [areas, selectedDistrict]);
 
   const activeFilterCount = useMemo(() => {
     let count = 0;
-    if (selectedDivision !== 'all') count++;
     if (selectedDistrict !== 'all') count++;
-    if (selectedSubject !== 'all') count++;
-    if (selectedMode !== 'all') count++;
+    if (selectedArea !== 'all') count++;
+    if (selectedCategory !== 'all') count++;
+    if (selectedBackground !== 'all') count++;
     if (selectedTime !== 'all') count++;
     return count;
-  }, [selectedDivision, selectedDistrict, selectedSubject, selectedMode, selectedTime]);
+  }, [selectedDistrict, selectedArea, selectedCategory, selectedBackground, selectedTime]);
 
   useEffect(() => {
     fetchData();
@@ -129,7 +125,7 @@ export default function BrowseJobs() {
 
   useEffect(() => {
     fetchJobs();
-  }, [selectedDistrict, selectedSubject, selectedMode, selectedTime, currentPage]);
+  }, [selectedDistrict, selectedArea, selectedCategory, selectedBackground, selectedTime, currentPage]);
 
   useEffect(() => {
     if (user && role === 'tutor') {
