@@ -15,10 +15,11 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { 
   Search, MapPin, Briefcase, 
-  BookOpen, Users, ArrowRight, ChevronLeft, ChevronRight, Send, Loader2, Monitor,
-  Clock, Filter, X, Sparkles
+  Users, ArrowRight, ChevronLeft, ChevronRight, Send, Loader2,
+  Clock, Filter, X, Sparkles, Tag, GraduationCap
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
+import { JOB_CATEGORIES, STUDENT_BACKGROUNDS } from '@/constants/jobCategories';
 
 interface District {
   id: string;
@@ -27,10 +28,10 @@ interface District {
   division_en: string;
 }
 
-interface Subject {
+interface Area {
   id: string;
   name_en: string;
-  name_bn: string;
+  district_id: string;
 }
 
 interface Job {
@@ -65,7 +66,7 @@ export default function BrowseJobs() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [districts, setDistricts] = useState<District[]>([]);
-  const [subjects, setSubjects] = useState<Subject[]>([]);
+  const [areas, setAreas] = useState<Area[]>([]);
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
   const [totalCount, setTotalCount] = useState(0);
@@ -74,10 +75,10 @@ export default function BrowseJobs() {
 
   // Filters
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedDivision, setSelectedDivision] = useState<string>('all');
   const [selectedDistrict, setSelectedDistrict] = useState<string>('all');
-  const [selectedSubject, setSelectedSubject] = useState<string>('all');
-  const [selectedMode, setSelectedMode] = useState<string>('all');
+  const [selectedArea, setSelectedArea] = useState<string>('all');
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [selectedBackground, setSelectedBackground] = useState<string>('all');
   const [selectedTime, setSelectedTime] = useState<string>('all');
 
   const TIME_OPTIONS = [
@@ -99,28 +100,24 @@ export default function BrowseJobs() {
   const [tutorProfileId, setTutorProfileId] = useState<string | null>(null);
   const [tutorProfileCompleteness, setTutorProfileCompleteness] = useState(0);
 
-  const divisions = useMemo(() => {
-    const divs = [...new Set(districts.map(d => d.division_en))].sort();
-    return divs;
+  const sortedDistricts = useMemo(() => {
+    return [...districts].sort((a, b) => a.name_en.localeCompare(b.name_en));
   }, [districts]);
 
-  const filteredDistricts = useMemo(() => {
-    let list = districts;
-    if (selectedDivision && selectedDivision !== 'all') {
-      list = list.filter(d => d.division_en === selectedDivision);
-    }
-    return list.sort((a, b) => a.name_en.localeCompare(b.name_en));
-  }, [districts, selectedDivision]);
+  const filteredAreas = useMemo(() => {
+    if (!selectedDistrict || selectedDistrict === 'all') return [];
+    return areas.filter(a => a.district_id === selectedDistrict).sort((a, b) => a.name_en.localeCompare(b.name_en));
+  }, [areas, selectedDistrict]);
 
   const activeFilterCount = useMemo(() => {
     let count = 0;
-    if (selectedDivision !== 'all') count++;
     if (selectedDistrict !== 'all') count++;
-    if (selectedSubject !== 'all') count++;
-    if (selectedMode !== 'all') count++;
+    if (selectedArea !== 'all') count++;
+    if (selectedCategory !== 'all') count++;
+    if (selectedBackground !== 'all') count++;
     if (selectedTime !== 'all') count++;
     return count;
-  }, [selectedDivision, selectedDistrict, selectedSubject, selectedMode, selectedTime]);
+  }, [selectedDistrict, selectedArea, selectedCategory, selectedBackground, selectedTime]);
 
   useEffect(() => {
     fetchData();
@@ -128,7 +125,7 @@ export default function BrowseJobs() {
 
   useEffect(() => {
     fetchJobs();
-  }, [selectedDistrict, selectedSubject, selectedMode, selectedTime, currentPage]);
+  }, [selectedDistrict, selectedArea, selectedCategory, selectedBackground, selectedTime, currentPage]);
 
   useEffect(() => {
     if (user && role === 'tutor') {
@@ -162,28 +159,19 @@ export default function BrowseJobs() {
   };
 
   const fetchData = async () => {
-    const [districtsRes, subjectsRes] = await Promise.all([
+    const [districtsRes, areasRes] = await Promise.all([
       supabase.from('districts').select('id, name_en, name_bn, division_en').order('name_en'),
-      supabase.from('subjects').select('*').order('name_en'),
+      supabase.from('areas').select('id, name_en, district_id').order('name_en'),
     ]);
-    
+
     if (districtsRes.data) setDistricts(districtsRes.data);
-    if (subjectsRes.data) setSubjects(subjectsRes.data);
-    
+    if (areasRes.data) setAreas(areasRes.data as Area[]);
+
     await fetchJobs();
   };
 
   const fetchJobs = async () => {
     setLoading(true);
-    
-    let subjectJobIds: string[] | null = null;
-    if (selectedSubject && selectedSubject !== 'all') {
-      const { data: jsData } = await supabase
-        .from('job_subjects')
-        .select('job_id')
-        .eq('subject_id', selectedSubject);
-      subjectJobIds = jsData?.map(js => js.job_id) || [];
-    }
 
     let countQuery = supabase
       .from('jobs')
@@ -193,24 +181,12 @@ export default function BrowseJobs() {
     if (selectedDistrict && selectedDistrict !== 'all') {
       countQuery = countQuery.eq('district_id', selectedDistrict);
     }
-    if (subjectJobIds !== null) {
-      if (subjectJobIds.length === 0) {
-        setTotalCount(0);
-        setJobs([]);
-        setLoading(false);
-        return;
-      }
-      countQuery = countQuery.in('id', subjectJobIds);
-    }
-    if (selectedMode && selectedMode !== 'all') {
-      countQuery = countQuery.eq('teaching_mode', selectedMode as 'online' | 'in_person' | 'hybrid');
+    if (selectedArea && selectedArea !== 'all') {
+      countQuery = countQuery.eq('area_id', selectedArea);
     }
     if (selectedTime && selectedTime !== 'all') {
       countQuery = countQuery.eq('preferred_time', selectedTime);
     }
-
-    const { count } = await countQuery;
-    setTotalCount(count || 0);
 
     const from = (currentPage - 1) * JOBS_PER_PAGE;
     const to = from + JOBS_PER_PAGE - 1;
@@ -225,38 +201,60 @@ export default function BrowseJobs() {
       `)
       .eq('status', 'open')
       .order('is_featured', { ascending: false })
-      .order('created_at', { ascending: false })
-      .range(from, to);
+      .order('created_at', { ascending: false });
 
     if (selectedDistrict && selectedDistrict !== 'all') {
       query = query.eq('district_id', selectedDistrict);
     }
-    if (subjectJobIds !== null) {
-      query = query.in('id', subjectJobIds);
-    }
-    if (selectedMode && selectedMode !== 'all') {
-      query = query.eq('teaching_mode', selectedMode as 'online' | 'in_person' | 'hybrid');
+    if (selectedArea && selectedArea !== 'all') {
+      query = query.eq('area_id', selectedArea);
     }
     if (selectedTime && selectedTime !== 'all') {
       query = query.eq('preferred_time', selectedTime);
     }
 
-    const { data } = await query;
-    
-    if (data) {
-      let filtered = data as unknown as Job[];
-      
-      if (searchQuery) {
-        const q = searchQuery.toLowerCase();
-        filtered = filtered.filter(j => 
-          j.title?.toLowerCase().includes(q) ||
-          j.description?.toLowerCase().includes(q)
-        );
-      }
-      
-      setJobs(filtered);
+    // Category & Background filters apply client-side (matched against title, description, class_level, special_requirements)
+    const needsClientFilter = (selectedCategory && selectedCategory !== 'all') || (selectedBackground && selectedBackground !== 'all') || !!searchQuery;
+
+    if (!needsClientFilter) {
+      const { count } = await countQuery;
+      setTotalCount(count || 0);
+      const { data } = await query.range(from, to);
+      setJobs((data as unknown as Job[]) || []);
+      setLoading(false);
+      return;
     }
-    
+
+    // Fetch full set then filter+paginate locally
+    const { data } = await query.limit(500);
+    let filtered = (data as unknown as Job[]) || [];
+
+    const matchesText = (j: Job, kw: string) => {
+      const k = kw.toLowerCase();
+      return (
+        j.title?.toLowerCase().includes(k) ||
+        j.description?.toLowerCase().includes(k) ||
+        j.class_level?.toLowerCase().includes(k) ||
+        (j as any).special_requirements?.toLowerCase().includes(k)
+      );
+    };
+
+    if (selectedCategory && selectedCategory !== 'all') {
+      filtered = filtered.filter(j => matchesText(j, selectedCategory));
+    }
+    if (selectedBackground && selectedBackground !== 'all') {
+      filtered = filtered.filter(j => matchesText(j, selectedBackground));
+    }
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      filtered = filtered.filter(j =>
+        j.title?.toLowerCase().includes(q) ||
+        j.description?.toLowerCase().includes(q)
+      );
+    }
+
+    setTotalCount(filtered.length);
+    setJobs(filtered.slice(from, to + 1));
     setLoading(false);
   };
 
@@ -360,10 +358,10 @@ export default function BrowseJobs() {
   };
 
   const clearFilters = () => {
-    setSelectedDivision('all');
     setSelectedDistrict('all');
-    setSelectedSubject('all');
-    setSelectedMode('all');
+    setSelectedArea('all');
+    setSelectedCategory('all');
+    setSelectedBackground('all');
     setSelectedTime('all');
     setSearchQuery('');
     setCurrentPage(1);
@@ -433,61 +431,62 @@ export default function BrowseJobs() {
             <div className="mt-4 pt-4 border-t border-border">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3">
                 <div>
-                  <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Division</label>
-                  <Select value={selectedDivision} onValueChange={(v) => { setSelectedDivision(v); setSelectedDistrict('all'); setCurrentPage(1); }}>
-                    <SelectTrigger className="h-10 rounded-lg">
-                      <SelectValue placeholder="All Divisions" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Divisions</SelectItem>
-                      {divisions.map(div => (
-                        <SelectItem key={div} value={div}>{div}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
                   <label className="text-xs font-medium text-muted-foreground mb-1.5 block">District</label>
-                  <Select value={selectedDistrict} onValueChange={(v) => { setSelectedDistrict(v); setCurrentPage(1); }}>
+                  <Select value={selectedDistrict} onValueChange={(v) => { setSelectedDistrict(v); setSelectedArea('all'); setCurrentPage(1); }}>
                     <SelectTrigger className="h-10 rounded-lg">
                       <MapPin className="h-3.5 w-3.5 mr-1.5 text-muted-foreground" />
                       <SelectValue placeholder="All Districts" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">All Districts</SelectItem>
-                      {filteredDistricts.map(d => (
+                      {sortedDistricts.map(d => (
                         <SelectItem key={d.id} value={d.id}>{d.name_en}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
                 <div>
-                  <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Subject</label>
-                  <Select value={selectedSubject} onValueChange={(v) => { setSelectedSubject(v); setCurrentPage(1); }}>
+                  <label className="text-xs font-medium text-muted-foreground mb-1.5 block">City / Area</label>
+                  <Select value={selectedArea} onValueChange={(v) => { setSelectedArea(v); setCurrentPage(1); }} disabled={selectedDistrict === 'all'}>
                     <SelectTrigger className="h-10 rounded-lg">
-                      <BookOpen className="h-3.5 w-3.5 mr-1.5 text-muted-foreground" />
-                      <SelectValue placeholder="All Subjects" />
+                      <MapPin className="h-3.5 w-3.5 mr-1.5 text-muted-foreground" />
+                      <SelectValue placeholder={selectedDistrict === 'all' ? 'Pick district first' : 'All Areas'} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="all">All Subjects</SelectItem>
-                      {subjects.map(s => (
-                        <SelectItem key={s.id} value={s.id}>{s.name_en}</SelectItem>
+                      <SelectItem value="all">All Areas</SelectItem>
+                      {filteredAreas.map(a => (
+                        <SelectItem key={a.id} value={a.id}>{a.name_en}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
                 <div>
-                  <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Teaching Mode</label>
-                  <Select value={selectedMode} onValueChange={(v) => { setSelectedMode(v); setCurrentPage(1); }}>
+                  <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Job Category</label>
+                  <Select value={selectedCategory} onValueChange={(v) => { setSelectedCategory(v); setCurrentPage(1); }}>
                     <SelectTrigger className="h-10 rounded-lg">
-                      <Monitor className="h-3.5 w-3.5 mr-1.5 text-muted-foreground" />
-                      <SelectValue placeholder="All Modes" />
+                      <Tag className="h-3.5 w-3.5 mr-1.5 text-muted-foreground" />
+                      <SelectValue placeholder="All Categories" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="all">All Modes</SelectItem>
-                      <SelectItem value="online">Online</SelectItem>
-                      <SelectItem value="in_person">In-Person</SelectItem>
-                      <SelectItem value="hybrid">Hybrid</SelectItem>
+                      <SelectItem value="all">All Categories</SelectItem>
+                      {JOB_CATEGORIES.map(c => (
+                        <SelectItem key={c} value={c}>{c}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Background</label>
+                  <Select value={selectedBackground} onValueChange={(v) => { setSelectedBackground(v); setCurrentPage(1); }}>
+                    <SelectTrigger className="h-10 rounded-lg">
+                      <GraduationCap className="h-3.5 w-3.5 mr-1.5 text-muted-foreground" />
+                      <SelectValue placeholder="All Backgrounds" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Backgrounds</SelectItem>
+                      {STUDENT_BACKGROUNDS.map(b => (
+                        <SelectItem key={b} value={b}>{b}</SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
