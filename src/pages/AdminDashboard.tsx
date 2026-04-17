@@ -930,6 +930,7 @@ export default function AdminDashboard() {
       }
       toast({ title: `Application ${status}` });
       fetchJobApplications(jobId);
+      fetchAllApplications();
       fetchJobs();
       fetchStats();
     }
