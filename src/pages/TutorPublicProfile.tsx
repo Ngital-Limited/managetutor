@@ -337,12 +337,12 @@ export default function TutorPublicProfile() {
       <main className="container mx-auto px-4 py-8 max-w-6xl">
         <div className="grid lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
-            <Tabs defaultValue="about" className="w-full">
+            <Tabs defaultValue="details" className="w-full">
               <TabsList className="w-full justify-start overflow-x-auto bg-muted/50">
+                <TabsTrigger value="details">Quick Details</TabsTrigger>
                 <TabsTrigger value="about">About</TabsTrigger>
                 <TabsTrigger value="education">Education</TabsTrigger>
                 {tutor.video_url && <TabsTrigger value="video">Video</TabsTrigger>}
-                <TabsTrigger value="details">Details</TabsTrigger>
               </TabsList>
 
               <TabsContent value="about" className="mt-4 space-y-4">
