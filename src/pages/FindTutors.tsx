@@ -21,6 +21,7 @@ import {
   User, Clock, CheckCircle2, X, ChevronDown, Heart, Award, ArrowRight, ChevronLeft, ChevronRight,
   BookOpen, Monitor, Users, SlidersHorizontal, LayoutGrid, LayoutList, GraduationCap
 } from 'lucide-react';
+import { stripAiOverviewMarkdown } from '@/components/AiOverview';
 
 interface District {
   id: string;
