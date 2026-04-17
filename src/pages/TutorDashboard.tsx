@@ -34,6 +34,7 @@ import {
   Home, Search, CreditCard, FileText
 } from 'lucide-react';
 import { generateTutorCV } from '@/components/TutorCVGenerator';
+import { TutorSidebarLayout } from '@/components/TutorSidebarLayout';
 
 interface Application {
   id: string;
