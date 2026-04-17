@@ -512,13 +512,7 @@ export default function TutorProfile() {
     return null;
   };
 
-  // Education helpers
-  const addEducation = () => {
-    setEducationEntries([...educationEntries, { institution: '', degree: '', field_of_study: '', passing_year: null, result: '', is_current: false }]);
-  };
-  const removeEducation = (index: number) => {
-    setEducationEntries(educationEntries.filter((_, i) => i !== index));
-  };
+  // Education helpers — fixed 4 slots (SSC, HSC, Bachelor, Masters)
   const updateEducation = (index: number, field: keyof EducationEntry, value: any) => {
     const updated = [...educationEntries];
     (updated[index] as any)[field] = value;
