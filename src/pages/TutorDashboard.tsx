@@ -111,7 +111,7 @@ function TutorSidebar() {
     : user?.email?.[0]?.toUpperCase() || '?';
 
   return (
-    <Sidebar collapsible="none">
+    <Sidebar collapsible="offcanvas">
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel>
