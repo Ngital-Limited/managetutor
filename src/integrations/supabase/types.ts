@@ -18,7 +18,6 @@ export type Database = {
         Row: {
           can_manage_jobs: boolean
           can_manage_revenue: boolean
-          can_manage_reviews: boolean
           can_manage_settings: boolean
           can_manage_tickets: boolean
           can_manage_users: boolean
@@ -33,7 +32,6 @@ export type Database = {
         Insert: {
           can_manage_jobs?: boolean
           can_manage_revenue?: boolean
-          can_manage_reviews?: boolean
           can_manage_settings?: boolean
           can_manage_tickets?: boolean
           can_manage_users?: boolean
@@ -48,7 +46,6 @@ export type Database = {
         Update: {
           can_manage_jobs?: boolean
           can_manage_revenue?: boolean
-          can_manage_reviews?: boolean
           can_manage_settings?: boolean
           can_manage_tickets?: boolean
           can_manage_users?: boolean
@@ -1134,109 +1131,6 @@ export type Database = {
           },
         ]
       }
-      review_update_requests: {
-        Row: {
-          admin_notes: string | null
-          created_at: string
-          id: string
-          reason: string
-          review_id: string
-          status: string
-          tutor_id: string
-          updated_at: string
-        }
-        Insert: {
-          admin_notes?: string | null
-          created_at?: string
-          id?: string
-          reason: string
-          review_id: string
-          status?: string
-          tutor_id: string
-          updated_at?: string
-        }
-        Update: {
-          admin_notes?: string | null
-          created_at?: string
-          id?: string
-          reason?: string
-          review_id?: string
-          status?: string
-          tutor_id?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "review_update_requests_review_id_fkey"
-            columns: ["review_id"]
-            isOneToOne: false
-            referencedRelation: "reviews"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "review_update_requests_tutor_id_fkey"
-            columns: ["tutor_id"]
-            isOneToOne: false
-            referencedRelation: "tutor_profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      reviews: {
-        Row: {
-          comment: string | null
-          created_at: string | null
-          id: string
-          is_approved: boolean | null
-          job_id: string | null
-          parent_id: string
-          rating: number
-          tutor_id: string
-        }
-        Insert: {
-          comment?: string | null
-          created_at?: string | null
-          id?: string
-          is_approved?: boolean | null
-          job_id?: string | null
-          parent_id: string
-          rating: number
-          tutor_id: string
-        }
-        Update: {
-          comment?: string | null
-          created_at?: string | null
-          id?: string
-          is_approved?: boolean | null
-          job_id?: string | null
-          parent_id?: string
-          rating?: number
-          tutor_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "reviews_job_id_fkey"
-            columns: ["job_id"]
-            isOneToOne: false
-            referencedRelation: "jobs"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "reviews_parent_id_profiles_fkey"
-            columns: ["parent_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "reviews_tutor_id_fkey"
-            columns: ["tutor_id"]
-            isOneToOne: false
-            referencedRelation: "tutor_profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       subjects: {
         Row: {
           category_en: string | null
@@ -1543,7 +1437,6 @@ export type Database = {
       tutor_profiles: {
         Row: {
           area_id: string | null
-          average_rating: number | null
           bio: string | null
           class_levels: string[] | null
           created_at: string | null
@@ -1578,7 +1471,6 @@ export type Database = {
           success_stories: string | null
           teaching_mode: Database["public"]["Enums"]["teaching_mode"] | null
           teaching_philosophy: string | null
-          total_reviews: number | null
           total_students: number | null
           updated_at: string | null
           user_id: string
@@ -1592,7 +1484,6 @@ export type Database = {
         }
         Insert: {
           area_id?: string | null
-          average_rating?: number | null
           bio?: string | null
           class_levels?: string[] | null
           created_at?: string | null
@@ -1627,7 +1518,6 @@ export type Database = {
           success_stories?: string | null
           teaching_mode?: Database["public"]["Enums"]["teaching_mode"] | null
           teaching_philosophy?: string | null
-          total_reviews?: number | null
           total_students?: number | null
           updated_at?: string | null
           user_id: string
@@ -1641,7 +1531,6 @@ export type Database = {
         }
         Update: {
           area_id?: string | null
-          average_rating?: number | null
           bio?: string | null
           class_levels?: string[] | null
           created_at?: string | null
@@ -1676,7 +1565,6 @@ export type Database = {
           success_stories?: string | null
           teaching_mode?: Database["public"]["Enums"]["teaching_mode"] | null
           teaching_philosophy?: string | null
-          total_reviews?: number | null
           total_students?: number | null
           updated_at?: string | null
           user_id?: string

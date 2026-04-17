@@ -10,7 +10,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import {
-  GraduationCap, ArrowLeft, Globe, Heart, Star, MapPin, Trash2
+  GraduationCap, ArrowLeft, Globe, Heart, MapPin, Trash2
 } from 'lucide-react';
 
 interface Favorite {
@@ -21,8 +21,6 @@ interface Favorite {
     id: string;
     user_id: string;
     slug: string | null;
-    average_rating: number;
-    total_reviews: number;
     experience_years: number;
     monthly_salary_min: number;
     monthly_salary_max: number;
@@ -56,7 +54,7 @@ export default function Favorites() {
       .select(`
         *,
         tutor_profiles (
-          id, user_id, slug, average_rating, total_reviews, experience_years, monthly_salary_min, monthly_salary_max, verification_status,
+          id, user_id, slug, experience_years, monthly_salary_min, monthly_salary_max, verification_status,
           profiles:user_id (full_name, avatar_url, districts (name_en)),
           tutor_subjects (subjects (name_en))
         )
@@ -121,10 +119,6 @@ export default function Favorites() {
                             {fav.tutor_profiles.profiles.districts.name_en}
                           </span>
                         )}
-                        <span className="flex items-center gap-1 text-accent">
-                          <Star className="h-3 w-3 fill-current" />
-                          {fav.tutor_profiles?.average_rating || 0}
-                        </span>
                         <span>{fav.tutor_profiles?.experience_years || 0} yrs exp</span>
                       </div>
                       <div className="flex flex-wrap gap-1">

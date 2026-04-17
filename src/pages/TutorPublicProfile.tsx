@@ -13,7 +13,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import {
-  GraduationCap, MapPin, Star, CheckCircle2, Heart,
+  GraduationCap, MapPin, CheckCircle2, Heart,
   Briefcase, BookOpen, User, Users, Share2, Video, Award, Monitor, Home, Sparkles,
 } from 'lucide-react';
 import BookDemoClassDialog from '@/components/BookDemoClassDialog';
@@ -28,8 +28,7 @@ interface TutorProfile {
   experience_years: number;
   monthly_salary_min: number;
   monthly_salary_max: number;
-  average_rating: number;
-  total_reviews: number;
+  // rating fields removed
   total_students: number;
   is_available: boolean;
   is_featured: boolean;
@@ -59,13 +58,7 @@ interface Profile {
 }
 
 interface Subject { id: string; name_en: string; }
-interface Review {
-  id: string;
-  rating: number;
-  comment: string;
-  created_at: string;
-  profiles: { full_name: string; avatar_url: string };
-}
+// Review interface removed
 interface EducationEntry {
   id: string;
   degree: string;
@@ -87,7 +80,7 @@ export default function TutorPublicProfile() {
   const [tutor, setTutor] = useState<TutorProfile | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [subjects, setSubjects] = useState<Subject[]>([]);
-  const [reviews, setReviews] = useState<Review[]>([]);
+  // reviews state removed
   const [educationEntries, setEducationEntries] = useState<EducationEntry[]>([]);
   const [relatedTutors, setRelatedTutors] = useState<any[]>([]);
   const [isFavorite, setIsFavorite] = useState(false);
@@ -132,15 +125,11 @@ export default function TutorPublicProfile() {
 
     setTutor(tutorData as TutorProfile);
 
-    const [profileRes, subjectsRes, reviewsRes, eduRes] = await Promise.all([
+    const [profileRes, subjectsRes, eduRes] = await Promise.all([
       supabase.from('profiles')
         .select('full_name, avatar_url, district_id, user_reference, districts (name_en), areas (name_en)')
         .eq('id', tutorData.user_id).maybeSingle(),
       supabase.from('tutor_subjects').select('subjects (id, name_en)').eq('tutor_profile_id', tutorData.id),
-      supabase.from('reviews')
-        .select('*, profiles:parent_id (full_name, avatar_url)')
-        .eq('tutor_id', tutorData.id).eq('is_approved', true)
-        .order('created_at', { ascending: false }).limit(20),
       supabase.from('tutor_education')
         .select('id, degree, institution, field_of_study, passing_year, result')
         .eq('tutor_id', tutorData.id),
@@ -156,7 +145,6 @@ export default function TutorPublicProfile() {
     });
 
     if (subjectsRes.data) setSubjects(subjectsRes.data.map((s: any) => s.subjects).filter(Boolean));
-    if (reviewsRes.data) setReviews(reviewsRes.data as unknown as Review[]);
     if (eduRes.data) setEducationEntries(eduRes.data as EducationEntry[]);
 
     if (user && role === 'parent') {

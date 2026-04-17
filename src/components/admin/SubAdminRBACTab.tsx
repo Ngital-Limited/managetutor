@@ -20,7 +20,7 @@ const PERMISSION_LABELS: Record<string, { label: string; description: string }> 
   can_manage_revenue: { label: 'Revenue & Payouts', description: 'Approve payouts and refunds' },
   can_view_analytics: { label: 'Analytics', description: 'View platform analytics and reports' },
   can_manage_settings: { label: 'Platform Settings', description: 'Edit commission rates and platform config' },
-  can_manage_reviews: { label: 'Review Moderation', description: 'Moderate and manage user reviews' },
+  
   can_send_notifications: { label: 'Notifications', description: 'Send broadcast notifications' },
 };
 

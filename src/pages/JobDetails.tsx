@@ -18,7 +18,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import {
   GraduationCap, ArrowLeft, Globe, MapPin, BookOpen, Calendar, Users, User,
-  DollarSign, Clock, CheckCircle2, XCircle, Send, Star, MessageSquare,
+  DollarSign, Clock, CheckCircle2, XCircle, Send, MessageSquare,
   Briefcase, UserCheck, Phone, Mail, AlertTriangle
 } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
@@ -66,8 +66,7 @@ interface Application {
     bio: string;
     education: string;
     experience_years: number;
-    average_rating: number;
-    total_reviews: number;
+    // rating fields removed
     verification_status: string;
     verification_paid: boolean;
     profiles: { full_name: string; avatar_url: string; phone: string };
@@ -144,7 +143,7 @@ export default function JobDetails() {
           .select(`
             *,
             tutor_profiles (
-              id, user_id, bio, education, experience_years, average_rating, total_reviews, verification_status, verification_paid,
+              id, user_id, bio, education, experience_years, verification_status, verification_paid,
               profiles:user_id (full_name, avatar_url, phone)
             )
           `)
@@ -567,8 +566,7 @@ export default function JobDetails() {
                                     )}
                                   </div>
                                   <p className="text-sm text-muted-foreground mb-2">
-                                    {app.tutor_profiles?.experience_years} yrs experience • 
-                                    <Star className="h-3 w-3 inline ml-1 text-accent" /> {app.tutor_profiles?.average_rating || 0}
+                                    {app.tutor_profiles?.experience_years} yrs experience
                                   </p>
                                   <p className="text-sm mb-2">{app.cover_message}</p>
                                   <div className="flex items-center gap-2 text-sm">

@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import {
-  GraduationCap, Globe, MapPin, Star, User, Clock, BookOpen, CheckCircle2, ArrowRight
+  GraduationCap, Globe, MapPin, User, Clock, BookOpen, CheckCircle2, ArrowRight
 } from 'lucide-react';
 
 interface District {
@@ -22,8 +22,7 @@ interface TutorProfile {
   experience_years: number;
   monthly_salary_min: number;
   monthly_salary_max: number;
-  average_rating: number;
-  total_reviews: number;
+  // rating fields removed
   verification_status: string;
   verification_paid: boolean;
   profiles: {
@@ -69,7 +68,7 @@ export default function LocationTutors() {
         `, { count: 'exact' })
         .eq('is_available', true)
         .eq('profiles.district_id', districts[0].id)
-        .order('average_rating', { ascending: false })
+        .order('is_featured', { ascending: false })
         .limit(12);
 
       if (tutorData) setTutors(tutorData as unknown as TutorProfile[]);
@@ -178,9 +177,6 @@ export default function LocationTutors() {
                       <h3 className="font-bold mb-1">{tutor.profiles?.full_name}</h3>
                       
                       <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground mb-3">
-                        <Star className="h-4 w-4 fill-accent text-accent" />
-                        <span>{tutor.average_rating || 0}</span>
-                        <span>•</span>
                         <span>{tutor.experience_years}y exp</span>
                       </div>
 
@@ -254,7 +250,7 @@ export default function LocationTutors() {
 
             <h3 className="text-xl font-bold text-foreground mt-6 mb-3">How It Works</h3>
             <ol className="list-decimal pl-6 space-y-2">
-              <li>Browse tutors in {locationName} based on subject, experience, and ratings</li>
+              <li>Browse tutors in {locationName} based on subject and experience</li>
               <li>Post your tuition requirement for free</li>
               <li>Receive applications from qualified tutors</li>
               <li>Chat with tutors and hire the best fit</li>

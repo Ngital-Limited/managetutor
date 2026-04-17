@@ -13,7 +13,7 @@ import { Logo } from '@/components/Logo';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import {
-  GraduationCap, Users, MapPin, Star, Search, FileText,
+  GraduationCap, Users, MapPin, Search, FileText,
   Globe, ArrowRight, Shield, BookOpen, Clock, Award,
   Briefcase, CheckCircle2, DollarSign, ChevronRight, Layers, UserCircle2
 } from 'lucide-react';
@@ -25,8 +25,7 @@ interface FeaturedTutor {
   bio: string | null;
   education: string | null;
   experience_years: number;
-  average_rating: number;
-  total_reviews: number;
+  // rating fields removed
   verification_status: string;
   verification_paid: boolean;
   teaching_mode: string;
@@ -82,14 +81,14 @@ export default function Index() {
         supabase.from('subjects').select('id, name_en, category_en').order('name_en'),
         supabase.from('tutor_profiles')
           .select(`
-            id, slug, bio, education, experience_years, average_rating, total_reviews,
+            id, slug, bio, education, experience_years,
             verification_status, teaching_mode, monthly_salary_min, monthly_salary_max, is_available,
             profiles:user_id (full_name, avatar_url),
             districts (name_en),
             tutor_subjects (subjects (name_en))
           `)
           .eq('is_available', true)
-          .order('average_rating', { ascending: false })
+          .order('is_featured', { ascending: false })
           .limit(6),
         supabase.from('jobs')
           .select('id, slug, title, description, budget_min, budget_max, teaching_mode, days_per_week, job_reference, created_at, districts (name_en), areas (name_en), subjects (name_en)')
@@ -250,7 +249,7 @@ export default function Index() {
               { icon: Users, value: '1,00,000+', label: t('stats.tutors') },
               { icon: Award, value: '4,000+', label: t('stats.matches') },
               { icon: MapPin, value: '64', label: t('stats.cities') },
-              { icon: Star, value: '98%', label: t('stats.satisfaction') },
+              { icon: CheckCircle2, value: '98%', label: t('stats.satisfaction') },
             ].map((stat, i) => (
               <div
                 key={i}
@@ -460,13 +459,6 @@ export default function Index() {
                             {tutor.profiles?.full_name}
                           </h3>
                           <p className="text-xs text-muted-foreground truncate mt-0.5">{tutor.education || 'Educator'}</p>
-                          {tutor.average_rating > 0 && (
-                            <div className="flex items-center gap-1 mt-1.5">
-                              <Star className="h-3 w-3 fill-warning text-warning" />
-                              <span className="text-[11px] font-semibold text-foreground tabular-nums">{tutor.average_rating.toFixed(1)}</span>
-                              <span className="text-[11px] text-muted-foreground">({tutor.total_reviews})</span>
-                            </div>
-                          )}
                         </div>
                       </div>
 
@@ -585,7 +577,7 @@ export default function Index() {
               { icon: Shield, title: 'Verified Tutors', desc: 'All tutors go through our verification process' },
               { icon: Clock, title: 'Flexible Scheduling', desc: 'Find tutors available when you need them' },
               { icon: Award, title: 'Trusted Platform', desc: 'Secure platform connecting parents with qualified tutors' },
-              { icon: Star, title: 'Reviews & Ratings', desc: 'Read genuine reviews from other parents' },
+              { icon: Users, title: 'Trusted Community', desc: 'Join thousands of parents and tutors across Bangladesh' },
             ].map((feature, i) => (
               <div
                 key={i}

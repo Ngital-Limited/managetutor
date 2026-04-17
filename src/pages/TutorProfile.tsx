@@ -21,7 +21,7 @@ import { useToast } from '@/hooks/use-toast';
 import { getMinProfileCompleteness } from '@/lib/profileCompleteness';
 import {
   GraduationCap, ArrowLeft, Save, Upload, FileText, CheckCircle2,
-  Clock, XCircle, AlertCircle, Video, Star, MessageSquare, Send,
+  Clock, XCircle, AlertCircle, Video, MessageSquare, Send,
   Plus, Trash2, Briefcase, BookOpen, Users, Sparkles, Loader2, RefreshCw
 } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
@@ -116,10 +116,7 @@ export default function TutorProfile() {
   });
 
   const [tutorProfileId, setTutorProfileId] = useState<string | null>(null);
-  const [reviews, setReviews] = useState<any[]>([]);
-  const [reviewRequests, setReviewRequests] = useState<any[]>([]);
-  const [reviewUpdateReason, setReviewUpdateReason] = useState('');
-  const [selectedReviewId, setSelectedReviewId] = useState<string | null>(null);
+  // reviews removed
 
   const [userProfile, setUserProfile] = useState({
     full_name: '',
@@ -218,11 +215,9 @@ export default function TutorProfile() {
       setTutorProfileId(td.id);
 
       // Fetch education entries and job experiences
-      const [eduRes, jobRes, reviewsRes, reqRes] = await Promise.all([
+      const [eduRes, jobRes] = await Promise.all([
         supabase.from('tutor_education').select('*').eq('tutor_id', td.id).order('passing_year', { ascending: false }),
         supabase.from('tutor_job_experiences').select('*').eq('tutor_id', td.id).order('start_date', { ascending: false }),
-        supabase.from('reviews').select('*, profiles:parent_id(full_name, avatar_url)').eq('tutor_id', td.id).eq('is_approved', true).order('created_at', { ascending: false }),
-        supabase.from('review_update_requests').select('*').eq('tutor_id', td.id),
       ]);
 
       // Always seed 4 fixed education slots: SSC, HSC, Bachelor, Masters
@@ -252,8 +247,6 @@ export default function TutorProfile() {
           responsibilities: j.responsibilities || '',
         })));
       }
-      if (reviewsRes.data) setReviews(reviewsRes.data);
-      if (reqRes.data) setReviewRequests(reqRes.data);
     }
     if (docsRes.data) setDocuments(docsRes.data);
     if (tutorSubjectsRes.data) {
@@ -1165,64 +1158,7 @@ export default function TutorProfile() {
             </CardContent>
           </Card>
 
-          {/* Parent Reviews */}
-          <Card className="rounded-2xl border-border/60 shadow-sm">
-            <CardContent className="p-6">
-              <div className="mb-4">
-                <h3 className="font-semibold flex items-center gap-2"><Star className="h-4 w-4" /> Parent Feedback ({reviews.length})</h3>
-                <p className="text-sm text-muted-foreground">Reviews left by parents. You can request a review update if a dispute was resolved.</p>
-              </div>
-              {reviews.length > 0 ? (
-                <div className="space-y-4">
-                  {reviews.map((review: any) => {
-                    const hasRequest = reviewRequests.some((r: any) => r.review_id === review.id);
-                    return (
-                      <div key={review.id} className="p-4 bg-muted/40 rounded-xl">
-                        <div className="flex items-start gap-3">
-                          <Avatar className="h-10 w-10">
-                            <AvatarImage src={review.profiles?.avatar_url} />
-                            <AvatarFallback>{review.profiles?.full_name?.charAt(0) || 'P'}</AvatarFallback>
-                          </Avatar>
-                          <div className="flex-1">
-                            <div className="flex items-center justify-between mb-1">
-                              <span className="font-medium">{review.profiles?.full_name}</span>
-                              <span className="text-xs text-muted-foreground">
-                                {formatExactDate(new Date(review.created_at))}
-                              </span>
-                            </div>
-                            <div className="flex items-center gap-1 mb-2">
-                              {[1, 2, 3, 4, 5].map(star => (
-                                <Star key={star} className={`h-4 w-4 ${star <= review.rating ? 'fill-accent text-accent' : 'text-muted-foreground'}`} />
-                              ))}
-                            </div>
-                            {review.comment && (
-                              <p className="text-sm text-muted-foreground mb-2">{review.comment}</p>
-                            )}
-                            {hasRequest ? (
-                              <Badge variant="outline" className="text-xs">
-                                <Clock className="h-3 w-3 mr-1" />
-                                Review Update Requested
-                              </Badge>
-                            ) : (
-                              <Button size="sm" variant="ghost" className="text-xs" onClick={() => { setSelectedReviewId(review.id); setReviewUpdateReason(''); }}>
-                                <MessageSquare className="h-3 w-3 mr-1" />
-                                Request Review Update
-                              </Button>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              ) : (
-                <div className="text-center py-8">
-                  <Star className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <p className="text-muted-foreground">No reviews yet. Reviews will appear once parents rate your teaching.</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+          {/* Parent reviews removed */}
         </TabsContent>
       </Tabs>
 
@@ -1237,47 +1173,6 @@ export default function TutorProfile() {
         </Button>
       </div>
 
-      {/* Review Update Request Dialog */}
-      <Dialog open={!!selectedReviewId} onOpenChange={(open) => !open && setSelectedReviewId(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Request Review Update</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <p className="text-sm text-muted-foreground">
-              If a dispute with the parent has been resolved, you can request them to update their review.
-              An admin will review your request.
-            </p>
-            <div>
-              <Label>Reason for Request</Label>
-              <Textarea value={reviewUpdateReason} onChange={(e) => setReviewUpdateReason(e.target.value)} placeholder="Explain why this review should be reconsidered..." rows={4} />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setSelectedReviewId(null)}>Cancel</Button>
-            <Button
-              disabled={!reviewUpdateReason.trim()}
-              onClick={async () => {
-                if (!tutorProfileId || !selectedReviewId) return;
-                const { error } = await supabase.from('review_update_requests').insert({
-                  tutor_id: tutorProfileId,
-                  review_id: selectedReviewId,
-                  reason: reviewUpdateReason,
-                } as any);
-                if (error) {
-                  toast({ title: 'Error', description: error.message, variant: 'destructive' });
-                } else {
-                  toast({ title: 'Request Sent', description: 'Your review update request has been submitted for admin review.' });
-                  setSelectedReviewId(null);
-                  fetchData();
-                }
-              }}
-            >
-              <Send className="h-4 w-4 mr-2" />
-              Submit Request
-            </Button>
-          </DialogFooter>
-        </DialogContent>
       </Dialog>
     </div>
   );

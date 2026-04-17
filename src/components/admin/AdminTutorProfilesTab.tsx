@@ -52,7 +52,7 @@ interface TutorRow {
   teaching_mode: string | null;
   verification_status: string;
   is_available: boolean;
-  average_rating: number | null;
+  // average_rating removed
   class_levels: string[] | null;
   user_reference: string | null;
   created_at: string;
@@ -171,7 +171,7 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
 
     let query = supabase
       .from('tutor_profiles')
-      .select('id, user_id, gender, education, experience_years, teaching_mode, verification_status, is_available, average_rating, class_levels, district_id, created_at')
+      .select('id, user_id, gender, education, experience_years, teaching_mode, verification_status, is_available, class_levels, district_id, created_at')
       .order('created_at', { ascending: false })
       .limit(200);
 
@@ -244,7 +244,7 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
         teaching_mode: t.teaching_mode,
         verification_status: t.verification_status || 'pending',
         is_available: t.is_available ?? true,
-        average_rating: t.average_rating,
+        // average_rating removed
         class_levels: t.class_levels,
         user_reference: prof?.user_reference || null,
         created_at: t.created_at || '',

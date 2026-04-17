@@ -98,8 +98,7 @@ interface Application {
     education: string;
     education_detail: string | null;
     experience_years: number;
-    average_rating: number;
-    total_reviews: number;
+    // rating fields removed
     total_students: number;
     verification_status: string;
     verification_paid: boolean;
@@ -407,7 +406,7 @@ export default function ParentDashboard() {
           jobs!inner (id, title, job_reference, parent_id),
           tutor_profiles (
             id, user_id, bio, education, education_detail, experience_years,
-            average_rating, total_reviews, total_students, verification_status, verification_paid,
+            total_students, verification_status, verification_paid,
             teaching_mode, gender, monthly_salary_min, monthly_salary_max, is_available,
             district_id, districts (name_en),
             profiles:user_id (full_name, avatar_url),
@@ -431,7 +430,7 @@ export default function ParentDashboard() {
         *,
         tutor_profiles (
           id, user_id, bio, education, education_detail, experience_years, 
-          average_rating, total_reviews, total_students, verification_status, verification_paid,
+          total_students, verification_status, verification_paid,
           teaching_mode, gender, monthly_salary_min, monthly_salary_max, is_available,
           district_id, districts (name_en),
           profiles:user_id (full_name, avatar_url),

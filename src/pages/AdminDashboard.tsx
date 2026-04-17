@@ -31,7 +31,7 @@ import {
   GraduationCap, Shield, Users, Briefcase, CheckCircle2, XCircle,
   Clock, AlertTriangle, BarChart3, FileText, Settings, Search,
   Eye, Ban, UserCheck, FileCheck,
-  LogOut, Home, Star, DollarSign, Trash2, CreditCard, Megaphone, Send, Mail,
+  LogOut, Home, DollarSign, Trash2, CreditCard, Megaphone, Send, Mail,
   Package, Plus, Pencil, ToggleLeft, ToggleRight, Wallet, MapPin, LifeBuoy, ShieldCheck,
   LogIn, BookOpen, UserPlus, TrendingUp, ChevronLeft, ArrowLeft,
   Phone, Calendar
@@ -59,7 +59,6 @@ interface Stats {
   completedJobs: number;
   acceptedJobs: number;
   pendingReports: number;
-  totalReviews: number;
   totalRevenue: number;
   pendingJobs: number;
   pendingUsers: number;
@@ -134,16 +133,6 @@ interface Report {
   reported_user_id: string;
   reporter: { full_name: string };
   reported: { full_name: string; email: string };
-}
-
-interface ReviewRow {
-  id: string;
-  rating: number;
-  comment: string | null;
-  is_approved: boolean;
-  created_at: string;
-  parent: { full_name: string };
-  tutor_profiles: { profiles: { full_name: string } };
 }
 
 interface PaymentRow {
@@ -777,7 +766,7 @@ export default function AdminDashboard() {
   const [stats, setStats] = useState<Stats>({
     totalUsers: 0, totalTutors: 0, totalParents: 0,
     pendingVerifications: 0, activeJobs: 0, totalJobs: 0, completedJobs: 0, acceptedJobs: 0,
-    pendingReports: 0, totalReviews: 0, totalRevenue: 0, pendingJobs: 0, pendingUsers: 0,
+    pendingReports: 0, totalRevenue: 0, pendingJobs: 0, pendingUsers: 0,
     pendingApplications: 0,
   });
 
@@ -818,8 +807,6 @@ export default function AdminDashboard() {
   const [vPaymentsPageSize, setVPaymentsPageSize] = useState(25);
   const [reports, setReports] = useState<Report[]>([]);
   const [reportsSearch, setReportsSearch] = useState('');
-  const [reviews, setReviews] = useState<ReviewRow[]>([]);
-  const [reviewsSearch, setReviewsSearch] = useState('');
   const [payments, setPayments] = useState<PaymentRow[]>([]);
   const [chartData, setChartData] = useState<{ signups: any[]; jobs: any[]; revenue: any[] }>({ signups: [], jobs: [], revenue: [] });
 
@@ -964,7 +951,7 @@ export default function AdminDashboard() {
           districts ( name_en ), areas ( name_en ),
           job_subjects ( subjects ( id, name_en ) )
         ),
-        tutor_profiles!inner ( id, user_id, gender, experience_years, verification_status, bio, monthly_salary_min, monthly_salary_max, average_rating, total_reviews )
+        tutor_profiles!inner ( id, user_id, gender, experience_years, verification_status, bio, monthly_salary_min, monthly_salary_max )
       `)
       .order('created_at', { ascending: false })
       .limit(200);
@@ -1082,7 +1069,7 @@ export default function AdminDashboard() {
       if (profs && profs.length > 0) {
         const profIds = profs.map(p => p.id);
         const { data: tutors } = await supabase.from('tutor_profiles')
-          .select('id, user_id, gender, experience_years, average_rating, verification_status, district_id')
+          .select('id, user_id, gender, experience_years, verification_status, district_id')
           .in('user_id', profIds);
         if (tutors && tutors.length > 0) {
           const profMap = new Map(profs.map(p => [p.id, p]));
@@ -1105,7 +1092,7 @@ export default function AdminDashboard() {
               phone: prof?.phone || null,
               email: prof?.email || '',
               district: distId ? (districtMap.get(distId) || null) : null,
-              rating: t.average_rating,
+              rating: null,
               verification: t.verification_status,
               reference: prof?.user_reference || null,
             };
@@ -1185,7 +1172,6 @@ export default function AdminDashboard() {
       { count: completedJobs },
       { count: acceptedJobs },
       { count: pendingReports },
-      { count: totalReviews },
       { count: pendingJobs },
       { count: pendingUsers },
       { count: pendingApplications },
@@ -1199,7 +1185,6 @@ export default function AdminDashboard() {
       supabase.from('jobs').select('id', { count: 'exact', head: true }).eq('status', 'completed'),
       supabase.from('jobs').select('id', { count: 'exact', head: true }).eq('status', 'in_progress' as any),
       supabase.from('reports').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
-      supabase.from('reviews').select('id', { count: 'exact', head: true }),
       supabase.from('jobs').select('id', { count: 'exact', head: true }).eq('status', 'pending_approval' as any),
       supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('is_approved', false),
       supabase.from('applications').select('id', { count: 'exact', head: true }).eq('status', 'pending' as any),
@@ -1212,7 +1197,7 @@ export default function AdminDashboard() {
       totalUsers: totalUsers || 0, totalTutors: totalTutors || 0, totalParents: totalParents || 0,
       pendingVerifications: pendingVerifications || 0, activeJobs: activeJobs || 0,
       totalJobs: totalJobs || 0, completedJobs: completedJobs || 0, acceptedJobs: acceptedJobs || 0,
-      pendingReports: pendingReports || 0, totalReviews: totalReviews || 0, totalRevenue,
+      pendingReports: pendingReports || 0, totalRevenue,
       pendingJobs: pendingJobs || 0, pendingUsers: pendingUsers || 0,
       pendingApplications: pendingApplications || 0,
     });
@@ -1374,32 +1359,6 @@ export default function AdminDashboard() {
     }
   }, []);
 
-  const fetchReviews = useCallback(async () => {
-    const { data } = await supabase
-      .from('reviews')
-      .select('id, rating, comment, is_approved, created_at, parent_id, tutor_id')
-      .order('created_at', { ascending: false }).limit(50);
-    if (data) {
-      const parentIds = [...new Set(data.map(r => r.parent_id))];
-      const tutorIds = [...new Set(data.map(r => r.tutor_id))];
-      const [{ data: parentProfs }, { data: tutorData }] = await Promise.all([
-        supabase.from('profiles').select('id, full_name').in('id', parentIds),
-        supabase.from('tutor_profiles').select('id, user_id').in('id', tutorIds),
-      ]);
-      const parentMap = new Map(parentProfs?.map(p => [p.id, p]) || []);
-      const tutorUserIds = [...new Set(tutorData?.map(t => t.user_id) || [])];
-      const { data: tutorProfs } = await supabase.from('profiles').select('id, full_name').in('id', tutorUserIds);
-      const tutorProfMap = new Map(tutorProfs?.map(p => [p.id, p]) || []);
-      const tutorMap = new Map(tutorData?.map(t => [t.id, tutorProfMap.get(t.user_id)]) || []);
-      
-      setReviews(data.map(r => ({
-        ...r,
-        parent: parentMap.get(r.parent_id) || { full_name: 'Unknown' },
-        tutor_profiles: { profiles: tutorMap.get(r.tutor_id) || { full_name: 'Unknown' } },
-      })) as unknown as ReviewRow[]);
-    }
-  }, []);
-
   const fetchPayments = useCallback(async () => {
     const { data } = await supabase
       .from('payment_transactions')
@@ -1427,10 +1386,9 @@ export default function AdminDashboard() {
       case 'jobs': fetchJobs(); break;
       case 'applications': fetchAllApplications(); break;
       case 'reports': fetchReports(); break;
-      case 'reviews': fetchReviews(); break;
       case 'payments': fetchPayments(); break;
     }
-  }, [activeTab, role, fetchUsers, fetchVerifications, fetchJobs, fetchAllApplications, fetchReports, fetchReviews, fetchPayments]);
+  }, [activeTab, role, fetchUsers, fetchVerifications, fetchJobs, fetchAllApplications, fetchReports, fetchPayments]);
 
   // Load districts/areas once for guardian filters
   useEffect(() => {
@@ -1510,11 +1468,7 @@ export default function AdminDashboard() {
     else { toast({ title: 'Job deleted' }); fetchJobs(); fetchStats(); }
   };
 
-  const handleToggleReview = async (reviewId: string, approved: boolean) => {
-    const { error } = await supabase.from('reviews').update({ is_approved: approved }).eq('id', reviewId);
-    if (error) toast({ title: 'Error', description: error.message, variant: 'destructive' });
-    else { toast({ title: `Review ${approved ? 'approved' : 'hidden'}` }); fetchReviews(); }
-  };
+  const handleUpdateJobStatus2Placeholder = null;
 
   const handleUpdateJobStatus = async (jobId: string, status: string) => {
     const { error } = await supabase.from('jobs').update({ status: status as any }).eq('id', jobId);
@@ -1707,7 +1661,6 @@ export default function AdminDashboard() {
       label: 'Analytics & Reports',
       items: [
         { title: 'Reports', value: 'reports', icon: AlertTriangle, badge: stats.pendingReports },
-        { title: 'Reviews', value: 'reviews', icon: Star },
         { title: 'Geographic Analytics', value: 'geographic', icon: MapPin },
         { title: 'Referral Sources', value: 'referrals', icon: TrendingUp },
       ],
@@ -2572,7 +2525,7 @@ export default function AdminDashboard() {
                                     <div className="flex items-center gap-1.5 flex-wrap">
                                       <Badge variant="secondary" className="text-xs gap-1"><Users className="h-3 w-3" />{total}</Badge>
                                       {pending > 0 && <Badge variant="outline" className="text-xs">Pending: {pending}</Badge>}
-                                      {shortlisted > 0 && <Badge variant="outline" className="text-xs gap-1"><Star className="h-3 w-3" />{shortlisted}</Badge>}
+                                      {shortlisted > 0 && <Badge variant="outline" className="text-xs gap-1"><CheckCircle2 className="h-3 w-3" />{shortlisted}</Badge>}
                                     </div>
                                   </TableCell>
                                   <TableCell className="text-right">
@@ -2911,18 +2864,13 @@ export default function AdminDashboard() {
                                           </Badge>
                                         );
                                       })()}
-                                      <div className="flex items-center gap-1 text-xs">
-                                        <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
-                                        <span className="font-semibold text-foreground">{tprof?.average_rating ? Number(tprof.average_rating).toFixed(1) : '—'}</span>
-                                        <span className="text-muted-foreground text-[10px]">({tprof?.total_reviews || 0})</span>
-                                      </div>
                                     </div>
                                   </TableCell>
                                   <TableCell className="text-right align-top">
                                     <div className="flex gap-1 justify-end flex-wrap">
                                       {!isFinal && app.status === 'pending' && (
                                         <Button variant="outline" size="sm" className="h-8 text-xs gap-1" onClick={() => handleAdminUpdateAppStatus(app.id, 'shortlisted', app.job_id)} title="Shortlist">
-                                          <Star className="h-3.5 w-3.5" /> Shortlist
+                                          <CheckCircle2 className="h-3.5 w-3.5" /> Shortlist
                                         </Button>
                                       )}
                                       {!isFinal && (app.status === 'pending' || app.status === 'shortlisted') && (
@@ -3054,79 +3002,7 @@ export default function AdminDashboard() {
               );
             })()}
 
-            {/* ═══════ REVIEWS TAB ═══════ */}
-            {activeTab === 'reviews' && (() => {
-              const q = reviewsSearch.trim().toLowerCase();
-              const filteredReviews = !q ? reviews : reviews.filter(r =>
-                ((r.parent as any)?.full_name || '').toLowerCase().includes(q) ||
-                ((r.tutor_profiles as any)?.profiles?.full_name || '').toLowerCase().includes(q) ||
-                (r.comment || '').toLowerCase().includes(q) ||
-                String(r.rating || '').includes(q)
-              );
-              return (
-              <div className="space-y-6">
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                  <h1 className="text-xl font-semibold">Review Moderation</h1>
-                  <div className="relative w-full sm:w-72">
-                    <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      value={reviewsSearch}
-                      onChange={(e) => setReviewsSearch(e.target.value)}
-                      placeholder="Search parent, tutor, comment, or rating"
-                      className="pl-8 h-9"
-                    />
-                  </div>
-                </div>
-                <Card>
-                  <CardContent className="p-0">
-                    <ScrollArea className="w-full">
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead>Parent</TableHead>
-                            <TableHead>Tutor</TableHead>
-                            <TableHead>Rating</TableHead>
-                            <TableHead>Comment</TableHead>
-                            <TableHead>Status</TableHead>
-                            <TableHead>Date</TableHead>
-                            <TableHead className="text-right">Actions</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {filteredReviews.length === 0 ? (
-                            <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">{q ? 'No matches' : 'No reviews yet'}</TableCell></TableRow>
-                          ) : filteredReviews.map((r) => (
-                            <TableRow key={r.id}>
-                              <TableCell className="text-sm">{(r.parent as any)?.full_name}</TableCell>
-                              <TableCell className="text-sm">{(r.tutor_profiles as any)?.profiles?.full_name || '—'}</TableCell>
-                              <TableCell>
-                                <div className="flex items-center gap-1">
-                                  <Star className="h-3.5 w-3.5 text-accent fill-accent" />
-                                  <span className="text-sm font-medium">{r.rating}</span>
-                                </div>
-                              </TableCell>
-                              <TableCell className="text-sm max-w-[250px] truncate">{r.comment || '—'}</TableCell>
-                              <TableCell>
-                                <Badge className={`text-xs ${r.is_approved ? 'bg-success/10 text-success' : 'bg-destructive/10 text-destructive'}`}>
-                                  {r.is_approved ? 'Visible' : 'Hidden'}
-                                </Badge>
-                              </TableCell>
-                              <TableCell className="text-xs text-muted-foreground">{formatExactDate(new Date(r.created_at))}</TableCell>
-                              <TableCell className="text-right">
-                                <Button variant="ghost" size="sm" onClick={() => handleToggleReview(r.id, !r.is_approved)}>
-                                  {r.is_approved ? <XCircle className="h-4 w-4 text-destructive" /> : <CheckCircle2 className="h-4 w-4 text-success" />}
-                                </Button>
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
-                    </ScrollArea>
-                  </CardContent>
-                </Card>
-              </div>
-              );
-            })()}
+            {/* Reviews tab removed */}
 
             {/* ═══════ PAYMENTS TAB ═══════ */}
             {activeTab === 'payments' && (
@@ -3648,7 +3524,7 @@ export default function AdminDashboard() {
                   {app.status === 'pending' && (
                     <div className="flex gap-2 flex-wrap">
                       <Button size="sm" variant="outline" className="border-primary text-primary hover:bg-primary/10" onClick={() => handleAdminUpdateAppStatus(app.id, 'shortlisted' as any, viewingJobApps!.jobId)} disabled={processing}>
-                        <Star className="h-3.5 w-3.5 mr-1" /> Shortlist
+                        <CheckCircle2 className="h-3.5 w-3.5 mr-1" /> Shortlist
                       </Button>
                       <Button size="sm" variant="outline" className="border-warning text-warning hover:bg-warning/10" onClick={() => handleAdminUpdateAppStatus(app.id, 'waiting' as any, viewingJobApps!.jobId)} disabled={processing}>
                         <Clock className="h-3.5 w-3.5 mr-1" /> Waiting
@@ -3680,7 +3556,7 @@ export default function AdminDashboard() {
                   {app.status === 'waiting' && (
                     <div className="flex gap-2 flex-wrap">
                       <Button size="sm" variant="outline" className="border-primary text-primary hover:bg-primary/10" onClick={() => handleAdminUpdateAppStatus(app.id, 'shortlisted' as any, viewingJobApps!.jobId)} disabled={processing}>
-                        <Star className="h-3.5 w-3.5 mr-1" /> Shortlist
+                        <CheckCircle2 className="h-3.5 w-3.5 mr-1" /> Shortlist
                       </Button>
                       <Button size="sm" className="bg-success hover:bg-success/90" onClick={() => handleAdminUpdateAppStatus(app.id, 'accepted', viewingJobApps!.jobId)} disabled={processing}>
                         <CheckCircle2 className="h-3.5 w-3.5 mr-1" /> Accept
