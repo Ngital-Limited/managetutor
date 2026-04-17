@@ -541,6 +541,26 @@ export default function TutorProfile() {
     );
   }
 
+  // Profile completeness — same scoring used by the apply gate (10 pts × 10 items = 100)
+  const completeness = useMemo(() => {
+    const requiredDegree = profile.is_student ? 'HSC' : 'Bachelor';
+    const reqEdu = educationEntries.find(e => (e.degree || '').toLowerCase() === requiredDegree.toLowerCase());
+    const items = [
+      { label: 'Bio / About', ok: !!profile.bio?.trim() },
+      { label: `${requiredDegree} education`, ok: !!reqEdu?.institution?.trim() },
+      { label: 'Years of experience', ok: !!profile.experience_years && profile.experience_years > 0 },
+      { label: 'Monthly salary range', ok: !!profile.monthly_salary_min && profile.monthly_salary_min > 0 },
+      { label: 'Gender', ok: !!profile.gender },
+      { label: 'District', ok: !!userProfile.district_id },
+      { label: 'Teaching mode', ok: !!profile.teaching_mode },
+      { label: 'Class levels', ok: selectedClassLevels.length > 0 },
+      { label: 'Verified badge (admin approval)', ok: profile.verification_status === 'approved' },
+      { label: 'At least one subject', ok: selectedSubjects.length > 0 },
+    ];
+    const score = items.filter(i => i.ok).length * 10;
+    return { score, items, missing: items.filter(i => !i.ok).map(i => i.label) };
+  }, [profile, educationEntries, userProfile.district_id, selectedClassLevels, selectedSubjects]);
+
   const profileContent = (
     <div className="px-4 py-6 max-w-5xl mx-auto">
       {/* Sticky header */}
@@ -557,6 +577,31 @@ export default function TutorProfile() {
               {saving ? 'Saving...' : 'Save Changes'}
             </Button>
           </div>
+        </div>
+
+        {/* Profile completeness */}
+        <div className="mt-4 rounded-xl border border-border/60 bg-muted/30 p-3">
+          <div className="flex items-center justify-between gap-3 mb-2">
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-medium">Profile Completeness</span>
+              <span className={`text-xs font-semibold ${completeness.score >= 70 ? 'text-success' : 'text-warning'}`}>
+                {completeness.score}%
+              </span>
+              {completeness.score < 70 && (
+                <span className="text-[11px] text-muted-foreground">• 70% required to apply for jobs</span>
+              )}
+            </div>
+          </div>
+          <Progress value={completeness.score} className="h-2" />
+          {completeness.missing.length > 0 && (
+            <div className="mt-2 flex flex-wrap gap-1.5">
+              {completeness.missing.map(m => (
+                <Badge key={m} variant="outline" className="text-[10px] border-warning/40 text-warning font-normal">
+                  {m}
+                </Badge>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
