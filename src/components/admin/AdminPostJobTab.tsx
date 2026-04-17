@@ -61,6 +61,7 @@ export function AdminPostJobTab({ toast }: Props) {
     student_gender: 'any',
     special_requirements: [] as string[],
     preferred_time: '',
+    fixed_time: '',
     number_of_students: 1,
     student_age: '',
     student_school_name: '',
@@ -131,7 +132,7 @@ export function AdminPostJobTab({ toast }: Props) {
       title: '', description: '', subject_ids: [], district_id: '', area_id: '', class_levels: [],
       category: '', background: '', days_per_week: 3, duration_hours: 1.5, budget_min: 3000, budget_max: 8000,
       teaching_mode: 'in_person', preferred_tutor_gender: 'any', student_gender: 'any',
-      special_requirements: [], preferred_time: '', number_of_students: 1, student_age: '', student_school_name: '', start_date: '', location_details: '',
+      special_requirements: [], preferred_time: '', fixed_time: '', number_of_students: 1, student_age: '', student_school_name: '', start_date: '', location_details: '',
     });
   };
 
@@ -260,6 +261,7 @@ export function AdminPostJobTab({ toast }: Props) {
         days_per_week: jobForm.days_per_week || null,
         duration_hours: jobForm.duration_hours || null,
         preferred_time: jobForm.preferred_time || null,
+        fixed_time: jobForm.fixed_time || null,
         preferred_tutor_gender: jobForm.preferred_tutor_gender as 'male' | 'female' | 'any',
         student_gender: jobForm.student_gender as 'male' | 'female' | 'any',
         special_requirements: jobForm.special_requirements.length > 0 ? jobForm.special_requirements.join(', ') : null,
