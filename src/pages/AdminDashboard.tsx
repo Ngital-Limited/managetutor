@@ -46,6 +46,7 @@ import { AdminPostJobTab } from '@/components/admin/AdminPostJobTab';
 import { AdminTutorEditTab } from '@/components/admin/AdminTutorEditTab';
 import { AdminTutorProfilesTab } from '@/components/admin/AdminTutorProfilesTab';
 import { ReferralAnalyticsTab } from '@/components/admin/ReferralAnalyticsTab';
+import { getPlatformCommissionPct, computeFeeSplit } from '@/lib/commission';
 
 // ──────────── Types ────────────
 interface Stats {
@@ -3653,6 +3654,20 @@ export default function AdminDashboard() {
                     <SelectItem value="90">1.5 hours</SelectItem>
                   </SelectContent>
                 </Select>
+              </div>
+              <div>
+                <label className="text-xs font-medium mb-1 block">Class Fee (৳) — leave 0 for free demo</label>
+                <Input type="number" min={0} step={10} value={demoScheduleFee} onChange={(e) => setDemoScheduleFee(e.target.value)} />
+                {Number(demoScheduleFee) > 0 && (() => {
+                  const s = computeFeeSplit(Number(demoScheduleFee), demoScheduleCommissionPct);
+                  return (
+                    <div className="mt-2 rounded-md border border-border bg-muted/40 p-2 text-xs space-y-1">
+                      <div className="font-medium text-foreground">Split ({s.commissionPct}% commission)</div>
+                      <div className="flex justify-between"><span className="text-muted-foreground">Platform commission</span><span>৳{s.platformCommission}</span></div>
+                      <div className="flex justify-between font-semibold"><span>Tutor payout</span><span>৳{s.tutorPayout}</span></div>
+                    </div>
+                  );
+                })()}
               </div>
               <div>
                 <label className="text-xs font-medium mb-1 block">Notes (optional)</label>
