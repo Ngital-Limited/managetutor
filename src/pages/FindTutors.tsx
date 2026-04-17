@@ -268,7 +268,7 @@ export default function FindTutors() {
     });
 
     return result;
-  }, [allTutors, selectedCategory, selectedBackground, selectedSubject, selectedDivision, selectedDistrict, searchQuery, sortBy]);
+  }, [allTutors, selectedCategory, selectedBackground, selectedSubject, selectedDivision, selectedDistrict, selectedArea, areas, searchQuery, sortBy]);
 
   const totalCount = filteredTutors.length;
   const totalPages = Math.ceil(totalCount / TUTORS_PER_PAGE);
