@@ -636,7 +636,7 @@ export default function FindTutors() {
                       <div className="px-2 pb-1">
                         <Input placeholder="Search..." value={districtSearch} onChange={e => setDistrictSearch(e.target.value)} className="h-7 text-xs" onClick={e => e.stopPropagation()} />
                       </div>
-                      <SelectItem value="all">All Districts</SelectItem>
+                      <SelectItem value="all">All Cities</SelectItem>
                       {filteredDistricts.map(d => <SelectItem key={d.id} value={d.id}>{d.name_en}</SelectItem>)}
                     </SelectContent>
                   </Select>
