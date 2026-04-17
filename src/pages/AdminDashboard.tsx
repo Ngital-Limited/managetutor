@@ -1474,6 +1474,7 @@ export default function AdminDashboard() {
       label: 'Jobs & Tutoring',
       items: [
         { title: 'Jobs', value: 'jobs', icon: Briefcase },
+        { title: 'Applications', value: 'applications', icon: FileText },
         { title: 'Post Job', value: 'post_job', icon: Plus },
         { title: 'Demo Requests', value: 'demo_requests', icon: BookOpen },
       ],
