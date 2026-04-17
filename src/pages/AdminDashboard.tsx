@@ -31,7 +31,7 @@ import {
   Eye, Ban, UserCheck, FileCheck,
   LogOut, Home, Star, DollarSign, Trash2, CreditCard, Megaphone, Send, Mail,
   Package, Plus, Pencil, ToggleLeft, ToggleRight, Wallet, MapPin, LifeBuoy, ShieldCheck,
-  LogIn, BookOpen, UserPlus
+  LogIn, BookOpen, UserPlus, TrendingUp
 } from 'lucide-react';
 import { RevenuePayoutTab } from '@/components/admin/RevenuePayoutTab';
 import { SupportTicketsTab } from '@/components/admin/SupportTicketsTab';
@@ -42,6 +42,7 @@ import { AdminCreateUserTab } from '@/components/admin/AdminCreateUserTab';
 import { AdminPostJobTab } from '@/components/admin/AdminPostJobTab';
 import { AdminTutorEditTab } from '@/components/admin/AdminTutorEditTab';
 import { AdminTutorProfilesTab } from '@/components/admin/AdminTutorProfilesTab';
+import { ReferralAnalyticsTab } from '@/components/admin/ReferralAnalyticsTab';
 
 // ──────────── Types ────────────
 interface Stats {
@@ -1499,6 +1500,7 @@ export default function AdminDashboard() {
         { title: 'Reports', value: 'reports', icon: AlertTriangle, badge: stats.pendingReports },
         { title: 'Reviews', value: 'reviews', icon: Star },
         { title: 'Geographic Analytics', value: 'geographic', icon: MapPin },
+        { title: 'Referral Sources', value: 'referrals', icon: TrendingUp },
       ],
     },
     {
@@ -2291,6 +2293,9 @@ export default function AdminDashboard() {
 
             {/* ═══════ GEOGRAPHIC ANALYTICS TAB ═══════ */}
             {activeTab === 'geographic' && <GeographicHeatmapTab toast={toast} />}
+
+            {/* ═══════ REFERRAL ANALYTICS TAB ═══════ */}
+            {activeTab === 'referrals' && <ReferralAnalyticsTab />}
 
             {/* ═══════ CONTACT MESSAGES TAB ═══════ */}
             {activeTab === 'contacts' && <ContactMessagesTab toast={toast} />}
