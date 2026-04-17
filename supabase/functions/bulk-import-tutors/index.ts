@@ -96,6 +96,37 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({ error: "Max 100 rows per batch" }), { status: 400, headers: corsHeaders });
     }
 
+    // Load districts + areas once for fuzzy matching
+    const { data: districtsData } = await admin.from("districts").select("id, name_en");
+    const { data: areasData } = await admin.from("areas").select("id, name_en, district_id");
+
+    const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, "");
+    const districts = (districtsData || []).map((d) => ({ id: d.id, key: norm(d.name_en), name: d.name_en }));
+    const areas = (areasData || []).map((a) => ({ id: a.id, district_id: a.district_id, key: norm(a.name_en), name: a.name_en }));
+    // Sort longer names first so "Mirpur 10" matches before "Mirpur"
+    areas.sort((a, b) => b.key.length - a.key.length);
+    districts.sort((a, b) => b.key.length - a.key.length);
+
+    function matchLocation(text?: string | null): { district_id: string | null; area_id: string | null } {
+      const t = clean(text);
+      if (!t) return { district_id: null, area_id: null };
+      const nt = norm(t);
+      if (!nt) return { district_id: null, area_id: null };
+      // Try area substring match first
+      for (const a of areas) {
+        if (a.key.length >= 3 && nt.includes(a.key)) {
+          return { district_id: a.district_id, area_id: a.id };
+        }
+      }
+      // Then district
+      for (const d of districts) {
+        if (d.key.length >= 3 && nt.includes(d.key)) {
+          return { district_id: d.id, area_id: null };
+        }
+      }
+      return { district_id: null, area_id: null };
+    }
+
     const results = { imported: 0, skipped: 0, errors: 0, details: [] as any[] };
 
     for (const r of rows) {
@@ -132,6 +163,7 @@ Deno.serve(async (req) => {
 
         const uid = created.user.id;
         const phone = normalizePhone(r.phone);
+        const loc = matchLocation([r.pre_area, r.p_address, r.per_address].filter(Boolean).join(" "));
 
         // handle_new_user trigger creates profiles row. Update it.
         const { error: profErr } = await admin
@@ -141,6 +173,8 @@ Deno.serve(async (req) => {
             phone,
             email_verified: true,
             is_approved: true, // imported tutors are pre-approved
+            district_id: loc.district_id,
+            area_id: loc.area_id,
           })
           .eq("id", uid);
         if (profErr) {
@@ -164,6 +198,7 @@ Deno.serve(async (req) => {
           gender: normalizeGender(r.gender),
           bio: buildBio(r) || null,
           education_detail: buildEducationDetail(r),
+          district_id: loc.district_id,
           present_address: clean(r.p_address),
           permanent_address: clean(r.per_address),
           father_phone: normalizePhone(r.f_phone),
