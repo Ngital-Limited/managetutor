@@ -578,6 +578,25 @@ export default function TutorProfile() {
         <TabsContent value="personal" className="space-y-6 mt-0">
           <Card className="rounded-2xl border-border/60 shadow-sm">
             <CardContent className="p-6 space-y-5">
+              {/* Profile Picture - Mandatory */}
+              <div className="flex items-center gap-5 pb-5 border-b border-border/60">
+                <Avatar className="h-20 w-20 ring-2 ring-border">
+                  <AvatarImage src={userProfile.avatar_url} />
+                  <AvatarFallback className="text-2xl">{userProfile.full_name?.charAt(0) || 'T'}</AvatarFallback>
+                </Avatar>
+                <div className="flex-1">
+                  <Label className="font-medium">Profile Picture <span className="text-destructive">*</span></Label>
+                  <p className="text-xs text-muted-foreground mt-0.5 mb-2">Required. JPG/PNG, max 5MB.</p>
+                  <label htmlFor="tutor-avatar-upload" className="cursor-pointer inline-flex">
+                    <div className="flex items-center gap-2 px-4 py-2 border rounded-xl hover:bg-muted transition-colors text-sm">
+                      <Upload className="h-4 w-4" />
+                      {avatarUploading ? 'Uploading...' : (userProfile.avatar_url ? 'Replace Photo' : 'Upload Photo')}
+                    </div>
+                  </label>
+                  <input id="tutor-avatar-upload" type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} disabled={avatarUploading} />
+                </div>
+              </div>
+
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
                   <Label>Full Name <span className="text-destructive">*</span></Label>
