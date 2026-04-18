@@ -174,7 +174,7 @@ export function RevenuePayoutTab({ toast }: { toast: any }) {
       </Card>
 
       <Tabs defaultValue="payouts">
-        <TabsList>
+        <TabsList className="w-full sm:w-auto inline-flex sm:flex h-auto overflow-x-auto whitespace-nowrap justify-start sm:justify-center scrollbar-none">
           <TabsTrigger value="payouts">Payout Requests {pendingPayouts.length > 0 && <Badge className="ml-1 bg-warning text-warning-foreground text-xs">{pendingPayouts.length}</Badge>}</TabsTrigger>
           <TabsTrigger value="refunds">Refund Requests {pendingRefunds.length > 0 && <Badge className="ml-1 bg-destructive text-destructive-foreground text-xs">{pendingRefunds.length}</Badge>}</TabsTrigger>
           <TabsTrigger value="transactions">All Transactions</TabsTrigger>
