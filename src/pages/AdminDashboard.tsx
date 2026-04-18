@@ -18,6 +18,7 @@ import { NotificationBell } from '@/components/NotificationBell';
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
   SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarTrigger,
+  useSidebar,
 } from '@/components/ui/sidebar';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { ChevronDown, Download } from 'lucide-react';
@@ -34,7 +35,7 @@ import {
   LogOut, Home, DollarSign, Trash2, CreditCard, Megaphone, Send, Mail,
   Package, Plus, Pencil, ToggleLeft, ToggleRight, Wallet, MapPin, LifeBuoy, ShieldCheck,
   LogIn, BookOpen, UserPlus, TrendingUp, ChevronLeft, ArrowLeft,
-  Phone, Calendar
+  Phone, Calendar, X
 } from 'lucide-react';
 import { RevenuePayoutTab } from '@/components/admin/RevenuePayoutTab';
 import { SupportTicketsTab } from '@/components/admin/SupportTicketsTab';
@@ -1684,88 +1685,107 @@ export default function AdminDashboard() {
     }
   };
 
+  const AdminSidebarInner = () => {
+    const { isMobile, setOpenMobile } = useSidebar();
+    const closeOnMobile = () => { if (isMobile) setOpenMobile(false); };
+    return (
+      <Sidebar collapsible="offcanvas" className="border-r border-border/50">
+        <SidebarContent>
+          <SidebarGroup>
+            <SidebarGroupLabel className="px-4 py-3 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Shield className="h-4 w-4 text-muted-foreground" />
+                <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Admin</span>
+              </div>
+              {isMobile && (
+                <button
+                  type="button"
+                  onClick={() => setOpenMobile(false)}
+                  className="inline-flex h-7 w-7 items-center justify-center rounded-md hover:bg-muted"
+                  aria-label="Close menu"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              )}
+            </SidebarGroupLabel>
+          </SidebarGroup>
+          {sidebarGroups.map((group) => {
+            const groupIsActive = group.items.some(i => i.value === activeTab);
+            return (
+              <Collapsible key={group.label} defaultOpen={groupIsActive || group.label === 'Dashboard'}>
+                <SidebarGroup className="py-0">
+                  <CollapsibleTrigger className="flex items-center justify-between w-full px-4 py-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors group">
+                    <span>{group.label}</span>
+                    <ChevronDown className="h-3.5 w-3.5 transition-transform group-data-[state=closed]:-rotate-90" />
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <SidebarGroupContent>
+                      <SidebarMenu>
+                        {group.items.map((item) => {
+                          const itemHref = (item as any).href as string | undefined;
+                          const buttonClass = `w-full justify-start text-sm ${activeTab === item.value ? 'bg-primary/8 text-primary font-medium' : 'text-muted-foreground hover:text-foreground'}`;
+                          return (
+                            <SidebarMenuItem key={item.value}>
+                              {itemHref ? (
+                                <SidebarMenuButton asChild className={buttonClass}>
+                                  <Link to={itemHref} onClick={closeOnMobile}>
+                                    <item.icon className="h-4 w-4 mr-2.5 shrink-0" />
+                                    <span className="flex-1 text-left truncate">{item.title}</span>
+                                  </Link>
+                                </SidebarMenuButton>
+                              ) : (
+                                <SidebarMenuButton
+                                  onClick={() => {
+                                    setActiveTab(item.value);
+                                    if (item.value === 'applications' && (item as any).badge) {
+                                      setAllAppsStatusFilter('pending');
+                                      setSelectedAppIds(new Set());
+                                    }
+                                    closeOnMobile();
+                                  }}
+                                  className={buttonClass}
+                                >
+                                  <item.icon className="h-4 w-4 mr-2.5 shrink-0" />
+                                  <span className="flex-1 text-left truncate">{item.title}</span>
+                                  {'badge' in item && item.badge ? (
+                                    <span className="ml-auto text-[10px] font-medium bg-destructive/10 text-destructive px-1.5 py-0.5 rounded-full">{item.badge}</span>
+                                  ) : null}
+                                </SidebarMenuButton>
+                              )}
+                            </SidebarMenuItem>
+                          );
+                        })}
+                      </SidebarMenu>
+                    </SidebarGroupContent>
+                  </CollapsibleContent>
+                </SidebarGroup>
+              </Collapsible>
+            );
+          })}
+          <SidebarGroup className="mt-auto">
+            <SidebarGroupContent>
+              <SidebarMenu>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild>
+                    <Link to="/" className="flex items-center gap-2 text-muted-foreground hover:text-foreground text-sm" onClick={closeOnMobile}>
+                      <Home className="h-4 w-4" />
+                      <span>Back to Site</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        </SidebarContent>
+      </Sidebar>
+    );
+  };
+
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-background">
         {/* Sidebar */}
-        <Sidebar collapsible="offcanvas" className="border-r border-border/50">
-          <SidebarContent>
-            <SidebarGroup>
-              <SidebarGroupLabel className="px-4 py-3">
-                <div className="flex items-center gap-2">
-                  <Shield className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Admin</span>
-                </div>
-              </SidebarGroupLabel>
-            </SidebarGroup>
-            {sidebarGroups.map((group) => {
-              const groupIsActive = group.items.some(i => i.value === activeTab);
-              return (
-                <Collapsible key={group.label} defaultOpen={groupIsActive || group.label === 'Dashboard'}>
-                  <SidebarGroup className="py-0">
-                    <CollapsibleTrigger className="flex items-center justify-between w-full px-4 py-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors group">
-                      <span>{group.label}</span>
-                      <ChevronDown className="h-3.5 w-3.5 transition-transform group-data-[state=closed]:-rotate-90" />
-                    </CollapsibleTrigger>
-                    <CollapsibleContent>
-                      <SidebarGroupContent>
-                        <SidebarMenu>
-                          {group.items.map((item) => {
-                            const itemHref = (item as any).href as string | undefined;
-                            const buttonClass = `w-full justify-start text-sm ${activeTab === item.value ? 'bg-primary/8 text-primary font-medium' : 'text-muted-foreground hover:text-foreground'}`;
-                            return (
-                              <SidebarMenuItem key={item.value}>
-                                {itemHref ? (
-                                  <SidebarMenuButton asChild className={buttonClass}>
-                                    <Link to={itemHref}>
-                                      <item.icon className="h-4 w-4 mr-2.5 shrink-0" />
-                                      <span className="flex-1 text-left truncate">{item.title}</span>
-                                    </Link>
-                                  </SidebarMenuButton>
-                                ) : (
-                                  <SidebarMenuButton
-                                    onClick={() => {
-                                      setActiveTab(item.value);
-                                      if (item.value === 'applications' && (item as any).badge) {
-                                        setAllAppsStatusFilter('pending');
-                                        setSelectedAppIds(new Set());
-                                      }
-                                    }}
-                                    className={buttonClass}
-                                  >
-                                    <item.icon className="h-4 w-4 mr-2.5 shrink-0" />
-                                    <span className="flex-1 text-left truncate">{item.title}</span>
-                                    {'badge' in item && item.badge ? (
-                                      <span className="ml-auto text-[10px] font-medium bg-destructive/10 text-destructive px-1.5 py-0.5 rounded-full">{item.badge}</span>
-                                    ) : null}
-                                  </SidebarMenuButton>
-                                )}
-                              </SidebarMenuItem>
-                            );
-                          })}
-                        </SidebarMenu>
-                      </SidebarGroupContent>
-                    </CollapsibleContent>
-                  </SidebarGroup>
-                </Collapsible>
-              );
-            })}
-            <SidebarGroup className="mt-auto">
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton asChild>
-                      <Link to="/" className="flex items-center gap-2 text-muted-foreground hover:text-foreground text-sm">
-                        <Home className="h-4 w-4" />
-                        <span>Back to Site</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
-          </SidebarContent>
-        </Sidebar>
+        <AdminSidebarInner />
 
         {/* Main Content */}
         <div className="flex-1 flex flex-col min-h-screen overflow-hidden">
