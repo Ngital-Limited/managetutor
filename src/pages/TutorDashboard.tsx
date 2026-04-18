@@ -478,15 +478,15 @@ export default function TutorDashboard() {
     <TutorSidebarLayout title="Tutor Dashboard">
       <div className="p-4 md:p-8">
         {/* Header */}
-        <div className="flex items-start justify-between mb-8">
-          <div className="flex items-center gap-4">
-            <Avatar className="h-16 w-16">
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-8">
+          <div className="flex items-center gap-4 min-w-0">
+            <Avatar className="h-16 w-16 shrink-0">
               <AvatarImage src={userProfile?.avatar_url || ''} />
               <AvatarFallback className="text-xl">{userProfile?.full_name?.charAt(0) || 'T'}</AvatarFallback>
             </Avatar>
-            <div>
-              <h1 className="text-2xl font-bold">Welcome, {userProfile?.full_name || 'Tutor'}!</h1>
-              <div className="flex items-center gap-2 mt-1">
+            <div className="min-w-0">
+              <h1 className="text-xl sm:text-2xl font-bold break-words">Welcome, {userProfile?.full_name || 'Tutor'}!</h1>
+              <div className="flex items-center gap-2 mt-1 flex-wrap">
                 <Badge className="bg-tutor text-tutor-foreground">Tutor</Badge>
                 {userProfile?.user_reference && (
                   <Badge variant="outline" className="font-mono text-xs">{userProfile.user_reference}</Badge>
@@ -500,10 +500,11 @@ export default function TutorDashboard() {
               </div>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap shrink-0">
             <Button
               variant="outline"
               size="sm"
+              className="flex-1 sm:flex-none"
               onClick={async () => {
                 if (!user) return;
                 try {
@@ -516,8 +517,8 @@ export default function TutorDashboard() {
               <FileText className="h-4 w-4 mr-2" />
               Download CV
             </Button>
-            <Link to="/tutor/profile">
-              <Button variant="outline" size="sm">
+            <Link to="/tutor/profile" className="flex-1 sm:flex-none">
+              <Button variant="outline" size="sm" className="w-full">
                 <Settings className="h-4 w-4 mr-2" />
                 Edit Profile
               </Button>
@@ -529,17 +530,17 @@ export default function TutorDashboard() {
         {profileComplete < 100 && (
           <Card className="mb-6 border-warning/50 bg-warning/5">
             <CardContent className="p-4">
-              <div className="flex items-center gap-4">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-4">
                 <AlertCircle className="h-8 w-8 text-warning flex-shrink-0" />
-                <div className="flex-1">
+                <div className="flex-1 min-w-0">
                   <h3 className="font-bold">Complete Your Profile</h3>
                   <p className="text-sm text-muted-foreground">
                     A complete profile helps you get more job applications
                   </p>
                   <Progress value={profileComplete} className="mt-2 h-2" />
                 </div>
-                <Link to="/tutor/profile">
-                  <Button>Complete Profile</Button>
+                <Link to="/tutor/profile" className="shrink-0">
+                  <Button className="w-full sm:w-auto">Complete Profile</Button>
                 </Link>
               </div>
             </CardContent>
@@ -800,12 +801,12 @@ export default function TutorDashboard() {
                       .filter(a => tab === 'all' || a.status === tab)
                       .map(app => (
                         <div key={app.id} className="p-4 border rounded-xl hover:bg-muted/50 transition-colors">
-                          <div className="flex items-start justify-between">
-                            <div className="flex-1">
+                          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                            <div className="flex-1 min-w-0">
                               <Link to={`/jobs/${(app.jobs as any)?.slug || app.jobs?.id}`} className="hover:text-primary">
-                                <h4 className="font-bold mb-1">{app.jobs?.title}</h4>
+                                <h4 className="font-bold mb-1 break-words">{app.jobs?.title}</h4>
                               </Link>
-                              <div className="flex items-center gap-3 text-sm text-muted-foreground mb-2">
+                              <div className="flex items-center gap-3 text-sm text-muted-foreground mb-2 flex-wrap">
                                 <span className="flex items-center gap-1">
                                   <MapPin className="h-3 w-3" />
                                   {app.jobs?.districts?.name_en}
@@ -817,7 +818,7 @@ export default function TutorDashboard() {
                                   </span>
                                 )}
                               </div>
-                              <div className="flex items-center gap-2">
+                              <div className="flex items-center gap-2 flex-wrap">
                                 <Badge variant="outline">Your Rate: ৳{app.proposed_rate}/mo</Badge>
                                 <span className="text-xs text-muted-foreground">
                                   Applied {formatExactDate(new Date(app.created_at))}
@@ -852,7 +853,7 @@ export default function TutorDashboard() {
                                 </div>
                               )}
                             </div>
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-2 flex-wrap shrink-0">
                               <Badge className={
                                 app.status === 'accepted' ? 'bg-success' :
                                 app.status === 'rejected' ? 'bg-destructive' :
