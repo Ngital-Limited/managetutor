@@ -334,20 +334,20 @@ export default function Index() {
         </section>
       )}
 
-      {/* Latest Tuition Jobs — minimal premium */}
+      {/* Latest Tuition Jobs */}
       {latestJobs.length > 0 && (
-        <section className="py-20 bg-background">
+        <section className="py-14 md:py-20 bg-background">
           <div className="container mx-auto px-4">
-            <div className="flex items-end justify-between mb-12">
+            <div className="flex items-end justify-between mb-8 md:mb-12 flex-wrap gap-3">
               <div>
-                <span className="text-xs uppercase tracking-[0.2em] text-muted-foreground font-medium">Opportunities</span>
-                <h2 className="text-3xl md:text-4xl font-semibold tracking-tight mt-2 mb-2">Latest Tuition Jobs</h2>
+                <span className="inline-block text-[10px] md:text-xs uppercase tracking-[0.2em] text-success font-bold bg-success/10 px-3 py-1 rounded-full mb-3">Opportunities</span>
+                <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight mb-2">Latest Tuition Jobs</h2>
                 <p className="text-sm text-muted-foreground max-w-xl">
-                  Fresh tuition opportunities posted daily by parents and guardians across Bangladesh. Browse open jobs by location, subject, budget, and schedule — then apply directly to start teaching and earning on your own terms.
+                  Fresh tuition opportunities posted daily by parents and guardians across Bangladesh — apply directly to start teaching on your own terms.
                 </p>
               </div>
               <Link to="/jobs">
-                <Button variant="ghost" className="hidden sm:flex gap-1 text-sm text-muted-foreground hover:text-foreground">
+                <Button variant="ghost" className="hidden sm:flex gap-1 text-sm text-primary hover:text-primary/80 font-semibold">
                   All Jobs <ArrowRight className="h-3.5 w-3.5" />
                 </Button>
               </Link>
@@ -432,21 +432,22 @@ export default function Index() {
         </section>
       )}
 
-      {/* Top Rated Tutors — minimal premium */}
+      {/* Top Rated Tutors */}
       {featuredTutors.length > 0 && (
-        <section className="relative py-20 bg-gradient-to-b from-background via-accent/[0.04] to-muted/30 overflow-hidden">
-          <div className="absolute bottom-0 left-0 w-[500px] h-[400px] bg-accent/5 rounded-full blur-[120px] pointer-events-none" />
+        <section className="relative py-14 md:py-20 bg-gradient-to-br from-tutor/[0.06] via-background to-accent/[0.08] overflow-hidden">
+          <div className="absolute bottom-0 left-0 w-[500px] h-[400px] bg-accent/15 rounded-full blur-[120px] pointer-events-none" />
+          <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-tutor/15 rounded-full blur-[120px] pointer-events-none" />
           <div className="container mx-auto px-4 relative z-10">
-            <div className="flex items-end justify-between mb-12">
+            <div className="flex items-end justify-between mb-8 md:mb-12 flex-wrap gap-3">
               <div>
-                <span className="text-xs uppercase tracking-[0.2em] text-muted-foreground font-medium">Educators</span>
-                <h2 className="text-3xl md:text-4xl font-semibold tracking-tight mt-2 mb-2">Top Rated Tutors</h2>
+                <span className="inline-block text-[10px] md:text-xs uppercase tracking-[0.2em] text-tutor font-bold bg-tutor/10 px-3 py-1 rounded-full mb-3">Educators</span>
+                <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight mb-2">Top Rated Tutors</h2>
                 <p className="text-sm text-muted-foreground max-w-xl">
-                  Meet our hand-picked, identity-verified educators trusted by thousands of families. Each tutor is screened by our admin team for academic credentials, teaching experience, and professionalism — so you can hire with complete confidence.
+                  Hand-picked, identity-verified educators trusted by thousands of families. Hire with complete confidence.
                 </p>
               </div>
               <Link to="/tutors">
-                <Button variant="ghost" className="hidden sm:flex gap-1 text-sm text-muted-foreground hover:text-foreground">
+                <Button variant="ghost" className="hidden sm:flex gap-1 text-sm text-tutor hover:text-tutor/80 font-semibold">
                   View All <ArrowRight className="h-3.5 w-3.5" />
                 </Button>
               </Link>
@@ -549,40 +550,37 @@ export default function Index() {
         </section>
       )}
 
-      {/* How It Works — minimal premium */}
-      <section className="py-20 bg-background">
+      {/* How It Works — vibrant gradient cards */}
+      <section className="py-14 md:py-20 bg-gradient-to-br from-background via-primary/[0.03] to-accent/[0.05]">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-14 max-w-2xl mx-auto">
-            <span className="text-xs uppercase tracking-[0.2em] text-muted-foreground font-medium">Process</span>
-            <h2 className="text-3xl md:text-4xl font-semibold tracking-tight mt-2 mb-3">{t('howItWorks.title')}</h2>
+          <div className="text-center mb-10 md:mb-14 max-w-2xl mx-auto">
+            <span className="inline-block text-[10px] md:text-xs uppercase tracking-[0.2em] text-accent font-bold bg-accent/10 px-3 py-1 rounded-full mb-3">Process</span>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight mb-3">{t('howItWorks.title')}</h2>
             <p className="text-sm text-muted-foreground">
-              From posting your requirement to starting your first lesson — our streamlined process gets you matched with the right tutor in just three simple steps. No middlemen, no hidden fees, just direct connections backed by a fully vetted platform.
+              From posting your requirement to starting your first lesson — three simple steps. No middlemen, no hidden fees.
             </p>
           </div>
-          <div className="grid md:grid-cols-3 gap-5 max-w-5xl mx-auto relative">
-            {/* Connecting line on desktop */}
-            <div className="hidden md:block absolute top-[58px] left-[16.66%] right-[16.66%] h-px bg-gradient-to-r from-transparent via-border to-transparent" />
-
+          <div className="grid md:grid-cols-3 gap-4 md:gap-5 max-w-5xl mx-auto">
             {[
-              { icon: FileText, title: t('howItWorks.step1.title'), desc: t('howItWorks.step1.desc'), step: '01' },
-              { icon: Users, title: t('howItWorks.step2.title'), desc: t('howItWorks.step2.desc'), step: '02' },
-              { icon: BookOpen, title: t('howItWorks.step3.title'), desc: t('howItWorks.step3.desc'), step: '03' },
+              { icon: FileText, title: t('howItWorks.step1.title'), desc: t('howItWorks.step1.desc'), step: '01', grad: 'from-primary to-accent', iconBg: 'bg-primary/15 text-primary' },
+              { icon: Users, title: t('howItWorks.step2.title'), desc: t('howItWorks.step2.desc'), step: '02', grad: 'from-tutor to-accent', iconBg: 'bg-tutor/15 text-tutor' },
+              { icon: BookOpen, title: t('howItWorks.step3.title'), desc: t('howItWorks.step3.desc'), step: '03', grad: 'from-success to-accent', iconBg: 'bg-success/15 text-success' },
             ].map((step, i) => (
               <div
                 key={i}
-                className="group relative bg-card rounded-2xl border border-border/60 p-7 transition-all duration-300 hover:border-primary/40 hover:shadow-[0_8px_30px_-12px_hsl(var(--primary)/0.18)] hover:-translate-y-0.5 animate-fade-in"
+                className="group relative bg-card rounded-2xl border border-border/60 p-6 md:p-7 transition-all duration-300 hover:shadow-2xl hover:shadow-primary/10 hover:-translate-y-1 animate-fade-in overflow-hidden"
                 style={{ animationDelay: `${i * 120}ms` }}
               >
-                {/* Icon + step number */}
+                <div className={`absolute inset-x-0 top-0 h-1 bg-gradient-to-r ${step.grad}`} />
                 <div className="flex items-center justify-between mb-5">
-                  <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/15 group-hover:scale-105 transition-all">
-                    <step.icon className="h-5 w-5 text-primary" />
+                  <div className={`w-12 h-12 rounded-2xl ${step.iconBg} flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm`}>
+                    <step.icon className="h-5 w-5" />
                   </div>
-                  <span className="text-xs font-mono uppercase tracking-[0.2em] text-muted-foreground/60 font-medium">
-                    Step {step.step}
+                  <span className={`text-2xl font-black tracking-tight bg-gradient-to-br ${step.grad} bg-clip-text text-transparent opacity-60`}>
+                    {step.step}
                   </span>
                 </div>
-                <h3 className="font-semibold text-base tracking-tight text-foreground mb-2">{step.title}</h3>
+                <h3 className="font-bold text-base tracking-tight text-foreground mb-2">{step.title}</h3>
                 <p className="text-xs text-muted-foreground leading-relaxed">{step.desc}</p>
               </div>
             ))}
@@ -590,33 +588,34 @@ export default function Index() {
         </div>
       </section>
 
-      {/* Features — minimal premium */}
-      <section className="relative py-24 bg-gradient-to-b from-background via-muted/20 to-background overflow-hidden">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[500px] bg-primary/[0.04] rounded-full blur-[140px] pointer-events-none" />
+      {/* Features — vibrant gradient cards */}
+      <section className="relative py-14 md:py-24 bg-gradient-to-b from-muted/30 via-background to-muted/20 overflow-hidden">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[500px] bg-primary/[0.06] rounded-full blur-[140px] pointer-events-none" />
         <div className="container mx-auto px-4 relative z-10">
-          <div className="text-center mb-16 max-w-2xl mx-auto">
-            <span className="text-xs uppercase tracking-[0.2em] text-muted-foreground font-medium">Why Us</span>
-            <h2 className="text-3xl md:text-4xl font-semibold tracking-tight mt-2 mb-3">Why Choose Manage Tutor?</h2>
+          <div className="text-center mb-10 md:mb-16 max-w-2xl mx-auto">
+            <span className="inline-block text-[10px] md:text-xs uppercase tracking-[0.2em] text-primary font-bold bg-primary/10 px-3 py-1 rounded-full mb-3">Why Us</span>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight mb-3">Why Choose Manage Tutor?</h2>
             <p className="text-sm text-muted-foreground">
-              Built for trust, designed for results — we combine rigorous tutor vetting, transparent pricing, and a smooth booking experience to deliver the most reliable home-tuition marketplace in Bangladesh.
+              Built for trust, designed for results — rigorous tutor vetting, transparent pricing, and a smooth booking experience.
             </p>
           </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4 max-w-6xl mx-auto">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 max-w-6xl mx-auto">
             {[
-              { icon: Shield, title: 'Verified Tutors', desc: 'Every tutor passes ID, education, and background checks before being approved by our admin team.' },
-              { icon: Clock, title: 'Flexible Scheduling', desc: 'Choose tutors who match your timetable — mornings, evenings, weekends, online, or in-person.' },
-              { icon: Award, title: 'Trusted Platform', desc: 'Secure payments, vetted profiles, and dedicated support keep every booking safe and worry-free.' },
-              { icon: Users, title: 'Trusted Community', desc: 'Join 4,000+ matched families and 1,00,000+ tutors building better learning outcomes nationwide.' },
+              { icon: Shield, title: 'Verified Tutors', desc: 'ID, education, and background checks before approval.', grad: 'from-primary to-accent', iconBg: 'bg-primary/15 text-primary' },
+              { icon: Clock, title: 'Flexible Scheduling', desc: 'Mornings, evenings, weekends, online or in-person.', grad: 'from-success to-accent', iconBg: 'bg-success/15 text-success' },
+              { icon: Award, title: 'Trusted Platform', desc: 'Secure payments, vetted profiles, dedicated support.', grad: 'from-warning to-agency', iconBg: 'bg-warning/15 text-warning' },
+              { icon: Users, title: 'Trusted Community', desc: '4,000+ matched families and 1,00,000+ tutors.', grad: 'from-tutor to-accent', iconBg: 'bg-tutor/15 text-tutor' },
             ].map((feature, i) => (
               <div
                 key={i}
-                className="group relative bg-card rounded-xl border border-border/60 p-6 transition-all hover:border-primary/30 hover:shadow-[0_4px_24px_-8px_hsl(var(--primary)/0.15)] animate-fade-in"
+                className="group relative bg-card rounded-2xl border border-border/60 p-4 md:p-6 transition-all hover:shadow-xl hover:shadow-primary/10 hover:-translate-y-0.5 animate-fade-in overflow-hidden"
                 style={{ animationDelay: `${i * 80}ms` }}
               >
-                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/15 transition-colors">
-                  <feature.icon className="h-5 w-5 text-primary" />
+                <div className={`absolute inset-x-0 top-0 h-1 bg-gradient-to-r ${feature.grad}`} />
+                <div className={`w-11 h-11 rounded-2xl ${feature.iconBg} flex items-center justify-center mb-3 md:mb-4 group-hover:scale-110 transition-transform shadow-sm`}>
+                  <feature.icon className="h-5 w-5" />
                 </div>
-                <h4 className="font-medium text-sm tracking-tight text-foreground mb-1.5">{feature.title}</h4>
+                <h4 className="font-bold text-sm tracking-tight text-foreground mb-1.5">{feature.title}</h4>
                 <p className="text-muted-foreground text-xs leading-relaxed">{feature.desc}</p>
               </div>
             ))}
@@ -624,31 +623,32 @@ export default function Index() {
         </div>
       </section>
 
-      {/* CTA — minimal premium */}
-      <section className="relative py-24 bg-foreground text-background overflow-hidden">
+      {/* CTA — vibrant gradient */}
+      <section className="relative py-16 md:py-24 bg-gradient-to-br from-primary via-secondary to-tutor text-primary-foreground overflow-hidden">
         <div
-          className="absolute inset-0 opacity-[0.04] pointer-events-none"
+          className="absolute inset-0 opacity-[0.08] pointer-events-none"
           style={{
             backgroundImage:
-              'linear-gradient(hsl(var(--background)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--background)) 1px, transparent 1px)',
-            backgroundSize: '48px 48px',
+              'linear-gradient(hsl(var(--primary-foreground)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--primary-foreground)) 1px, transparent 1px)',
+            backgroundSize: '40px 40px',
           }}
         />
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[400px] bg-primary/20 rounded-full blur-[140px] pointer-events-none" />
+        <div className="absolute -top-20 left-1/2 -translate-x-1/2 w-[700px] h-[400px] bg-accent/30 rounded-full blur-[140px] pointer-events-none" />
+        <div className="absolute -bottom-20 right-0 w-[500px] h-[400px] bg-tutor/40 rounded-full blur-[120px] pointer-events-none" />
         <div className="container mx-auto px-4 text-center relative z-10 max-w-2xl">
-          <span className="text-xs uppercase tracking-[0.2em] text-background/60 font-medium">Get Started</span>
-          <h2 className="text-3xl md:text-5xl font-semibold tracking-tight mt-3 mb-5 leading-[1.1]">Ready to Get Started?</h2>
-          <p className="text-base text-background/70 mb-10 max-w-lg mx-auto leading-relaxed">
-            Whether you're a parent searching for the perfect tutor for your child or an educator ready to grow your teaching career, Manage Tutor connects you with the right opportunity in minutes. Sign up free, get verified, and start your journey today.
+          <span className="inline-block text-[10px] md:text-xs uppercase tracking-[0.2em] text-primary-foreground/80 font-bold bg-primary-foreground/10 backdrop-blur px-3 py-1 rounded-full mb-4 border border-primary-foreground/20">Get Started</span>
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight mb-4 leading-[1.1]">Ready to Get Started?</h2>
+          <p className="text-sm sm:text-base text-primary-foreground/80 mb-8 md:mb-10 max-w-lg mx-auto leading-relaxed px-2">
+            Whether you're a parent searching for the perfect tutor or an educator ready to grow your career — Manage Tutor connects you in minutes.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link to="/auth?mode=signup&role=parent">
-              <Button size="lg" className="bg-background text-foreground hover:bg-background/90 h-12 px-7 rounded-lg text-sm font-semibold gap-2 shadow-lg">
+              <Button size="lg" className="w-full sm:w-auto bg-background text-foreground hover:bg-background/90 h-12 px-7 rounded-xl text-sm font-bold gap-2 shadow-2xl shadow-black/20">
                 I Need a Tutor <ArrowRight className="h-4 w-4" />
               </Button>
             </Link>
             <Link to="/auth?mode=signup&role=tutor">
-              <Button size="lg" variant="outline" className="border-background/30 bg-transparent text-background hover:bg-background/10 hover:text-background h-12 px-7 rounded-lg text-sm font-semibold gap-2">
+              <Button size="lg" variant="outline" className="w-full sm:w-auto border-primary-foreground/40 bg-primary-foreground/10 backdrop-blur text-primary-foreground hover:bg-primary-foreground/20 hover:text-primary-foreground h-12 px-7 rounded-xl text-sm font-bold gap-2">
                 I'm a Tutor <GraduationCap className="h-4 w-4" />
               </Button>
             </Link>
