@@ -81,6 +81,7 @@ export default function FindTutors() {
   const { language } = useLanguage();
   const { user, role } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
   
   const [districts, setDistricts] = useState<District[]>([]);
   const [areas, setAreas] = useState<Area[]>([]);
