@@ -269,51 +269,66 @@ export default function Index() {
         </div>
       </section>
 
-      {/* Subject Categories — minimal premium */}
+      {/* Subject Categories — colorful gradient tiles */}
       {subjectCategories.length > 0 && (
-        <section className="relative py-20 bg-gradient-to-b from-primary/[0.04] via-muted/30 to-background overflow-hidden">
-          <div className="absolute top-0 right-0 w-[500px] h-[400px] bg-primary/5 rounded-full blur-[120px] pointer-events-none" />
+        <section className="relative py-14 md:py-20 bg-gradient-to-br from-muted/40 via-background to-accent/[0.06] overflow-hidden">
+          <div className="absolute top-0 right-0 w-[500px] h-[400px] bg-primary/10 rounded-full blur-[120px] pointer-events-none" />
+          <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-tutor/10 rounded-full blur-[120px] pointer-events-none" />
           <div className="container mx-auto px-4 relative z-10">
-            <div className="flex items-end justify-between mb-12 max-w-5xl">
+            <div className="flex items-end justify-between mb-8 md:mb-12 max-w-5xl flex-wrap gap-3">
               <div>
-                <span className="text-xs uppercase tracking-[0.2em] text-muted-foreground font-medium">Categories</span>
-                <h2 className="text-3xl md:text-4xl font-semibold tracking-tight mt-2 mb-2">Browse by Subject</h2>
+                <span className="inline-block text-[10px] md:text-xs uppercase tracking-[0.2em] text-primary font-bold bg-primary/10 px-3 py-1 rounded-full mb-3">Categories</span>
+                <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight mb-2">Browse by Subject</h2>
                 <p className="text-sm text-muted-foreground max-w-xl">
-                  Explore 50+ subjects across every academic category — from primary school basics to advanced university coursework, language learning, music, art, programming, and competitive exam preparation. Pick a category to discover qualified tutors and active tuition jobs in your area.
+                  Explore 50+ subjects across every academic category — pick a category to discover qualified tutors and active tuition jobs in your area.
                 </p>
               </div>
               <Link to="/jobs">
-                <Button variant="ghost" className="hidden sm:flex gap-1 text-sm text-muted-foreground hover:text-foreground">
+                <Button variant="ghost" className="hidden sm:flex gap-1 text-sm text-primary hover:text-primary/80 font-semibold">
                   All Jobs <ArrowRight className="h-3.5 w-3.5" />
                 </Button>
               </Link>
             </div>
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {subjectCategories.slice(0, 6).map((cat, i) => (
-                <div
-                  key={i}
-                  className="group bg-card rounded-xl border border-border/60 p-5 transition-all hover:border-primary/30 hover:shadow-[0_4px_24px_-8px_hsl(var(--primary)/0.15)] animate-fade-in"
-                  style={{ animationDelay: `${i * 60}ms` }}
-                >
-                  <div className="flex items-center gap-3 mb-4">
-                    <BookOpen className="h-4 w-4 text-muted-foreground/70 group-hover:text-primary transition-colors" />
-                    <h3 className="font-medium text-sm tracking-tight">{cat.category_en}</h3>
-                    <span className="ml-auto text-[11px] text-muted-foreground tabular-nums">{cat.subjects.length}</span>
+              {subjectCategories.slice(0, 6).map((cat, i) => {
+                const palettes = [
+                  { grad: 'from-primary to-accent', icon: 'bg-primary/15 text-primary', border: 'hover:border-primary/40' },
+                  { grad: 'from-tutor to-accent', icon: 'bg-tutor/15 text-tutor', border: 'hover:border-tutor/40' },
+                  { grad: 'from-accent to-primary', icon: 'bg-accent/15 text-accent', border: 'hover:border-accent/40' },
+                  { grad: 'from-success to-accent', icon: 'bg-success/15 text-success', border: 'hover:border-success/40' },
+                  { grad: 'from-agency to-warning', icon: 'bg-agency/15 text-agency', border: 'hover:border-agency/40' },
+                  { grad: 'from-warning to-agency', icon: 'bg-warning/15 text-warning', border: 'hover:border-warning/40' },
+                ];
+                const p = palettes[i % palettes.length];
+                return (
+                  <div
+                    key={i}
+                    className={`group relative bg-card rounded-2xl border border-border/60 p-5 transition-all ${p.border} hover:shadow-xl hover:shadow-primary/10 hover:-translate-y-0.5 animate-fade-in overflow-hidden`}
+                    style={{ animationDelay: `${i * 60}ms` }}
+                  >
+                    <div className={`absolute inset-x-0 top-0 h-1 bg-gradient-to-r ${p.grad}`} />
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className={`w-9 h-9 rounded-xl ${p.icon} flex items-center justify-center group-hover:scale-110 transition-transform`}>
+                        <BookOpen className="h-4 w-4" />
+                      </div>
+                      <h3 className="font-bold text-sm tracking-tight flex-1">{cat.category_en}</h3>
+                      <span className={`text-[11px] font-bold tabular-nums ${p.icon} px-2 py-0.5 rounded-md`}>{cat.subjects.length}</span>
+                    </div>
+                    <div className="flex flex-wrap gap-1.5">
+                      {cat.subjects.slice(0, 5).map((sub) => (
+                        <Link key={sub.id} to={`/jobs?subject=${sub.id}`}>
+                          <Badge variant="outline" className="cursor-pointer border-border/60 hover:bg-foreground hover:text-background hover:border-foreground transition-colors text-[11px] font-normal">
+                            {sub.name_en}
+                          </Badge>
+                        </Link>
+                      ))}
+                      {cat.subjects.length > 5 && (
+                        <Badge variant="outline" className="text-[11px] text-muted-foreground border-border/60 font-normal">+{cat.subjects.length - 5}</Badge>
+                      )}
+                    </div>
                   </div>
-                  <div className="flex flex-wrap gap-1.5">
-                    {cat.subjects.slice(0, 5).map((sub) => (
-                      <Link key={sub.id} to={`/jobs?subject=${sub.id}`}>
-                        <Badge variant="outline" className="cursor-pointer border-border/60 hover:bg-foreground hover:text-background hover:border-foreground transition-colors text-[11px] font-normal">
-                          {sub.name_en}
-                        </Badge>
-                      </Link>
-                    ))}
-                    {cat.subjects.length > 5 && (
-                      <Badge variant="outline" className="text-[11px] text-muted-foreground border-border/60 font-normal">+{cat.subjects.length - 5}</Badge>
-                    )}
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </section>
