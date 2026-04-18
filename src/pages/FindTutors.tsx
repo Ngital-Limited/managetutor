@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -81,6 +81,7 @@ export default function FindTutors() {
   const { language } = useLanguage();
   const { user, role } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
   
   const [districts, setDistricts] = useState<District[]>([]);
   const [areas, setAreas] = useState<Area[]>([]);
@@ -276,7 +277,8 @@ export default function FindTutors() {
     e.preventDefault();
     e.stopPropagation();
     if (!user) {
-      toast({ title: 'Login Required', description: 'Please login to save tutors', variant: 'destructive' });
+      const redirect = window.location.pathname + window.location.search;
+      navigate(`/auth?redirect=${encodeURIComponent(redirect)}`);
       return;
     }
     const isFav = favorites.has(tutorId);

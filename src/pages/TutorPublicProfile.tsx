@@ -171,8 +171,8 @@ export default function TutorPublicProfile() {
 
   const toggleFavorite = async () => {
     if (!user || !tutor) {
-      toast({ title: 'Login Required', description: 'Please login to save tutors', variant: 'destructive' });
-      navigate('/auth');
+      const redirect = window.location.pathname + window.location.search;
+      navigate(`/auth?redirect=${encodeURIComponent(redirect)}`);
       return;
     }
     setFavoriteLoading(true);
