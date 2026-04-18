@@ -20,6 +20,7 @@ import {
   SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarTrigger,
   useSidebar,
 } from '@/components/ui/sidebar';
+import { AdminBottomNav } from '@/components/AdminBottomNav';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { ChevronDown, Download } from 'lucide-react';
 import { MultiSearchableSelect } from '@/components/MultiSearchableSelect';
