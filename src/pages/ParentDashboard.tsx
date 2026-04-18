@@ -2384,7 +2384,7 @@ export default function ParentDashboard() {
           {/* Top Bar */}
           <header className="sticky top-0 z-50 h-14 flex items-center justify-between border-b border-border bg-card/80 backdrop-blur-xl px-4">
             <div className="flex items-center gap-2">
-              <SidebarTrigger />
+              <SidebarTrigger className="hidden md:inline-flex" />
               <span className="text-lg font-bold hidden sm:inline">{sectionTitle}</span>
             </div>
             <div className="flex items-center gap-3">
