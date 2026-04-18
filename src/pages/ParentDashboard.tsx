@@ -47,7 +47,7 @@ import {
   Star, Briefcase, Users, Clock, CheckCircle2, XCircle, Search, ArrowRight,
   Eye, Edit, Trash2, Calendar, Home, Heart, AlertCircle,
   User, CreditCard, Pause, Play, Flag, Zap,
-  Send, AlertTriangle, Receipt, DollarSign, LayoutDashboard
+  Send, AlertTriangle, Receipt, DollarSign, LayoutDashboard, X
 } from 'lucide-react';
 
 interface District { id: string; name_en: string; division_en: string; }
