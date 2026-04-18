@@ -481,25 +481,31 @@ export default function FindTutors() {
       <Header />
 
       {/* Hero */}
-      <section className="gradient-hero text-primary-foreground py-10">
-        <div className="container mx-auto px-4 max-w-6xl">
-          <h1 className="text-2xl md:text-3xl font-extrabold mb-2">Find Your Perfect Tutor</h1>
-          <p className="text-sm opacity-90 max-w-xl">Browse verified tutors and find the right match for your learning needs</p>
+      <section className="relative overflow-hidden bg-gradient-to-br from-primary via-primary to-secondary text-primary-foreground">
+        <div className="absolute -top-32 -right-20 w-[420px] h-[420px] rounded-full bg-accent/40 blur-[120px] pointer-events-none" />
+        <div className="absolute -bottom-32 -left-20 w-[420px] h-[420px] rounded-full bg-tutor/30 blur-[120px] pointer-events-none" />
+        <div className="container mx-auto px-4 max-w-6xl pt-12 pb-10 relative z-10">
+          <div className="inline-flex items-center gap-2 bg-primary-foreground/15 backdrop-blur-sm rounded-full px-4 py-1.5 text-xs font-medium mb-4 border border-primary-foreground/20">
+            <Award className="h-3.5 w-3.5" />
+            Verified Tutors Across Bangladesh
+          </div>
+          <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight mb-2 leading-tight">Find Your Perfect Tutor</h1>
+          <p className="text-sm md:text-base opacity-90 max-w-xl">Browse verified tutors and find the right match for your learning needs</p>
 
           {/* Inline search */}
-          <div className="mt-6 bg-card/10 backdrop-blur-sm rounded-xl p-3 flex flex-col sm:flex-row gap-3 max-w-3xl">
+          <div className="mt-6 bg-card/95 backdrop-blur-md rounded-2xl p-3 flex flex-col sm:flex-row gap-3 max-w-3xl border border-primary-foreground/20 shadow-2xl text-foreground">
             <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-primary-foreground/60" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Search by name, subject, or expertise..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9 h-10 rounded-lg bg-white/10 border-white/20 text-primary-foreground placeholder:text-primary-foreground/50 focus-visible:ring-white/40"
+                className="pl-9 h-10 rounded-lg"
               />
             </div>
             <div className="flex gap-2">
               <Select value={selectedSubject} onValueChange={v => setSelectedSubject(v === 'all' ? '' : v)}>
-                <SelectTrigger className="w-[180px] h-10 rounded-lg bg-white/10 border-white/20 text-primary-foreground">
+                <SelectTrigger className="w-[180px] h-10 rounded-lg">
                   <BookOpen className="h-3.5 w-3.5 mr-1.5 opacity-70" />
                   <SelectValue placeholder="Subject" />
                 </SelectTrigger>
@@ -510,7 +516,7 @@ export default function FindTutors() {
                   ))}
                 </SelectContent>
               </Select>
-              <Button className="h-10 rounded-lg bg-white text-primary hover:bg-white/90 font-semibold px-5" onClick={fetchTutors}>
+              <Button className="h-10 rounded-lg font-semibold px-5" onClick={fetchTutors}>
                 <Search className="h-4 w-4 mr-1.5" />Search
               </Button>
             </div>
