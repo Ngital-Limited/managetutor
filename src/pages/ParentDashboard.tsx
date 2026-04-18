@@ -41,6 +41,7 @@ import {
   SidebarTrigger,
   useSidebar,
 } from '@/components/ui/sidebar';
+import { ParentBottomNav } from '@/components/ParentBottomNav';
 import { NotificationBell } from '@/components/NotificationBell';
 import {
   GraduationCap, LogOut, Globe, Plus, MapPin, BookOpen,
