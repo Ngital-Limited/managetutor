@@ -20,6 +20,7 @@ import {
   SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarTrigger,
   useSidebar,
 } from '@/components/ui/sidebar';
+import { AdminBottomNav } from '@/components/AdminBottomNav';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { ChevronDown, Download } from 'lucide-react';
 import { MultiSearchableSelect } from '@/components/MultiSearchableSelect';
@@ -1791,7 +1792,7 @@ export default function AdminDashboard() {
         <div className="flex-1 flex flex-col min-h-screen overflow-hidden">
           <header className="sticky top-0 z-50 h-12 flex items-center justify-between border-b border-border/50 bg-background/95 backdrop-blur-sm px-4">
             <div className="flex items-center gap-3">
-              <SidebarTrigger className="text-muted-foreground" />
+              <SidebarTrigger className="text-muted-foreground hidden md:inline-flex" />
               <span className="text-sm font-medium text-muted-foreground hidden sm:inline">Super Admin</span>
             </div>
             <div className="flex items-center gap-2">
@@ -1802,7 +1803,7 @@ export default function AdminDashboard() {
             </div>
           </header>
 
-          <main className="flex-1 p-4 md:p-6 overflow-auto">
+          <main className="flex-1 p-4 md:p-6 overflow-auto pb-24 md:pb-6">
             {/* ═══════ OVERVIEW TAB ═══════ */}
             {activeTab === 'overview' && (
               <div className="space-y-6 max-w-6xl">
@@ -3174,6 +3175,7 @@ export default function AdminDashboard() {
               </div>
             )}
           </main>
+          <AdminBottomNav activeTab={activeTab} setActiveTab={setActiveTab} />
         </div>
       </div>
 

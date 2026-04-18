@@ -41,6 +41,7 @@ import {
   SidebarTrigger,
   useSidebar,
 } from '@/components/ui/sidebar';
+import { ParentBottomNav } from '@/components/ParentBottomNav';
 import { NotificationBell } from '@/components/NotificationBell';
 import {
   GraduationCap, LogOut, Globe, Plus, MapPin, BookOpen,
@@ -2384,7 +2385,7 @@ export default function ParentDashboard() {
           {/* Top Bar */}
           <header className="sticky top-0 z-50 h-14 flex items-center justify-between border-b border-border bg-card/80 backdrop-blur-xl px-4">
             <div className="flex items-center gap-2">
-              <SidebarTrigger />
+              <SidebarTrigger className="hidden md:inline-flex" />
               <span className="text-lg font-bold hidden sm:inline">{sectionTitle}</span>
             </div>
             <div className="flex items-center gap-3">
@@ -2397,9 +2398,14 @@ export default function ParentDashboard() {
             </div>
           </header>
 
-          <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto">
+          <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto pb-24 md:pb-8">
             {renderActiveSection()}
           </main>
+          <ParentBottomNav
+            activeSection={activeSection}
+            setActiveSection={setActiveSection}
+            pendingApplicants={allApplicants.filter((a: any) => a.status === 'pending').length}
+          />
         </div>
       </div>
 
