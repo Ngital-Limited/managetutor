@@ -142,9 +142,10 @@ const externalLinks = [
 ];
 
 function ParentSidebar({ activeSection, setActiveSection, onPostJob, pendingApplicants, onApplicantsClick }: { activeSection: SectionKey; setActiveSection: (s: SectionKey) => void; onPostJob: () => void; pendingApplicants: number; onApplicantsClick?: () => void }) {
-  const { state } = useSidebar();
+  const { state, isMobile, setOpenMobile } = useSidebar();
   const collapsed = state === 'collapsed';
   const { profile, user } = useAuth();
+  const closeOnMobile = () => { if (isMobile) setOpenMobile(false); };
 
   const initials = profile?.full_name
     ? profile.full_name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
@@ -154,9 +155,19 @@ function ParentSidebar({ activeSection, setActiveSection, onPostJob, pendingAppl
     <Sidebar collapsible="offcanvas">
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>
+          <SidebarGroupLabel className="flex items-center justify-between">
             {!collapsed && (
               <Logo size="sm" />
+            )}
+            {isMobile && (
+              <button
+                type="button"
+                onClick={() => setOpenMobile(false)}
+                className="ml-auto inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-muted"
+                aria-label="Close menu"
+              >
+                <X className="h-4 w-4" />
+              </button>
             )}
           </SidebarGroupLabel>
           <div className={`flex items-center gap-3 px-3 py-3 ${collapsed ? 'justify-center' : ''}`}>
@@ -175,7 +186,7 @@ function ParentSidebar({ activeSection, setActiveSection, onPostJob, pendingAppl
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton
-                  onClick={onPostJob}
+                  onClick={() => { onPostJob(); closeOnMobile(); }}
                   className="cursor-pointer hover:bg-primary/10 text-primary font-medium"
                 >
                   <Plus className="mr-2 h-4 w-4" />
@@ -190,6 +201,7 @@ function ParentSidebar({ activeSection, setActiveSection, onPostJob, pendingAppl
                       if (item.key === 'applicants' && pendingApplicants > 0) {
                         onApplicantsClick?.();
                       }
+                      closeOnMobile();
                     }}
                     className={`cursor-pointer ${activeSection === item.key ? 'bg-muted text-primary font-medium' : 'hover:bg-muted/50'}`}
                   >
@@ -214,7 +226,7 @@ function ParentSidebar({ activeSection, setActiveSection, onPostJob, pendingAppl
               {externalLinks.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
-                    <Link to={item.url} className="hover:bg-muted/50">
+                    <Link to={item.url} className="hover:bg-muted/50" onClick={closeOnMobile}>
                       <item.icon className="mr-2 h-4 w-4" />
                       {!collapsed && <span>{item.title}</span>}
                     </Link>
