@@ -427,21 +427,19 @@ export default function BrowseJobs({ embedded = false }: { embedded?: boolean } 
 
       {/* Hero Section */}
       {!embedded && (
-        <section className="relative overflow-hidden bg-gradient-to-br from-primary via-primary/90 to-blue-700 text-primary-foreground">
-          <div className="absolute inset-0 opacity-10">
-            <div className="absolute top-10 left-10 w-72 h-72 bg-white rounded-full blur-3xl" />
-            <div className="absolute bottom-10 right-10 w-96 h-96 bg-blue-300 rounded-full blur-3xl" />
-          </div>
-          <div className="container mx-auto px-4 py-14 relative z-10">
+        <section className="relative overflow-hidden bg-gradient-to-br from-primary via-primary to-secondary text-primary-foreground">
+          <div className="absolute -top-32 -right-20 w-[420px] h-[420px] rounded-full bg-accent/40 blur-[120px] pointer-events-none" />
+          <div className="absolute -bottom-32 -left-20 w-[420px] h-[420px] rounded-full bg-tutor/30 blur-[120px] pointer-events-none" />
+          <div className="container mx-auto px-4 pt-12 pb-14 relative z-10">
             <div className="max-w-3xl">
-              <div className="inline-flex items-center gap-2 bg-white/15 backdrop-blur-sm rounded-full px-4 py-1.5 text-sm font-medium mb-5">
+              <div className="inline-flex items-center gap-2 bg-primary-foreground/15 backdrop-blur-sm rounded-full px-4 py-1.5 text-sm font-medium mb-5 border border-primary-foreground/20">
                 <Sparkles className="h-4 w-4" />
                 {totalCount} Active Opportunities
               </div>
-              <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight mb-4 leading-tight">
+              <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight mb-4 leading-tight">
                 Find Your Perfect<br />Tuition Job
               </h1>
-              <p className="text-lg opacity-85 max-w-xl leading-relaxed">
+              <p className="text-base md:text-lg opacity-90 max-w-xl leading-relaxed">
                 Discover tuition opportunities across Bangladesh. Apply instantly and start teaching today.
               </p>
             </div>
