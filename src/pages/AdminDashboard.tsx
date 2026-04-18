@@ -1802,7 +1802,7 @@ export default function AdminDashboard() {
             </div>
           </header>
 
-          <main className="flex-1 p-4 md:p-6 overflow-auto">
+          <main className="flex-1 p-4 md:p-6 overflow-auto pb-24 md:pb-6">
             {/* ═══════ OVERVIEW TAB ═══════ */}
             {activeTab === 'overview' && (
               <div className="space-y-6 max-w-6xl">
