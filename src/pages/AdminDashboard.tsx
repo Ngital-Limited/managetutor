@@ -3174,6 +3174,7 @@ export default function AdminDashboard() {
               </div>
             )}
           </main>
+          <AdminBottomNav activeTab={activeTab} setActiveTab={setActiveTab} />
         </div>
       </div>
 
