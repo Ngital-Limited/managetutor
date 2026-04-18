@@ -131,7 +131,7 @@ export default function TutorRecommendations() {
           </CardHeader>
           <CardContent>
             <Tabs value={tab} onValueChange={setTab}>
-              <TabsList className="mb-4">
+              <TabsList className="mb-4 w-full sm:w-auto inline-flex sm:flex h-auto overflow-x-auto whitespace-nowrap justify-start sm:justify-center scrollbar-none">
                 <TabsTrigger value="recommended"><Sparkles className="h-3 w-3 mr-1" />Recommended ({recommended.length})</TabsTrigger>
                 <TabsTrigger value="nearby"><MapPin className="h-3 w-3 mr-1" />Near You ({nearby.length})</TabsTrigger>
                 <TabsTrigger value="highpay"><DollarSign className="h-3 w-3 mr-1" />High-Paying ({highPay.length})</TabsTrigger>
