@@ -2397,9 +2397,14 @@ export default function ParentDashboard() {
             </div>
           </header>
 
-          <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto">
+          <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto pb-24 md:pb-8">
             {renderActiveSection()}
           </main>
+          <ParentBottomNav
+            activeSection={activeSection}
+            setActiveSection={setActiveSection}
+            pendingApplicants={allApplicants.filter((a: any) => a.status === 'pending').length}
+          />
         </div>
       </div>
 
