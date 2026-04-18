@@ -37,6 +37,7 @@ import Terms from "./pages/Terms";
 import Install from "./pages/Install";
 import { ImpersonationBanner } from "./components/ImpersonationBanner";
 import { InstallAppBanner } from "./components/InstallAppBanner";
+import { AuthGate } from "./components/AuthGate";
 
 const queryClient = new QueryClient();
 
@@ -48,6 +49,7 @@ const App = () => (
           <BrowserRouter>
             <Toaster />
             <Sonner />
+            <AuthGate />
             <ImpersonationBanner />
             <InstallAppBanner />
             <Routes>
