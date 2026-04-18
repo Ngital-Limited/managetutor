@@ -15,6 +15,7 @@ import {
   Home, FileText, Calendar, Briefcase, User, CreditCard, LogOut,
   Sparkles, Zap, ShieldCheck,
 } from 'lucide-react';
+import { TutorBottomNav } from '@/components/TutorBottomNav';
 
 const tutorSidebarItems = [
   { title: 'Dashboard', url: '/tutor/dashboard', icon: Home },
@@ -113,9 +114,10 @@ export function TutorSidebarLayout({ children, title }: TutorSidebarLayoutProps)
               </Button>
             </div>
           </header>
-          <main className="flex-1 overflow-auto">
+          <main className="flex-1 overflow-auto pb-20 md:pb-0">
             {children}
           </main>
+          <TutorBottomNav />
         </div>
       </div>
     </SidebarProvider>
