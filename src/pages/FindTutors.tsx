@@ -486,45 +486,53 @@ export default function FindTutors() {
       <section className="relative overflow-hidden bg-gradient-to-br from-primary via-primary to-secondary text-primary-foreground">
         <div className="absolute -top-32 -right-20 w-[420px] h-[420px] rounded-full bg-accent/40 blur-[120px] pointer-events-none" />
         <div className="absolute -bottom-32 -left-20 w-[420px] h-[420px] rounded-full bg-tutor/30 blur-[120px] pointer-events-none" />
-        <div className="container mx-auto px-4 max-w-6xl pt-12 pb-10 relative z-10">
-          <div className="inline-flex items-center gap-2 bg-primary-foreground/15 backdrop-blur-sm rounded-full px-4 py-1.5 text-xs font-medium mb-4 border border-primary-foreground/20">
-            <Award className="h-3.5 w-3.5" />
-            Verified Tutors Across Bangladesh
+        <div className="container mx-auto px-4 max-w-6xl pt-12 pb-14 relative z-10">
+          <div className="max-w-3xl">
+            <div className="inline-flex items-center gap-2 bg-primary-foreground/15 backdrop-blur-sm rounded-full px-4 py-1.5 text-sm font-medium mb-5 border border-primary-foreground/20">
+              <Award className="h-4 w-4" />
+              Verified Tutors Across Bangladesh
+            </div>
+            <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight mb-4 leading-tight">
+              Find Your Perfect<br />Tutor
+            </h1>
+            <p className="text-base md:text-lg opacity-90 max-w-xl leading-relaxed">
+              Browse verified tutors and find the right match for your learning needs.
+            </p>
           </div>
-          <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight mb-2 leading-tight">Find Your Perfect Tutor</h1>
-          <p className="text-sm md:text-base opacity-90 max-w-xl">Browse verified tutors and find the right match for your learning needs</p>
+        </div>
+      </section>
 
-          {/* Inline search */}
-          <div className="mt-6 bg-card/95 backdrop-blur-md rounded-2xl p-3 flex flex-col sm:flex-row gap-3 max-w-3xl border border-primary-foreground/20 shadow-2xl text-foreground">
+      {/* Search Bar - Floating */}
+      <div className="container mx-auto px-4 max-w-6xl relative z-20 -mt-7">
+        <div className="bg-card rounded-2xl shadow-xl border border-border p-4">
+          <div className="flex flex-col md:flex-row gap-3">
             <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
               <Input
                 placeholder="Search by name, subject, or expertise..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9 h-10 rounded-lg"
+                className="pl-11 h-12 rounded-xl border-0 bg-muted/50 text-base"
               />
             </div>
-            <div className="flex gap-2">
-              <Select value={selectedSubject} onValueChange={v => setSelectedSubject(v === 'all' ? '' : v)}>
-                <SelectTrigger className="w-[180px] h-10 rounded-lg">
-                  <BookOpen className="h-3.5 w-3.5 mr-1.5 opacity-70" />
-                  <SelectValue placeholder="Subject" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Subjects</SelectItem>
-                  {subjectOptions.map(s => (
-                    <SelectItem key={s.id} value={s.id}>{s.name_en}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Button className="h-10 rounded-lg font-semibold px-5" onClick={fetchTutors}>
-                <Search className="h-4 w-4 mr-1.5" />Search
-              </Button>
-            </div>
+            <Select value={selectedSubject} onValueChange={v => setSelectedSubject(v === 'all' ? '' : v)}>
+              <SelectTrigger className="md:w-[200px] h-12 rounded-xl">
+                <BookOpen className="h-4 w-4 mr-2 opacity-70" />
+                <SelectValue placeholder="Subject" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Subjects</SelectItem>
+                {subjectOptions.map(s => (
+                  <SelectItem key={s.id} value={s.id}>{s.name_en}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Button className="h-12 rounded-xl px-8 font-semibold" onClick={fetchTutors}>
+              <Search className="h-4 w-4 mr-2" />Search
+            </Button>
           </div>
         </div>
-      </section>
+      </div>
 
       <div className="container mx-auto px-4 py-6 max-w-6xl">
         {/* Toolbar: Filters toggle, sort, view mode, count */}
