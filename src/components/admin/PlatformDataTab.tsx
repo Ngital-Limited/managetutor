@@ -561,7 +561,7 @@ export function PlatformDataTab({ toast }: { toast: any }) {
       </div>
 
       <Tabs defaultValue="subjects" className="space-y-4">
-        <TabsList>
+        <TabsList className="w-full sm:w-auto inline-flex sm:flex h-auto overflow-x-auto whitespace-nowrap justify-start sm:justify-center scrollbar-none">
           <TabsTrigger value="subjects" className="gap-1.5"><BookOpen className="h-3.5 w-3.5" /> Subjects</TabsTrigger>
           <TabsTrigger value="districts" className="gap-1.5"><MapPin className="h-3.5 w-3.5" /> Districts</TabsTrigger>
           <TabsTrigger value="areas" className="gap-1.5"><Map className="h-3.5 w-3.5" /> Areas</TabsTrigger>
