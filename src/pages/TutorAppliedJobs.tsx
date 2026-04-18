@@ -215,7 +215,7 @@ export default function TutorAppliedJobs() {
               <CardContent>
                 {applications.length > 0 ? (
                   <Tabs defaultValue="all">
-                    <TabsList className="mb-4 flex-wrap">
+                    <TabsList className="mb-4 w-full sm:w-auto inline-flex sm:flex h-auto overflow-x-auto whitespace-nowrap justify-start sm:justify-center scrollbar-none">
                       <TabsTrigger value="all">All ({stats.total})</TabsTrigger>
                       <TabsTrigger value="pending">Pending ({stats.pending})</TabsTrigger>
                       <TabsTrigger value="shortlisted">Shortlisted ({stats.shortlisted})</TabsTrigger>
