@@ -310,7 +310,7 @@ function ContactMessagesTab({ toast }: { toast: ReturnType<typeof useToast>['toa
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-3">
         <h1 className="text-xl font-semibold">Contact Messages</h1>
         {unreadCount > 0 && <Badge variant="destructive">{unreadCount} unread</Badge>}
       </div>
@@ -496,7 +496,7 @@ function DemoRequestsTab({ toast }: { toast: ReturnType<typeof useToast>['toast'
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-3">
         <h1 className="text-xl font-semibold">Demo Class Requests</h1>
         {pendingCount > 0 && (
           <Badge className="bg-warning text-warning-foreground">{pendingCount} pending</Badge>
@@ -642,7 +642,7 @@ function SubscriptionPlansTab({ toast }: { toast: ReturnType<typeof useToast>['t
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-3">
         <h1 className="text-xl font-semibold">Subscription Plans</h1>
         <Button onClick={openCreate}><Plus className="h-4 w-4 mr-2" /> Create Plan</Button>
       </div>
@@ -2124,7 +2124,7 @@ export default function AdminDashboard() {
             {/* ═══════ VERIFICATIONS TAB ═══════ */}
             {activeTab === 'verifications' && (
               <div className="space-y-6">
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between flex-wrap gap-3">
                   <h1 className="text-xl font-semibold">Tutor Verifications</h1>
                   <Select value={verificationFilter} onValueChange={(v) => setVerificationFilter(v)}>
                     <SelectTrigger className="w-44"><SelectValue /></SelectTrigger>

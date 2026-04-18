@@ -1527,7 +1527,7 @@ export default function ParentDashboard() {
                   A complete profile helps tutors understand your needs better.
                 </p>
                 <Progress value={profileInfo.percent} className="h-2 mb-3" />
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                   <div className="flex flex-wrap gap-2">
                     {profileInfo.missing.map((item) => (
                       <Badge key={item} variant="outline" className="text-warning border-warning/50">
@@ -1535,10 +1535,12 @@ export default function ParentDashboard() {
                       </Badge>
                     ))}
                   </div>
-                  <span className="text-sm font-medium text-muted-foreground">{profileInfo.percent}% complete</span>
-                  <Link to="/parent/profile">
-                    <Button size="sm">Edit Profile</Button>
-                  </Link>
+                  <div className="flex items-center justify-between sm:justify-end gap-3 shrink-0">
+                    <span className="text-sm font-medium text-muted-foreground">{profileInfo.percent}% complete</span>
+                    <Link to="/parent/profile">
+                      <Button size="sm">Edit Profile</Button>
+                    </Link>
+                  </div>
                 </div>
               </div>
             </div>
