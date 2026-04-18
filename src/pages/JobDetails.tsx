@@ -679,12 +679,13 @@ export default function JobDetails() {
                         Apply Now
                       </Button>
                     ) : (
-                      <Link to="/auth">
-                        <Button className="w-full" size="lg">
-                          <Send className="h-4 w-4 mr-2" />
-                          Login to Apply
-                        </Button>
-                      </Link>
+                      <Button className="w-full" size="lg" onClick={() => {
+                        const redirect = window.location.pathname + window.location.search;
+                        navigate(`/auth?redirect=${encodeURIComponent(redirect)}`);
+                      }}>
+                        <Send className="h-4 w-4 mr-2" />
+                        Login to Apply
+                      </Button>
                     )}
                   </>
                 )}

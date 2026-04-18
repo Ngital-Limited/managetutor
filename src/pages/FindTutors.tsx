@@ -276,7 +276,8 @@ export default function FindTutors() {
     e.preventDefault();
     e.stopPropagation();
     if (!user) {
-      toast({ title: 'Login Required', description: 'Please login to save tutors', variant: 'destructive' });
+      const redirect = window.location.pathname + window.location.search;
+      navigate(`/auth?redirect=${encodeURIComponent(redirect)}`);
       return;
     }
     const isFav = favorites.has(tutorId);

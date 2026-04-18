@@ -314,7 +314,8 @@ export default function BrowseJobs({ embedded = false }: { embedded?: boolean } 
 
   const handleApply = (job: Job) => {
     if (!user) {
-      navigate('/auth');
+      const redirect = window.location.pathname + window.location.search;
+      navigate(`/auth?redirect=${encodeURIComponent(redirect)}`);
       return;
     }
     if (role !== 'tutor') {
