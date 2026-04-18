@@ -132,48 +132,49 @@ export default function Index() {
     <div className="min-h-screen bg-background">
       <Header />
 
-      {/* Hero Section — minimal & premium */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-primary/[0.04] via-background to-background">
-        {/* Subtle grid texture */}
+      {/* Hero — vibrant, mobile-first */}
+      <section className="relative overflow-hidden bg-gradient-to-br from-primary via-primary to-secondary text-primary-foreground">
+        {/* Decorative orbs */}
+        <div className="absolute -top-32 -right-20 w-[420px] h-[420px] rounded-full bg-accent/40 blur-[120px] pointer-events-none" />
+        <div className="absolute -bottom-32 -left-20 w-[420px] h-[420px] rounded-full bg-tutor/40 blur-[120px] pointer-events-none" />
+        {/* Grid texture */}
         <div
-          className="absolute inset-0 opacity-[0.025] pointer-events-none"
+          className="absolute inset-0 opacity-[0.08] pointer-events-none"
           style={{
             backgroundImage:
-              'linear-gradient(hsl(var(--foreground)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--foreground)) 1px, transparent 1px)',
-            backgroundSize: '48px 48px',
+              'linear-gradient(hsl(var(--primary-foreground)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--primary-foreground)) 1px, transparent 1px)',
+            backgroundSize: '40px 40px',
           }}
         />
-        {/* Single soft glow accent */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[400px] bg-primary/10 rounded-full blur-[120px] pointer-events-none" />
 
-        <div className="container mx-auto px-4 pt-20 md:pt-28 pb-16 md:pb-20 relative z-10">
+        <div className="container mx-auto px-4 pt-16 pb-12 md:pt-24 md:pb-20 relative z-10">
           <div className="max-w-3xl mx-auto text-center">
-            <div className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-card/60 backdrop-blur px-4 py-1.5 mb-7 animate-fade-in">
-              <span className="relative flex h-1.5 w-1.5">
+            <div className="inline-flex items-center gap-2 rounded-full border border-primary-foreground/25 bg-primary-foreground/10 backdrop-blur px-4 py-1.5 mb-6 animate-fade-in">
+              <span className="relative flex h-2 w-2">
                 <span className="absolute inline-flex h-full w-full rounded-full bg-success opacity-75 animate-ping" />
-                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-success" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-success" />
               </span>
-              <span className="text-xs font-medium text-muted-foreground tracking-wide">
+              <span className="text-[11px] sm:text-xs font-medium tracking-wide">
                 Trusted by 4,000+ families across Bangladesh
               </span>
             </div>
 
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-semibold tracking-tight text-foreground mb-5 animate-fade-in animation-delay-100 leading-[1.05]">
+            <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold tracking-tight mb-4 animate-fade-in animation-delay-100 leading-[1.05]">
               {t('hero.title')}
             </h1>
-            <p className="text-base md:text-lg text-muted-foreground mb-10 max-w-xl mx-auto animate-fade-in animation-delay-200 leading-relaxed">
+            <p className="text-sm sm:text-base md:text-lg text-primary-foreground/80 mb-8 max-w-xl mx-auto animate-fade-in animation-delay-200 leading-relaxed px-2">
               {t('hero.subtitle')}
             </p>
 
-            {/* Premium minimal search card */}
-            <div className="bg-card/80 backdrop-blur-md rounded-2xl border border-border/70 shadow-[0_8px_40px_-12px_hsl(var(--primary)/0.18)] overflow-hidden animate-fade-in animation-delay-300 text-left">
+            {/* Search card */}
+            <div className="bg-card/95 backdrop-blur-md text-foreground rounded-2xl border border-primary-foreground/20 shadow-2xl shadow-primary/30 overflow-hidden animate-fade-in animation-delay-300 text-left">
               {/* Toggle */}
-              <div className="flex items-center justify-center gap-1 p-1.5 border-b border-border/50 bg-muted/30">
+              <div className="flex items-center justify-center gap-1 p-1.5 border-b border-border/50 bg-muted/40">
                 <button
                   onClick={() => setSearchType('tutors')}
-                  className={`flex-1 max-w-[200px] flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-all ${
+                  className={`flex-1 max-w-[220px] flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg transition-all ${
                     searchType === 'tutors'
-                      ? 'bg-card text-foreground shadow-sm'
+                      ? 'bg-gradient-to-r from-primary to-accent text-primary-foreground shadow-md'
                       : 'text-muted-foreground hover:text-foreground'
                   }`}
                 >
@@ -181,9 +182,9 @@ export default function Index() {
                 </button>
                 <button
                   onClick={() => setSearchType('jobs')}
-                  className={`flex-1 max-w-[200px] flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-all ${
+                  className={`flex-1 max-w-[220px] flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg transition-all ${
                     searchType === 'jobs'
-                      ? 'bg-card text-foreground shadow-sm'
+                      ? 'bg-gradient-to-r from-primary to-accent text-primary-foreground shadow-md'
                       : 'text-muted-foreground hover:text-foreground'
                   }`}
                 >
@@ -229,7 +230,7 @@ export default function Index() {
                 </div>
                 <Button
                   onClick={handleSearch}
-                  className="w-full h-11 rounded-lg text-sm font-semibold gap-2 shadow-sm"
+                  className="w-full h-12 rounded-lg text-sm font-bold gap-2 shadow-lg bg-gradient-to-r from-primary to-accent hover:opacity-95 transition-opacity"
                 >
                   <Search className="h-4 w-4" />
                   {searchType === 'tutors' ? 'Search Tutors' : 'Search Jobs'}
@@ -241,24 +242,27 @@ export default function Index() {
         </div>
       </section>
 
-      {/* Stats — minimal premium */}
-      <section className="py-20 bg-background border-y border-border/40">
+      {/* Stats — vibrant gradient tiles */}
+      <section className="py-12 md:py-16 bg-background -mt-px">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-px bg-border/40 rounded-2xl overflow-hidden border border-border/40">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 max-w-5xl mx-auto">
             {[
-              { icon: Users, value: '1,00,000+', label: t('stats.tutors') },
-              { icon: Award, value: '4,000+', label: t('stats.matches') },
-              { icon: MapPin, value: '64', label: t('stats.cities') },
-              { icon: CheckCircle2, value: '98%', label: t('stats.satisfaction') },
+              { icon: Users, value: '1,00,000+', label: t('stats.tutors'), gradient: 'from-primary to-accent', iconBg: 'bg-primary/15', iconColor: 'text-primary' },
+              { icon: Award, value: '4,000+', label: t('stats.matches'), gradient: 'from-tutor to-accent', iconBg: 'bg-tutor/15', iconColor: 'text-tutor' },
+              { icon: MapPin, value: '64', label: t('stats.cities'), gradient: 'from-accent to-primary', iconBg: 'bg-accent/15', iconColor: 'text-accent' },
+              { icon: CheckCircle2, value: '98%', label: t('stats.satisfaction'), gradient: 'from-success to-accent', iconBg: 'bg-success/15', iconColor: 'text-success' },
             ].map((stat, i) => (
               <div
                 key={i}
-                className="bg-background px-6 py-10 text-center group transition-colors hover:bg-muted/30 animate-fade-in"
+                className="relative bg-card rounded-2xl border border-border/60 p-4 md:p-6 text-center group transition-all hover:shadow-xl hover:shadow-primary/10 hover:-translate-y-0.5 animate-fade-in overflow-hidden"
                 style={{ animationDelay: `${i * 80}ms` }}
               >
-                <stat.icon className="h-5 w-5 mx-auto mb-4 text-muted-foreground/70 group-hover:text-primary transition-colors" />
-                <div className="text-3xl md:text-4xl font-semibold tracking-tight text-foreground mb-1.5">{stat.value}</div>
-                <div className="text-muted-foreground text-xs uppercase tracking-wider font-medium">{stat.label}</div>
+                <div className={`absolute inset-x-0 top-0 h-1 bg-gradient-to-r ${stat.gradient}`} />
+                <div className={`w-10 h-10 md:w-11 md:h-11 mx-auto mb-3 rounded-xl ${stat.iconBg} ${stat.iconColor} flex items-center justify-center group-hover:scale-110 transition-transform`}>
+                  <stat.icon className="h-5 w-5" />
+                </div>
+                <div className="text-xl md:text-3xl font-bold tracking-tight text-foreground mb-1 tabular-nums">{stat.value}</div>
+                <div className="text-muted-foreground text-[10px] md:text-xs uppercase tracking-wider font-semibold">{stat.label}</div>
               </div>
             ))}
           </div>
