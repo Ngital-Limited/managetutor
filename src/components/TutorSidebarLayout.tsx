@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/sidebar';
 import {
   Home, FileText, Calendar, Briefcase, User, CreditCard, LogOut,
-  Sparkles, Zap, ShieldCheck,
+  Sparkles, Zap, ShieldCheck, X,
 } from 'lucide-react';
 import { TutorBottomNav } from '@/components/TutorBottomNav';
 
@@ -38,12 +38,27 @@ function TutorSidebarInner() {
     ? profile.full_name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
     : user?.email?.[0]?.toUpperCase() || '?';
 
+  const { setOpenMobile } = useSidebar();
+  const handleNavClick = () => {
+    if (isMobile) setOpenMobile(false);
+  };
+
   return (
     <Sidebar collapsible="offcanvas">
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>
+          <SidebarGroupLabel className="flex items-center justify-between">
             {!collapsed && <Logo size="sm" />}
+            {isMobile && (
+              <button
+                type="button"
+                onClick={() => setOpenMobile(false)}
+                className="ml-auto inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-muted"
+                aria-label="Close menu"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
           </SidebarGroupLabel>
           <div className={`flex items-center gap-3 px-3 py-3 ${collapsed ? 'justify-center' : ''}`}>
             <Avatar className="h-9 w-9 shrink-0 border-2 border-primary/20">
@@ -65,6 +80,7 @@ function TutorSidebarInner() {
                     <NavLink
                       to={item.url}
                       end={item.url === '/tutor/dashboard'}
+                      onClick={handleNavClick}
                       className="hover:bg-muted/50"
                       activeClassName="bg-muted text-primary font-medium"
                     >
@@ -103,7 +119,7 @@ export function TutorSidebarLayout({ children, title }: TutorSidebarLayoutProps)
         <div className="flex-1 flex flex-col min-w-0 w-full">
           <header className="sticky top-0 z-40 h-14 flex items-center justify-between border-b border-border bg-card/80 backdrop-blur-xl px-3 sm:px-4">
             <div className="flex items-center gap-2 min-w-0">
-              <SidebarTrigger />
+              <SidebarTrigger className="hidden md:inline-flex" />
               <span className="text-base sm:text-lg font-bold truncate">{title}</span>
             </div>
             <div className="flex items-center gap-2 sm:gap-3 shrink-0">
