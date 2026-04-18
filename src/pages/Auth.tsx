@@ -54,6 +54,11 @@ export default function Auth() {
 
   useEffect(() => {
     if (user && !authLoading && userRole) {
+      const redirect = searchParams.get('redirect');
+      if (redirect && redirect.startsWith('/') && !redirect.startsWith('//')) {
+        navigate(redirect);
+        return;
+      }
       if (userRole === 'tutor') {
         navigate('/tutor/dashboard');
       } else if (userRole === 'parent') {
@@ -64,7 +69,7 @@ export default function Auth() {
         navigate('/dashboard');
       }
     }
-  }, [user, authLoading, userRole, navigate]);
+  }, [user, authLoading, userRole, navigate, searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
