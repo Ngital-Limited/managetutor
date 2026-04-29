@@ -814,7 +814,22 @@ export default function TutorProfile() {
                       <div className="grid md:grid-cols-2 gap-4">
                         <div>
                           <Label>Institution Name</Label>
-                          <Input className="rounded-xl mt-1.5 h-11" value={entry.institution} onChange={(e) => updateEducation(index, 'institution', e.target.value)} placeholder={meta.institutionPlaceholder} />
+                          {entry.degree === 'Bachelor' || entry.degree === 'Masters' ? (
+                            <div className="mt-1.5">
+                              <SearchableSelect
+                                options={UNIVERSITY_OPTIONS}
+                                value={entry.institution}
+                                onValueChange={(v) => updateEducation(index, 'institution', v)}
+                                placeholder={meta.institutionPlaceholder || 'Select university'}
+                                searchPlaceholder="Search universities..."
+                                emptyText="No university found."
+                                grouped
+                                className="h-11 rounded-xl"
+                              />
+                            </div>
+                          ) : (
+                            <Input className="rounded-xl mt-1.5 h-11" value={entry.institution} onChange={(e) => updateEducation(index, 'institution', e.target.value)} placeholder={meta.institutionPlaceholder} />
+                          )}
                         </div>
                         <div>
                           <Label>{entry.degree === 'SSC' || entry.degree === 'HSC' ? 'Background' : 'Field of Study'}</Label>
