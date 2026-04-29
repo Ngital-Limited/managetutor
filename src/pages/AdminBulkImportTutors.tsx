@@ -189,9 +189,10 @@ export default function AdminBulkImportTutors() {
           <CardTitle>Bulk Import Tutors</CardTitle>
           <CardDescription>
             Headers are auto-mapped (case-insensitive, ignores spaces, underscores, apostrophes, colons).
-            Either Email or Phone Number is required per row — if email is missing, a placeholder email is generated from the phone.
-            Phones are normalized to Bangladesh format (01XXXXXXXXX); +880, 880, or missing leading 0 are accepted.
-            Duplicates are detected by email AND phone. Imports run in batches of {BATCH_SIZE}.
+            Recognized fields: fname, lname, email, phone, gender, school, college, university,
+            department, t_experience, background, medium, p_address, per_address, alt_phone, f_phone,
+            m_phone, fb_link, pre_class, pre_subject, pre_area, status, photo, nid_url, student_id_url.
+            Imports run in batches of {BATCH_SIZE}.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
