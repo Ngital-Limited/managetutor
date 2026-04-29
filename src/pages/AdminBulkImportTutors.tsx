@@ -46,7 +46,7 @@ const HEADER_ALIASES: Record<string, string> = {
   medium: 'medium', languagemedium: 'medium', teachingmedium: 'medium',
   fblink: 'fb_link', facebook: 'fb_link', facebooklink: 'fb_link', facebookurl: 'fb_link', fburl: 'fb_link',
   preclass: 'pre_class', preferredclass: 'pre_class', preferredclasses: 'pre_class', classpreference: 'pre_class', classes: 'pre_class',
-  presubject: 'pre_subject', preferredsubject: 'pre_subject', preferredsubjects: 'pre_subject', subjectpreference: 'pre_subject', subjects: 'pre_subject',
+  presubject: 'pre_subject', preferredsubject: 'pre_subject', preferredsubjects: 'pre_subject', prefeeredsubject: 'pre_subject', prefferedsubject: 'pre_subject', subjectpreference: 'pre_subject', subjects: 'pre_subject',
   prearea: 'pre_area', preferredarea: 'pre_area', preferredareas: 'pre_area', areapreference: 'pre_area', area: 'pre_area', location: 'pre_area', district: 'pre_area',
   status: 'status',
   photo: 'photo', photourl: 'photo', picture: 'photo', avatar: 'photo', avatarurl: 'photo', image: 'photo', imageurl: 'photo', profilepicture: 'photo', profilephoto: 'photo',
