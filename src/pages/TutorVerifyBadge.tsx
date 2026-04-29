@@ -179,5 +179,7 @@ export default function TutorVerifyBadge() {
           Identity document upload (NID / Passport / Birth Certificate) has moved to your{' '}
           <a href="/tutor/profile" className="text-primary underline">Profile → Media → Verification Documents</a>.
         </p>
+      </div>
+    </TutorSidebarLayout>
   );
 }
