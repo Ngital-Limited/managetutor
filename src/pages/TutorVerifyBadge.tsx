@@ -175,73 +175,9 @@ export default function TutorVerifyBadge() {
           </CardContent>
         </Card>
 
-        <Card className="mt-6">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <FileCheck2 className="h-5 w-5 text-primary" />
-              Identity Document
-            </CardTitle>
-            <CardDescription>
-              Upload your NID Card, Passport, or Birth Certificate. Required for verification approval.
-              Accepted: JPG, PNG, WEBP, PDF (max 10MB). Your document is private and only visible to admins.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid sm:grid-cols-[200px_1fr] gap-3 items-end">
-              <div className="space-y-1.5">
-                <Label>Document Type</Label>
-                <Select value={docType} onValueChange={setDocType}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="nid">NID Card</SelectItem>
-                    <SelectItem value="passport">Passport</SelectItem>
-                    <SelectItem value="birth_certificate">Birth Certificate</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-1.5">
-                <Label>Upload File</Label>
-                <input
-                  ref={fileRef}
-                  type="file"
-                  accept="image/jpeg,image/png,image/webp,application/pdf"
-                  onChange={handleFileChange}
-                  disabled={uploading}
-                  className="block w-full text-sm file:mr-3 file:py-2 file:px-4 file:rounded-md file:border-0 file:bg-primary file:text-primary-foreground hover:file:bg-primary/90 file:cursor-pointer"
-                />
-              </div>
-            </div>
-
-            {profile?.id_document_url && (
-              <div className="flex items-center justify-between gap-3 p-3 rounded-lg bg-success/10 border border-success/20">
-                <div className="flex items-center gap-2 min-w-0">
-                  <CheckCircle2 className="h-5 w-5 text-success flex-shrink-0" />
-                  <div className="min-w-0">
-                    <p className="text-sm font-medium truncate">
-                      {profile.id_document_type === 'nid' ? 'NID Card' :
-                        profile.id_document_type === 'passport' ? 'Passport' : 'Birth Certificate'} uploaded
-                    </p>
-                    {profile.id_document_uploaded_at && (
-                      <p className="text-xs text-muted-foreground">
-                        {new Date(profile.id_document_uploaded_at).toLocaleString()}
-                      </p>
-                    )}
-                  </div>
-                </div>
-                <Button variant="outline" size="sm" onClick={handleView}>
-                  <Eye className="h-4 w-4 mr-1" /> View
-                </Button>
-              </div>
-            )}
-
-            {uploading && (
-              <p className="text-sm text-muted-foreground flex items-center gap-2">
-                <Upload className="h-4 w-4 animate-pulse" /> Uploading...
-              </p>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-    </TutorSidebarLayout>
+        <p className="text-xs text-muted-foreground mt-4">
+          Identity document upload (NID / Passport / Birth Certificate) has moved to your{' '}
+          <a href="/tutor/profile" className="text-primary underline">Profile → Media → Verification Documents</a>.
+        </p>
   );
 }
