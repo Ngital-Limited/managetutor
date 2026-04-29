@@ -469,7 +469,54 @@ export default function TutorProfile() {
     toast({ title: 'Profile picture updated' });
   };
 
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, docType: string) => {
+  const handleIdDocUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !targetUserId) return;
+    if (file.size > 10 * 1024 * 1024) {
+      toast({ title: 'File too large', description: 'Maximum size is 10MB.', variant: 'destructive' });
+      return;
+    }
+    const allowed = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'];
+    if (!allowed.includes(file.type)) {
+      toast({ title: 'Invalid file', description: 'Upload JPG, PNG, WEBP, or PDF.', variant: 'destructive' });
+      return;
+    }
+    setIdDocUploading(true);
+    try {
+      const ext = file.name.split('.').pop() || 'bin';
+      const path = `${targetUserId}/${idDocType}-${Date.now()}.${ext}`;
+      const { error: upErr } = await supabase.storage
+        .from('verification-documents')
+        .upload(path, file, { upsert: true, contentType: file.type });
+      if (upErr) throw upErr;
+      const nowIso = new Date().toISOString();
+      const { error: updErr } = await supabase
+        .from('tutor_profiles')
+        .update({ id_document_type: idDocType, id_document_url: path, id_document_uploaded_at: nowIso })
+        .eq('user_id', targetUserId);
+      if (updErr) throw updErr;
+      setIdDocUrl(path);
+      setIdDocUploadedAt(nowIso);
+      toast({ title: 'Document uploaded', description: 'Our team will review it shortly.' });
+    } catch (err: any) {
+      toast({ title: 'Upload failed', description: err.message, variant: 'destructive' });
+    } finally {
+      setIdDocUploading(false);
+      e.target.value = '';
+    }
+  };
+
+  const handleViewIdDoc = async () => {
+    if (!idDocUrl) return;
+    const { data, error } = await supabase.storage
+      .from('verification-documents')
+      .createSignedUrl(idDocUrl, 60);
+    if (error) {
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+      return;
+    }
+    if (data?.signedUrl) window.open(data.signedUrl, '_blank');
+  };
     const file = e.target.files?.[0];
     if (!file || !user) return;
 
