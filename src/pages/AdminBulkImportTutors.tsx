@@ -197,7 +197,12 @@ export default function AdminBulkImportTutors() {
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
-            <Label htmlFor="csv">CSV File</Label>
+            <div className="flex items-center justify-between mb-1">
+              <Label htmlFor="csv">CSV File</Label>
+              <Button type="button" size="sm" variant="outline" onClick={downloadTemplate}>
+                <Download className="h-4 w-4 mr-1" /> Download Template
+              </Button>
+            </div>
             <Input id="csv" type="file" accept=".csv" onChange={handleFile} disabled={running} />
             {rows.length > 0 && (
               <p className="text-xs text-muted-foreground mt-1">{rows.length} rows loaded</p>
