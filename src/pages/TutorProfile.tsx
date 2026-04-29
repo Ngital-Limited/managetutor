@@ -738,10 +738,7 @@ export default function TutorProfile() {
                 </div>
               </div>
 
-              <div>
-                <Label>Bio / About You</Label>
-                <Textarea className="rounded-xl mt-1.5" value={profile.bio} onChange={(e) => setProfile({ ...profile, bio: e.target.value })} placeholder="Tell parents about yourself, your teaching style, and experience..." rows={4} />
-              </div>
+
 
               {/* Address */}
               <div className="space-y-3 pt-2 border-t border-border/60">
