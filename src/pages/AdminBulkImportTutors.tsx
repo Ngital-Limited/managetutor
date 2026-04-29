@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Upload, Loader2 } from 'lucide-react';
+import { ArrowLeft, Upload, Loader2, Download } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -153,6 +153,31 @@ export default function AdminBulkImportTutors() {
     URL.revokeObjectURL(url);
   };
 
+  const downloadTemplate = () => {
+    const headers = [
+      'First Name', 'Last Name', 'User Name', 'Email', 'Phone Number',
+      'Alternative No', 'Father Number', 'Mother Number',
+      'Present Address', 'Permanent Address', 'gender',
+      'School', 'College', 'University', 'Department',
+      'Experience', 'Background', 'Medium',
+      'Preferred Class', 'Preferred Subject',
+    ];
+    const sample = [
+      'Rahim', 'Hasan', 'rahim.hasan', 'rahim@example.com', '+8801712345678',
+      '+8801812345678', '+8801912345678', '+8801612345678',
+      'House 12, Road 5, Dhanmondi, Dhaka', 'Village: Char, Comilla', 'male',
+      'Govt. Laboratory High School', 'Notre Dame College', 'University of Dhaka', 'Computer Science',
+      '3', 'Science', 'English',
+      'Class 9; Class 10 (SSC)', 'Mathematics; Physics',
+    ];
+    const csv = Papa.unparse({ fields: headers, data: [sample] });
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'tutor_import_template.csv'; a.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="container mx-auto py-6 max-w-4xl">
       <Button variant="ghost" size="sm" onClick={() => navigate('/admin')} className="mb-4">
@@ -172,7 +197,12 @@ export default function AdminBulkImportTutors() {
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
-            <Label htmlFor="csv">CSV File</Label>
+            <div className="flex items-center justify-between mb-1">
+              <Label htmlFor="csv">CSV File</Label>
+              <Button type="button" size="sm" variant="outline" onClick={downloadTemplate}>
+                <Download className="h-4 w-4 mr-1" /> Download Template
+              </Button>
+            </div>
             <Input id="csv" type="file" accept=".csv" onChange={handleFile} disabled={running} />
             {rows.length > 0 && (
               <p className="text-xs text-muted-foreground mt-1">{rows.length} rows loaded</p>
