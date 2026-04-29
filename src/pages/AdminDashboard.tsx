@@ -1655,6 +1655,7 @@ export default function AdminDashboard() {
         { title: 'Jobs', value: 'jobs', icon: Briefcase },
         { title: 'Applications', value: 'applications', icon: FileText, badge: stats.pendingApplications },
         { title: 'Post Job', value: 'post_job', icon: Plus },
+        { title: 'Import Jobs', value: 'import_jobs', icon: Download, href: '/admin/import-jobs' },
         { title: 'Demo Requests', value: 'demo_requests', icon: BookOpen },
       ],
     },
