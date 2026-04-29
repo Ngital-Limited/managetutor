@@ -174,6 +174,16 @@ export default function TutorAppliedJobs() {
           <header className="sticky top-0 z-30 flex items-center justify-between px-4 py-3 border-b bg-background/95 backdrop-blur">
             <div className="flex items-center gap-2">
               <SidebarTrigger />
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate('/tutor/dashboard')}
+                className="gap-1 px-2"
+                aria-label="Back to dashboard"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                <span className="hidden sm:inline">Back</span>
+              </Button>
               <h1 className="text-lg font-bold">My Applications</h1>
             </div>
             <div className="flex items-center gap-2">
