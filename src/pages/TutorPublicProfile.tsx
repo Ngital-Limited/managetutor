@@ -363,7 +363,7 @@ export default function TutorPublicProfile() {
                 <Card>
                   <CardHeader><CardTitle className="flex items-center gap-2 text-base"><User className="h-4 w-4" />About</CardTitle></CardHeader>
                   <CardContent className="space-y-4">
-                    <p className="text-muted-foreground whitespace-pre-wrap text-sm leading-relaxed">{tutor.bio || 'No bio provided yet.'}</p>
+                    
                     {tutor.teaching_philosophy && (
                       <div>
                         <h4 className="text-sm font-semibold mb-1">Teaching Philosophy</h4>

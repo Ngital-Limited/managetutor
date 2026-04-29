@@ -2825,7 +2825,7 @@ export default function AdminDashboard() {
                               const tp = app.tutor_profile;
                               const tprof = app.tutor_profiles as any;
                               const edu = app.tutor_last_education;
-                              const bio = tprof?.bio || '';
+                              
                               return (
                                 <TableRow key={app.id} className="hover:bg-muted/20">
                                   <TableCell className="text-xs font-mono text-muted-foreground align-top">
@@ -2876,11 +2876,9 @@ export default function AdminDashboard() {
                                     )}
                                   </TableCell>
                                   <TableCell className="text-xs text-muted-foreground max-w-[220px] align-top">
-                                    {bio && <p className="line-clamp-2 text-foreground/80" title={bio}>{bio}</p>}
-                                    {app.cover_message && (
-                                      <p className="line-clamp-2 mt-1 italic border-l-2 border-primary/30 pl-2" title={app.cover_message}>“{app.cover_message}”</p>
-                                    )}
-                                    {!bio && !app.cover_message && '—'}
+                                    {app.cover_message ? (
+                                      <p className="line-clamp-2 italic border-l-2 border-primary/30 pl-2" title={app.cover_message}>"{app.cover_message}"</p>
+                                    ) : '—'}
                                   </TableCell>
                                   <TableCell className="align-top"><Badge className={`text-[10px] capitalize ${statusColor(app.status)}`}>{app.status}</Badge></TableCell>
                                   <TableCell className="align-top">

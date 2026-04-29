@@ -549,7 +549,7 @@ export default function TutorProfile() {
     const requiredDegree = profile.is_student ? 'HSC' : 'Bachelor';
     const reqEdu = educationEntries.find(e => (e.degree || '').toLowerCase() === requiredDegree.toLowerCase());
     const items = [
-      { label: 'Bio / About', ok: !!profile.bio?.trim() },
+      
       { label: `${requiredDegree} education`, ok: !!reqEdu?.institution?.trim() },
       { label: 'Years of experience', ok: !!profile.experience_years && profile.experience_years > 0 },
       { label: 'Monthly salary range', ok: !!profile.monthly_salary_min && profile.monthly_salary_min > 0 },
@@ -738,10 +738,7 @@ export default function TutorProfile() {
                 </div>
               </div>
 
-              <div>
-                <Label>Bio / About You</Label>
-                <Textarea className="rounded-xl mt-1.5" value={profile.bio} onChange={(e) => setProfile({ ...profile, bio: e.target.value })} placeholder="Tell parents about yourself, your teaching style, and experience..." rows={4} />
-              </div>
+
 
               {/* Address */}
               <div className="space-y-3 pt-2 border-t border-border/60">

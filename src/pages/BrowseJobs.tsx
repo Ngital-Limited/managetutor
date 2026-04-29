@@ -155,7 +155,7 @@ export default function BrowseJobs({ embedded = false }: { embedded?: boolean } 
     if (data) {
       setTutorProfileId(data.id);
       let complete = 0;
-      if (data.bio) complete += 10;
+      
       if (data.education) complete += 10;
       if (data.experience_years && data.experience_years > 0) complete += 10;
       if (data.monthly_salary_min && data.monthly_salary_min > 0) complete += 10;
