@@ -15,10 +15,13 @@ export default function TutorVerifyBadge() {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [profile, setProfile] = useState<{ verification_status: string; verification_paid: boolean } | null>(null);
+  const [profile, setProfile] = useState<{ verification_status: string; verification_paid: boolean; id_document_type: string | null; id_document_url: string | null; id_document_uploaded_at: string | null } | null>(null);
   const [userProfile, setUserProfile] = useState<{ full_name: string } | null>(null);
   const [verificationFee, setVerificationFee] = useState<number>(50);
   const [loading, setLoading] = useState(false);
+  const [docType, setDocType] = useState<string>('nid');
+  const [uploading, setUploading] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!authLoading && !user) {
