@@ -48,6 +48,7 @@ import { AdminPostJobTab } from '@/components/admin/AdminPostJobTab';
 import { AdminTutorEditTab } from '@/components/admin/AdminTutorEditTab';
 import { AdminTutorProfilesTab } from '@/components/admin/AdminTutorProfilesTab';
 import { ReferralAnalyticsTab } from '@/components/admin/ReferralAnalyticsTab';
+import { AdsManagementTab } from '@/components/admin/AdsManagementTab';
 import { getPlatformCommissionPct, computeFeeSplit } from '@/lib/commission';
 
 // ──────────── Types ────────────
@@ -1688,6 +1689,7 @@ export default function AdminDashboard() {
       items: [
         { title: 'Sub-Admin Roles', value: 'rbac', icon: ShieldCheck },
         { title: 'Platform Data', value: 'platform_data', icon: BookOpen },
+        { title: 'Ads Management', value: 'ads', icon: Megaphone },
         { title: 'Settings', value: 'settings', icon: Settings },
       ],
     },
@@ -3143,6 +3145,9 @@ export default function AdminDashboard() {
 
             {/* ═══════ PLATFORM DATA TAB ═══════ */}
             {activeTab === 'platform_data' && <PlatformDataTab toast={toast} />}
+
+            {/* ═══════ ADS MANAGEMENT TAB ═══════ */}
+            {activeTab === 'ads' && <AdsManagementTab toast={toast} />}
 
             {/* ═══════ SETTINGS TAB ═══════ */}
             {activeTab === 'settings' && (
