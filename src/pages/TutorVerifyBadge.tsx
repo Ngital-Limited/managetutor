@@ -45,10 +45,64 @@ export default function TutorVerifyBadge() {
     if (prof) setUserProfile(prof);
     const { data: tutorData } = await supabase
       .from('tutor_profiles')
-      .select('verification_status, verification_paid')
+      .select('verification_status, verification_paid, id_document_type, id_document_url, id_document_uploaded_at')
       .eq('user_id', user.id)
       .single();
-    if (tutorData) setProfile(tutorData as any);
+    if (tutorData) {
+      setProfile(tutorData as any);
+      if ((tutorData as any).id_document_type) setDocType((tutorData as any).id_document_type);
+    }
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+    if (file.size > 10 * 1024 * 1024) {
+      toast({ title: 'File too large', description: 'Maximum size is 10MB.', variant: 'destructive' });
+      return;
+    }
+    const allowed = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'];
+    if (!allowed.includes(file.type)) {
+      toast({ title: 'Invalid file', description: 'Upload JPG, PNG, WEBP, or PDF.', variant: 'destructive' });
+      return;
+    }
+    setUploading(true);
+    try {
+      const ext = file.name.split('.').pop() || 'bin';
+      const path = `${user.id}/${docType}-${Date.now()}.${ext}`;
+      const { error: upErr } = await supabase.storage
+        .from('verification-documents')
+        .upload(path, file, { upsert: true, contentType: file.type });
+      if (upErr) throw upErr;
+      const { error: updErr } = await supabase
+        .from('tutor_profiles')
+        .update({
+          id_document_type: docType,
+          id_document_url: path,
+          id_document_uploaded_at: new Date().toISOString(),
+        })
+        .eq('user_id', user.id);
+      if (updErr) throw updErr;
+      toast({ title: 'Document uploaded', description: 'Our team will review it shortly.' });
+      await load();
+    } catch (err: any) {
+      toast({ title: 'Upload failed', description: err.message, variant: 'destructive' });
+    } finally {
+      setUploading(false);
+      if (fileRef.current) fileRef.current.value = '';
+    }
+  };
+
+  const handleView = async () => {
+    if (!profile?.id_document_url) return;
+    const { data, error } = await supabase.storage
+      .from('verification-documents')
+      .createSignedUrl(profile.id_document_url, 60);
+    if (error) {
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+      return;
+    }
+    if (data?.signedUrl) window.open(data.signedUrl, '_blank');
   };
 
   const handlePay = async () => {
