@@ -423,11 +423,10 @@ export default function TutorDashboard() {
   const getProfileCompleteness = () => {
     if (!profile) return 0;
     let complete = 0;
-    if (profile.bio) complete += 20;
-    if (profile.education) complete += 20;
-    if (profile.experience_years > 0) complete += 20;
-    if (profile.monthly_salary_min > 0) complete += 20;
-    if (profile.verification_status === 'approved') complete += 20;
+    if (profile.education) complete += 25;
+    if (profile.experience_years > 0) complete += 25;
+    if (profile.monthly_salary_min > 0) complete += 25;
+    if (profile.verification_status === 'approved') complete += 25;
     return complete;
   };
 
