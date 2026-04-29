@@ -80,6 +80,12 @@ export default function TutorProfile() {
   const [uploading, setUploading] = useState(false);
   const [selectedClassLevels, setSelectedClassLevels] = useState<string[]>([]);
 
+  // Identity document (NID / Passport / Birth Certificate)
+  const [idDocType, setIdDocType] = useState<string>('nid');
+  const [idDocUrl, setIdDocUrl] = useState<string | null>(null);
+  const [idDocUploadedAt, setIdDocUploadedAt] = useState<string | null>(null);
+  const [idDocUploading, setIdDocUploading] = useState(false);
+
   // Education & Job Experience
   const [educationEntries, setEducationEntries] = useState<EducationEntry[]>([]);
   const [jobExperiences, setJobExperiences] = useState<JobExperienceEntry[]>([]);
