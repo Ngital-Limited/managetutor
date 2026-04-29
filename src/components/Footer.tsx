@@ -173,6 +173,18 @@ export function Footer() {
             </span>
             <span className="hidden sm:inline text-secondary-foreground/20">•</span>
             <span className="hidden sm:inline">Made in Bangladesh</span>
+            <span className="text-secondary-foreground/20">•</span>
+            <span>
+              Designed &amp; Developed by{' '}
+              <a
+                href="https://ngital.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-medium text-secondary-foreground/70 hover:text-primary transition-colors"
+              >
+                Ngital
+              </a>
+            </span>
           </div>
         </div>
       </div>
