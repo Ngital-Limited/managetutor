@@ -10,7 +10,9 @@ export interface TemplateEntry {
 }
 
 import { template as parentWelcome } from './parent-welcome.tsx'
+import { template as tutorWelcome } from './tutor-welcome.tsx'
 
 export const TEMPLATES: Record<string, TemplateEntry> = {
   'parent-welcome': parentWelcome,
+  'tutor-welcome': tutorWelcome,
 }

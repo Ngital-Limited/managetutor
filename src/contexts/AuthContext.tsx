@@ -240,13 +240,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         });
       }
 
-      // Send branded welcome email to parents (fire-and-forget; don't block signup)
+      // Send branded welcome email by role (fire-and-forget; don't block signup)
       if (selectedRole === 'parent') {
         supabase.functions.invoke('send-transactional-email', {
           body: {
             templateName: 'parent-welcome',
             recipientEmail: email,
             idempotencyKey: `parent-welcome-${data.user.id}`,
+            templateData: { name: fullName },
+          },
+        }).catch((err) => console.error('Welcome email failed:', err));
+      } else if (selectedRole === 'tutor') {
+        supabase.functions.invoke('send-transactional-email', {
+          body: {
+            templateName: 'tutor-welcome',
+            recipientEmail: email,
+            idempotencyKey: `tutor-welcome-${data.user.id}`,
             templateData: { name: fullName },
           },
         }).catch((err) => console.error('Welcome email failed:', err));
