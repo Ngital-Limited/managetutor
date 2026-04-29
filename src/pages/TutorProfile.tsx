@@ -221,6 +221,9 @@ export default function TutorProfile() {
       });
       setSelectedClassLevels(td.class_levels || []);
       setTutorProfileId(td.id);
+      if (td.id_document_type) setIdDocType(td.id_document_type);
+      setIdDocUrl(td.id_document_url || null);
+      setIdDocUploadedAt(td.id_document_uploaded_at || null);
 
       // Fetch education entries and job experiences
       const [eduRes, jobRes] = await Promise.all([
