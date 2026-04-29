@@ -1550,6 +1550,8 @@ export default function AdminDashboard() {
   const handleSaveJob = async () => {
     if (!editingJob) return;
     setProcessing(true);
+    const subjectIds = editJobForm.subject_ids || [];
+    const primarySubjectId = subjectIds[0] || editJobForm.subject_id || null;
     const { error } = await supabase.from('jobs').update({
       title: editJobForm.title,
       description: editJobForm.description,
@@ -1560,7 +1562,7 @@ export default function AdminDashboard() {
       district_id: editJobForm.district_id || null,
       area_id: editJobForm.area_id || null,
       class_level: editJobForm.class_level || null,
-      subject_id: editJobForm.subject_id || null,
+      subject_id: primarySubjectId,
       days_per_week: editJobForm.days_per_week || null,
       duration_hours: editJobForm.duration_hours || null,
       preferred_time: editJobForm.preferred_time || null,
@@ -1573,8 +1575,24 @@ export default function AdminDashboard() {
       special_requirements: editJobForm.special_requirements || null,
       start_date: editJobForm.start_date || null,
     }).eq('id', editingJob.id);
-    if (error) toast({ title: 'Error', description: error.message, variant: 'destructive' });
-    else { toast({ title: 'Job updated successfully' }); setEditingJob(null); fetchJobs(); fetchStats(); }
+    if (error) {
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+      setProcessing(false);
+      return;
+    }
+    // Sync job_subjects join table
+    await supabase.from('job_subjects').delete().eq('job_id', editingJob.id);
+    if (subjectIds.length > 0) {
+      const rows = subjectIds.map((sid) => ({ job_id: editingJob.id, subject_id: sid }));
+      const { error: jsErr } = await supabase.from('job_subjects').insert(rows);
+      if (jsErr) {
+        toast({ title: 'Subjects partially saved', description: jsErr.message, variant: 'destructive' });
+      }
+    }
+    toast({ title: 'Job updated successfully' });
+    setEditingJob(null);
+    fetchJobs();
+    fetchStats();
     setProcessing(false);
   };
 
