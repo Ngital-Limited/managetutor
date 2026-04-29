@@ -835,10 +835,18 @@ export default function AdminDashboard() {
   const [adminNotes, setAdminNotes] = useState('');
   const [processing, setProcessing] = useState(false);
   const [editingJob, setEditingJob] = useState<any | null>(null);
-  const [editJobForm, setEditJobForm] = useState({
+  const [editJobForm, setEditJobForm] = useState<{
+    title: string; description: string; status: string; teaching_mode: string;
+    budget_min: number; budget_max: number; district_id: string; area_id: string;
+    class_level: string; subject_id: string; subject_ids: string[];
+    days_per_week: number; duration_hours: number;
+    preferred_time: string; fixed_time: string; preferred_tutor_gender: string;
+    student_gender: string; student_age: string; number_of_students: number;
+    location_details: string; special_requirements: string; start_date: string;
+  }>({
     title: '', description: '', status: '', teaching_mode: '',
     budget_min: 0, budget_max: 0, district_id: '', area_id: '',
-    class_level: '', subject_id: '', days_per_week: 0, duration_hours: 0,
+    class_level: '', subject_id: '', subject_ids: [], days_per_week: 0, duration_hours: 0,
     preferred_time: '', fixed_time: '', preferred_tutor_gender: 'any', student_gender: '',
     student_age: '', number_of_students: 1, location_details: '',
     special_requirements: '', start_date: '',
@@ -1495,16 +1503,21 @@ export default function AdminDashboard() {
   };
 
   const openEditJob = async (jobId: string) => {
-    const [{ data }, { data: dists }, { data: ars }, { data: subs }] = await Promise.all([
+    const [{ data }, { data: dists }, { data: ars }, { data: subs }, { data: jobSubs }] = await Promise.all([
       supabase.from('jobs').select('*').eq('id', jobId).single(),
       supabase.from('districts').select('id, name_en').order('name_en'),
       supabase.from('areas').select('id, name_en, district_id').order('name_en'),
       supabase.from('subjects').select('id, name_en').order('name_en'),
+      supabase.from('job_subjects').select('subject_id').eq('job_id', jobId),
     ]);
     if (dists) setEditJobDistricts(dists);
     if (ars) setEditJobAreas(ars);
     if (subs) setEditJobSubjects(subs);
     if (data) {
+      const linkedIds = (jobSubs || []).map((r: any) => r.subject_id).filter(Boolean);
+      const initialSubjectIds = linkedIds.length > 0
+        ? linkedIds
+        : (data.subject_id ? [data.subject_id] : []);
       setEditingJob(data);
       setEditJobForm({
         title: data.title || '',
@@ -1517,6 +1530,7 @@ export default function AdminDashboard() {
         area_id: data.area_id || '',
         class_level: data.class_level || '',
         subject_id: data.subject_id || '',
+        subject_ids: initialSubjectIds,
         days_per_week: data.days_per_week || 0,
         duration_hours: data.duration_hours || 0,
         preferred_time: data.preferred_time || '',
@@ -1532,9 +1546,12 @@ export default function AdminDashboard() {
     }
   };
 
+
   const handleSaveJob = async () => {
     if (!editingJob) return;
     setProcessing(true);
+    const subjectIds = editJobForm.subject_ids || [];
+    const primarySubjectId = subjectIds[0] || editJobForm.subject_id || null;
     const { error } = await supabase.from('jobs').update({
       title: editJobForm.title,
       description: editJobForm.description,
@@ -1545,7 +1562,7 @@ export default function AdminDashboard() {
       district_id: editJobForm.district_id || null,
       area_id: editJobForm.area_id || null,
       class_level: editJobForm.class_level || null,
-      subject_id: editJobForm.subject_id || null,
+      subject_id: primarySubjectId,
       days_per_week: editJobForm.days_per_week || null,
       duration_hours: editJobForm.duration_hours || null,
       preferred_time: editJobForm.preferred_time || null,
@@ -1558,8 +1575,24 @@ export default function AdminDashboard() {
       special_requirements: editJobForm.special_requirements || null,
       start_date: editJobForm.start_date || null,
     }).eq('id', editingJob.id);
-    if (error) toast({ title: 'Error', description: error.message, variant: 'destructive' });
-    else { toast({ title: 'Job updated successfully' }); setEditingJob(null); fetchJobs(); fetchStats(); }
+    if (error) {
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+      setProcessing(false);
+      return;
+    }
+    // Sync job_subjects join table
+    await supabase.from('job_subjects').delete().eq('job_id', editingJob.id);
+    if (subjectIds.length > 0) {
+      const rows = subjectIds.map((sid) => ({ job_id: editingJob.id, subject_id: sid }));
+      const { error: jsErr } = await supabase.from('job_subjects').insert(rows);
+      if (jsErr) {
+        toast({ title: 'Subjects partially saved', description: jsErr.message, variant: 'destructive' });
+      }
+    }
+    toast({ title: 'Job updated successfully' });
+    setEditingJob(null);
+    fetchJobs();
+    fetchStats();
     setProcessing(false);
   };
 
@@ -3355,13 +3388,16 @@ export default function AdminDashboard() {
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="text-sm font-medium">Subject</label>
-                <Select value={editJobForm.subject_id} onValueChange={(v) => setEditJobForm(f => ({ ...f, subject_id: v }))}>
-                  <SelectTrigger className="mt-1"><SelectValue placeholder="Select subject" /></SelectTrigger>
-                  <SelectContent>
-                    {editJobSubjects.map(s => <SelectItem key={s.id} value={s.id}>{s.name_en}</SelectItem>)}
-                  </SelectContent>
-                </Select>
+                <label className="text-sm font-medium">Subjects</label>
+                <div className="mt-1">
+                  <MultiSearchableSelect
+                    options={editJobSubjects.map(s => ({ value: s.id, label: s.name_en }))}
+                    values={editJobForm.subject_ids}
+                    onValuesChange={(vals) => setEditJobForm(f => ({ ...f, subject_ids: vals }))}
+                    placeholder="Select subjects"
+                    searchPlaceholder="Search subjects..."
+                  />
+                </div>
               </div>
               <div>
                 <label className="text-sm font-medium">Class Level</label>
