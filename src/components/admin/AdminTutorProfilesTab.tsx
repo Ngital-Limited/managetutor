@@ -169,24 +169,34 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
     setSelectedIds(new Set());
     setSelectAll(false);
 
-    let query = supabase
-      .from('tutor_profiles')
-      .select('id, user_id, gender, education, experience_years, teaching_mode, verification_status, is_available, class_levels, district_id, created_at')
-      .order('created_at', { ascending: false })
-      .limit(200);
+    const buildQuery = () => {
+      let q = supabase
+        .from('tutor_profiles')
+        .select('id, user_id, gender, education, experience_years, teaching_mode, verification_status, is_available, class_levels, district_id, created_at')
+        .order('created_at', { ascending: false });
 
-    if (filterGender !== 'all') query = query.eq('gender', filterGender as any);
-    if (filterVerification !== 'all') query = query.eq('verification_status', filterVerification as any);
-    if (filterAvailability !== 'all') query = query.eq('is_available', filterAvailability === 'available');
-    if (filterMedium !== 'all') query = query.eq('teaching_mode', filterMedium as any);
+      if (filterGender !== 'all') q = q.eq('gender', filterGender as any);
+      if (filterVerification !== 'all') q = q.eq('verification_status', filterVerification as any);
+      if (filterAvailability !== 'all') q = q.eq('is_available', filterAvailability === 'available');
+      if (filterMedium !== 'all') q = q.eq('teaching_mode', filterMedium as any);
 
-    // Multi-area filter: narrow by district_ids server-side
-    if (filterAreas.length > 0) {
-      const districtIds = [...new Set(filterAreas.map(aId => areas.find(a => a.id === aId)?.district_id).filter(Boolean))] as string[];
-      if (districtIds.length > 0) query = query.in('district_id', districtIds);
+      // Multi-area filter: narrow by district_ids server-side
+      if (filterAreas.length > 0) {
+        const districtIds = [...new Set(filterAreas.map(aId => areas.find(a => a.id === aId)?.district_id).filter(Boolean))] as string[];
+        if (districtIds.length > 0) q = q.in('district_id', districtIds);
+      }
+      return q;
+    };
+
+    // Paginate past Supabase's default 1000-row cap so all tutors load.
+    const PAGE_SIZE = 1000;
+    let tutorData: any[] = [];
+    for (let from = 0; from < 20000; from += PAGE_SIZE) {
+      const { data: page, error } = await buildQuery().range(from, from + PAGE_SIZE - 1);
+      if (error || !page) break;
+      tutorData = tutorData.concat(page);
+      if (page.length < PAGE_SIZE) break;
     }
-
-    const { data: tutorData } = await query;
     if (!tutorData) { setTutors([]); setLoading(false); return; }
 
     const userIds = [...new Set(tutorData.map(t => t.user_id))];
