@@ -153,6 +153,31 @@ export default function AdminBulkImportTutors() {
     URL.revokeObjectURL(url);
   };
 
+  const downloadTemplate = () => {
+    const headers = [
+      'First Name', 'Last Name', 'User Name', 'Email', 'Phone Number',
+      'Alternative No', 'Father Number', 'Mother Number',
+      'Present Address', 'Permanent Address', 'gender',
+      'School', 'College', 'University', 'Department',
+      'Experience', 'Background', 'Medium',
+      'Preferred Class', 'Preferred Subject',
+    ];
+    const sample = [
+      'Rahim', 'Hasan', 'rahim.hasan', 'rahim@example.com', '+8801712345678',
+      '+8801812345678', '+8801912345678', '+8801612345678',
+      'House 12, Road 5, Dhanmondi, Dhaka', 'Village: Char, Comilla', 'male',
+      'Govt. Laboratory High School', 'Notre Dame College', 'University of Dhaka', 'Computer Science',
+      '3', 'Science', 'English',
+      'Class 9; Class 10 (SSC)', 'Mathematics; Physics',
+    ];
+    const csv = Papa.unparse({ fields: headers, data: [sample] });
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'tutor_import_template.csv'; a.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="container mx-auto py-6 max-w-4xl">
       <Button variant="ghost" size="sm" onClick={() => navigate('/admin')} className="mb-4">
