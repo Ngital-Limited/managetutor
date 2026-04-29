@@ -3389,56 +3389,15 @@ export default function AdminDashboard() {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="text-sm font-medium">Subjects</label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      className="mt-1 w-full justify-between font-normal h-auto min-h-10 py-2"
-                    >
-                      <div className="flex flex-wrap gap-1 items-center">
-                        {editJobForm.subject_ids.length === 0 ? (
-                          <span className="text-muted-foreground">Select subjects</span>
-                        ) : (
-                          editJobSubjects
-                            .filter(s => editJobForm.subject_ids.includes(s.id))
-                            .map(s => (
-                              <Badge key={s.id} variant="secondary" className="text-xs">
-                                {s.name_en}
-                              </Badge>
-                            ))
-                        )}
-                      </div>
-                      <ChevronDown className="h-4 w-4 opacity-50 ml-2 flex-shrink-0" />
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0 max-h-72 overflow-auto" align="start">
-                    <div className="p-1">
-                      {editJobSubjects.map(s => {
-                        const checked = editJobForm.subject_ids.includes(s.id);
-                        return (
-                          <label
-                            key={s.id}
-                            className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-accent cursor-pointer text-sm"
-                          >
-                            <Checkbox
-                              checked={checked}
-                              onCheckedChange={(c) => {
-                                setEditJobForm(f => ({
-                                  ...f,
-                                  subject_ids: c
-                                    ? [...f.subject_ids, s.id]
-                                    : f.subject_ids.filter(id => id !== s.id),
-                                }));
-                              }}
-                            />
-                            <span>{s.name_en}</span>
-                          </label>
-                        );
-                      })}
-                    </div>
-                  </PopoverContent>
-                </Popover>
+                <div className="mt-1">
+                  <MultiSearchableSelect
+                    options={editJobSubjects.map(s => ({ value: s.id, label: s.name_en }))}
+                    values={editJobForm.subject_ids}
+                    onValuesChange={(vals) => setEditJobForm(f => ({ ...f, subject_ids: vals }))}
+                    placeholder="Select subjects"
+                    searchPlaceholder="Search subjects..."
+                  />
+                </div>
               </div>
               <div>
                 <label className="text-sm font-medium">Class Level</label>
