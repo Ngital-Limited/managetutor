@@ -63,8 +63,14 @@ function buildEducationDetail(r: TutorRow): string | null {
 function normalizePhone(p?: string): string | null {
   const c = clean(p);
   if (!c) return null;
-  if (/^01[3-9]\d{8}$/.test(c)) return c;
-  return null; // store invalid as null
+  // Strip all non-digits
+  let digits = c.replace(/\D/g, "");
+  // Strip Bangladesh country code if present
+  if (digits.startsWith("880")) digits = digits.slice(3);
+  // Accept 10-digit local without leading 0 (e.g. 1712345678) → prefix 0
+  if (/^1[3-9]\d{8}$/.test(digits)) digits = "0" + digits;
+  if (/^01[3-9]\d{8}$/.test(digits)) return digits;
+  return null;
 }
 
 function normalizeGender(g?: string): "male" | "female" {
@@ -144,20 +150,34 @@ Deno.serve(async (req) => {
     const results = { imported: 0, skipped: 0, errors: 0, details: [] as any[] };
 
     for (const r of rows) {
-      const email = clean(r.email)?.toLowerCase();
+      const phone = normalizePhone(r.phone);
+      let email = clean(r.email)?.toLowerCase();
+      // If no email but we have a valid phone, synthesize a placeholder email
+      if (!email && phone) {
+        email = `${phone}@imported.managetutor.local`;
+      }
       if (!email) {
         results.skipped++;
-        results.details.push({ email: r.email, status: "skipped", reason: "no email" });
+        results.details.push({ email: r.email || r.phone || "(empty)", status: "skipped", reason: "no email or valid phone" });
         continue;
       }
 
       try {
         // Skip if email already exists
-        const { data: existing } = await admin.from("profiles").select("id").eq("email", email).maybeSingle();
-        if (existing) {
+        const { data: existingEmail } = await admin.from("profiles").select("id").eq("email", email).maybeSingle();
+        if (existingEmail) {
           results.skipped++;
           results.details.push({ email, status: "skipped", reason: "email exists" });
           continue;
+        }
+        // Skip if phone already exists
+        if (phone) {
+          const { data: existingPhone } = await admin.from("profiles").select("id").eq("phone", phone).maybeSingle();
+          if (existingPhone) {
+            results.skipped++;
+            results.details.push({ email, status: "skipped", reason: "phone exists" });
+            continue;
+          }
         }
 
         const fullName = [clean(r.fname), clean(r.lname)].filter(Boolean).join(" ") || email.split("@")[0];
