@@ -43,7 +43,7 @@ export default function TutorRecommendations() {
     if (!user) return;
     const { data: tutorData } = await supabase
       .from('tutor_profiles')
-      .select('id, district_id')
+      .select('id, district_id, gender')
       .eq('user_id', user.id)
       .single();
     if (!tutorData) return;
@@ -60,22 +60,49 @@ export default function TutorRecommendations() {
       .eq('tutor_profile_id', tutorData.id);
     const subjectIds = (subs || []).map(s => s.subject_id);
 
-    const baseSelect = 'id, slug, title, budget_min, budget_max, teaching_mode, class_level, created_at, districts(name_en), subjects(name_en)';
+    const baseSelect = 'id, slug, title, budget_min, budget_max, teaching_mode, class_level, created_at, district_id, preferred_tutor_gender, districts(name_en), subjects(name_en)';
 
-    let recQ = supabase.from('jobs').select(baseSelect).eq('status', 'open').order('created_at', { ascending: false }).limit(20);
+    // Gender filter: only jobs where preferred tutor matches this tutor's gender
+    // (or 'any'). Applied to all tabs so unrelated jobs don't show.
+    const tutorGender = tutorData.gender; // 'male' | 'female' | other
+
+    // RECOMMENDED: tutor's district + gender match + subject match (if any)
+    let recQ = supabase
+      .from('jobs')
+      .select(baseSelect)
+      .eq('status', 'open')
+      .order('created_at', { ascending: false })
+      .limit(20);
+    if (tutorData.district_id) recQ = recQ.eq('district_id', tutorData.district_id);
+    if (tutorGender) recQ = recQ.or(`preferred_tutor_gender.eq.any,preferred_tutor_gender.eq.${tutorGender}`);
     if (subjectIds.length) recQ = recQ.in('subject_id', subjectIds);
     if (appliedIds.length) recQ = recQ.not('id', 'in', `(${appliedIds.join(',')})`);
     const { data: recData } = await recQ;
     setRecommended((recData || []) as unknown as RecommendedJob[]);
 
+    // NEARBY: same district + gender match (no subject filter)
     if (tutorData.district_id) {
-      let nearQ = supabase.from('jobs').select(baseSelect).eq('status', 'open').eq('district_id', tutorData.district_id).order('created_at', { ascending: false }).limit(20);
+      let nearQ = supabase
+        .from('jobs')
+        .select(baseSelect)
+        .eq('status', 'open')
+        .eq('district_id', tutorData.district_id)
+        .order('created_at', { ascending: false })
+        .limit(20);
+      if (tutorGender) nearQ = nearQ.or(`preferred_tutor_gender.eq.any,preferred_tutor_gender.eq.${tutorGender}`);
       if (appliedIds.length) nearQ = nearQ.not('id', 'in', `(${appliedIds.join(',')})`);
       const { data: nearData } = await nearQ;
       setNearby((nearData || []) as unknown as RecommendedJob[]);
     }
 
-    let highQ = supabase.from('jobs').select(baseSelect).eq('status', 'open').order('budget_max', { ascending: false }).limit(20);
+    // HIGH PAY: gender match (district relaxed so tutors see top-paying jobs)
+    let highQ = supabase
+      .from('jobs')
+      .select(baseSelect)
+      .eq('status', 'open')
+      .order('budget_max', { ascending: false })
+      .limit(20);
+    if (tutorGender) highQ = highQ.or(`preferred_tutor_gender.eq.any,preferred_tutor_gender.eq.${tutorGender}`);
     if (appliedIds.length) highQ = highQ.not('id', 'in', `(${appliedIds.join(',')})`);
     const { data: highData } = await highQ;
     setHighPay((highData || []) as unknown as RecommendedJob[]);

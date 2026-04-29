@@ -444,9 +444,24 @@ function DemoRequestsTab({ toast }: { toast: ReturnType<typeof useToast>['toast'
         // Format the schedule for the notification message
         const scheduleStr = `${request.preferred_date} at ${request.preferred_time}${request.duration_minutes ? ` (${request.duration_minutes} min)` : ''}`;
 
-        // Sync the linked application status to 'invited_to_demo' if present
+        // Sync the linked application status to 'invited_to_demo' if present.
+        // If no application_id is linked (e.g. demo booked from the tutor's
+        // public profile), fall back to finding a pending application from the
+        // same parent to the same tutor and promoting it to 'invited_to_demo'
+        // so it shows up in the parent's "Invite" section.
         if (request.application_id) {
           await supabase.from('applications').update({ status: 'invited_to_demo' as any }).eq('id', request.application_id);
+        } else {
+          const { data: matchingApps } = await supabase
+            .from('applications')
+            .select('id, jobs!inner(parent_id)')
+            .eq('tutor_id', request.tutor_profiles?.id)
+            .in('status', ['pending', 'shortlisted', 'waiting'] as any);
+          const targetApp = (matchingApps || []).find((a: any) => a.jobs?.parent_id === request.parent_id);
+          if (targetApp) {
+            await supabase.from('applications').update({ status: 'invited_to_demo' as any }).eq('id', targetApp.id);
+            await supabase.from('demo_bookings').update({ application_id: targetApp.id }).eq('id', id);
+          }
         }
 
         const { data: tp } = await supabase

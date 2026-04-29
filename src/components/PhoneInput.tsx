@@ -52,9 +52,13 @@ export function PhoneInput({ value, onChange, placeholder = '01XXXXXXXXX', class
         className={cn(showError && 'border-destructive focus-visible:ring-destructive', className)}
         maxLength={11}
       />
-      {showError && (
+      {showError ? (
         <p className="text-xs text-destructive">
-          Please enter a valid 11-digit Bangladesh phone number (e.g., 01712345678)
+          Please enter a valid Bangladesh phone number — 11 digits starting with 01 (e.g. 01712345678). The +880 country code is added automatically.
+        </p>
+      ) : (
+        <p className="text-xs text-muted-foreground">
+          Bangladesh format: 01XXXXXXXXX (11 digits). +880 will be added automatically.
         </p>
       )}
     </div>
