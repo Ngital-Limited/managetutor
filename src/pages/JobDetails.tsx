@@ -218,7 +218,7 @@ export default function JobDetails() {
 
     // Calculate profile completeness (required degree counts toward score)
     let complete = 0;
-    if (tutorProfile.bio) complete += 10;
+    
     complete += 10; // education (verified above)
     if (tutorProfile.experience_years && tutorProfile.experience_years > 0) complete += 10;
     if (tutorProfile.monthly_salary_min && tutorProfile.monthly_salary_min > 0) complete += 10;
