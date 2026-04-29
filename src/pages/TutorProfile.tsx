@@ -1310,6 +1310,10 @@ export default function TutorProfile() {
                   </p>
                 )}
               </div>
+            </CardContent>
+          </Card>
+
+          {/* Video Introduction */}
           <Card className="rounded-2xl border-border/60 shadow-sm">
             <CardContent className="p-6 space-y-4">
               <div>
