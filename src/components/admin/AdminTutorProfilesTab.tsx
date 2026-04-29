@@ -200,11 +200,17 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
     if (!tutorData) { setTutors([]); setLoading(false); return; }
 
     const userIds = [...new Set(tutorData.map(t => t.user_id))];
-    const { data: profiles } = await supabase
-      .from('profiles')
-      .select('id, full_name, email, phone, avatar_url, user_reference, is_approved, is_banned, area_id')
-      .in('id', userIds);
-    const profMap = new Map(profiles?.map(p => [p.id, p]) || []);
+    const profiles: any[] = [];
+    for (let i = 0; i < userIds.length; i += 500) {
+      const chunk = userIds.slice(i, i + 500);
+      const { data: pg } = await supabase
+        .from('profiles')
+        .select('id, full_name, email, phone, avatar_url, user_reference, is_approved, is_banned, area_id')
+        .in('id', chunk)
+        .limit(chunk.length);
+      if (pg) profiles.push(...pg);
+    }
+    const profMap = new Map(profiles.map(p => [p.id, p]));
 
     // Education filter
     let tutorIdsByEdu = new Set<string>();
