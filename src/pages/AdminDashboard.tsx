@@ -1495,16 +1495,21 @@ export default function AdminDashboard() {
   };
 
   const openEditJob = async (jobId: string) => {
-    const [{ data }, { data: dists }, { data: ars }, { data: subs }] = await Promise.all([
+    const [{ data }, { data: dists }, { data: ars }, { data: subs }, { data: jobSubs }] = await Promise.all([
       supabase.from('jobs').select('*').eq('id', jobId).single(),
       supabase.from('districts').select('id, name_en').order('name_en'),
       supabase.from('areas').select('id, name_en, district_id').order('name_en'),
       supabase.from('subjects').select('id, name_en').order('name_en'),
+      supabase.from('job_subjects').select('subject_id').eq('job_id', jobId),
     ]);
     if (dists) setEditJobDistricts(dists);
     if (ars) setEditJobAreas(ars);
     if (subs) setEditJobSubjects(subs);
     if (data) {
+      const linkedIds = (jobSubs || []).map((r: any) => r.subject_id).filter(Boolean);
+      const initialSubjectIds = linkedIds.length > 0
+        ? linkedIds
+        : (data.subject_id ? [data.subject_id] : []);
       setEditingJob(data);
       setEditJobForm({
         title: data.title || '',
@@ -1517,6 +1522,7 @@ export default function AdminDashboard() {
         area_id: data.area_id || '',
         class_level: data.class_level || '',
         subject_id: data.subject_id || '',
+        subject_ids: initialSubjectIds,
         days_per_week: data.days_per_week || 0,
         duration_hours: data.duration_hours || 0,
         preferred_time: data.preferred_time || '',
@@ -1531,6 +1537,7 @@ export default function AdminDashboard() {
       });
     }
   };
+
 
   const handleSaveJob = async () => {
     if (!editingJob) return;
