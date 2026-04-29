@@ -8,9 +8,12 @@ import {
   Head,
   Heading,
   Html,
+  Link,
   Preview,
+  Section,
   Text,
 } from 'npm:@react-email/components@0.0.22'
+import { BRAND, styles } from './_brand.ts'
 
 interface ReauthenticationEmailProps {
   token: string
@@ -19,42 +22,34 @@ interface ReauthenticationEmailProps {
 export const ReauthenticationEmail = ({ token }: ReauthenticationEmailProps) => (
   <Html lang="en" dir="ltr">
     <Head />
-    <Preview>Your verification code</Preview>
-    <Body style={main}>
-      <Container style={container}>
-        <Heading style={h1}>Confirm reauthentication</Heading>
-        <Text style={text}>Use the code below to confirm your identity:</Text>
-        <Text style={codeStyle}>{token}</Text>
-        <Text style={footer}>
-          This code will expire shortly. If you didn't request this, you can
-          safely ignore this email.
-        </Text>
+    <Preview>Your {BRAND.name} security verification code</Preview>
+    <Body style={styles.main}>
+      <Container style={styles.container}>
+        <Section style={styles.header}>
+          <Text style={styles.brandWordmark}>{BRAND.name}</Text>
+          <Text style={styles.brandTag}>Security verification</Text>
+        </Section>
+        <Section style={styles.body}>
+          <Heading style={styles.h1}>Your verification code</Heading>
+          <Text style={styles.text}>
+            Use the code below to confirm your identity. This code expires shortly.
+          </Text>
+          <Text style={styles.codeBox}>{token}</Text>
+          <Text style={styles.smallNote}>
+            If you didn't request this code, please secure your account by changing
+            your password immediately. Never share this code with anyone — {BRAND.name}{' '}
+            staff will never ask for it.
+          </Text>
+        </Section>
+        <Section style={styles.footer}>
+          © {new Date().getFullYear()} {BRAND.name} ·{' '}
+          <Link href={BRAND.url} style={{ color: BRAND.muted }}>
+            {BRAND.domain}
+          </Link>
+        </Section>
       </Container>
     </Body>
   </Html>
 )
 
 export default ReauthenticationEmail
-
-const main = { backgroundColor: '#ffffff', fontFamily: 'Arial, sans-serif' }
-const container = { padding: '20px 25px' }
-const h1 = {
-  fontSize: '22px',
-  fontWeight: 'bold' as const,
-  color: '#000000',
-  margin: '0 0 20px',
-}
-const text = {
-  fontSize: '14px',
-  color: '#55575d',
-  lineHeight: '1.5',
-  margin: '0 0 25px',
-}
-const codeStyle = {
-  fontFamily: 'Courier, monospace',
-  fontSize: '22px',
-  fontWeight: 'bold' as const,
-  color: '#000000',
-  margin: '0 0 30px',
-}
-const footer = { fontSize: '12px', color: '#999999', margin: '30px 0 0' }

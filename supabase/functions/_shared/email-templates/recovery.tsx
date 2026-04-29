@@ -9,63 +9,60 @@ import {
   Head,
   Heading,
   Html,
+  Link,
   Preview,
+  Section,
   Text,
 } from 'npm:@react-email/components@0.0.22'
+import { BRAND, styles } from './_brand.ts'
 
 interface RecoveryEmailProps {
   siteName: string
   confirmationUrl: string
 }
 
-export const RecoveryEmail = ({
-  siteName,
-  confirmationUrl,
-}: RecoveryEmailProps) => (
+export const RecoveryEmail = ({ confirmationUrl }: RecoveryEmailProps) => (
   <Html lang="en" dir="ltr">
     <Head />
-    <Preview>Reset your password for {siteName}</Preview>
-    <Body style={main}>
-      <Container style={container}>
-        <Heading style={h1}>Reset your password</Heading>
-        <Text style={text}>
-          We received a request to reset your password for {siteName}. Click
-          the button below to choose a new password.
-        </Text>
-        <Button style={button} href={confirmationUrl}>
-          Reset Password
-        </Button>
-        <Text style={footer}>
-          If you didn't request a password reset, you can safely ignore this
-          email. Your password will not be changed.
-        </Text>
+    <Preview>Reset your {BRAND.name} password</Preview>
+    <Body style={styles.main}>
+      <Container style={styles.container}>
+        <Section style={styles.header}>
+          <Text style={styles.brandWordmark}>{BRAND.name}</Text>
+          <Text style={styles.brandTag}>{BRAND.tagline}</Text>
+        </Section>
+        <Section style={styles.body}>
+          <Heading style={styles.h1}>Reset your password</Heading>
+          <Text style={styles.text}>
+            We received a request to reset the password for your {BRAND.name} account.
+            Click the button below to choose a new password. This link will expire in 1 hour.
+          </Text>
+          <Button style={styles.button} href={confirmationUrl}>
+            Reset Password
+          </Button>
+          <Text style={styles.smallNote}>
+            If the button doesn't work, copy and paste this link into your browser:
+            <br />
+            <Link href={confirmationUrl} style={styles.link}>
+              {confirmationUrl}
+            </Link>
+          </Text>
+          <Text style={styles.smallNote}>
+            If you didn't request a password reset, you can safely ignore this email —
+            your password will not change. For your security, never share this link with anyone.
+          </Text>
+        </Section>
+        <Section style={styles.footer}>
+          © {new Date().getFullYear()} {BRAND.name} ·{' '}
+          <Link href={BRAND.url} style={{ color: BRAND.muted }}>
+            {BRAND.domain}
+          </Link>
+          <br />
+          This is a security-related email sent to the address on file for your account.
+        </Section>
       </Container>
     </Body>
   </Html>
 )
 
 export default RecoveryEmail
-
-const main = { backgroundColor: '#ffffff', fontFamily: 'Arial, sans-serif' }
-const container = { padding: '20px 25px' }
-const h1 = {
-  fontSize: '22px',
-  fontWeight: 'bold' as const,
-  color: '#000000',
-  margin: '0 0 20px',
-}
-const text = {
-  fontSize: '14px',
-  color: '#55575d',
-  lineHeight: '1.5',
-  margin: '0 0 25px',
-}
-const button = {
-  backgroundColor: '#000000',
-  color: '#ffffff',
-  fontSize: '14px',
-  borderRadius: '8px',
-  padding: '12px 20px',
-  textDecoration: 'none',
-}
-const footer = { fontSize: '12px', color: '#999999', margin: '30px 0 0' }
