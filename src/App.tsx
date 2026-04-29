@@ -14,6 +14,7 @@ import BrowseJobs from "./pages/BrowseJobs";
 import JobDetails from "./pages/JobDetails";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminBulkImportTutors from "./pages/AdminBulkImportTutors";
+import AdminBulkImportJobs from "./pages/AdminBulkImportJobs";
 import TutorProfile from "./pages/TutorProfile";
 import TutorDashboard from "./pages/TutorDashboard";
 import TutorAppliedJobs from "./pages/TutorAppliedJobs";
@@ -80,6 +81,7 @@ const App = () => (
               <Route path="/payment/cancelled" element={<PaymentCancelled />} />
               <Route path="/admin" element={<AdminDashboard />} />
               <Route path="/admin/import-tutors" element={<AdminBulkImportTutors />} />
+              <Route path="/admin/import-jobs" element={<AdminBulkImportJobs />} />
               <Route path="/about" element={<About />} />
               <Route path="/contact" element={<Contact />} />
               <Route path="/privacy" element={<Privacy />} />
