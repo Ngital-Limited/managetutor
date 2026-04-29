@@ -80,6 +80,12 @@ export default function TutorProfile() {
   const [uploading, setUploading] = useState(false);
   const [selectedClassLevels, setSelectedClassLevels] = useState<string[]>([]);
 
+  // Identity document (NID / Passport / Birth Certificate)
+  const [idDocType, setIdDocType] = useState<string>('nid');
+  const [idDocUrl, setIdDocUrl] = useState<string | null>(null);
+  const [idDocUploadedAt, setIdDocUploadedAt] = useState<string | null>(null);
+  const [idDocUploading, setIdDocUploading] = useState(false);
+
   // Education & Job Experience
   const [educationEntries, setEducationEntries] = useState<EducationEntry[]>([]);
   const [jobExperiences, setJobExperiences] = useState<JobExperienceEntry[]>([]);
@@ -215,6 +221,9 @@ export default function TutorProfile() {
       });
       setSelectedClassLevels(td.class_levels || []);
       setTutorProfileId(td.id);
+      if (td.id_document_type) setIdDocType(td.id_document_type);
+      setIdDocUrl(td.id_document_url || null);
+      setIdDocUploadedAt(td.id_document_uploaded_at || null);
 
       // Fetch education entries and job experiences
       const [eduRes, jobRes] = await Promise.all([
@@ -458,6 +467,55 @@ export default function TutorProfile() {
     await supabase.from('profiles').update({ avatar_url: urlData.publicUrl }).eq('id', targetUserId);
     setAvatarUploading(false);
     toast({ title: 'Profile picture updated' });
+  };
+
+  const handleIdDocUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !targetUserId) return;
+    if (file.size > 10 * 1024 * 1024) {
+      toast({ title: 'File too large', description: 'Maximum size is 10MB.', variant: 'destructive' });
+      return;
+    }
+    const allowed = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'];
+    if (!allowed.includes(file.type)) {
+      toast({ title: 'Invalid file', description: 'Upload JPG, PNG, WEBP, or PDF.', variant: 'destructive' });
+      return;
+    }
+    setIdDocUploading(true);
+    try {
+      const ext = file.name.split('.').pop() || 'bin';
+      const path = `${targetUserId}/${idDocType}-${Date.now()}.${ext}`;
+      const { error: upErr } = await supabase.storage
+        .from('verification-documents')
+        .upload(path, file, { upsert: true, contentType: file.type });
+      if (upErr) throw upErr;
+      const nowIso = new Date().toISOString();
+      const { error: updErr } = await supabase
+        .from('tutor_profiles')
+        .update({ id_document_type: idDocType, id_document_url: path, id_document_uploaded_at: nowIso })
+        .eq('user_id', targetUserId);
+      if (updErr) throw updErr;
+      setIdDocUrl(path);
+      setIdDocUploadedAt(nowIso);
+      toast({ title: 'Document uploaded', description: 'Our team will review it shortly.' });
+    } catch (err: any) {
+      toast({ title: 'Upload failed', description: err.message, variant: 'destructive' });
+    } finally {
+      setIdDocUploading(false);
+      e.target.value = '';
+    }
+  };
+
+  const handleViewIdDoc = async () => {
+    if (!idDocUrl) return;
+    const { data, error } = await supabase.storage
+      .from('verification-documents')
+      .createSignedUrl(idDocUrl, 60);
+    if (error) {
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+      return;
+    }
+    if (data?.signedUrl) window.open(data.signedUrl, '_blank');
   };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, docType: string) => {
@@ -1194,6 +1252,63 @@ export default function TutorProfile() {
                       : 'Please upload your National ID and at least your highest/last educational certificate. Experience certificates are optional but recommended.'}
                   </p>
                 </div>
+              </div>
+
+              {/* Identity Document (NID / Passport / Birth Certificate) */}
+              <div className="border-t pt-5 mt-2">
+                <h4 className="font-semibold flex items-center gap-2"><FileText className="h-4 w-4 text-primary" /> Identity Document</h4>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Upload your NID Card, Passport, or Birth Certificate. Required for verification approval.
+                  Accepted: JPG, PNG, WEBP, PDF (max 10MB). Your document is private and only visible to admins.
+                </p>
+                <div className="grid sm:grid-cols-[200px_1fr] gap-3 items-end">
+                  <div className="space-y-1.5">
+                    <Label>Document Type</Label>
+                    <Select value={idDocType} onValueChange={setIdDocType}>
+                      <SelectTrigger className="rounded-xl h-11"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="nid">NID Card</SelectItem>
+                        <SelectItem value="passport">Passport</SelectItem>
+                        <SelectItem value="birth_certificate">Birth Certificate</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label>Upload File</Label>
+                    <input
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp,application/pdf"
+                      onChange={handleIdDocUpload}
+                      disabled={idDocUploading}
+                      className="block w-full text-sm file:mr-3 file:py-2 file:px-4 file:rounded-md file:border-0 file:bg-primary file:text-primary-foreground hover:file:bg-primary/90 file:cursor-pointer"
+                    />
+                  </div>
+                </div>
+
+                {idDocUrl && (
+                  <div className="flex items-center justify-between gap-3 p-3 mt-3 rounded-xl bg-success/10 border border-success/20">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <CheckCircle2 className="h-5 w-5 text-success flex-shrink-0" />
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium truncate">
+                          {idDocType === 'nid' ? 'NID Card' : idDocType === 'passport' ? 'Passport' : 'Birth Certificate'} uploaded
+                        </p>
+                        {idDocUploadedAt && (
+                          <p className="text-xs text-muted-foreground">{new Date(idDocUploadedAt).toLocaleString()}</p>
+                        )}
+                      </div>
+                    </div>
+                    <Button type="button" variant="outline" size="sm" className="rounded-xl" onClick={handleViewIdDoc}>
+                      View
+                    </Button>
+                  </div>
+                )}
+
+                {idDocUploading && (
+                  <p className="text-sm text-muted-foreground flex items-center gap-2 mt-2">
+                    <Upload className="h-4 w-4 animate-pulse" /> Uploading...
+                  </p>
+                )}
               </div>
             </CardContent>
           </Card>
