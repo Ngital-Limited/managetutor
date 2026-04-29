@@ -187,17 +187,21 @@ export default function FindTutors() {
     if (priceRange[1] < 10000) query = query.lte('monthly_salary_max', priceRange[1]);
     if (verifiedOnly) query = query.eq('verification_status', 'approved');
 
-    const { data } = await query.order('is_featured', { ascending: false }).order('created_at', { ascending: false });
+    const { data } = await query.order('is_featured', { ascending: false }).order('created_at', { ascending: false }).range(0, 4999);
     
     if (data && data.length > 0) {
-      const userIds = data.map((t: any) => t.user_id);
-      const { data: profilesData } = await supabase
-        .from('profiles')
-        .select('id, full_name, avatar_url, district_id, districts (name_en), areas (name_en)')
-        .in('id', userIds);
-
+      const userIds = Array.from(new Set(data.map((t: any) => t.user_id).filter(Boolean)));
       const profilesMap = new Map<string, any>();
-      if (profilesData) profilesData.forEach((p: any) => profilesMap.set(p.id, p));
+      // Batch fetch to avoid URL length limits with large .in() lists
+      const CHUNK = 150;
+      for (let i = 0; i < userIds.length; i += CHUNK) {
+        const slice = userIds.slice(i, i + CHUNK);
+        const { data: profilesData } = await supabase
+          .from('profiles')
+          .select('id, full_name, avatar_url, district_id, districts (name_en), areas (name_en)')
+          .in('id', slice);
+        if (profilesData) profilesData.forEach((p: any) => profilesMap.set(p.id, p));
+      }
 
       const merged = (data as unknown as TutorProfile[]).map(t => ({
         ...t,
