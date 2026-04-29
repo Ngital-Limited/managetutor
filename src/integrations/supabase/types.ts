@@ -1454,6 +1454,9 @@ export type Database = {
           gender: Database["public"]["Enums"]["gender"]
           height: string | null
           id: string
+          id_document_type: string | null
+          id_document_uploaded_at: string | null
+          id_document_url: string | null
           is_available: boolean | null
           is_featured: boolean | null
           is_student: boolean
@@ -1501,6 +1504,9 @@ export type Database = {
           gender: Database["public"]["Enums"]["gender"]
           height?: string | null
           id?: string
+          id_document_type?: string | null
+          id_document_uploaded_at?: string | null
+          id_document_url?: string | null
           is_available?: boolean | null
           is_featured?: boolean | null
           is_student?: boolean
@@ -1548,6 +1554,9 @@ export type Database = {
           gender?: Database["public"]["Enums"]["gender"]
           height?: string | null
           id?: string
+          id_document_type?: string | null
+          id_document_uploaded_at?: string | null
+          id_document_url?: string | null
           is_available?: boolean | null
           is_featured?: boolean | null
           is_student?: boolean
