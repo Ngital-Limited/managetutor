@@ -14,6 +14,51 @@ export type Database = {
   }
   public: {
     Tables: {
+      ad_placements: {
+        Row: {
+          ad_type: string
+          created_at: string
+          created_by: string | null
+          height: number
+          html_content: string | null
+          id: string
+          image_url: string | null
+          is_active: boolean
+          link_url: string | null
+          slot: string
+          updated_at: string
+          width: number
+        }
+        Insert: {
+          ad_type: string
+          created_at?: string
+          created_by?: string | null
+          height?: number
+          html_content?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          link_url?: string | null
+          slot: string
+          updated_at?: string
+          width?: number
+        }
+        Update: {
+          ad_type?: string
+          created_at?: string
+          created_by?: string | null
+          height?: number
+          html_content?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          link_url?: string | null
+          slot?: string
+          updated_at?: string
+          width?: number
+        }
+        Relationships: []
+      }
       admin_permissions: {
         Row: {
           can_manage_jobs: boolean
