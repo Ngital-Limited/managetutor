@@ -2825,7 +2825,7 @@ export default function AdminDashboard() {
                               const tp = app.tutor_profile;
                               const tprof = app.tutor_profiles as any;
                               const edu = app.tutor_last_education;
-                              const bio = tprof?.bio || '';
+                              
                               return (
                                 <TableRow key={app.id} className="hover:bg-muted/20">
                                   <TableCell className="text-xs font-mono text-muted-foreground align-top">
