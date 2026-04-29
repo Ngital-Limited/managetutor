@@ -517,6 +517,8 @@ export default function TutorProfile() {
     }
     if (data?.signedUrl) window.open(data.signedUrl, '_blank');
   };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, docType: string) => {
     const file = e.target.files?.[0];
     if (!file || !user) return;
 
