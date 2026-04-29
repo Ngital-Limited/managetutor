@@ -109,27 +109,36 @@ export function NotificationBell() {
     const ref = notification.reference_id;
     const type = notification.type;
 
-    // Tutor-facing job-related notifications → open the job
+    // Tutor-facing JOB notifications → open the job page (ref is a job_id)
     const tutorJobTypes = [
       'new_job',
       'application_accepted',
       'application_rejected',
       'application_shortlisted',
       'application_invited_to_demo',
-      'demo_approved',
-      'demo_result_confirmed',
-      'demo_result_cancelled',
       'interview_invite',
       'hire',
+      'hired',
+    ];
+
+    // Demo-related notifications → go to dashboard (ref is a booking_id, not a job)
+    const demoTypes = [
+      'demo_approved',
+      'demo_rejected',
+      'demo_invite',
+      'demo_booking',
+      'demo_result_confirmed',
+      'demo_result_cancelled',
     ];
 
     if (ref && tutorJobTypes.includes(type)) {
       navigate(`/jobs/${ref}`);
-    } else if (type === 'application_received' && ref) {
-      // Parent received an application → go to parent dashboard with job context
-      navigate(`/parent-dashboard?job=${ref}`);
-    } else if (type === 'demo_booking' && ref) {
+    } else if (demoTypes.includes(type)) {
+      // Send to the right dashboard demo section based on role
       navigate('/dashboard');
+    } else if (type === 'application_received' && ref) {
+      // Parent received an application → go to parent dashboard
+      navigate(`/parent/dashboard?job=${ref}`);
     } else {
       // Fallback: go to dashboard
       navigate('/dashboard');
