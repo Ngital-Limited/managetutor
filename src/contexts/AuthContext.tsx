@@ -239,6 +239,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           agency_name: fullName,
         });
       }
+
+      // Send branded welcome email to parents (fire-and-forget; don't block signup)
+      if (selectedRole === 'parent') {
+        supabase.functions.invoke('send-transactional-email', {
+          body: {
+            templateName: 'parent-welcome',
+            recipientEmail: email,
+            idempotencyKey: `parent-welcome-${data.user.id}`,
+            templateData: { name: fullName },
+          },
+        }).catch((err) => console.error('Welcome email failed:', err));
+      }
     }
 
     return { error: null };
