@@ -422,7 +422,7 @@ export default function FindTutors() {
             </div>
 
             <p className="text-xs text-muted-foreground line-clamp-2 mb-3 leading-relaxed">
-              {tutor.bio || tutor.education || 'Experienced tutor ready to help you learn.'}
+              {tutor.education || 'Experienced tutor ready to help you learn.'}
             </p>
 
             {/* Subjects */}
