@@ -196,7 +196,6 @@ Deno.serve(async (req) => {
         }
 
         const uid = created.user.id;
-        const phone = normalizePhone(r.phone);
         const loc = matchLocation([r.pre_area, r.p_address, r.per_address].filter(Boolean).join(" "));
 
         // handle_new_user trigger creates profiles row. Update it.
