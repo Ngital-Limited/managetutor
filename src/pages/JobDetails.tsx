@@ -21,6 +21,7 @@ import {
   DollarSign, Clock, CheckCircle2, XCircle, Send, MessageSquare,
   Briefcase, UserCheck, Phone, Mail, AlertTriangle
 } from 'lucide-react';
+import { AdSlot } from '@/components/AdSlot';
 import { Progress } from '@/components/ui/progress';
 import { getMinProfileCompleteness } from '@/lib/profileCompleteness';
 
@@ -722,6 +723,11 @@ export default function JobDetails() {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Sponsored Ad — 300x250 */}
+            <div className="flex justify-center">
+              <AdSlot slot="job_details_sidebar" width={300} height={250} />
+            </div>
 
             {/* Posted By - only show to tutors */}
             {role === 'tutor' && (
