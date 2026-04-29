@@ -354,7 +354,7 @@ export function AdminTutorEditTab({ toast }: Props) {
               <div className="flex justify-between"><span className="text-muted-foreground">Verification</span><Badge variant="outline" className="capitalize">{selectedTutor.verification_status}</Badge></div>
               <div className="flex justify-between"><span className="text-muted-foreground">Experience</span><span>{selectedTutor.experience_years} years</span></div>
               <div className="flex justify-between"><span className="text-muted-foreground">Gender</span><span className="capitalize">{selectedTutor.gender}</span></div>
-              {selectedTutor.bio && <div><span className="text-muted-foreground">Bio:</span><p className="mt-1 text-xs bg-muted/50 p-2 rounded">{selectedTutor.bio}</p></div>}
+              
             </CardContent>
           </Card>
 
