@@ -1253,10 +1253,63 @@ export default function TutorProfile() {
                   </p>
                 </div>
               </div>
-            </CardContent>
-          </Card>
 
-          {/* Video Introduction */}
+              {/* Identity Document (NID / Passport / Birth Certificate) */}
+              <div className="border-t pt-5 mt-2">
+                <h4 className="font-semibold flex items-center gap-2"><FileText className="h-4 w-4 text-primary" /> Identity Document</h4>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Upload your NID Card, Passport, or Birth Certificate. Required for verification approval.
+                  Accepted: JPG, PNG, WEBP, PDF (max 10MB). Your document is private and only visible to admins.
+                </p>
+                <div className="grid sm:grid-cols-[200px_1fr] gap-3 items-end">
+                  <div className="space-y-1.5">
+                    <Label>Document Type</Label>
+                    <Select value={idDocType} onValueChange={setIdDocType}>
+                      <SelectTrigger className="rounded-xl h-11"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="nid">NID Card</SelectItem>
+                        <SelectItem value="passport">Passport</SelectItem>
+                        <SelectItem value="birth_certificate">Birth Certificate</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label>Upload File</Label>
+                    <input
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp,application/pdf"
+                      onChange={handleIdDocUpload}
+                      disabled={idDocUploading}
+                      className="block w-full text-sm file:mr-3 file:py-2 file:px-4 file:rounded-md file:border-0 file:bg-primary file:text-primary-foreground hover:file:bg-primary/90 file:cursor-pointer"
+                    />
+                  </div>
+                </div>
+
+                {idDocUrl && (
+                  <div className="flex items-center justify-between gap-3 p-3 mt-3 rounded-xl bg-success/10 border border-success/20">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <CheckCircle2 className="h-5 w-5 text-success flex-shrink-0" />
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium truncate">
+                          {idDocType === 'nid' ? 'NID Card' : idDocType === 'passport' ? 'Passport' : 'Birth Certificate'} uploaded
+                        </p>
+                        {idDocUploadedAt && (
+                          <p className="text-xs text-muted-foreground">{new Date(idDocUploadedAt).toLocaleString()}</p>
+                        )}
+                      </div>
+                    </div>
+                    <Button type="button" variant="outline" size="sm" className="rounded-xl" onClick={handleViewIdDoc}>
+                      View
+                    </Button>
+                  </div>
+                )}
+
+                {idDocUploading && (
+                  <p className="text-sm text-muted-foreground flex items-center gap-2 mt-2">
+                    <Upload className="h-4 w-4 animate-pulse" /> Uploading...
+                  </p>
+                )}
+              </div>
           <Card className="rounded-2xl border-border/60 shadow-sm">
             <CardContent className="p-6 space-y-4">
               <div>
