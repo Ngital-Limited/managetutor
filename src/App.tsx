@@ -36,6 +36,7 @@ import Contact from "./pages/Contact";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
 import Install from "./pages/Install";
+import Unsubscribe from "./pages/Unsubscribe";
 import { ImpersonationBanner } from "./components/ImpersonationBanner";
 import { InstallAppBanner } from "./components/InstallAppBanner";
 import { AuthGate } from "./components/AuthGate";
@@ -61,6 +62,7 @@ const App = () => (
               <Route path="/jobs" element={<BrowseJobs />} />
               <Route path="/jobs/:id" element={<JobDetails />} />
               <Route path="/auth" element={<Auth />} />
+              <Route path="/unsubscribe" element={<Unsubscribe />} />
               <Route path="/reset-password" element={<ResetPassword />} />
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/parent/dashboard" element={<ParentDashboard />} />
