@@ -184,12 +184,6 @@ function openCVPrintWindow(data: TutorCVData) {
       ${data.districtName || data.presentAddress ? `<span><span class="ic">📍</span>${data.presentAddress || data.districtName}</span>` : ''}
     </div>
 
-    ${data.bio ? `
-    <div class="sec">
-      <h2>Summary</h2>
-      <p>${data.bio}</p>
-    </div>` : ''}
-
     ${data.experiences.length > 0 ? `
     <div class="sec">
       <h2>Experience</h2>
