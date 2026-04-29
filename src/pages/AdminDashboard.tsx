@@ -835,10 +835,18 @@ export default function AdminDashboard() {
   const [adminNotes, setAdminNotes] = useState('');
   const [processing, setProcessing] = useState(false);
   const [editingJob, setEditingJob] = useState<any | null>(null);
-  const [editJobForm, setEditJobForm] = useState({
+  const [editJobForm, setEditJobForm] = useState<{
+    title: string; description: string; status: string; teaching_mode: string;
+    budget_min: number; budget_max: number; district_id: string; area_id: string;
+    class_level: string; subject_id: string; subject_ids: string[];
+    days_per_week: number; duration_hours: number;
+    preferred_time: string; fixed_time: string; preferred_tutor_gender: string;
+    student_gender: string; student_age: string; number_of_students: number;
+    location_details: string; special_requirements: string; start_date: string;
+  }>({
     title: '', description: '', status: '', teaching_mode: '',
     budget_min: 0, budget_max: 0, district_id: '', area_id: '',
-    class_level: '', subject_id: '', days_per_week: 0, duration_hours: 0,
+    class_level: '', subject_id: '', subject_ids: [], days_per_week: 0, duration_hours: 0,
     preferred_time: '', fixed_time: '', preferred_tutor_gender: 'any', student_gender: '',
     student_age: '', number_of_students: 1, location_details: '',
     special_requirements: '', start_date: '',
