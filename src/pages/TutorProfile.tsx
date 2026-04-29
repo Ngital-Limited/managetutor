@@ -892,16 +892,46 @@ export default function TutorProfile() {
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <div>
-                      <Label>Company / Organization *</Label>
-                      <Input className="rounded-xl mt-1.5 h-11" value={entry.company} onChange={(e) => updateJobExperience(index, 'company', e.target.value)} placeholder="e.g., ABC Coaching Center" />
-                    </div>
-                    <div>
-                      <Label>Designation *</Label>
-                      <Input className="rounded-xl mt-1.5 h-11" value={entry.designation} onChange={(e) => updateJobExperience(index, 'designation', e.target.value)} placeholder="e.g., Senior Tutor" />
-                    </div>
-                  </div>
+                  {(() => {
+                    const MEDIUMS = ['Bangla', 'English Medium', 'English Version', 'Madrasah'];
+                    const allClassItems = CLASS_LEVELS.flatMap(g => g.items);
+                    const selectedClasses = (entry.company || '').split(',').map(s => s.trim()).filter(Boolean);
+                    const toggleClass = (item: string) => {
+                      const next = selectedClasses.includes(item)
+                        ? selectedClasses.filter(c => c !== item)
+                        : [...selectedClasses, item];
+                      updateJobExperience(index, 'company', next.join(', '));
+                    };
+                    return (
+                      <>
+                        <div>
+                          <Label>Classes Taught *</Label>
+                          <p className="text-xs text-muted-foreground mt-1">Select all classes you taught at this position.</p>
+                          <div className="flex flex-wrap gap-2 mt-2 max-h-48 overflow-y-auto p-2 border border-border rounded-xl bg-background">
+                            {allClassItems.map(item => (
+                              <Badge
+                                key={item}
+                                variant={selectedClasses.includes(item) ? 'default' : 'outline'}
+                                className="cursor-pointer rounded-full px-3 py-1"
+                                onClick={() => toggleClass(item)}
+                              >
+                                {item}
+                              </Badge>
+                            ))}
+                          </div>
+                        </div>
+                        <div>
+                          <Label>Medium *</Label>
+                          <Select value={entry.designation || ''} onValueChange={(v) => updateJobExperience(index, 'designation', v)}>
+                            <SelectTrigger className="rounded-xl mt-1.5 h-11"><SelectValue placeholder="Select medium" /></SelectTrigger>
+                            <SelectContent>
+                              {MEDIUMS.map(m => <SelectItem key={m} value={m}>{m}</SelectItem>)}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </>
+                    );
+                  })()}
                   <div className="grid md:grid-cols-2 gap-4">
                     <div>
                       <Label>Start Date</Label>
