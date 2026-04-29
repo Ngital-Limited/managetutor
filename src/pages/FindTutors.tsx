@@ -187,7 +187,7 @@ export default function FindTutors() {
     if (priceRange[1] < 10000) query = query.lte('monthly_salary_max', priceRange[1]);
     if (verifiedOnly) query = query.eq('verification_status', 'approved');
 
-    const { data } = await query.order('is_featured', { ascending: false }).order('created_at', { ascending: false });
+    const { data } = await query.order('is_featured', { ascending: false }).order('created_at', { ascending: false }).range(0, 4999);
     
     if (data && data.length > 0) {
       const userIds = Array.from(new Set(data.map((t: any) => t.user_id).filter(Boolean)));
