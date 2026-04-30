@@ -99,7 +99,7 @@ export default function Index() {
             .order('is_featured', { ascending: false })
             .limit(6);
           return { data };
-        }, { ttl: TTL.short }),
+        }, { ttl: TTL.short, swr: 5 * 60_000 }),
         cached('home:latest-jobs', async () => {
           const { data } = await supabase.from('jobs')
             .select('id, slug, title, description, budget_min, budget_max, teaching_mode, days_per_week, job_reference, created_at, districts (name_en), areas (name_en), subjects (name_en)')
@@ -107,7 +107,7 @@ export default function Index() {
             .order('created_at', { ascending: false })
             .limit(6);
           return { data };
-        }, { ttl: TTL.short }),
+        }, { ttl: TTL.short, swr: 5 * 60_000 }),
       ]);
 
       if (a) setAreas(a.map((x: any) => ({ id: x.id, name_en: x.name_en, district_name: x.districts?.name_en || '' })));
@@ -130,6 +130,15 @@ export default function Index() {
       if (jobs) setLatestJobs(jobs as unknown as LatestJob[]);
     };
     fetchAll();
+
+    // Live-update when SWR background refresh completes
+    const unsubT = subscribe<{ data: any[] | null }>('home:featured-tutors', (v) => {
+      if (v?.data) setFeaturedTutors(v.data as unknown as FeaturedTutor[]);
+    });
+    const unsubJ = subscribe<{ data: any[] | null }>('home:latest-jobs', (v) => {
+      if (v?.data) setLatestJobs(v.data as unknown as LatestJob[]);
+    });
+    return () => { unsubT(); unsubJ(); };
   }, []);
 
   const handleSearch = () => {
