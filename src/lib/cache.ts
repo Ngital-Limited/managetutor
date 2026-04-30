@@ -12,6 +12,8 @@
  * or namespaced by user id.
  */
 
+import { supabase } from "@/integrations/supabase/client";
+
 type CacheEntry<T> = {
   value: T;
   /** After this timestamp, value is considered stale (needs revalidation). */
