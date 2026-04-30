@@ -18,12 +18,39 @@ type CacheEntry<T> = {
   freshUntil: number;
   /** After this timestamp, value is fully expired and must be re-fetched. */
   staleUntil: number;
+  /** Configured TTL in ms (for dashboard display). */
+  ttl: number;
+  /** Configured SWR window in ms (for dashboard display). */
+  swr: number;
+  /** Last write time (ms epoch). */
+  writtenAt: number;
+  /** Successful fetches written to this key. */
+  refreshCount: number;
+  /** Last read time (ms epoch). */
+  lastAccess: number;
 };
 
 const store = new Map<string, CacheEntry<unknown>>();
 const inflight = new Map<string, Promise<unknown>>();
 type Listener<T = unknown> = (value: T) => void;
 const listeners = new Map<string, Set<Listener>>();
+
+/** Per-key counters used by the cache dashboard. */
+type KeyMetric = {
+  hits: number;        // fresh-cache hits
+  staleHits: number;   // SWR stale-but-served hits
+  misses: number;      // had to wait for fetch (cold or expired)
+  errors: number;      // fetcher rejected
+  totalLatencyMs: number; // sum of fetcher durations (for avg)
+};
+const metrics = new Map<string, KeyMetric>();
+
+function bumpMetric(key: string, field: keyof KeyMetric, by = 1): void {
+  let m = metrics.get(key);
+  if (!m) { m = { hits: 0, staleHits: 0, misses: 0, errors: 0, totalLatencyMs: 0 }; metrics.set(key, m); }
+  (m[field] as number) += by;
+}
+
 
 export interface CacheOptions {
   /** Time-to-live in milliseconds. Default 60s. */
