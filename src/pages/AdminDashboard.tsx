@@ -28,7 +28,7 @@ import { MultiSearchableSelect } from '@/components/MultiSearchableSelect';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { cached, invalidate, invalidatePrefix, subscribe, TTL } from '@/lib/cache';
+import { cached, sharedCached, invalidate, sharedInvalidate, invalidatePrefix, subscribe, TTL } from '@/lib/cache';
 import { format } from 'date-fns';
 import {
   GraduationCap, Shield, Users, Briefcase, CheckCircle2, XCircle,
@@ -1200,7 +1200,7 @@ export default function AdminDashboard() {
   }, [role]);
 
   const fetchStats = async (force = false) => {
-    const result = await cached(
+    const result = await sharedCached(
       'admin:stats:v1',
       async () => {
         const [
