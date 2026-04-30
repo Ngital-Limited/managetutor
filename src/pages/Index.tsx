@@ -78,24 +78,36 @@ export default function Index() {
   useEffect(() => {
     const fetchAll = async () => {
       const [{ data: a }, { data: s }, { data: tutors }, { data: jobs }] = await Promise.all([
-        supabase.from('areas').select('id, name_en, districts (name_en)').order('name_en'),
-        supabase.from('subjects').select('id, name_en, category_en').order('name_en'),
-        supabase.from('tutor_profiles')
-          .select(`
-            id, slug, bio, education, experience_years,
-            verification_status, teaching_mode, monthly_salary_min, monthly_salary_max, is_available,
-            profiles:user_id (full_name, avatar_url),
-            districts (name_en),
-            tutor_subjects (subjects (name_en))
-          `)
-          .eq('is_available', true)
-          .order('is_featured', { ascending: false })
-          .limit(6),
-        supabase.from('jobs')
-          .select('id, slug, title, description, budget_min, budget_max, teaching_mode, days_per_week, job_reference, created_at, districts (name_en), areas (name_en), subjects (name_en)')
-          .eq('status', 'open')
-          .order('created_at', { ascending: false })
-          .limit(6),
+        cached('lookup:areas:withDistrictName', async () => {
+          const { data } = await supabase.from('areas').select('id, name_en, districts (name_en)').order('name_en');
+          return { data };
+        }, { ttl: TTL.long }),
+        cached('lookup:subjects:withCategory', async () => {
+          const { data } = await supabase.from('subjects').select('id, name_en, category_en').order('name_en');
+          return { data };
+        }, { ttl: TTL.long }),
+        cached('home:featured-tutors', async () => {
+          const { data } = await supabase.from('tutor_profiles')
+            .select(`
+              id, slug, bio, education, experience_years,
+              verification_status, teaching_mode, monthly_salary_min, monthly_salary_max, is_available,
+              profiles:user_id (full_name, avatar_url),
+              districts (name_en),
+              tutor_subjects (subjects (name_en))
+            `)
+            .eq('is_available', true)
+            .order('is_featured', { ascending: false })
+            .limit(6);
+          return { data };
+        }, { ttl: TTL.short }),
+        cached('home:latest-jobs', async () => {
+          const { data } = await supabase.from('jobs')
+            .select('id, slug, title, description, budget_min, budget_max, teaching_mode, days_per_week, job_reference, created_at, districts (name_en), areas (name_en), subjects (name_en)')
+            .eq('status', 'open')
+            .order('created_at', { ascending: false })
+            .limit(6);
+          return { data };
+        }, { ttl: TTL.short }),
       ]);
 
       if (a) setAreas(a.map((x: any) => ({ id: x.id, name_en: x.name_en, district_name: x.districts?.name_en || '' })));
