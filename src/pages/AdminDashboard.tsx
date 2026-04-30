@@ -1310,7 +1310,13 @@ export default function AdminDashboard() {
   useEffect(() => { setGuardianPage(1); }, [userSearch, guardianDistrictFilter, guardianAreaFilter, guardianStatusFilter, guardianPageSize]);
 
   // Reset job pagination when filter or page size changes
-  useEffect(() => { setJobPage(1); }, [jobStatusFilter, jobSearch, jobPageSize]);
+  useEffect(() => { setJobPage(1); }, [jobStatusFilter, jobSearchDebounced, jobPageSize]);
+
+  // Debounce job search to avoid hammering the server on each keystroke
+  useEffect(() => {
+    const t = setTimeout(() => setJobSearchDebounced(jobSearch.trim()), 300);
+    return () => clearTimeout(t);
+  }, [jobSearch]);
 
   // Reset Applications tab pagination when filters/search/selection change
   useEffect(() => { setAppsJobsPage(1); }, [appsJobsSearch, appsJobsPageSize]);
