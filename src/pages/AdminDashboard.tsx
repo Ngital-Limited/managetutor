@@ -3241,6 +3241,19 @@ export default function AdminDashboard() {
             {/* ═══════ ADS MANAGEMENT TAB ═══════ */}
             {activeTab === 'ads' && <AdsManagementTab toast={toast} />}
 
+            {/* ═══════ CACHE TAB ═══════ */}
+            {activeTab === 'cache' && (
+              <div className="space-y-4">
+                <div>
+                  <h1 className="text-xl font-semibold">Cache Performance</h1>
+                  <p className="text-sm text-muted-foreground">
+                    Hit/miss rates, TTLs, and per-key stats for the in-memory cache layer.
+                  </p>
+                </div>
+                <AdminCacheTab />
+              </div>
+            )}
+
             {/* ═══════ SETTINGS TAB ═══════ */}
             {activeTab === 'settings' && (
               <div className="space-y-6">
