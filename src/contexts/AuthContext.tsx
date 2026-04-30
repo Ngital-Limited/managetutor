@@ -291,6 +291,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setRole(null);
     setProfile(null);
     setImpersonation(null);
+    // Clear cached data tied to the previous session
+    const { clearCache } = await import('@/lib/cache');
+    clearCache();
   };
 
   const effectiveUserId = user?.id ?? null;
