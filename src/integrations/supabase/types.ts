@@ -317,6 +317,36 @@ export type Database = {
           },
         ]
       }
+      cache_entries: {
+        Row: {
+          cache_key: string
+          created_at: string
+          expires_at: string
+          hits: number
+          stale_until: string
+          updated_at: string
+          value: Json
+        }
+        Insert: {
+          cache_key: string
+          created_at?: string
+          expires_at: string
+          hits?: number
+          stale_until: string
+          updated_at?: string
+          value: Json
+        }
+        Update: {
+          cache_key?: string
+          created_at?: string
+          expires_at?: string
+          hits?: number
+          stale_until?: string
+          updated_at?: string
+          value?: Json
+        }
+        Relationships: []
+      }
       contact_messages: {
         Row: {
           admin_notes: string | null
@@ -1929,6 +1959,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      cleanup_expired_cache: { Args: never; Returns: undefined }
       cleanup_old_notifications: { Args: never; Returns: undefined }
       delete_email: {
         Args: { message_id: number; queue_name: string }
