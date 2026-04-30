@@ -13,6 +13,7 @@ import { SearchableSelect } from '@/components/SearchableSelect';
 import { Logo } from '@/components/Logo';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
+import { AutoRefreshControl } from '@/components/AutoRefreshControl';
 import {
   GraduationCap, Users, MapPin, Search, FileText,
   Globe, ArrowRight, Shield, BookOpen, Clock, Award,
@@ -424,6 +425,11 @@ export default function Index() {
                   <RefreshCw className={`h-3.5 w-3.5 ${refreshingJobs ? 'animate-spin' : ''}`} />
                   Refresh
                 </Button>
+                <AutoRefreshControl
+                  storageKey="home:latest-jobs"
+                  onTick={refreshLatestJobs}
+                  defaultIntervalMs={120_000}
+                />
                 <Link to="/jobs">
                   <Button variant="ghost" className="hidden sm:flex gap-1 text-sm text-primary hover:text-primary/80 font-semibold">
                     All Jobs <ArrowRight className="h-3.5 w-3.5" />
@@ -537,6 +543,11 @@ export default function Index() {
                   <RefreshCw className={`h-3.5 w-3.5 ${refreshingTutors ? 'animate-spin' : ''}`} />
                   Refresh
                 </Button>
+                <AutoRefreshControl
+                  storageKey="home:featured-tutors"
+                  onTick={refreshFeaturedTutors}
+                  defaultIntervalMs={120_000}
+                />
                 <Link to="/tutors">
                   <Button variant="ghost" className="hidden sm:flex gap-1 text-sm text-tutor hover:text-tutor/80 font-semibold">
                     View All <ArrowRight className="h-3.5 w-3.5" />
