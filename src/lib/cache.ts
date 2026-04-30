@@ -191,6 +191,120 @@ export function clearCache(): void {
   listeners.clear();
 }
 
+// ── Introspection (admin cache dashboard) ──────────────────────────────
+
+export interface CacheStatRow {
+  key: string;
+  status: 'fresh' | 'stale' | 'expired' | 'empty';
+  ttlMs: number;
+  swrMs: number;
+  ageMs: number;            // time since last write
+  freshForMs: number;       // ms remaining until stale (negative = stale)
+  expiresInMs: number;      // ms remaining until fully expired
+  refreshCount: number;
+  hits: number;
+  staleHits: number;
+  misses: number;
+  errors: number;
+  hitRate: number;          // 0..1, fresh+stale hits ÷ total reads
+  avgFetchMs: number;
+  approxBytes: number;      // rough JSON size estimate
+}
+
+function approxSize(value: unknown): number {
+  try { return JSON.stringify(value)?.length ?? 0; } catch { return 0; }
+}
+
+/** Snapshot of every cache entry + counters, for the admin dashboard. */
+export function getCacheStats(): {
+  rows: CacheStatRow[];
+  totals: {
+    entries: number;
+    fresh: number;
+    stale: number;
+    hits: number;
+    staleHits: number;
+    misses: number;
+    errors: number;
+    hitRate: number;
+    approxBytes: number;
+    inflight: number;
+    listeners: number;
+  };
+} {
+  const now = Date.now();
+  const allKeys = new Set<string>([...store.keys(), ...metrics.keys()]);
+  const rows: CacheStatRow[] = [];
+
+  let fresh = 0, stale = 0, totalHits = 0, totalStale = 0, totalMisses = 0, totalErrors = 0, totalBytes = 0;
+
+  for (const key of allKeys) {
+    const entry = store.get(key);
+    const m = metrics.get(key) ?? { hits: 0, staleHits: 0, misses: 0, errors: 0, totalLatencyMs: 0 };
+    const reads = m.hits + m.staleHits + m.misses;
+    const hitRate = reads === 0 ? 0 : (m.hits + m.staleHits) / reads;
+    const avgFetchMs = m.misses + m.errors === 0 ? 0 : m.totalLatencyMs / Math.max(1, (entry?.refreshCount ?? 0));
+    const status: CacheStatRow['status'] = !entry
+      ? 'empty'
+      : entry.freshUntil > now ? 'fresh'
+      : entry.staleUntil > now ? 'stale'
+      : 'expired';
+    if (status === 'fresh') fresh++;
+    else if (status === 'stale') stale++;
+
+    const bytes = entry ? approxSize(entry.value) : 0;
+    totalHits += m.hits;
+    totalStale += m.staleHits;
+    totalMisses += m.misses;
+    totalErrors += m.errors;
+    totalBytes += bytes;
+
+    rows.push({
+      key,
+      status,
+      ttlMs: entry?.ttl ?? 0,
+      swrMs: entry?.swr ?? 0,
+      ageMs: entry ? now - entry.writtenAt : 0,
+      freshForMs: entry ? entry.freshUntil - now : 0,
+      expiresInMs: entry ? entry.staleUntil - now : 0,
+      refreshCount: entry?.refreshCount ?? 0,
+      hits: m.hits,
+      staleHits: m.staleHits,
+      misses: m.misses,
+      errors: m.errors,
+      hitRate,
+      avgFetchMs,
+      approxBytes: bytes,
+    });
+  }
+
+  rows.sort((a, b) => (b.hits + b.staleHits + b.misses) - (a.hits + a.staleHits + a.misses));
+
+  const totalReads = totalHits + totalStale + totalMisses;
+  return {
+    rows,
+    totals: {
+      entries: store.size,
+      fresh,
+      stale,
+      hits: totalHits,
+      staleHits: totalStale,
+      misses: totalMisses,
+      errors: totalErrors,
+      hitRate: totalReads === 0 ? 0 : (totalHits + totalStale) / totalReads,
+      approxBytes: totalBytes,
+      inflight: inflight.size,
+      listeners: listeners.size,
+    },
+  };
+}
+
+/** Reset hit/miss counters (entries themselves are kept). */
+export function resetCacheMetrics(): void {
+  metrics.clear();
+}
+
+
 /** Common TTL presets (ms). */
 export const TTL = {
   short: 15_000, // counts, fast-moving lists
