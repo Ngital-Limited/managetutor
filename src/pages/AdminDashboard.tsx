@@ -810,8 +810,11 @@ export default function AdminDashboard() {
   const [jobs, setJobs] = useState<JobRow[]>([]);
   const [jobStatusFilter, setJobStatusFilter] = useState('all');
   const [jobSearch, setJobSearch] = useState('');
+  const [jobSearchDebounced, setJobSearchDebounced] = useState('');
   const [jobPage, setJobPage] = useState(1);
   const [jobPageSize, setJobPageSize] = useState(25);
+  const [jobsTotal, setJobsTotal] = useState(0);
+  const [jobsLoading, setJobsLoading] = useState(false);
   // Applications tab pagination (Level 1: jobs grouping, Level 2: applicants list)
   const [appsJobsPage, setAppsJobsPage] = useState(1);
   const [appsJobsPageSize, setAppsJobsPageSize] = useState(25);
