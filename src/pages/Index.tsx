@@ -412,11 +412,24 @@ export default function Index() {
                   Fresh tuition opportunities posted daily by parents and guardians across Bangladesh — apply directly to start teaching on your own terms.
                 </p>
               </div>
-              <Link to="/jobs">
-                <Button variant="ghost" className="hidden sm:flex gap-1 text-sm text-primary hover:text-primary/80 font-semibold">
-                  All Jobs <ArrowRight className="h-3.5 w-3.5" />
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={refreshLatestJobs}
+                  disabled={refreshingJobs}
+                  className="gap-1.5 text-xs text-muted-foreground hover:text-primary"
+                  aria-label="Refresh latest jobs"
+                >
+                  <RefreshCw className={`h-3.5 w-3.5 ${refreshingJobs ? 'animate-spin' : ''}`} />
+                  Refresh
                 </Button>
-              </Link>
+                <Link to="/jobs">
+                  <Button variant="ghost" className="hidden sm:flex gap-1 text-sm text-primary hover:text-primary/80 font-semibold">
+                    All Jobs <ArrowRight className="h-3.5 w-3.5" />
+                  </Button>
+                </Link>
+              </div>
             </div>
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
               {latestJobs.map((job, i) => (
@@ -512,11 +525,24 @@ export default function Index() {
                   Hand-picked, identity-verified educators trusted by thousands of families. Hire with complete confidence.
                 </p>
               </div>
-              <Link to="/tutors">
-                <Button variant="ghost" className="hidden sm:flex gap-1 text-sm text-tutor hover:text-tutor/80 font-semibold">
-                  View All <ArrowRight className="h-3.5 w-3.5" />
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={refreshFeaturedTutors}
+                  disabled={refreshingTutors}
+                  className="gap-1.5 text-xs text-muted-foreground hover:text-tutor"
+                  aria-label="Refresh featured tutors"
+                >
+                  <RefreshCw className={`h-3.5 w-3.5 ${refreshingTutors ? 'animate-spin' : ''}`} />
+                  Refresh
                 </Button>
-              </Link>
+                <Link to="/tutors">
+                  <Button variant="ghost" className="hidden sm:flex gap-1 text-sm text-tutor hover:text-tutor/80 font-semibold">
+                    View All <ArrowRight className="h-3.5 w-3.5" />
+                  </Button>
+                </Link>
+              </div>
             </div>
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
               {featuredTutors.map((tutor, i) => {
