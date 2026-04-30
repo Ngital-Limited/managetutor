@@ -88,17 +88,28 @@ function refresh<T>(
   const existing = inflight.get(key) as Promise<T> | undefined;
   if (existing) return existing;
 
+  const startedAt = Date.now();
   const promise = (async () => {
     try {
       const value = await fetcher();
       const now = Date.now();
+      const prev = store.get(key);
       store.set(key, {
         value,
         freshUntil: now + ttl,
         staleUntil: now + ttl + swr,
+        ttl,
+        swr,
+        writtenAt: now,
+        refreshCount: (prev?.refreshCount ?? 0) + 1,
+        lastAccess: prev?.lastAccess ?? now,
       });
+      bumpMetric(key, 'totalLatencyMs', now - startedAt);
       notify(key, value);
       return value;
+    } catch (err) {
+      bumpMetric(key, 'errors');
+      throw err;
     } finally {
       inflight.delete(key);
     }
@@ -119,20 +130,25 @@ export async function cached<T>(
   if (!force) {
     const hit = store.get(key) as CacheEntry<T> | undefined;
     if (hit) {
+      hit.lastAccess = now;
       if (hit.freshUntil > now) {
-        // Fresh — return immediately, no refetch.
+        bumpMetric(key, 'hits');
         return hit.value;
       }
       if (swr > 0 && hit.staleUntil > now) {
-        // Stale-but-usable — return cached value, refresh in background.
+        bumpMetric(key, 'staleHits');
         void refresh(key, fetcher, ttl, swr).catch(() => { /* swallow */ });
         return hit.value;
       }
     }
     const pending = inflight.get(key) as Promise<T> | undefined;
-    if (pending) return pending;
+    if (pending) {
+      bumpMetric(key, 'misses');
+      return pending;
+    }
   }
 
+  bumpMetric(key, 'misses');
   return refresh(key, fetcher, ttl, swr);
 }
 
