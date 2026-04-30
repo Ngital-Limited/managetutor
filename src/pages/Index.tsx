@@ -8,7 +8,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { cached, sharedCached, subscribe, TTL } from '@/lib/cache';
+import { cached, sharedCached, sharedInvalidate, subscribe, TTL } from '@/lib/cache';
 import { SearchableSelect } from '@/components/SearchableSelect';
 import { Logo } from '@/components/Logo';
 import { Header } from '@/components/Header';
@@ -16,7 +16,7 @@ import { Footer } from '@/components/Footer';
 import {
   GraduationCap, Users, MapPin, Search, FileText,
   Globe, ArrowRight, Shield, BookOpen, Clock, Award,
-  Briefcase, CheckCircle2, DollarSign, ChevronRight, Layers, UserCircle2
+  Briefcase, CheckCircle2, DollarSign, ChevronRight, Layers, UserCircle2, RefreshCw
 } from 'lucide-react';
 import { CLASS_LEVELS } from '@/constants/classLevels';
 import { JOB_CATEGORIES, STUDENT_BACKGROUNDS } from '@/constants/jobCategories';
@@ -74,6 +74,50 @@ export default function Index() {
   const [featuredTutors, setFeaturedTutors] = useState<FeaturedTutor[]>([]);
   const [latestJobs, setLatestJobs] = useState<LatestJob[]>([]);
   const [subjectCategories, setSubjectCategories] = useState<SubjectCategory[]>([]);
+  const [refreshingTutors, setRefreshingTutors] = useState(false);
+  const [refreshingJobs, setRefreshingJobs] = useState(false);
+
+  const refreshFeaturedTutors = async () => {
+    setRefreshingTutors(true);
+    try {
+      await sharedInvalidate('home:featured-tutors:v2');
+      const { data } = await sharedCached('home:featured-tutors:v2', async () => {
+        const { data } = await supabase.from('tutor_profiles')
+          .select(`
+            id, slug, bio, education, experience_years,
+            verification_status, teaching_mode, monthly_salary_min, monthly_salary_max, is_available,
+            profiles:user_id (full_name, avatar_url),
+            districts (name_en),
+            tutor_subjects (subjects (name_en))
+          `)
+          .eq('is_available', true)
+          .order('is_featured', { ascending: false })
+          .limit(6);
+        return { data };
+      }, { ttl: TTL.medium, swr: 5 * 60_000, force: true });
+      if (data) setFeaturedTutors(data as unknown as FeaturedTutor[]);
+    } finally {
+      setRefreshingTutors(false);
+    }
+  };
+
+  const refreshLatestJobs = async () => {
+    setRefreshingJobs(true);
+    try {
+      await sharedInvalidate('home:latest-jobs:v2');
+      const { data } = await sharedCached('home:latest-jobs:v2', async () => {
+        const { data } = await supabase.from('jobs')
+          .select('id, slug, title, description, budget_min, budget_max, teaching_mode, days_per_week, job_reference, created_at, districts (name_en), areas (name_en), subjects (name_en)')
+          .eq('status', 'open')
+          .order('created_at', { ascending: false })
+          .limit(6);
+        return { data };
+      }, { ttl: TTL.medium, swr: 5 * 60_000, force: true });
+      if (data) setLatestJobs(data as unknown as LatestJob[]);
+    } finally {
+      setRefreshingJobs(false);
+    }
+  };
 
   useEffect(() => {
     const fetchAll = async () => {
