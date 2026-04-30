@@ -1363,19 +1363,41 @@ export default function AdminDashboard() {
   }, [verificationFilter]);
 
   const fetchJobs = useCallback(async () => {
+    setJobsLoading(true);
+    const from = (jobPage - 1) * jobPageSize;
+    const to = from + jobPageSize - 1;
+
     let query = supabase
       .from('jobs')
-      .select('id, title, job_reference, status, teaching_mode, total_applications, created_at, parent_id, districts (name_en), subjects (name_en)')
-      .order('created_at', { ascending: false }).limit(1000);
+      .select(
+        'id, title, job_reference, status, teaching_mode, total_applications, created_at, parent_id, districts (name_en), subjects (name_en)',
+        { count: 'exact' }
+      )
+      .order('created_at', { ascending: false })
+      .range(from, to);
+
     if (jobStatusFilter !== 'all') query = query.eq('status', jobStatusFilter as any);
-    const { data } = await query;
-    if (data) {
+
+    const q = jobSearchDebounced;
+    if (q) {
+      // Server-side OR search across reference + title
+      const escaped = q.replace(/[%,()]/g, ' ');
+      query = query.or(`job_reference.ilike.%${escaped}%,title.ilike.%${escaped}%`);
+    }
+
+    const { data, count } = await query;
+    setJobsTotal(count ?? 0);
+
+    if (data && data.length > 0) {
       const parentIds = [...new Set(data.map(j => j.parent_id))];
       const { data: profs } = await supabase.from('profiles').select('id, full_name').in('id', parentIds);
       const pMap = new Map(profs?.map(p => [p.id, p]) || []);
       setJobs(data.map(j => ({ ...j, profiles: pMap.get(j.parent_id) || { full_name: 'Unknown' } })) as unknown as JobRow[]);
+    } else {
+      setJobs([]);
     }
-  }, [jobStatusFilter]);
+    setJobsLoading(false);
+  }, [jobStatusFilter, jobSearchDebounced, jobPage, jobPageSize]);
 
   const fetchReports = useCallback(async () => {
     const { data } = await supabase
