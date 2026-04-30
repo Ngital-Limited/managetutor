@@ -90,12 +90,6 @@ Deno.serve(async (req) => {
         });
       }
 
-      // best-effort hit counter (don't block)
-      supabase
-        .rpc("noop_inc_cache_hits", { _key: body.key })
-        .then(() => {})
-        .catch(() => {});
-
       return new Response(
         JSON.stringify({
           status: expiresAt > now ? "fresh" : "stale",
