@@ -51,6 +51,7 @@ import { AdminTutorProfilesTab } from '@/components/admin/AdminTutorProfilesTab'
 import { ReferralAnalyticsTab } from '@/components/admin/ReferralAnalyticsTab';
 import { AdsManagementTab } from '@/components/admin/AdsManagementTab';
 import { AdminCacheTab } from '@/components/admin/AdminCacheTab';
+import { AutoRefreshControl } from '@/components/AutoRefreshControl';
 import { getPlatformCommissionPct, computeFeeSplit } from '@/lib/commission';
 
 // ──────────── Types ────────────
@@ -1930,20 +1931,31 @@ export default function AdminDashboard() {
                     <h1 className="text-xl font-semibold">Overview</h1>
                     <p className="text-sm text-muted-foreground mt-0.5">Platform health at a glance</p>
                   </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={async () => {
-                      invalidate('admin:stats:v1');
-                      await sharedInvalidate('admin:stats:v1');
-                      await fetchStats(true);
-                      toast({ title: 'Stats refreshed' });
-                    }}
-                    className="gap-1.5"
-                  >
-                    <RefreshCw className="h-3.5 w-3.5" />
-                    Refresh
-                  </Button>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <AutoRefreshControl
+                      storageKey="admin:overview-stats"
+                      onTick={async () => {
+                        invalidate('admin:stats:v1');
+                        await sharedInvalidate('admin:stats:v1');
+                        await fetchStats(true);
+                      }}
+                      defaultIntervalMs={60_000}
+                    />
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={async () => {
+                        invalidate('admin:stats:v1');
+                        await sharedInvalidate('admin:stats:v1');
+                        await fetchStats(true);
+                        toast({ title: 'Stats refreshed' });
+                      }}
+                      className="gap-1.5"
+                    >
+                      <RefreshCw className="h-3.5 w-3.5" />
+                      Refresh
+                    </Button>
+                  </div>
                 </div>
 
                 {/* Key metrics — compact grid */}
