@@ -936,10 +936,10 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
           </ScrollArea>
 
           {/* Pagination */}
-          {!loading && sortedTutors.length > 0 && (
+          {!loading && totalCount > 0 && (
             <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-4 py-3 border-t">
               <div className="text-sm text-muted-foreground">
-                Showing {(currentPage - 1) * pageSize + 1}–{Math.min(currentPage * pageSize, sortedTutors.length)} of {sortedTutors.length}
+                Showing {(currentPage - 1) * pageSize + 1}–{Math.min(currentPage * pageSize, totalCount)} of {totalCount}
               </div>
               <div className="flex items-center gap-2">
                 <Select value={String(pageSize)} onValueChange={(v) => setPageSize(Number(v))}>
