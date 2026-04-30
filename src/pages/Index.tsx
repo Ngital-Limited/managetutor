@@ -8,7 +8,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { cached, TTL } from '@/lib/cache';
+import { cached, subscribe, TTL } from '@/lib/cache';
 import { SearchableSelect } from '@/components/SearchableSelect';
 import { Logo } from '@/components/Logo';
 import { Header } from '@/components/Header';

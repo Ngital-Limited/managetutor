@@ -28,7 +28,7 @@ import { MultiSearchableSelect } from '@/components/MultiSearchableSelect';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { cached, invalidate, invalidatePrefix, TTL } from '@/lib/cache';
+import { cached, invalidate, invalidatePrefix, subscribe, TTL } from '@/lib/cache';
 import { format } from 'date-fns';
 import {
   GraduationCap, Shield, Users, Briefcase, CheckCircle2, XCircle,
