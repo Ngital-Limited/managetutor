@@ -2387,16 +2387,7 @@ export default function AdminDashboard() {
             )}
 
             {/* ═══════ JOBS TAB ═══════ */}
-            {activeTab === 'jobs' && (() => {
-              const q = jobSearch.trim().toLowerCase();
-              const filteredJobs = q
-                ? jobs.filter(j =>
-                    (j.job_reference || '').toLowerCase().includes(q) ||
-                    (j.title || '').toLowerCase().includes(q) ||
-                    ((j.profiles as any)?.full_name || '').toLowerCase().includes(q)
-                  )
-                : jobs;
-              return (
+            {activeTab === 'jobs' && (
               <div className="space-y-6">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                   <h1 className="text-xl font-semibold">Job Management</h1>
@@ -2406,7 +2397,7 @@ export default function AdminDashboard() {
                       <Input
                         value={jobSearch}
                         onChange={(e) => setJobSearch(e.target.value)}
-                        placeholder="Search by reference, title, or guardian"
+                        placeholder="Search by reference or title"
                         className="pl-8 h-9"
                       />
                     </div>
@@ -2441,9 +2432,11 @@ export default function AdminDashboard() {
                           </TableRow>
                         </TableHeader>
                         <TableBody>
-                          {filteredJobs.length === 0 ? (
+                          {jobsLoading ? (
+                            <TableRow><TableCell colSpan={9} className="text-center py-8 text-muted-foreground">Loading…</TableCell></TableRow>
+                          ) : jobs.length === 0 ? (
                             <TableRow><TableCell colSpan={9} className="text-center py-8 text-muted-foreground">No jobs found</TableCell></TableRow>
-                          ) : filteredJobs.slice((jobPage - 1) * jobPageSize, jobPage * jobPageSize).map((job) => (
+                          ) : jobs.map((job) => (
                             <TableRow key={job.id}>
                               <TableCell className="font-mono text-xs">{job.job_reference || '—'}</TableCell>
                               <TableCell className="font-medium text-sm max-w-[200px] truncate">{job.title}</TableCell>
@@ -2492,14 +2485,14 @@ export default function AdminDashboard() {
                   </CardContent>
                 </Card>
 
-                {filteredJobs.length > 0 && (() => {
-                  const totalPages = Math.max(1, Math.ceil(filteredJobs.length / jobPageSize));
+                {jobsTotal > 0 && (() => {
+                  const totalPages = Math.max(1, Math.ceil(jobsTotal / jobPageSize));
                   const page = Math.min(jobPage, totalPages);
                   const start = (page - 1) * jobPageSize + 1;
-                  const end = Math.min(page * jobPageSize, filteredJobs.length);
+                  const end = Math.min(page * jobPageSize, jobsTotal);
                   return (
                     <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-1">
-                      <div className="text-xs text-muted-foreground">Showing {start}–{end} of {filteredJobs.length}</div>
+                      <div className="text-xs text-muted-foreground">Showing {start}–{end} of {jobsTotal}</div>
                       <div className="flex items-center gap-2 flex-wrap">
                         <Select value={String(jobPageSize)} onValueChange={(v) => { setJobPageSize(Number(v)); setJobPage(1); }}>
                           <SelectTrigger className="h-8 w-[100px] text-xs"><SelectValue /></SelectTrigger>
@@ -2517,8 +2510,7 @@ export default function AdminDashboard() {
                   );
                 })()}
               </div>
-              );
-            })()}
+            )}
 
             {/* ═══════ APPLICATIONS TAB (Two-level drill-down) ═══════ */}
             {activeTab === 'applications' && (() => {
