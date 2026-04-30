@@ -1552,11 +1552,20 @@ export default function AdminDashboard() {
   };
 
   const openEditJob = async (jobId: string) => {
-    const [{ data }, { data: dists }, { data: ars }, { data: subs }, { data: jobSubs }] = await Promise.all([
+    const [{ data }, dists, ars, subs, { data: jobSubs }] = await Promise.all([
       supabase.from('jobs').select('*').eq('id', jobId).single(),
-      supabase.from('districts').select('id, name_en').order('name_en'),
-      supabase.from('areas').select('id, name_en, district_id').order('name_en'),
-      supabase.from('subjects').select('id, name_en').order('name_en'),
+      cached('lookup:districts', async () => {
+        const { data } = await supabase.from('districts').select('id, name_en').order('name_en');
+        return data || [];
+      }, { ttl: TTL.long }),
+      cached('lookup:areas', async () => {
+        const { data } = await supabase.from('areas').select('id, name_en, district_id').order('name_en');
+        return data || [];
+      }, { ttl: TTL.long }),
+      cached('lookup:subjects', async () => {
+        const { data } = await supabase.from('subjects').select('id, name_en').order('name_en');
+        return data || [];
+      }, { ttl: TTL.long }),
       supabase.from('job_subjects').select('subject_id').eq('job_id', jobId),
     ]);
     if (dists) setEditJobDistricts(dists);
