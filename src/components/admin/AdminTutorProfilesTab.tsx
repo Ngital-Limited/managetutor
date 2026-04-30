@@ -83,6 +83,7 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(25);
+  const [searchDebounced, setSearchDebounced] = useState('');
 
   // ─── Data ───
   const [tutors, setTutors] = useState<TutorRow[]>([]);
@@ -164,83 +165,203 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
     if (notifyDialogOpen) fetchJobsForNotify();
   }, [notifyDialogOpen, fetchJobsForNotify]);
 
-  const fetchTutors = useCallback(async () => {
-    setLoading(true);
-    setSelectedIds(new Set());
-    setSelectAll(false);
+  // Debounce search to avoid hammering the server on every keystroke
+  useEffect(() => {
+    const t = setTimeout(() => setSearchDebounced(search.trim()), 350);
+    return () => clearTimeout(t);
+  }, [search]);
 
-    const buildQuery = () => {
+  // Reset to page 1 whenever any filter changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [
+    searchDebounced, filterAreas, filterGender, filterMedium,
+    filterEducation, filterUniversity, filterVerification, filterAvailability,
+    filterClassLevel, filterSubject, filterCategory, filterLastEducation,
+    sortBy, sortDir, pageSize,
+  ]);
+
+  /**
+   * Build a server-side query against tutor_profiles applying every filter
+   * we can express directly. Cross-table filters (subject, education, search)
+   * are pre-resolved into ID sets and intersected via `.in('id', ids)`.
+   *
+   * Returns either { rows, count } for a page, or { ids } when fetchAllIds=true.
+   */
+  const queryTutors = useCallback(async (opts: {
+    from: number;
+    to: number;
+    fetchAllIds?: boolean;
+  }) => {
+    // ─── Pre-resolve cross-table ID filters ───
+    const idConstraints: string[][] = [];
+
+    // Subject / category filter → tutor_subjects
+    if (filterSubject !== 'all') {
+      const { data } = await supabase
+        .from('tutor_subjects').select('tutor_profile_id').eq('subject_id', filterSubject);
+      idConstraints.push([...new Set((data || []).map(r => r.tutor_profile_id))]);
+    } else if (filterCategory !== 'all') {
+      const catSubjectIds = subjects.filter(s => s.category_en === filterCategory).map(s => s.id);
+      if (catSubjectIds.length > 0) {
+        const { data } = await supabase
+          .from('tutor_subjects').select('tutor_profile_id').in('subject_id', catSubjectIds);
+        idConstraints.push([...new Set((data || []).map(r => r.tutor_profile_id))]);
+      } else {
+        idConstraints.push([]);
+      }
+    }
+
+    // Education filter → tutor_education
+    if (filterEducation || filterUniversity) {
+      let eduQ = supabase.from('tutor_education').select('tutor_id');
+      if (filterEducation) eduQ = eduQ.ilike('degree', `%${filterEducation}%`);
+      if (filterUniversity) eduQ = eduQ.ilike('institution', `%${filterUniversity}%`);
+      const { data } = await eduQ;
+      idConstraints.push([...new Set((data || []).map(r => r.tutor_id))]);
+    }
+
+    // Search by name/email/phone/reference → resolve via profiles
+    let searchUserIds: string[] | null = null;
+    if (searchDebounced) {
+      const esc = searchDebounced.replace(/[%,()]/g, ' ');
+      const { data: pData } = await supabase
+        .from('profiles')
+        .select('id')
+        .or(`full_name.ilike.%${esc}%,email.ilike.%${esc}%,phone.ilike.%${esc}%,user_reference.ilike.%${esc}%`)
+        .limit(2000);
+      searchUserIds = [...new Set((pData || []).map(p => p.id))];
+      if (searchUserIds.length === 0) return { rows: [], count: 0, ids: [] as string[] };
+    }
+
+    // If any cross-table filter returned 0 ids, short-circuit
+    if (idConstraints.some(arr => arr.length === 0)) {
+      return { rows: [], count: 0, ids: [] as string[] };
+    }
+
+    // Intersect cross-table id constraints
+    let intersectedIds: string[] | null = null;
+    if (idConstraints.length > 0) {
+      intersectedIds = idConstraints.reduce<string[]>((acc, cur, i) => {
+        if (i === 0) return cur;
+        const set = new Set(cur);
+        return acc.filter(id => set.has(id));
+      }, []);
+      if (intersectedIds.length === 0) return { rows: [], count: 0, ids: [] as string[] };
+    }
+
+    // ─── Main query ───
+    const buildBase = (selectCols: string, withCount: boolean) => {
       let q = supabase
         .from('tutor_profiles')
-        .select('id, user_id, gender, education, experience_years, teaching_mode, verification_status, is_available, class_levels, district_id, created_at')
-        .order('created_at', { ascending: false });
+        .select(selectCols, withCount ? { count: 'exact' } : undefined);
 
       if (filterGender !== 'all') q = q.eq('gender', filterGender as any);
       if (filterVerification !== 'all') q = q.eq('verification_status', filterVerification as any);
       if (filterAvailability !== 'all') q = q.eq('is_available', filterAvailability === 'available');
       if (filterMedium !== 'all') q = q.eq('teaching_mode', filterMedium as any);
 
-      // Multi-area filter: narrow by district_ids server-side
+      // Multi-area: narrow by district_id (then refine on area_id client-side per page)
       if (filterAreas.length > 0) {
-        const districtIds = [...new Set(filterAreas.map(aId => areas.find(a => a.id === aId)?.district_id).filter(Boolean))] as string[];
+        const districtIds = [...new Set(
+          filterAreas.map(aId => areas.find(a => a.id === aId)?.district_id).filter(Boolean)
+        )] as string[];
         if (districtIds.length > 0) q = q.in('district_id', districtIds);
       }
+
+      // Class level (text[] array contains)
+      if (filterClassLevel !== 'all') {
+        q = q.contains('class_levels', [filterClassLevel] as any);
+      }
+
+      if (intersectedIds) q = q.in('id', intersectedIds);
       return q;
     };
 
-    // Paginate past Supabase's default 1000-row cap so all tutors load.
-    const PAGE_SIZE = 1000;
-    let tutorData: any[] = [];
-    for (let from = 0; from < 20000; from += PAGE_SIZE) {
-      const { data: page, error } = await buildQuery().range(from, from + PAGE_SIZE - 1);
-      if (error || !page) break;
-      tutorData = tutorData.concat(page);
-      if (page.length < PAGE_SIZE) break;
-    }
-    if (!tutorData) { setTutors([]); setLoading(false); return; }
-
-    const userIds = [...new Set(tutorData.map(t => t.user_id))];
-    const profiles: any[] = [];
-    for (let i = 0; i < userIds.length; i += 500) {
-      const chunk = userIds.slice(i, i + 500);
-      const { data: pg } = await supabase
-        .from('profiles')
-        .select('id, full_name, email, phone, avatar_url, user_reference, is_approved, is_banned, area_id')
-        .in('id', chunk)
-        .limit(chunk.length);
-      if (pg) profiles.push(...pg);
-    }
-    const profMap = new Map(profiles.map(p => [p.id, p]));
-
-    // Education filter
-    let tutorIdsByEdu = new Set<string>();
-    let hasEduFilter = false;
-    if (filterEducation || filterUniversity) {
-      hasEduFilter = true;
-      let eduQuery = supabase.from('tutor_education').select('tutor_id, degree, institution');
-      if (filterEducation) eduQuery = eduQuery.ilike('degree', `%${filterEducation}%`);
-      if (filterUniversity) eduQuery = eduQuery.ilike('institution', `%${filterUniversity}%`);
-      const { data: eduData } = await eduQuery;
-      tutorIdsByEdu = new Set(eduData?.map(e => e.tutor_id) || []);
-    }
-
-    // Subject filter
-    let tutorIdsBySubject = new Set<string>();
-    let hasSubjectFilter = false;
-    if (filterSubject !== 'all') {
-      hasSubjectFilter = true;
-      const { data: tsData } = await supabase.from('tutor_subjects').select('tutor_profile_id').eq('subject_id', filterSubject);
-      tutorIdsBySubject = new Set(tsData?.map(s => s.tutor_profile_id) || []);
-    } else if (filterCategory !== 'all') {
-      hasSubjectFilter = true;
-      const catSubjectIds = subjects.filter(s => s.category_en === filterCategory).map(s => s.id);
-      if (catSubjectIds.length > 0) {
-        const { data: tsData } = await supabase.from('tutor_subjects').select('tutor_profile_id').in('subject_id', catSubjectIds);
-        tutorIdsBySubject = new Set(tsData?.map(s => s.tutor_profile_id) || []);
+    if (opts.fetchAllIds) {
+      // Fetch every matching tutor's user_id (used by "Notify All Filtered")
+      const all: { user_id: string; id: string }[] = [];
+      const PAGE = 1000;
+      for (let from = 0; from < 50000; from += PAGE) {
+        const { data } = await buildBase('id, user_id', false)
+          .order('created_at', { ascending: false })
+          .range(from, from + PAGE - 1);
+        if (!data || data.length === 0) break;
+        all.push(...data as any);
+        if (data.length < PAGE) break;
       }
+      // If user search is active, intersect with searchUserIds
+      let filtered = all;
+      if (searchUserIds) {
+        const set = new Set(searchUserIds);
+        filtered = all.filter(r => set.has(r.user_id));
+      }
+      return { rows: [], count: filtered.length, ids: filtered.map(r => r.user_id) };
     }
 
-    let result: TutorRow[] = tutorData.map(t => {
+    // ─── Page query ───
+    // When search by user is active and is small enough, narrow by user_id.in(...)
+    let pageQ = buildBase(
+      'id, user_id, gender, education, experience_years, teaching_mode, verification_status, is_available, class_levels, district_id, created_at, slug',
+      true,
+    );
+    if (searchUserIds) pageQ = pageQ.in('user_id', searchUserIds);
+
+    pageQ = pageQ.order('created_at', { ascending: sortBy === 'joined' ? sortDir === 'asc' : false })
+                 .range(opts.from, opts.to);
+
+    const { data: tutorData, count } = await pageQ;
+    return { rows: tutorData || [], count: count ?? 0, ids: [] as string[] };
+  }, [
+    searchDebounced, filterAreas, filterGender, filterMedium,
+    filterEducation, filterUniversity, filterVerification, filterAvailability,
+    filterClassLevel, filterSubject, filterCategory,
+    areas, subjects, sortBy, sortDir,
+  ]);
+
+  const fetchTutors = useCallback(async () => {
+    setLoading(true);
+    setSelectedIds(new Set());
+    setSelectAll(false);
+
+    const from = (currentPage - 1) * pageSize;
+    const to = from + pageSize - 1;
+
+    const { rows: tutorData, count } = await queryTutors({ from, to });
+
+    if (tutorData.length === 0) {
+      setTutors([]);
+      setTotalCount(count);
+      setLoading(false);
+      return;
+    }
+
+    // Hydrate this page only (small fixed batch)
+    const userIds = [...new Set(tutorData.map((t: any) => t.user_id))];
+    const tutorIds = tutorData.map((t: any) => t.id);
+
+    const [{ data: profilesData }, { data: eduData }] = await Promise.all([
+      supabase.from('profiles')
+        .select('id, full_name, email, phone, avatar_url, user_reference, is_approved, is_banned, area_id')
+        .in('id', userIds),
+      supabase.from('tutor_education')
+        .select('tutor_id, degree, institution')
+        .in('tutor_id', tutorIds),
+    ]);
+
+    const profMap = new Map((profilesData || []).map(p => [p.id, p]));
+    const DEGREE_RANK: Record<string, number> = { masters: 4, master: 4, bachelor: 3, hsc: 2, ssc: 1 };
+    const lastEduMap = new Map<string, string>();
+    (eduData || []).forEach((e: any) => {
+      if (!e.institution?.trim()) return;
+      const key = (e.degree || '').toLowerCase().trim();
+      const rank = DEGREE_RANK[key] ?? 0;
+      const cur = lastEduMap.get(e.tutor_id);
+      const curRank = cur ? (DEGREE_RANK[cur.toLowerCase()] ?? 0) : -1;
+      if (rank > curRank) lastEduMap.set(e.tutor_id, e.degree);
+    });
+
+    let result: TutorRow[] = tutorData.map((t: any) => {
       const prof = profMap.get(t.user_id);
       return {
         tutor_id: t.id,
@@ -255,102 +376,51 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
         area_id: prof?.area_id || null,
         district_id: t.district_id,
         education: t.education,
-        last_education: null,
+        last_education: lastEduMap.get(t.id) || null,
         experience_years: t.experience_years || 0,
         teaching_mode: t.teaching_mode,
         verification_status: t.verification_status || 'pending',
         is_available: t.is_available ?? true,
-        // average_rating removed
         class_levels: t.class_levels,
         user_reference: prof?.user_reference || null,
         created_at: t.created_at || '',
         is_approved: prof?.is_approved ?? false,
         is_banned: prof?.is_banned ?? false,
-      };
+        ...(t.slug ? { slug: t.slug } : {}),
+      } as TutorRow;
     });
 
-    if (hasEduFilter) result = result.filter(t => tutorIdsByEdu.has(t.tutor_id));
-    if (hasSubjectFilter) result = result.filter(t => tutorIdsBySubject.has(t.tutor_id));
-
-    // Class level filter
-    if (filterClassLevel !== 'all') {
-      result = result.filter(t => t.class_levels?.includes(filterClassLevel));
-    }
-
-    // Multi-area filter client-side
+    // Client-side narrow by exact area (district pre-filter is server-side)
     if (filterAreas.length > 0) {
       result = result.filter(t => t.area_id && filterAreas.includes(t.area_id));
     }
-
-    if (search.trim()) {
-      const q = search.toLowerCase();
-      result = result.filter(t =>
-        t.name.toLowerCase().includes(q) ||
-        t.email.toLowerCase().includes(q) ||
-        (t.phone && t.phone.includes(q)) ||
-        (t.user_reference && t.user_reference.toLowerCase().includes(q))
-      );
-    }
-
-    // Compute last_education (highest degree) for displayed tutors
-    const DEGREE_RANK: Record<string, number> = { masters: 4, master: 4, bachelor: 3, hsc: 2, ssc: 1 };
-    const tutorIds = result.map(t => t.tutor_id);
-    if (tutorIds.length > 0) {
-      const { data: allEdu } = await supabase
-        .from('tutor_education')
-        .select('tutor_id, degree, institution')
-        .in('tutor_id', tutorIds);
-      const byTutor = new Map<string, { degree: string; rank: number }>();
-      (allEdu || []).forEach((e: any) => {
-        if (!e.institution?.trim()) return;
-        const key = (e.degree || '').toLowerCase().trim();
-        const rank = DEGREE_RANK[key] ?? 0;
-        const cur = byTutor.get(e.tutor_id);
-        if (!cur || rank > cur.rank) byTutor.set(e.tutor_id, { degree: e.degree, rank });
-      });
-      result = result.map(t => ({ ...t, last_education: byTutor.get(t.tutor_id)?.degree || null }));
-    }
-
-    // Last education filter
+    // Last-education filter (only knowable after hydration)
     if (filterLastEducation !== 'all') {
       result = result.filter(t => (t.last_education || '').toLowerCase() === filterLastEducation.toLowerCase());
     }
 
     setTutors(result);
-    setTotalCount(result.length);
+    setTotalCount(count);
     setLoading(false);
-  }, [search, filterAreas, filterGender, filterMedium, filterEducation, filterUniversity, filterVerification, filterAvailability, filterClassLevel, filterSubject, filterCategory, filterLastEducation, areas, districts, districtMap, areaMap, subjects]);
+  }, [queryTutors, currentPage, pageSize, districtMap, areaMap, filterAreas, filterLastEducation]);
 
   useEffect(() => { fetchTutors(); }, [fetchTutors]);
 
+  // Sort current page client-side for last_education only (joined sort is server-side)
   const sortedTutors = useMemo(() => {
-    if (!sortBy) return tutors;
+    if (sortBy !== 'last_education') return tutors;
     const DEGREE_RANK: Record<string, number> = { masters: 4, master: 4, bachelor: 3, hsc: 2, ssc: 1 };
     const arr = [...tutors];
     arr.sort((a, b) => {
-      let av: number = 0, bv: number = 0;
-      if (sortBy === 'last_education') {
-        av = DEGREE_RANK[(a.last_education || '').toLowerCase()] ?? 0;
-        bv = DEGREE_RANK[(b.last_education || '').toLowerCase()] ?? 0;
-      } else if (sortBy === 'joined') {
-        av = a.created_at ? new Date(a.created_at).getTime() : 0;
-        bv = b.created_at ? new Date(b.created_at).getTime() : 0;
-      }
+      const av = DEGREE_RANK[(a.last_education || '').toLowerCase()] ?? 0;
+      const bv = DEGREE_RANK[(b.last_education || '').toLowerCase()] ?? 0;
       return sortDir === 'asc' ? av - bv : bv - av;
     });
     return arr;
   }, [tutors, sortBy, sortDir]);
 
-  const totalPages = Math.max(1, Math.ceil(sortedTutors.length / pageSize));
-  const paginatedTutors = useMemo(
-    () => sortedTutors.slice((currentPage - 1) * pageSize, currentPage * pageSize),
-    [sortedTutors, currentPage, pageSize]
-  );
-
-  // Reset to page 1 when filters/sorting/page-size change
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [search, filterAreas, filterGender, filterMedium, filterEducation, filterUniversity, filterVerification, filterAvailability, filterClassLevel, filterSubject, filterCategory, filterLastEducation, sortBy, sortDir, pageSize]);
+  const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
+  const paginatedTutors = sortedTutors; // already a single page from the server
 
   // Clamp page if it overflows after data change
   useEffect(() => {
@@ -429,7 +499,9 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
     }
     setNotifySending(true);
     try {
-      const targetUserIds = notifyMode === 'selected' ? Array.from(selectedIds) : tutors.map(t => t.user_id);
+      const targetUserIds = notifyMode === 'selected'
+        ? Array.from(selectedIds)
+        : (await queryTutors({ from: 0, to: 0, fetchAllIds: true })).ids;
       if (targetUserIds.length === 0) {
         toast({ title: 'No tutors selected', description: 'Please select tutors or apply filters first', variant: 'destructive' });
         setNotifySending(false);
@@ -864,10 +936,10 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
           </ScrollArea>
 
           {/* Pagination */}
-          {!loading && sortedTutors.length > 0 && (
+          {!loading && totalCount > 0 && (
             <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-4 py-3 border-t">
               <div className="text-sm text-muted-foreground">
-                Showing {(currentPage - 1) * pageSize + 1}–{Math.min(currentPage * pageSize, sortedTutors.length)} of {sortedTutors.length}
+                Showing {(currentPage - 1) * pageSize + 1}–{Math.min(currentPage * pageSize, totalCount)} of {totalCount}
               </div>
               <div className="flex items-center gap-2">
                 <Select value={String(pageSize)} onValueChange={(v) => setPageSize(Number(v))}>
