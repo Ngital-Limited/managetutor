@@ -14,6 +14,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
+import { cached, TTL } from '@/lib/cache';
 import { useToast } from '@/hooks/use-toast';
 import { JOB_CATEGORIES, STUDENT_BACKGROUNDS } from '@/constants/jobCategories';
 import { 
