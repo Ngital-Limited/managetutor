@@ -7,10 +7,45 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
-const supabase = createClient(
-  Deno.env.get("SUPABASE_URL")!,
-  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-);
+const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
+const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+const ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
+
+// Service-role client for actual cache table reads/writes
+const supabase = createClient(SUPABASE_URL, SERVICE_KEY);
+
+/** Public namespaces any visitor may write/read (results are non-sensitive,
+ *  cross-user homepage/lookup data). Anything else requires admin. */
+const PUBLIC_KEY_PREFIXES = ["home:", "lookup:", "public:"];
+
+function isPublicKey(key: string): boolean {
+  return PUBLIC_KEY_PREFIXES.some((p) => key.startsWith(p));
+}
+
+/** Verify the caller is an authenticated admin using their JWT. */
+async function isAdminCaller(req: Request): Promise<boolean> {
+  const auth = req.headers.get("Authorization") || "";
+  const token = auth.startsWith("Bearer ") ? auth.slice(7) : "";
+  if (!token || token === ANON_KEY) return false;
+  try {
+    const userClient = createClient(SUPABASE_URL, ANON_KEY, {
+      global: { headers: { Authorization: `Bearer ${token}` } },
+    });
+    const { data: userData } = await userClient.auth.getUser();
+    const userId = userData?.user?.id;
+    if (!userId) return false;
+    const { data, error } = await supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", userId)
+      .eq("role", "admin")
+      .maybeSingle();
+    if (error) return false;
+    return !!data;
+  } catch {
+    return false;
+  }
+}
 
 type GetBody = { op: "get"; key: string };
 type SetBody = {
