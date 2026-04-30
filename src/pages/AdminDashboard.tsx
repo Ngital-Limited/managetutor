@@ -28,7 +28,7 @@ import { MultiSearchableSelect } from '@/components/MultiSearchableSelect';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { cached, invalidate, invalidatePrefix, TTL } from '@/lib/cache';
+import { cached, invalidate, invalidatePrefix, subscribe, TTL } from '@/lib/cache';
 import { format } from 'date-fns';
 import {
   GraduationCap, Shield, Users, Briefcase, CheckCircle2, XCircle,
@@ -1191,6 +1191,13 @@ export default function AdminDashboard() {
     }
   }, [user, role, loading]);
 
+  // Subscribe to background SWR refreshes so the dashboard updates silently
+  useEffect(() => {
+    if (role !== 'admin') return;
+    const unsub = subscribe<typeof stats>('admin:stats:v1', (fresh) => setStats(fresh));
+    return unsub;
+  }, [role]);
+
   const fetchStats = async (force = false) => {
     const result = await cached(
       'admin:stats:v1',
@@ -1235,7 +1242,7 @@ export default function AdminDashboard() {
           pendingApplications: pendingApplications || 0,
         };
       },
-      { ttl: TTL.medium, force }
+      { ttl: TTL.short, swr: 5 * 60_000, force }
     );
 
     setStats(result);
