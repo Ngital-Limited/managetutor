@@ -327,8 +327,6 @@ export function resetCacheMetrics(): void {
 //      - L2 stale (SWR): warm L1, kick off background refresh.
 //      - L2 miss: run fetcher, write L2 + L1.
 
-import { supabase } from "@/integrations/supabase/client";
-
 type SharedHit<T> =
   | { status: "miss" }
   | { status: "fresh" | "stale"; value: T; expiresAt: number; staleUntil: number };
