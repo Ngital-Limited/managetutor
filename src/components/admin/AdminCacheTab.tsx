@@ -5,7 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useToast } from '@/hooks/use-toast';
-import { Activity, Database, Trash2, RefreshCw, RotateCcw, Search } from 'lucide-react';
+import { Activity, Database, Trash2, RefreshCw, RotateCcw, Search, ShieldAlert } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
 import {
   getCacheStats,
   invalidate,
@@ -45,15 +46,39 @@ function statusBadge(status: CacheStatRow['status']) {
 
 export function AdminCacheTab() {
   const { toast } = useToast();
+  const { role, loading: authLoading } = useAuth();
+  const isAdmin = role === 'admin';
   const [snapshot, setSnapshot] = useState(() => getCacheStats());
   const [filter, setFilter] = useState('');
   const [autoRefresh, setAutoRefresh] = useState(true);
 
   useEffect(() => {
-    if (!autoRefresh) return;
+    if (!isAdmin || !autoRefresh) return;
     const id = setInterval(() => setSnapshot(getCacheStats()), REFRESH_INTERVAL_MS);
     return () => clearInterval(id);
-  }, [autoRefresh]);
+  }, [autoRefresh, isAdmin]);
+
+  if (authLoading) {
+    return (
+      <div className="rounded-lg border border-border/60 p-8 text-center text-sm text-muted-foreground">
+        Checking permissions…
+      </div>
+    );
+  }
+
+  if (!isAdmin) {
+    return (
+      <div className="rounded-lg border border-destructive/40 bg-destructive/5 p-6 flex items-start gap-3">
+        <ShieldAlert className="h-5 w-5 text-destructive mt-0.5 shrink-0" />
+        <div>
+          <h3 className="text-sm font-semibold text-destructive">Admin access required</h3>
+          <p className="text-xs text-muted-foreground mt-1">
+            The cache dashboard and invalidation controls are restricted to administrators only.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   const filteredRows = useMemo(() => {
     const q = filter.trim().toLowerCase();
