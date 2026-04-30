@@ -499,7 +499,9 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
     }
     setNotifySending(true);
     try {
-      const targetUserIds = notifyMode === 'selected' ? Array.from(selectedIds) : tutors.map(t => t.user_id);
+      const targetUserIds = notifyMode === 'selected'
+        ? Array.from(selectedIds)
+        : (await queryTutors({ from: 0, to: 0, fetchAllIds: true })).ids;
       if (targetUserIds.length === 0) {
         toast({ title: 'No tutors selected', description: 'Please select tutors or apply filters first', variant: 'destructive' });
         setNotifySending(false);
