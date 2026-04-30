@@ -189,8 +189,14 @@ export default function BrowseJobs({ embedded = false }: { embedded?: boolean } 
 
   const fetchData = async () => {
     const [areasRes, districtsRes] = await Promise.all([
-      supabase.from('areas').select('id, name_en, district_id, districts (name_en)').order('name_en'),
-      supabase.from('districts').select('id, name_en, division_en').order('name_en'),
+      cached('lookup:areas:withDistrict', async () => {
+        const { data } = await supabase.from('areas').select('id, name_en, district_id, districts (name_en)').order('name_en');
+        return { data };
+      }, { ttl: TTL.long }),
+      cached('lookup:districts:withDivision', async () => {
+        const { data } = await supabase.from('districts').select('id, name_en, division_en').order('name_en');
+        return { data };
+      }, { ttl: TTL.long }),
     ]);
 
     if (areasRes.data) {
