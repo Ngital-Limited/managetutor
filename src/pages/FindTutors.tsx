@@ -14,6 +14,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
+import { cached, TTL } from '@/lib/cache';
 import { useToast } from '@/hooks/use-toast';
 import { JOB_CATEGORIES, STUDENT_BACKGROUNDS } from '@/constants/jobCategories';
 import { 
@@ -152,9 +153,18 @@ export default function FindTutors() {
 
   const fetchData = async () => {
     const [districtsRes, subjectsRes, areasRes] = await Promise.all([
-      supabase.from('districts').select('*').order('name_en'),
-      supabase.from('subjects').select('*').order('name_en'),
-      supabase.from('areas').select('id, name_en, district_id, districts (name_en)').order('name_en'),
+      cached('lookup:districts:all', async () => {
+        const { data } = await supabase.from('districts').select('*').order('name_en');
+        return { data };
+      }, { ttl: TTL.long }),
+      cached('lookup:subjects:all', async () => {
+        const { data } = await supabase.from('subjects').select('*').order('name_en');
+        return { data };
+      }, { ttl: TTL.long }),
+      cached('lookup:areas:withDistrict', async () => {
+        const { data } = await supabase.from('areas').select('id, name_en, district_id, districts (name_en)').order('name_en');
+        return { data };
+      }, { ttl: TTL.long }),
     ]);
     if (districtsRes.data) setDistricts(districtsRes.data);
     if (subjectsRes.data) setSubjects(subjectsRes.data);

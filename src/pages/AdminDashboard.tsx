@@ -28,6 +28,7 @@ import { MultiSearchableSelect } from '@/components/MultiSearchableSelect';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { cached, invalidate, invalidatePrefix, TTL } from '@/lib/cache';
 import { format } from 'date-fns';
 import {
   GraduationCap, Shield, Users, Briefcase, CheckCircle2, XCircle,
@@ -1190,47 +1191,56 @@ export default function AdminDashboard() {
     }
   }, [user, role, loading]);
 
-  const fetchStats = async () => {
-    const [
-      { count: totalUsers },
-      { count: totalTutors },
-      { count: totalParents },
-      { count: pendingVerifications },
-      { count: activeJobs },
-      { count: totalJobs },
-      { count: completedJobs },
-      { count: acceptedJobs },
-      { count: pendingReports },
-      { count: pendingJobs },
-      { count: pendingUsers },
-      { count: pendingApplications },
-    ] = await Promise.all([
-      supabase.from('profiles').select('id', { count: 'exact', head: true }),
-      supabase.from('tutor_profiles').select('id', { count: 'exact', head: true }),
-      supabase.from('user_roles').select('id', { count: 'exact', head: true }).eq('role', 'parent'),
-      supabase.from('tutor_profiles').select('id', { count: 'exact', head: true }).eq('verification_status', 'pending'),
-      supabase.from('jobs').select('id', { count: 'exact', head: true }).eq('status', 'open'),
-      supabase.from('jobs').select('id', { count: 'exact', head: true }),
-      supabase.from('jobs').select('id', { count: 'exact', head: true }).eq('status', 'completed'),
-      supabase.from('jobs').select('id', { count: 'exact', head: true }).eq('status', 'in_progress' as any),
-      supabase.from('reports').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
-      supabase.from('jobs').select('id', { count: 'exact', head: true }).eq('status', 'pending_approval' as any),
-      supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('is_approved', false),
-      supabase.from('applications').select('id', { count: 'exact', head: true }).eq('status', 'pending' as any),
-    ]);
+  const fetchStats = async (force = false) => {
+    const result = await cached(
+      'admin:stats:v1',
+      async () => {
+        const [
+          { count: totalUsers },
+          { count: totalTutors },
+          { count: totalParents },
+          { count: pendingVerifications },
+          { count: activeJobs },
+          { count: totalJobs },
+          { count: completedJobs },
+          { count: acceptedJobs },
+          { count: pendingReports },
+          { count: pendingJobs },
+          { count: pendingUsers },
+          { count: pendingApplications },
+        ] = await Promise.all([
+          supabase.from('profiles').select('id', { count: 'exact', head: true }),
+          supabase.from('tutor_profiles').select('id', { count: 'exact', head: true }),
+          supabase.from('user_roles').select('id', { count: 'exact', head: true }).eq('role', 'parent'),
+          supabase.from('tutor_profiles').select('id', { count: 'exact', head: true }).eq('verification_status', 'pending'),
+          supabase.from('jobs').select('id', { count: 'exact', head: true }).eq('status', 'open'),
+          supabase.from('jobs').select('id', { count: 'exact', head: true }),
+          supabase.from('jobs').select('id', { count: 'exact', head: true }).eq('status', 'completed'),
+          supabase.from('jobs').select('id', { count: 'exact', head: true }).eq('status', 'in_progress' as any),
+          supabase.from('reports').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
+          supabase.from('jobs').select('id', { count: 'exact', head: true }).eq('status', 'pending_approval' as any),
+          supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('is_approved', false),
+          supabase.from('applications').select('id', { count: 'exact', head: true }).eq('status', 'pending' as any),
+        ]);
 
-    const { data: rev } = await supabase.from('payment_transactions').select('amount').eq('status', 'completed');
-    const totalRevenue = rev?.reduce((s, r) => s + Number(r.amount), 0) || 0;
+        const { data: rev } = await supabase.from('payment_transactions').select('amount').eq('status', 'completed');
+        const totalRevenue = rev?.reduce((s, r) => s + Number(r.amount), 0) || 0;
 
-    setStats({
-      totalUsers: totalUsers || 0, totalTutors: totalTutors || 0, totalParents: totalParents || 0,
-      pendingVerifications: pendingVerifications || 0, activeJobs: activeJobs || 0,
-      totalJobs: totalJobs || 0, completedJobs: completedJobs || 0, acceptedJobs: acceptedJobs || 0,
-      pendingReports: pendingReports || 0, totalRevenue,
-      pendingJobs: pendingJobs || 0, pendingUsers: pendingUsers || 0,
-      pendingApplications: pendingApplications || 0,
-    });
+        return {
+          totalUsers: totalUsers || 0, totalTutors: totalTutors || 0, totalParents: totalParents || 0,
+          pendingVerifications: pendingVerifications || 0, activeJobs: activeJobs || 0,
+          totalJobs: totalJobs || 0, completedJobs: completedJobs || 0, acceptedJobs: acceptedJobs || 0,
+          pendingReports: pendingReports || 0, totalRevenue,
+          pendingJobs: pendingJobs || 0, pendingUsers: pendingUsers || 0,
+          pendingApplications: pendingApplications || 0,
+        };
+      },
+      { ttl: TTL.medium, force }
+    );
+
+    setStats(result);
   };
+
 
   const fetchChartData = async () => {
     // Build last 30 days date labels
@@ -1451,12 +1461,18 @@ export default function AdminDashboard() {
   useEffect(() => {
     if (role !== 'admin') return;
     (async () => {
-      const [{ data: d }, { data: a }] = await Promise.all([
-        supabase.from('districts').select('id, name_en').order('name_en'),
-        supabase.from('areas').select('id, name_en, district_id').order('name_en'),
+      const [d, a] = await Promise.all([
+        cached('lookup:districts', async () => {
+          const { data } = await supabase.from('districts').select('id, name_en').order('name_en');
+          return data || [];
+        }, { ttl: TTL.long }),
+        cached('lookup:areas', async () => {
+          const { data } = await supabase.from('areas').select('id, name_en, district_id').order('name_en');
+          return data || [];
+        }, { ttl: TTL.long }),
       ]);
-      if (d) setGuardianDistricts(d);
-      if (a) setGuardianAreas(a);
+      setGuardianDistricts(d);
+      setGuardianAreas(a);
     })();
   }, [role]);
 
@@ -1472,7 +1488,8 @@ export default function AdminDashboard() {
       toast({ title: 'Success', description: `Tutor ${status}` });
       setSelectedTutor(null);
       fetchVerifications();
-      fetchStats();
+      invalidate('admin:stats:v1');
+      fetchStats(true);
     }
     setProcessing(false);
   };
@@ -1480,7 +1497,7 @@ export default function AdminDashboard() {
   const handleApproveUser = async (userId: string) => {
     const { error } = await supabase.from('profiles').update({ is_approved: true }).eq('id', userId);
     if (error) toast({ title: 'Error', description: error.message, variant: 'destructive' });
-    else { toast({ title: 'User approved' }); fetchUsers(); fetchStats(); }
+    else { toast({ title: 'User approved' }); fetchUsers(); invalidate('admin:stats:v1'); fetchStats(true); }
   };
 
   const handleBanUser = async (userId: string, ban: boolean) => {
@@ -1513,7 +1530,8 @@ export default function AdminDashboard() {
       setSelectedReport(null);
       setAdminNotes('');
       fetchReports();
-      fetchStats();
+      invalidate('admin:stats:v1');
+      fetchStats(true);
     }
     setProcessing(false);
   };
@@ -1522,7 +1540,7 @@ export default function AdminDashboard() {
     if (!confirm('Are you sure you want to delete this job?')) return;
     const { error } = await supabase.from('jobs').delete().eq('id', jobId);
     if (error) toast({ title: 'Error', description: error.message, variant: 'destructive' });
-    else { toast({ title: 'Job deleted' }); fetchJobs(); fetchStats(); }
+    else { toast({ title: 'Job deleted' }); fetchJobs(); invalidate('admin:stats:v1'); fetchStats(true); }
   };
 
   const handleUpdateJobStatus2Placeholder = null;
@@ -1530,15 +1548,24 @@ export default function AdminDashboard() {
   const handleUpdateJobStatus = async (jobId: string, status: string) => {
     const { error } = await supabase.from('jobs').update({ status: status as any }).eq('id', jobId);
     if (error) toast({ title: 'Error', description: error.message, variant: 'destructive' });
-    else { toast({ title: `Job status updated to ${status}` }); fetchJobs(); fetchStats(); }
+    else { toast({ title: `Job status updated to ${status}` }); fetchJobs(); invalidate('admin:stats:v1'); fetchStats(true); }
   };
 
   const openEditJob = async (jobId: string) => {
-    const [{ data }, { data: dists }, { data: ars }, { data: subs }, { data: jobSubs }] = await Promise.all([
+    const [{ data }, dists, ars, subs, { data: jobSubs }] = await Promise.all([
       supabase.from('jobs').select('*').eq('id', jobId).single(),
-      supabase.from('districts').select('id, name_en').order('name_en'),
-      supabase.from('areas').select('id, name_en, district_id').order('name_en'),
-      supabase.from('subjects').select('id, name_en').order('name_en'),
+      cached('lookup:districts', async () => {
+        const { data } = await supabase.from('districts').select('id, name_en').order('name_en');
+        return data || [];
+      }, { ttl: TTL.long }),
+      cached('lookup:areas', async () => {
+        const { data } = await supabase.from('areas').select('id, name_en, district_id').order('name_en');
+        return data || [];
+      }, { ttl: TTL.long }),
+      cached('lookup:subjects', async () => {
+        const { data } = await supabase.from('subjects').select('id, name_en').order('name_en');
+        return data || [];
+      }, { ttl: TTL.long }),
       supabase.from('job_subjects').select('subject_id').eq('job_id', jobId),
     ]);
     if (dists) setEditJobDistricts(dists);
