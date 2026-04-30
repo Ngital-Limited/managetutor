@@ -1235,7 +1235,7 @@ export default function AdminDashboard() {
           pendingApplications: pendingApplications || 0,
         };
       },
-      { ttl: TTL.medium, force }
+      { ttl: TTL.short, swr: 5 * 60_000, force }
     );
 
     setStats(result);
