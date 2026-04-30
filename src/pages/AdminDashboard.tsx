@@ -37,7 +37,7 @@ import {
   LogOut, Home, DollarSign, Trash2, CreditCard, Megaphone, Send, Mail,
   Package, Plus, Pencil, ToggleLeft, ToggleRight, Wallet, MapPin, LifeBuoy, ShieldCheck,
   LogIn, BookOpen, UserPlus, TrendingUp, ChevronLeft, ArrowLeft,
-  Phone, Calendar, X
+  Phone, Calendar, X, Activity
 } from 'lucide-react';
 import { RevenuePayoutTab } from '@/components/admin/RevenuePayoutTab';
 import { SupportTicketsTab } from '@/components/admin/SupportTicketsTab';
@@ -50,6 +50,7 @@ import { AdminTutorEditTab } from '@/components/admin/AdminTutorEditTab';
 import { AdminTutorProfilesTab } from '@/components/admin/AdminTutorProfilesTab';
 import { ReferralAnalyticsTab } from '@/components/admin/ReferralAnalyticsTab';
 import { AdsManagementTab } from '@/components/admin/AdsManagementTab';
+import { AdminCacheTab } from '@/components/admin/AdminCacheTab';
 import { getPlatformCommissionPct, computeFeeSplit } from '@/lib/commission';
 
 // ──────────── Types ────────────
@@ -1788,6 +1789,7 @@ export default function AdminDashboard() {
         { title: 'Sub-Admin Roles', value: 'rbac', icon: ShieldCheck },
         { title: 'Platform Data', value: 'platform_data', icon: BookOpen },
         { title: 'Ads Management', value: 'ads', icon: Megaphone },
+        { title: 'Cache', value: 'cache', icon: Activity },
         { title: 'Settings', value: 'settings', icon: Settings },
       ],
     },
@@ -3238,6 +3240,19 @@ export default function AdminDashboard() {
 
             {/* ═══════ ADS MANAGEMENT TAB ═══════ */}
             {activeTab === 'ads' && <AdsManagementTab toast={toast} />}
+
+            {/* ═══════ CACHE TAB ═══════ */}
+            {activeTab === 'cache' && (
+              <div className="space-y-4">
+                <div>
+                  <h1 className="text-xl font-semibold">Cache Performance</h1>
+                  <p className="text-sm text-muted-foreground">
+                    Hit/miss rates, TTLs, and per-key stats for the in-memory cache layer.
+                  </p>
+                </div>
+                <AdminCacheTab />
+              </div>
+            )}
 
             {/* ═══════ SETTINGS TAB ═══════ */}
             {activeTab === 'settings' && (

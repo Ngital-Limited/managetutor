@@ -18,12 +18,39 @@ type CacheEntry<T> = {
   freshUntil: number;
   /** After this timestamp, value is fully expired and must be re-fetched. */
   staleUntil: number;
+  /** Configured TTL in ms (for dashboard display). */
+  ttl: number;
+  /** Configured SWR window in ms (for dashboard display). */
+  swr: number;
+  /** Last write time (ms epoch). */
+  writtenAt: number;
+  /** Successful fetches written to this key. */
+  refreshCount: number;
+  /** Last read time (ms epoch). */
+  lastAccess: number;
 };
 
 const store = new Map<string, CacheEntry<unknown>>();
 const inflight = new Map<string, Promise<unknown>>();
 type Listener<T = unknown> = (value: T) => void;
 const listeners = new Map<string, Set<Listener>>();
+
+/** Per-key counters used by the cache dashboard. */
+type KeyMetric = {
+  hits: number;        // fresh-cache hits
+  staleHits: number;   // SWR stale-but-served hits
+  misses: number;      // had to wait for fetch (cold or expired)
+  errors: number;      // fetcher rejected
+  totalLatencyMs: number; // sum of fetcher durations (for avg)
+};
+const metrics = new Map<string, KeyMetric>();
+
+function bumpMetric(key: string, field: keyof KeyMetric, by = 1): void {
+  let m = metrics.get(key);
+  if (!m) { m = { hits: 0, staleHits: 0, misses: 0, errors: 0, totalLatencyMs: 0 }; metrics.set(key, m); }
+  (m[field] as number) += by;
+}
+
 
 export interface CacheOptions {
   /** Time-to-live in milliseconds. Default 60s. */
@@ -61,17 +88,28 @@ function refresh<T>(
   const existing = inflight.get(key) as Promise<T> | undefined;
   if (existing) return existing;
 
+  const startedAt = Date.now();
   const promise = (async () => {
     try {
       const value = await fetcher();
       const now = Date.now();
+      const prev = store.get(key);
       store.set(key, {
         value,
         freshUntil: now + ttl,
         staleUntil: now + ttl + swr,
+        ttl,
+        swr,
+        writtenAt: now,
+        refreshCount: (prev?.refreshCount ?? 0) + 1,
+        lastAccess: prev?.lastAccess ?? now,
       });
+      bumpMetric(key, 'totalLatencyMs', now - startedAt);
       notify(key, value);
       return value;
+    } catch (err) {
+      bumpMetric(key, 'errors');
+      throw err;
     } finally {
       inflight.delete(key);
     }
@@ -92,20 +130,25 @@ export async function cached<T>(
   if (!force) {
     const hit = store.get(key) as CacheEntry<T> | undefined;
     if (hit) {
+      hit.lastAccess = now;
       if (hit.freshUntil > now) {
-        // Fresh — return immediately, no refetch.
+        bumpMetric(key, 'hits');
         return hit.value;
       }
       if (swr > 0 && hit.staleUntil > now) {
-        // Stale-but-usable — return cached value, refresh in background.
+        bumpMetric(key, 'staleHits');
         void refresh(key, fetcher, ttl, swr).catch(() => { /* swallow */ });
         return hit.value;
       }
     }
     const pending = inflight.get(key) as Promise<T> | undefined;
-    if (pending) return pending;
+    if (pending) {
+      bumpMetric(key, 'misses');
+      return pending;
+    }
   }
 
+  bumpMetric(key, 'misses');
   return refresh(key, fetcher, ttl, swr);
 }
 
@@ -147,6 +190,120 @@ export function clearCache(): void {
   inflight.clear();
   listeners.clear();
 }
+
+// ── Introspection (admin cache dashboard) ──────────────────────────────
+
+export interface CacheStatRow {
+  key: string;
+  status: 'fresh' | 'stale' | 'expired' | 'empty';
+  ttlMs: number;
+  swrMs: number;
+  ageMs: number;            // time since last write
+  freshForMs: number;       // ms remaining until stale (negative = stale)
+  expiresInMs: number;      // ms remaining until fully expired
+  refreshCount: number;
+  hits: number;
+  staleHits: number;
+  misses: number;
+  errors: number;
+  hitRate: number;          // 0..1, fresh+stale hits ÷ total reads
+  avgFetchMs: number;
+  approxBytes: number;      // rough JSON size estimate
+}
+
+function approxSize(value: unknown): number {
+  try { return JSON.stringify(value)?.length ?? 0; } catch { return 0; }
+}
+
+/** Snapshot of every cache entry + counters, for the admin dashboard. */
+export function getCacheStats(): {
+  rows: CacheStatRow[];
+  totals: {
+    entries: number;
+    fresh: number;
+    stale: number;
+    hits: number;
+    staleHits: number;
+    misses: number;
+    errors: number;
+    hitRate: number;
+    approxBytes: number;
+    inflight: number;
+    listeners: number;
+  };
+} {
+  const now = Date.now();
+  const allKeys = new Set<string>([...store.keys(), ...metrics.keys()]);
+  const rows: CacheStatRow[] = [];
+
+  let fresh = 0, stale = 0, totalHits = 0, totalStale = 0, totalMisses = 0, totalErrors = 0, totalBytes = 0;
+
+  for (const key of allKeys) {
+    const entry = store.get(key);
+    const m = metrics.get(key) ?? { hits: 0, staleHits: 0, misses: 0, errors: 0, totalLatencyMs: 0 };
+    const reads = m.hits + m.staleHits + m.misses;
+    const hitRate = reads === 0 ? 0 : (m.hits + m.staleHits) / reads;
+    const avgFetchMs = m.misses + m.errors === 0 ? 0 : m.totalLatencyMs / Math.max(1, (entry?.refreshCount ?? 0));
+    const status: CacheStatRow['status'] = !entry
+      ? 'empty'
+      : entry.freshUntil > now ? 'fresh'
+      : entry.staleUntil > now ? 'stale'
+      : 'expired';
+    if (status === 'fresh') fresh++;
+    else if (status === 'stale') stale++;
+
+    const bytes = entry ? approxSize(entry.value) : 0;
+    totalHits += m.hits;
+    totalStale += m.staleHits;
+    totalMisses += m.misses;
+    totalErrors += m.errors;
+    totalBytes += bytes;
+
+    rows.push({
+      key,
+      status,
+      ttlMs: entry?.ttl ?? 0,
+      swrMs: entry?.swr ?? 0,
+      ageMs: entry ? now - entry.writtenAt : 0,
+      freshForMs: entry ? entry.freshUntil - now : 0,
+      expiresInMs: entry ? entry.staleUntil - now : 0,
+      refreshCount: entry?.refreshCount ?? 0,
+      hits: m.hits,
+      staleHits: m.staleHits,
+      misses: m.misses,
+      errors: m.errors,
+      hitRate,
+      avgFetchMs,
+      approxBytes: bytes,
+    });
+  }
+
+  rows.sort((a, b) => (b.hits + b.staleHits + b.misses) - (a.hits + a.staleHits + a.misses));
+
+  const totalReads = totalHits + totalStale + totalMisses;
+  return {
+    rows,
+    totals: {
+      entries: store.size,
+      fresh,
+      stale,
+      hits: totalHits,
+      staleHits: totalStale,
+      misses: totalMisses,
+      errors: totalErrors,
+      hitRate: totalReads === 0 ? 0 : (totalHits + totalStale) / totalReads,
+      approxBytes: totalBytes,
+      inflight: inflight.size,
+      listeners: listeners.size,
+    },
+  };
+}
+
+/** Reset hit/miss counters (entries themselves are kept). */
+export function resetCacheMetrics(): void {
+  metrics.clear();
+}
+
 
 /** Common TTL presets (ms). */
 export const TTL = {
