@@ -83,6 +83,7 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(25);
+  const [searchDebounced, setSearchDebounced] = useState('');
 
   // ─── Data ───
   const [tutors, setTutors] = useState<TutorRow[]>([]);
