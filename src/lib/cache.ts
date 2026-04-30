@@ -14,42 +14,63 @@
 
 type CacheEntry<T> = {
   value: T;
-  expiresAt: number;
+  /** After this timestamp, value is considered stale (needs revalidation). */
+  freshUntil: number;
+  /** After this timestamp, value is fully expired and must be re-fetched. */
+  staleUntil: number;
 };
 
 const store = new Map<string, CacheEntry<unknown>>();
 const inflight = new Map<string, Promise<unknown>>();
+type Listener<T = unknown> = (value: T) => void;
+const listeners = new Map<string, Set<Listener>>();
 
 export interface CacheOptions {
   /** Time-to-live in milliseconds. Default 60s. */
   ttl?: number;
+  /**
+   * Stale-while-revalidate window (ms) added on top of `ttl`.
+   *
+   * After `ttl` elapses the cached value is "stale" but still returned
+   * instantly; a background fetch refreshes it. After `ttl + swr` the
+   * value is fully expired and the next call awaits the fetch.
+   *
+   * Default 0 (classic TTL behavior).
+   */
+  swr?: number;
   /** Force a fresh fetch and overwrite the cached value. */
   force?: boolean;
 }
 
 const DEFAULT_TTL = 60_000;
 
-export async function cached<T>(
+function notify(key: string, value: unknown): void {
+  const subs = listeners.get(key);
+  if (!subs) return;
+  for (const fn of subs) {
+    try { fn(value); } catch { /* ignore subscriber errors */ }
+  }
+}
+
+function refresh<T>(
   key: string,
   fetcher: () => Promise<T>,
-  options: CacheOptions = {}
+  ttl: number,
+  swr: number
 ): Promise<T> {
-  const { ttl = DEFAULT_TTL, force = false } = options;
-  const now = Date.now();
-
-  if (!force) {
-    const hit = store.get(key) as CacheEntry<T> | undefined;
-    if (hit && hit.expiresAt > now) {
-      return hit.value;
-    }
-    const pending = inflight.get(key) as Promise<T> | undefined;
-    if (pending) return pending;
-  }
+  const existing = inflight.get(key) as Promise<T> | undefined;
+  if (existing) return existing;
 
   const promise = (async () => {
     try {
       const value = await fetcher();
-      store.set(key, { value, expiresAt: Date.now() + ttl });
+      const now = Date.now();
+      store.set(key, {
+        value,
+        freshUntil: now + ttl,
+        staleUntil: now + ttl + swr,
+      });
+      notify(key, value);
       return value;
     } finally {
       inflight.delete(key);
@@ -58,6 +79,54 @@ export async function cached<T>(
 
   inflight.set(key, promise);
   return promise;
+}
+
+export async function cached<T>(
+  key: string,
+  fetcher: () => Promise<T>,
+  options: CacheOptions = {}
+): Promise<T> {
+  const { ttl = DEFAULT_TTL, swr = 0, force = false } = options;
+  const now = Date.now();
+
+  if (!force) {
+    const hit = store.get(key) as CacheEntry<T> | undefined;
+    if (hit) {
+      if (hit.freshUntil > now) {
+        // Fresh — return immediately, no refetch.
+        return hit.value;
+      }
+      if (swr > 0 && hit.staleUntil > now) {
+        // Stale-but-usable — return cached value, refresh in background.
+        void refresh(key, fetcher, ttl, swr).catch(() => { /* swallow */ });
+        return hit.value;
+      }
+    }
+    const pending = inflight.get(key) as Promise<T> | undefined;
+    if (pending) return pending;
+  }
+
+  return refresh(key, fetcher, ttl, swr);
+}
+
+/**
+ * Subscribe to background refreshes for a cache key.
+ * Returns an unsubscribe function. Useful for SWR consumers that need to
+ * re-render when a stale value gets revalidated.
+ */
+export function subscribe<T>(key: string, listener: (value: T) => void): () => void {
+  let set = listeners.get(key);
+  if (!set) {
+    set = new Set();
+    listeners.set(key, set);
+  }
+  set.add(listener as Listener);
+  return () => {
+    const s = listeners.get(key);
+    if (!s) return;
+    s.delete(listener as Listener);
+    if (s.size === 0) listeners.delete(key);
+  };
 }
 
 /** Remove a single cached key. */
@@ -76,6 +145,7 @@ export function invalidatePrefix(prefix: string): void {
 export function clearCache(): void {
   store.clear();
   inflight.clear();
+  listeners.clear();
 }
 
 /** Common TTL presets (ms). */
