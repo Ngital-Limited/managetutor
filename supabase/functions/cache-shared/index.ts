@@ -139,6 +139,18 @@ Deno.serve(async (req) => {
     }
 
     if (body.op === "set") {
+      // Public namespaces (home:, lookup:, public:) any visitor may write so
+      // homepage fetches can populate the shared cache. Anything else
+      // (admin:, internal:, etc.) requires admin auth.
+      if (!isPublicKey(body.key)) {
+        if (!(await isAdminCaller(req))) {
+          return new Response(JSON.stringify({ error: "forbidden" }), {
+            status: 403,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+      }
+
       const ttlMs = body.ttlSeconds * 1000;
       const swrMs = (body.swrSeconds ?? 0) * 1000;
       const now = Date.now();
@@ -159,6 +171,14 @@ Deno.serve(async (req) => {
       if (error) throw error;
 
       return new Response(JSON.stringify({ ok: true }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // del — admin only (invalidation is a privileged operation)
+    if (!(await isAdminCaller(req))) {
+      return new Response(JSON.stringify({ error: "forbidden" }), {
+        status: 403,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
