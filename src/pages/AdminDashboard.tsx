@@ -1191,6 +1191,13 @@ export default function AdminDashboard() {
     }
   }, [user, role, loading]);
 
+  // Subscribe to background SWR refreshes so the dashboard updates silently
+  useEffect(() => {
+    if (role !== 'admin') return;
+    const unsub = subscribe<typeof stats>('admin:stats:v1', (fresh) => setStats(fresh));
+    return unsub;
+  }, [role]);
+
   const fetchStats = async (force = false) => {
     const result = await cached(
       'admin:stats:v1',
