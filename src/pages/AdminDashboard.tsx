@@ -1497,7 +1497,7 @@ export default function AdminDashboard() {
   const handleApproveUser = async (userId: string) => {
     const { error } = await supabase.from('profiles').update({ is_approved: true }).eq('id', userId);
     if (error) toast({ title: 'Error', description: error.message, variant: 'destructive' });
-    else { toast({ title: 'User approved' }); fetchUsers(); fetchStats(); }
+    else { toast({ title: 'User approved' }); fetchUsers(); invalidate('admin:stats:v1'); fetchStats(true); }
   };
 
   const handleBanUser = async (userId: string, ban: boolean) => {
@@ -1530,7 +1530,8 @@ export default function AdminDashboard() {
       setSelectedReport(null);
       setAdminNotes('');
       fetchReports();
-      fetchStats();
+      invalidate('admin:stats:v1');
+      fetchStats(true);
     }
     setProcessing(false);
   };
@@ -1539,7 +1540,7 @@ export default function AdminDashboard() {
     if (!confirm('Are you sure you want to delete this job?')) return;
     const { error } = await supabase.from('jobs').delete().eq('id', jobId);
     if (error) toast({ title: 'Error', description: error.message, variant: 'destructive' });
-    else { toast({ title: 'Job deleted' }); fetchJobs(); fetchStats(); }
+    else { toast({ title: 'Job deleted' }); fetchJobs(); invalidate('admin:stats:v1'); fetchStats(true); }
   };
 
   const handleUpdateJobStatus2Placeholder = null;
@@ -1547,7 +1548,7 @@ export default function AdminDashboard() {
   const handleUpdateJobStatus = async (jobId: string, status: string) => {
     const { error } = await supabase.from('jobs').update({ status: status as any }).eq('id', jobId);
     if (error) toast({ title: 'Error', description: error.message, variant: 'destructive' });
-    else { toast({ title: `Job status updated to ${status}` }); fetchJobs(); fetchStats(); }
+    else { toast({ title: `Job status updated to ${status}` }); fetchJobs(); invalidate('admin:stats:v1'); fetchStats(true); }
   };
 
   const openEditJob = async (jobId: string) => {
