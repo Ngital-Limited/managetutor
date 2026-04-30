@@ -1191,47 +1191,56 @@ export default function AdminDashboard() {
     }
   }, [user, role, loading]);
 
-  const fetchStats = async () => {
-    const [
-      { count: totalUsers },
-      { count: totalTutors },
-      { count: totalParents },
-      { count: pendingVerifications },
-      { count: activeJobs },
-      { count: totalJobs },
-      { count: completedJobs },
-      { count: acceptedJobs },
-      { count: pendingReports },
-      { count: pendingJobs },
-      { count: pendingUsers },
-      { count: pendingApplications },
-    ] = await Promise.all([
-      supabase.from('profiles').select('id', { count: 'exact', head: true }),
-      supabase.from('tutor_profiles').select('id', { count: 'exact', head: true }),
-      supabase.from('user_roles').select('id', { count: 'exact', head: true }).eq('role', 'parent'),
-      supabase.from('tutor_profiles').select('id', { count: 'exact', head: true }).eq('verification_status', 'pending'),
-      supabase.from('jobs').select('id', { count: 'exact', head: true }).eq('status', 'open'),
-      supabase.from('jobs').select('id', { count: 'exact', head: true }),
-      supabase.from('jobs').select('id', { count: 'exact', head: true }).eq('status', 'completed'),
-      supabase.from('jobs').select('id', { count: 'exact', head: true }).eq('status', 'in_progress' as any),
-      supabase.from('reports').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
-      supabase.from('jobs').select('id', { count: 'exact', head: true }).eq('status', 'pending_approval' as any),
-      supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('is_approved', false),
-      supabase.from('applications').select('id', { count: 'exact', head: true }).eq('status', 'pending' as any),
-    ]);
+  const fetchStats = async (force = false) => {
+    const result = await cached(
+      'admin:stats:v1',
+      async () => {
+        const [
+          { count: totalUsers },
+          { count: totalTutors },
+          { count: totalParents },
+          { count: pendingVerifications },
+          { count: activeJobs },
+          { count: totalJobs },
+          { count: completedJobs },
+          { count: acceptedJobs },
+          { count: pendingReports },
+          { count: pendingJobs },
+          { count: pendingUsers },
+          { count: pendingApplications },
+        ] = await Promise.all([
+          supabase.from('profiles').select('id', { count: 'exact', head: true }),
+          supabase.from('tutor_profiles').select('id', { count: 'exact', head: true }),
+          supabase.from('user_roles').select('id', { count: 'exact', head: true }).eq('role', 'parent'),
+          supabase.from('tutor_profiles').select('id', { count: 'exact', head: true }).eq('verification_status', 'pending'),
+          supabase.from('jobs').select('id', { count: 'exact', head: true }).eq('status', 'open'),
+          supabase.from('jobs').select('id', { count: 'exact', head: true }),
+          supabase.from('jobs').select('id', { count: 'exact', head: true }).eq('status', 'completed'),
+          supabase.from('jobs').select('id', { count: 'exact', head: true }).eq('status', 'in_progress' as any),
+          supabase.from('reports').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
+          supabase.from('jobs').select('id', { count: 'exact', head: true }).eq('status', 'pending_approval' as any),
+          supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('is_approved', false),
+          supabase.from('applications').select('id', { count: 'exact', head: true }).eq('status', 'pending' as any),
+        ]);
 
-    const { data: rev } = await supabase.from('payment_transactions').select('amount').eq('status', 'completed');
-    const totalRevenue = rev?.reduce((s, r) => s + Number(r.amount), 0) || 0;
+        const { data: rev } = await supabase.from('payment_transactions').select('amount').eq('status', 'completed');
+        const totalRevenue = rev?.reduce((s, r) => s + Number(r.amount), 0) || 0;
 
-    setStats({
-      totalUsers: totalUsers || 0, totalTutors: totalTutors || 0, totalParents: totalParents || 0,
-      pendingVerifications: pendingVerifications || 0, activeJobs: activeJobs || 0,
-      totalJobs: totalJobs || 0, completedJobs: completedJobs || 0, acceptedJobs: acceptedJobs || 0,
-      pendingReports: pendingReports || 0, totalRevenue,
-      pendingJobs: pendingJobs || 0, pendingUsers: pendingUsers || 0,
-      pendingApplications: pendingApplications || 0,
-    });
+        return {
+          totalUsers: totalUsers || 0, totalTutors: totalTutors || 0, totalParents: totalParents || 0,
+          pendingVerifications: pendingVerifications || 0, activeJobs: activeJobs || 0,
+          totalJobs: totalJobs || 0, completedJobs: completedJobs || 0, acceptedJobs: acceptedJobs || 0,
+          pendingReports: pendingReports || 0, totalRevenue,
+          pendingJobs: pendingJobs || 0, pendingUsers: pendingUsers || 0,
+          pendingApplications: pendingApplications || 0,
+        };
+      },
+      { ttl: TTL.medium, force }
+    );
+
+    setStats(result);
   };
+
 
   const fetchChartData = async () => {
     // Build last 30 days date labels
