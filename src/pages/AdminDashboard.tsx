@@ -1461,12 +1461,18 @@ export default function AdminDashboard() {
   useEffect(() => {
     if (role !== 'admin') return;
     (async () => {
-      const [{ data: d }, { data: a }] = await Promise.all([
-        supabase.from('districts').select('id, name_en').order('name_en'),
-        supabase.from('areas').select('id, name_en, district_id').order('name_en'),
+      const [d, a] = await Promise.all([
+        cached('lookup:districts', async () => {
+          const { data } = await supabase.from('districts').select('id, name_en').order('name_en');
+          return data || [];
+        }, { ttl: TTL.long }),
+        cached('lookup:areas', async () => {
+          const { data } = await supabase.from('areas').select('id, name_en, district_id').order('name_en');
+          return data || [];
+        }, { ttl: TTL.long }),
       ]);
-      if (d) setGuardianDistricts(d);
-      if (a) setGuardianAreas(a);
+      setGuardianDistricts(d);
+      setGuardianAreas(a);
     })();
   }, [role]);
 
@@ -1482,7 +1488,8 @@ export default function AdminDashboard() {
       toast({ title: 'Success', description: `Tutor ${status}` });
       setSelectedTutor(null);
       fetchVerifications();
-      fetchStats();
+      invalidate('admin:stats:v1');
+      fetchStats(true);
     }
     setProcessing(false);
   };
