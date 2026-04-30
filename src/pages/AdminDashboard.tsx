@@ -28,7 +28,7 @@ import { MultiSearchableSelect } from '@/components/MultiSearchableSelect';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { cached, invalidate, invalidatePrefix, subscribe, TTL } from '@/lib/cache';
+import { cached, sharedCached, invalidate, sharedInvalidate, invalidatePrefix, subscribe, TTL } from '@/lib/cache';
 import { format } from 'date-fns';
 import {
   GraduationCap, Shield, Users, Briefcase, CheckCircle2, XCircle,
@@ -1200,7 +1200,7 @@ export default function AdminDashboard() {
   }, [role]);
 
   const fetchStats = async (force = false) => {
-    const result = await cached(
+    const result = await sharedCached(
       'admin:stats:v1',
       async () => {
         const [
@@ -1496,7 +1496,7 @@ export default function AdminDashboard() {
       toast({ title: 'Success', description: `Tutor ${status}` });
       setSelectedTutor(null);
       fetchVerifications();
-      invalidate('admin:stats:v1');
+      invalidate('admin:stats:v1'); void sharedInvalidate('admin:stats:v1');
       fetchStats(true);
     }
     setProcessing(false);
@@ -1505,7 +1505,7 @@ export default function AdminDashboard() {
   const handleApproveUser = async (userId: string) => {
     const { error } = await supabase.from('profiles').update({ is_approved: true }).eq('id', userId);
     if (error) toast({ title: 'Error', description: error.message, variant: 'destructive' });
-    else { toast({ title: 'User approved' }); fetchUsers(); invalidate('admin:stats:v1'); fetchStats(true); }
+    else { toast({ title: 'User approved' }); fetchUsers(); invalidate('admin:stats:v1'); void sharedInvalidate('admin:stats:v1'); fetchStats(true); }
   };
 
   const handleBanUser = async (userId: string, ban: boolean) => {
@@ -1538,7 +1538,7 @@ export default function AdminDashboard() {
       setSelectedReport(null);
       setAdminNotes('');
       fetchReports();
-      invalidate('admin:stats:v1');
+      invalidate('admin:stats:v1'); void sharedInvalidate('admin:stats:v1');
       fetchStats(true);
     }
     setProcessing(false);
@@ -1548,7 +1548,7 @@ export default function AdminDashboard() {
     if (!confirm('Are you sure you want to delete this job?')) return;
     const { error } = await supabase.from('jobs').delete().eq('id', jobId);
     if (error) toast({ title: 'Error', description: error.message, variant: 'destructive' });
-    else { toast({ title: 'Job deleted' }); fetchJobs(); invalidate('admin:stats:v1'); fetchStats(true); }
+    else { toast({ title: 'Job deleted' }); fetchJobs(); invalidate('admin:stats:v1'); void sharedInvalidate('admin:stats:v1'); fetchStats(true); }
   };
 
   const handleUpdateJobStatus2Placeholder = null;
@@ -1556,7 +1556,7 @@ export default function AdminDashboard() {
   const handleUpdateJobStatus = async (jobId: string, status: string) => {
     const { error } = await supabase.from('jobs').update({ status: status as any }).eq('id', jobId);
     if (error) toast({ title: 'Error', description: error.message, variant: 'destructive' });
-    else { toast({ title: `Job status updated to ${status}` }); fetchJobs(); invalidate('admin:stats:v1'); fetchStats(true); }
+    else { toast({ title: `Job status updated to ${status}` }); fetchJobs(); invalidate('admin:stats:v1'); void sharedInvalidate('admin:stats:v1'); fetchStats(true); }
   };
 
   const openEditJob = async (jobId: string) => {

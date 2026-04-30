@@ -12,6 +12,8 @@
  * or namespaced by user id.
  */
 
+import { supabase } from "@/integrations/supabase/client";
+
 type CacheEntry<T> = {
   value: T;
   /** After this timestamp, value is considered stale (needs revalidation). */
@@ -304,6 +306,198 @@ export function resetCacheMetrics(): void {
   metrics.clear();
 }
 
+
+// ── Shared (cross-user) cache via edge function ───────────────────────
+//
+// `sharedCached()` is the production-grade equivalent of `cached()` that
+// stores values in a shared Postgres-backed store (via the `cache-shared`
+// edge function). All visitors hit the same warm cache, so a fresh tab
+// load on one device benefits from another device's recent fetch.
+//
+// Layered strategy:
+//   L1 = in-memory `cached()` (per-tab, microsecond reads)
+//   L2 = shared store (cross-device, ~100ms reads, but only 1 DB query
+//        per TTL window across the whole platform)
+//   L3 = `fetcher()` against Supabase (the real query)
+//
+// On a request:
+//   1. L1 fresh? return instantly.
+//   2. L1 stale (SWR) or empty → call L2 via edge function.
+//      - L2 fresh: warm L1, return.
+//      - L2 stale (SWR): warm L1, kick off background refresh.
+//      - L2 miss: run fetcher, write L2 + L1.
+
+type SharedHit<T> =
+  | { status: "miss" }
+  | { status: "fresh" | "stale"; value: T; expiresAt: number; staleUntil: number };
+
+async function sharedGet<T>(key: string): Promise<SharedHit<T>> {
+  const { data, error } = await supabase.functions.invoke("cache-shared", {
+    body: { op: "get", key },
+  });
+  if (error || !data) return { status: "miss" };
+  return data as SharedHit<T>;
+}
+
+async function sharedSet<T>(
+  key: string,
+  value: T,
+  ttlMs: number,
+  swrMs: number,
+): Promise<void> {
+  await supabase.functions.invoke("cache-shared", {
+    body: {
+      op: "set",
+      key,
+      value,
+      ttlSeconds: Math.max(1, Math.round(ttlMs / 1000)),
+      swrSeconds: Math.max(0, Math.round(swrMs / 1000)),
+    },
+  });
+}
+
+/** Invalidate a shared cache entry (call after mutations). */
+export async function sharedInvalidate(key: string): Promise<void> {
+  invalidate(key);
+  try {
+    await supabase.functions.invoke("cache-shared", {
+      body: { op: "del", key },
+    });
+  } catch {
+    /* best-effort */
+  }
+}
+
+/** Invalidate every shared entry whose key starts with `prefix`. */
+export async function sharedInvalidatePrefix(prefix: string): Promise<void> {
+  invalidatePrefix(prefix);
+  try {
+    await supabase.functions.invoke("cache-shared", {
+      body: { op: "del", prefix },
+    });
+  } catch {
+    /* best-effort */
+  }
+}
+
+const sharedInflight = new Map<string, Promise<unknown>>();
+
+/**
+ * Fetch with a two-level cache: in-memory (L1) + shared Postgres (L2).
+ * Use for expensive queries whose results are safe to share across users
+ * (admin counts, public job listings, public tutor lists). DO NOT use for
+ * per-user data unless you namespace `key` with the user id.
+ */
+export async function sharedCached<T>(
+  key: string,
+  fetcher: () => Promise<T>,
+  options: CacheOptions = {},
+): Promise<T> {
+  const { ttl = DEFAULT_TTL, swr = 0, force = false } = options;
+  const now = Date.now();
+
+  if (!force) {
+    // L1
+    const hit = store.get(key) as CacheEntry<T> | undefined;
+    if (hit) {
+      hit.lastAccess = now;
+      if (hit.freshUntil > now) {
+        bumpMetric(key, "hits");
+        return hit.value;
+      }
+      if (swr > 0 && hit.staleUntil > now) {
+        bumpMetric(key, "staleHits");
+        void revalidateShared(key, fetcher, ttl, swr).catch(() => {});
+        return hit.value;
+      }
+    }
+    const pending = sharedInflight.get(key) as Promise<T> | undefined;
+    if (pending) {
+      bumpMetric(key, "misses");
+      return pending;
+    }
+  }
+
+  bumpMetric(key, "misses");
+  return revalidateShared(key, fetcher, ttl, swr, force);
+}
+
+function revalidateShared<T>(
+  key: string,
+  fetcher: () => Promise<T>,
+  ttl: number,
+  swr: number,
+  force = false,
+): Promise<T> {
+  const existing = sharedInflight.get(key) as Promise<T> | undefined;
+  if (existing) return existing;
+
+  const startedAt = Date.now();
+  const promise = (async () => {
+    try {
+      // Try L2 first unless forcing
+      if (!force) {
+        const remote = await sharedGet<T>(key);
+        if (remote.status === "fresh" || remote.status === "stale") {
+          const now = Date.now();
+          const prev = store.get(key);
+          store.set(key, {
+            value: remote.value,
+            freshUntil: remote.expiresAt,
+            staleUntil: remote.staleUntil,
+            ttl,
+            swr,
+            writtenAt: now,
+            refreshCount: (prev?.refreshCount ?? 0) + 1,
+            lastAccess: now,
+          });
+          notify(key, remote.value);
+          if (remote.status === "stale") {
+            // L2 was stale: kick off true refresh in background
+            void runFetcherAndWrite(key, fetcher, ttl, swr).catch(() => {});
+          }
+          return remote.value;
+        }
+      }
+      return await runFetcherAndWrite(key, fetcher, ttl, swr, startedAt);
+    } catch (err) {
+      bumpMetric(key, "errors");
+      throw err;
+    } finally {
+      sharedInflight.delete(key);
+    }
+  })();
+
+  sharedInflight.set(key, promise);
+  return promise;
+}
+
+async function runFetcherAndWrite<T>(
+  key: string,
+  fetcher: () => Promise<T>,
+  ttl: number,
+  swr: number,
+  startedAt: number = Date.now(),
+): Promise<T> {
+  const value = await fetcher();
+  const now = Date.now();
+  const prev = store.get(key);
+  store.set(key, {
+    value,
+    freshUntil: now + ttl,
+    staleUntil: now + ttl + swr,
+    ttl,
+    swr,
+    writtenAt: now,
+    refreshCount: (prev?.refreshCount ?? 0) + 1,
+    lastAccess: now,
+  });
+  bumpMetric(key, "totalLatencyMs", now - startedAt);
+  notify(key, value);
+  // Fire-and-forget L2 write
+  void sharedSet(key, value, ttl, swr).catch(() => {});
+  return value;
+}
 
 /** Common TTL presets (ms). */
 export const TTL = {

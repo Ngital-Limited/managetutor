@@ -8,7 +8,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { cached, subscribe, TTL } from '@/lib/cache';
+import { cached, sharedCached, subscribe, TTL } from '@/lib/cache';
 import { SearchableSelect } from '@/components/SearchableSelect';
 import { Logo } from '@/components/Logo';
 import { Header } from '@/components/Header';
@@ -86,7 +86,7 @@ export default function Index() {
           const { data } = await supabase.from('subjects').select('id, name_en, category_en').order('name_en');
           return { data };
         }, { ttl: TTL.long }),
-        cached('home:featured-tutors', async () => {
+        sharedCached('home:featured-tutors:v2', async () => {
           const { data } = await supabase.from('tutor_profiles')
             .select(`
               id, slug, bio, education, experience_years,
@@ -99,15 +99,15 @@ export default function Index() {
             .order('is_featured', { ascending: false })
             .limit(6);
           return { data };
-        }, { ttl: TTL.short, swr: 5 * 60_000 }),
-        cached('home:latest-jobs', async () => {
+        }, { ttl: TTL.medium, swr: 5 * 60_000 }),
+        sharedCached('home:latest-jobs:v2', async () => {
           const { data } = await supabase.from('jobs')
             .select('id, slug, title, description, budget_min, budget_max, teaching_mode, days_per_week, job_reference, created_at, districts (name_en), areas (name_en), subjects (name_en)')
             .eq('status', 'open')
             .order('created_at', { ascending: false })
             .limit(6);
           return { data };
-        }, { ttl: TTL.short, swr: 5 * 60_000 }),
+        }, { ttl: TTL.medium, swr: 5 * 60_000 }),
       ]);
 
       if (a) setAreas(a.map((x: any) => ({ id: x.id, name_en: x.name_en, district_name: x.districts?.name_en || '' })));
@@ -132,10 +132,10 @@ export default function Index() {
     fetchAll();
 
     // Live-update when SWR background refresh completes
-    const unsubT = subscribe<{ data: any[] | null }>('home:featured-tutors', (v) => {
+    const unsubT = subscribe<{ data: any[] | null }>('home:featured-tutors:v2', (v) => {
       if (v?.data) setFeaturedTutors(v.data as unknown as FeaturedTutor[]);
     });
-    const unsubJ = subscribe<{ data: any[] | null }>('home:latest-jobs', (v) => {
+    const unsubJ = subscribe<{ data: any[] | null }>('home:latest-jobs:v2', (v) => {
       if (v?.data) setLatestJobs(v.data as unknown as LatestJob[]);
     });
     return () => { unsubT(); unsubJ(); };
