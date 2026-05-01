@@ -2615,9 +2615,13 @@ export default function AdminDashboard() {
                 return 'pending';
               };
 
-              // Pipeline tab counts (across ALL applications, not filtered)
+              // "All" shows only applications still in the pending stage —
+              // once shortlisted / demo / confirmed / not_confirmed, they move to their own tab.
+              const pendingApps = allApplications.filter(a => stageOf(a) === 'pending');
+
+              // Pipeline tab counts
               const pipelineCounts = {
-                all: allApplications.length,
+                all: pendingApps.length,
                 shortlisted: allApplications.filter(a => stageOf(a) === 'shortlisted').length,
                 demo: allApplications.filter(a => stageOf(a) === 'demo').length,
                 confirmed: allApplications.filter(a => stageOf(a) === 'confirmed').length,
@@ -2633,7 +2637,7 @@ export default function AdminDashboard() {
 
               // Apps filtered by pipeline tab (used for Level-1 grouping)
               const pipelineApps = appsPipelineTab === 'all'
-                ? allApplications
+                ? pendingApps
                 : allApplications.filter(a => stageOf(a) === appsPipelineTab);
 
               // ───── LEVEL 1: Jobs list ─────
