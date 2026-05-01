@@ -74,7 +74,7 @@ describe("Ad isolation: HTML ads must not affect site fonts or layout", () => {
     expect(adStyles.isolation).toBe("isolate");
     // Class-only wrapper inherits max-width: 100% from .ad-slot rule.
     expect(adStyles.maxWidth).toBe("100%");
-    expect(adStyles.minWidth).toBe("0px");
+    expect(["0", "0px"]).toContain(adStyles.minWidth);
 
     const pageStyles = getComputedStyle(page);
     expect(["clip", "hidden"]).toContain(pageStyles.overflowX);
