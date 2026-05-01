@@ -53,6 +53,8 @@ import { AdminVerificationsTab } from '@/components/admin/AdminVerificationsTab'
 import { ReferralAnalyticsTab } from '@/components/admin/ReferralAnalyticsTab';
 import { AdsManagementTab } from '@/components/admin/AdsManagementTab';
 import { AdminCacheTab } from '@/components/admin/AdminCacheTab';
+import { AdminHiresTab } from '@/components/admin/AdminHiresTab';
+import { AdminCommissionTab } from '@/components/admin/AdminCommissionTab';
 import { AutoRefreshControl } from '@/components/AutoRefreshControl';
 import { getPlatformCommissionPct, computeFeeSplit } from '@/lib/commission';
 
