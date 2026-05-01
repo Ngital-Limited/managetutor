@@ -333,7 +333,7 @@ export default function TutorAppliedJobs() {
                     <Briefcase className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                     <h3 className="font-bold mb-2">No applications yet</h3>
                     <p className="text-muted-foreground mb-4">Start applying to tuition jobs to grow your teaching career</p>
-                    <Link to="/jobs">
+                    <Link to="/tutor/find-jobs">
                       <Button>Browse Jobs <ArrowRight className="h-4 w-4 ml-2" /></Button>
                     </Link>
                   </div>
