@@ -701,9 +701,10 @@ export function AdminPostJobTab({ toast }: Props) {
             <Button type="submit" className="w-full" disabled={submitting || !hasParent}>
               {submitting ? <><Clock className="h-4 w-4 mr-2 animate-spin" /> Posting...</> : 'Post Job'}
             </Button>
-          </form>
-        </DialogContent>
-      </Dialog>
+            </form>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }
