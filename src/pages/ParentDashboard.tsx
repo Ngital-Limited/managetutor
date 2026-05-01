@@ -1128,6 +1128,7 @@ export default function ParentDashboard() {
   const activeJobs = jobs.filter(j => j.status === 'in_progress');
   const completedJobs = jobs.filter(j => j.status === 'completed');
   const pausedJobs = jobs.filter(j => j.status === 'cancelled');
+  const draftJobs = jobs.filter(j => j.status === 'draft');
   const totalApplicants = jobs.reduce((sum, j) => sum + (j.total_applications || 0), 0);
   const profileInfo = getProfileCompleteness();
 
