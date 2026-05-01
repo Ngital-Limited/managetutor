@@ -8,7 +8,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useToast } from '@/hooks/use-toast';
 import { Logo } from '@/components/Logo';
 import { supabase } from '@/integrations/supabase/client';
-import { GraduationCap, Users, Loader2, Mail, Lock, User, ArrowRight, Phone, ArrowLeft, CheckCircle2 } from 'lucide-react';
+import { GraduationCap, Users, Loader2, Mail, Lock, User, ArrowRight, Phone, ArrowLeft, CheckCircle2, AlertTriangle, RefreshCw } from 'lucide-react';
 import { PhoneInput, isValidBDPhone } from '@/components/PhoneInput';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { z } from 'zod';
@@ -53,6 +53,7 @@ export default function Auth() {
   const [resetSent, setResetSent] = useState(false);
   const [emailVerified, setEmailVerified] = useState(false);
   const [checkingVerification, setCheckingVerification] = useState(false);
+  const [verifyError, setVerifyError] = useState<string | null>(null);
   const [resendLoading, setResendLoading] = useState(false);
   const [resendCooldown, setResendCooldown] = useState(0);
 
@@ -80,14 +81,35 @@ export default function Auth() {
   // Poll for email verification when showing the verify screen
   useEffect(() => {
     if (!showVerifyEmail || emailVerified) return;
+    const EXPIRY_MS = 10 * 60 * 1000; // 10 minutes
+    const MAX_CONSECUTIVE_ERRORS = 5;
+    const startTime = Date.now();
+    let errorCount = 0;
+
     const interval = setInterval(async () => {
+      // Check session expiry
+      if (Date.now() - startTime > EXPIRY_MS) {
+        setVerifyError('Verification session timed out. Please resend the verification email or try signing up again.');
+        clearInterval(interval);
+        return;
+      }
       try {
-        const { data } = await supabase.auth.getSession();
+        const { data, error } = await supabase.auth.getSession();
+        if (error) throw error;
         if (data.session?.user?.email_confirmed_at) {
           setEmailVerified(true);
+          setVerifyError(null);
+          clearInterval(interval);
+        } else {
+          errorCount = 0; // reset on successful poll
+        }
+      } catch (err: any) {
+        errorCount++;
+        if (errorCount >= MAX_CONSECUTIVE_ERRORS) {
+          setVerifyError('Unable to check verification status. Please check your connection and try again.');
           clearInterval(interval);
         }
-      } catch {}
+      }
     }, 4000);
     return () => clearInterval(interval);
   }, [showVerifyEmail, emailVerified]);
@@ -300,10 +322,32 @@ export default function Auth() {
                     <p>Please check your inbox and click the verification link to activate your account.</p>
                     <p className="text-muted-foreground">Don't forget to check your spam/junk folder.</p>
                   </div>
-                  <div className="flex items-center justify-center gap-2 mt-4 text-xs text-muted-foreground">
-                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                    <span>Waiting for verification...</span>
-                  </div>
+                  {verifyError ? (
+                    <div className="p-4 rounded-lg bg-destructive/10 border border-destructive/20 text-sm space-y-3 mt-4">
+                      <div className="flex items-center gap-2 text-destructive font-medium">
+                        <AlertTriangle className="h-4 w-4 shrink-0" />
+                        <span>{verifyError}</span>
+                      </div>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="w-full"
+                        onClick={() => {
+                          setVerifyError(null);
+                          // Re-trigger polling by toggling showVerifyEmail
+                          setShowVerifyEmail(false);
+                          setTimeout(() => setShowVerifyEmail(true), 50);
+                        }}
+                      >
+                        <RefreshCw className="h-3.5 w-3.5 mr-2" /> Retry Verification Check
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-center gap-2 mt-4 text-xs text-muted-foreground">
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      <span>Waiting for verification...</span>
+                    </div>
+                  )}
                   <Button
                     variant="outline"
                     className="w-full mt-4 h-10 rounded-lg text-sm"
