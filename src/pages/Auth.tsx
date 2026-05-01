@@ -103,7 +103,27 @@ export default function Auth() {
     return () => subscription.unsubscribe();
   }, [showVerifyEmail, emailVerified]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  // Cooldown timer for resend button
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const timer = setTimeout(() => setResendCooldown(c => c - 1), 1000);
+    return () => clearTimeout(timer);
+  }, [resendCooldown]);
+
+  const handleResendVerification = async () => {
+    if (resendLoading || resendCooldown > 0 || !signupEmail) return;
+    setResendLoading(true);
+    const { error } = await supabase.auth.resend({ type: 'signup', email: signupEmail });
+    if (error) {
+      toast({ title: 'Failed to resend', description: error.message, variant: 'destructive' });
+    } else {
+      toast({ title: 'Verification email sent', description: `Check your inbox at ${signupEmail}` });
+      setResendCooldown(60);
+    }
+    setResendLoading(false);
+  };
+
+
     e.preventDefault();
     setLoading(true);
 
