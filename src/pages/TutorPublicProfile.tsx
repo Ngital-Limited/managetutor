@@ -100,15 +100,15 @@ export default function TutorPublicProfile() {
 
     if (UUID_REGEX.test(id)) {
       // Try id, then user_id
-      const r1 = await supabase.from('tutor_profiles').select(selectCols).eq('id', id).maybeSingle();
+      const r1 = await supabase.from('tutor_profiles_public').select(selectCols).eq('id', id).maybeSingle();
       tutorData = r1.data;
       if (!tutorData) {
-        const r2 = await supabase.from('tutor_profiles').select(selectCols).eq('user_id', id).maybeSingle();
+        const r2 = await supabase.from('tutor_profiles_public').select(selectCols).eq('user_id', id).maybeSingle();
         tutorData = r2.data;
       }
     } else {
       // Treat as slug
-      const r = await supabase.from('tutor_profiles').select(selectCols).eq('slug', id).maybeSingle();
+      const r = await supabase.from('tutor_profiles_public').select(selectCols).eq('slug', id).maybeSingle();
       tutorData = r.data;
     }
 
@@ -157,7 +157,7 @@ export default function TutorPublicProfile() {
     // Related tutors: same district, available, exclude current
     if (tutorData.district_id) {
       const { data: relData } = await supabase
-        .from('tutor_profiles')
+        .from('tutor_profiles_public')
         .select('id, slug, user_id, display_name, monthly_salary_min, monthly_salary_max, experience_years, teaching_mode, bio, profiles:user_id(full_name, avatar_url)')
         .eq('district_id', tutorData.district_id)
         .eq('is_available', true)

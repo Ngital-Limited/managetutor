@@ -188,8 +188,8 @@ export default function FindTutors() {
   const fetchTutors = async () => {
     setLoading(true);
     let query = supabase
-      .from('tutor_profiles')
-      .select(`*, profiles!tutor_profiles_user_id_profiles_fkey (full_name, avatar_url, district_id, districts (name_en), areas (name_en)), districts (name_en, division_en), areas (name_en), tutor_subjects (subjects (*))`)
+      .from('tutor_profiles_public')
+      .select(`*, profiles:user_id (full_name, avatar_url, district_id, districts (name_en), areas (name_en)), districts (name_en, division_en), areas (name_en), tutor_subjects (subjects (*))`)
       .eq('is_available', true);
 
     if (selectedGender && selectedGender !== 'any') query = query.eq('gender', selectedGender as 'male' | 'female');

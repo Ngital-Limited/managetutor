@@ -83,7 +83,7 @@ export default function Index() {
     try {
       await sharedInvalidate('home:featured-tutors:v2');
       const { data } = await sharedCached('home:featured-tutors:v2', async () => {
-        const { data } = await supabase.from('tutor_profiles')
+        const { data } = await supabase.from('tutor_profiles_public')
           .select(`
             id, slug, bio, education, experience_years,
             verification_status, teaching_mode, monthly_salary_min, monthly_salary_max, is_available,
@@ -132,7 +132,7 @@ export default function Index() {
           return { data };
         }, { ttl: TTL.long }),
         sharedCached('home:featured-tutors:v2', async () => {
-          const { data } = await supabase.from('tutor_profiles')
+          const { data } = await supabase.from('tutor_profiles_public')
             .select(`
               id, slug, bio, education, experience_years,
               verification_status, teaching_mode, monthly_salary_min, monthly_salary_max, is_available,
