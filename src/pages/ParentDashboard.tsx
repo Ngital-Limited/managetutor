@@ -128,7 +128,7 @@ interface UserProfileFull {
   user_reference: string | null;
 }
 
-type SectionKey = 'overview' | 'jobs' | 'applicants' | 'demo' | 'tuitions' | 'payments' | 'profile';
+type SectionKey = 'overview' | 'jobs' | 'applicants' | 'demo' | 'tuitions' | 'payments' | 'profile' | 'help' | 'settings';
 
 const sectionItems: { key: SectionKey; title: string; icon: any }[] = [
   { key: 'overview', title: 'Overview', icon: LayoutDashboard },
@@ -138,6 +138,8 @@ const sectionItems: { key: SectionKey; title: string; icon: any }[] = [
   { key: 'demo', title: 'Demo Classes', icon: Calendar },
   { key: 'payments', title: 'Payments', icon: CreditCard },
   { key: 'profile', title: 'My Profile', icon: User },
+  { key: 'help', title: 'Help & Support', icon: LifeBuoy },
+  { key: 'settings', title: 'Settings', icon: Settings },
 ];
 
 const externalLinks = [
