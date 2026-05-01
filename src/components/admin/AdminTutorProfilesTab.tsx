@@ -470,6 +470,36 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
     setBanReason('');
   };
 
+  // ─── Role Transfer ───
+  const [transferDialogOpen, setTransferDialogOpen] = useState(false);
+  const [transferTargetUserId, setTransferTargetUserId] = useState<string | null>(null);
+  const [transferTargetName, setTransferTargetName] = useState('');
+  const [transferProcessing, setTransferProcessing] = useState(false);
+
+  const openTransferDialog = (userId: string, name: string) => {
+    setTransferTargetUserId(userId);
+    setTransferTargetName(name);
+    setTransferDialogOpen(true);
+  };
+
+  const confirmTransferToParent = async () => {
+    if (!transferTargetUserId) return;
+    setTransferProcessing(true);
+    const { error } = await supabase.rpc('transfer_user_role', {
+      _target_user_id: transferTargetUserId,
+      _new_role: 'parent',
+    });
+    setTransferProcessing(false);
+    if (error) {
+      toast({ title: 'Transfer Failed', description: error.message, variant: 'destructive' });
+    } else {
+      toast({ title: 'Role Transferred', description: `${transferTargetName} is now a Parent.` });
+      fetchTutors();
+    }
+    setTransferDialogOpen(false);
+    setTransferTargetUserId(null);
+  };
+
   const handleApproveToggle = async (userId: string, currentlyApproved: boolean) => {
     const { error } = await supabase.from('profiles').update({ is_approved: !currentlyApproved }).eq('id', userId);
     if (error) { toast({ title: 'Error', description: error.message, variant: 'destructive' }); return; }
@@ -926,6 +956,9 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
                               : <><CheckCircle2 className="h-3.5 w-3.5 text-success" /> Verify Tutor</>
                             }
                           </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => openTransferDialog(t.user_id, t.name)} className="flex items-center gap-2">
+                            <ArrowUpDown className="h-3.5 w-3.5 text-primary" /> Transfer to Parent
+                          </DropdownMenuItem>
                           <DropdownMenuSeparator />
                           <DropdownMenuItem
                             onClick={() => t.is_banned ? handleBanToggle(t.user_id, true) : openBanDialog(t.user_id, t.name)}
@@ -1073,6 +1106,34 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
             <Button variant="destructive" onClick={confirmBan} disabled={banProcessing || !banReason.trim()}>
               {banProcessing ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Ban className="h-4 w-4 mr-1" />}
               Confirm Ban
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Transfer Role Dialog */}
+      <Dialog open={transferDialogOpen} onOpenChange={(open) => { if (!open) { setTransferDialogOpen(false); setTransferTargetUserId(null); } }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <ArrowUpDown className="h-5 w-5 text-primary" /> Transfer Role
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <p className="text-sm text-muted-foreground">
+              Transfer <strong>{transferTargetName}</strong> from <strong>Tutor</strong> to <strong>Parent</strong>?
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Their tutor profile will be marked unavailable but kept for reference. They will be able to post jobs as a parent.
+            </p>
+          </div>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => { setTransferDialogOpen(false); setTransferTargetUserId(null); }}>
+              Cancel
+            </Button>
+            <Button onClick={confirmTransferToParent} disabled={transferProcessing}>
+              {transferProcessing ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <ArrowUpDown className="h-4 w-4 mr-1" />}
+              Confirm Transfer
             </Button>
           </DialogFooter>
         </DialogContent>

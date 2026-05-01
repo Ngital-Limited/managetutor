@@ -19,7 +19,7 @@ interface District { id: string; name_en: string; division_en: string; }
 interface Area { id: string; name_en: string; district_id: string; }
 
 export function AdminCreateUserTab({ toast }: Props) {
-  const [role, setRole] = useState<'parent' | 'tutor' | 'agency'>('parent');
+  const [role, setRole] = useState<'parent' | 'tutor'>('parent');
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
@@ -94,14 +94,6 @@ export function AdminCreateUserTab({ toast }: Props) {
         });
       }
 
-      // 5. If agency, create agency_profiles
-      if (role === 'agency') {
-        await supabase.from('agency_profiles').insert({
-          user_id: userId,
-          agency_name: fullName.trim(),
-        });
-      }
-
       toast({ title: 'User Created!', description: `${fullName} has been registered as ${role}.` });
       setCreatedUsers(prev => [{ name: fullName, role, email, date: new Date().toISOString() }, ...prev]);
       resetForm();
@@ -163,7 +155,7 @@ export function AdminCreateUserTab({ toast }: Props) {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2"><UserPlus className="h-5 w-5 text-primary" /> New User</CardTitle>
-            <CardDescription>Register a new parent, tutor, or agency account.</CardDescription>
+            <CardDescription>Register a new parent or tutor account.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
@@ -173,7 +165,6 @@ export function AdminCreateUserTab({ toast }: Props) {
                 <SelectContent>
                   <SelectItem value="parent">Parent</SelectItem>
                   <SelectItem value="tutor">Tutor</SelectItem>
-                  <SelectItem value="agency">Agency</SelectItem>
                 </SelectContent>
               </Select>
             </div>

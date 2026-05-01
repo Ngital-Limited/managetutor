@@ -112,98 +112,6 @@ export type Database = {
           },
         ]
       }
-      agency_profiles: {
-        Row: {
-          agency_name: string
-          created_at: string | null
-          description: string | null
-          id: string
-          logo_url: string | null
-          total_tutors: number | null
-          updated_at: string | null
-          user_id: string
-          verification_status:
-            | Database["public"]["Enums"]["verification_status"]
-            | null
-          verified_at: string | null
-          website: string | null
-        }
-        Insert: {
-          agency_name: string
-          created_at?: string | null
-          description?: string | null
-          id?: string
-          logo_url?: string | null
-          total_tutors?: number | null
-          updated_at?: string | null
-          user_id: string
-          verification_status?:
-            | Database["public"]["Enums"]["verification_status"]
-            | null
-          verified_at?: string | null
-          website?: string | null
-        }
-        Update: {
-          agency_name?: string
-          created_at?: string | null
-          description?: string | null
-          id?: string
-          logo_url?: string | null
-          total_tutors?: number | null
-          updated_at?: string | null
-          user_id?: string
-          verification_status?:
-            | Database["public"]["Enums"]["verification_status"]
-            | null
-          verified_at?: string | null
-          website?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "agency_profiles_user_id_profiles_fkey"
-            columns: ["user_id"]
-            isOneToOne: true
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      agency_tutors: {
-        Row: {
-          agency_id: string
-          id: string
-          joined_at: string | null
-          tutor_id: string
-        }
-        Insert: {
-          agency_id: string
-          id?: string
-          joined_at?: string | null
-          tutor_id: string
-        }
-        Update: {
-          agency_id?: string
-          id?: string
-          joined_at?: string | null
-          tutor_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "agency_tutors_agency_id_fkey"
-            columns: ["agency_id"]
-            isOneToOne: false
-            referencedRelation: "agency_profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "agency_tutors_tutor_id_fkey"
-            columns: ["tutor_id"]
-            isOneToOne: false
-            referencedRelation: "tutor_profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       applications: {
         Row: {
           cover_message: string | null
@@ -2017,6 +1925,10 @@ export type Database = {
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
       slugify: { Args: { _text: string }; Returns: string }
+      transfer_user_role: {
+        Args: { _new_role: string; _target_user_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
       app_role: "parent" | "tutor" | "agency" | "admin"
