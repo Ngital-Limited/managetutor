@@ -772,7 +772,7 @@ export default function ParentDashboard() {
     setSubmitting(false);
   };
 
-  const handleApplicationAction = async (appId: string, status: 'accepted' | 'rejected' | 'shortlisted') => {
+  const handleApplicationAction = async (appId: string, status: 'accepted' | 'rejected' | 'shortlisted' | 'contact_requested' | 'contact_released') => {
     const { error } = await supabase.from('applications').update({ status: status as any }).eq('id', appId);
 
     if (error) {
@@ -780,14 +780,13 @@ export default function ParentDashboard() {
       return;
     }
 
-    // Find the app & job for this action (works from inline list OR All-Applicants table)
     const inlineApp = applications.find(a => a.id === appId);
     const allApp = allApplicants.find((a: any) => a.id === appId);
     const tutorUserId = inlineApp?.tutor_profiles?.user_id || (allApp as any)?.tutor_profiles?.user_id;
     const jobTitle = selectedJob?.title || (allApp as any)?.jobs?.title || '';
     const jobId = selectedJob?.id || (allApp as any)?.jobs?.id;
 
-    toast({ title: 'Updated', description: `Application ${status}.` });
+    toast({ title: 'Updated', description: `Application ${status.replace('_', ' ')}.` });
 
     if (status === 'accepted' && jobId) {
       await supabase.from('jobs').update({ status: 'in_progress' as any }).eq('id', jobId);
@@ -806,6 +805,15 @@ export default function ParentDashboard() {
         title: 'You have been shortlisted!',
         message: `Great news — you've been shortlisted for "${jobTitle}". The guardian may invite you for a demo class soon.`,
         type: 'application_shortlisted',
+        reference_id: jobId,
+      });
+    } else if (status === 'contact_requested' && tutorUserId) {
+      // Notify admin that parent wants tutor contact info
+      await supabase.from('notifications').insert({
+        user_id: tutorUserId,
+        title: 'Contact info requested',
+        message: `A guardian has requested your contact details for "${jobTitle}". Admin will review and release shortly.`,
+        type: 'contact_requested',
         reference_id: jobId,
       });
     } else if (status === 'rejected' && tutorUserId) {
