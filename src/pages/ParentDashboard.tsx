@@ -2734,6 +2734,8 @@ export default function ParentDashboard() {
       case 'demo': return renderDemoBookings();
       case 'payments': return renderPayments();
       case 'profile': return renderProfile();
+      case 'help': return <ParentHelpSupport />;
+      case 'settings': return <ParentSettings />;
       default: return renderOverview();
     }
   };
