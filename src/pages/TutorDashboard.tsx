@@ -634,7 +634,7 @@ export default function TutorDashboard() {
           </Card>
         </div>
 
-        </div>
+
 
         {/* Compact Summary Widgets */}
         <div className="grid sm:grid-cols-3 gap-3">
