@@ -430,6 +430,7 @@ export default function TutorProfile() {
             result: entry.result || null,
             is_current: entry.is_current,
             current_semester: semesterValue,
+            medium: entry.medium || null,
           } as any).eq('id', entry.id);
         } else {
           const { data: newEdu } = await supabase.from('tutor_education').insert({
@@ -441,6 +442,7 @@ export default function TutorProfile() {
             result: entry.result || null,
             is_current: entry.is_current,
             current_semester: semesterValue,
+            medium: entry.medium || null,
           } as any).select('id').single();
           if (newEdu) entry.id = newEdu.id;
         }
