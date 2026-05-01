@@ -37,7 +37,7 @@ import {
   LogOut, Home, DollarSign, Trash2, CreditCard, Megaphone, Send, Mail,
   Package, Plus, Pencil, ToggleLeft, ToggleRight, Wallet, MapPin, LifeBuoy, ShieldCheck,
   LogIn, BookOpen, UserPlus, TrendingUp, ChevronLeft, ChevronRight, ArrowLeft,
-  Phone, Calendar, X, Activity, HelpCircle
+  Phone, Calendar, X, Activity, HelpCircle, ArrowUpDown
 } from 'lucide-react';
 import { Tooltip as UITooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { RevenuePayoutTab } from '@/components/admin/RevenuePayoutTab';
@@ -855,6 +855,34 @@ export default function AdminDashboard() {
   const [selectedUser, setSelectedUser] = useState<UserRow | null>(null);
   const [adminNotes, setAdminNotes] = useState('');
   const [processing, setProcessing] = useState(false);
+
+  // ─── Role Transfer (Guardian → Tutor) ───
+  const [transferDialogOpen, setTransferDialogOpen] = useState(false);
+  const [transferTarget, setTransferTarget] = useState<{ id: string; name: string } | null>(null);
+  const [transferProcessing, setTransferProcessing] = useState(false);
+
+  const openGuardianTransferDialog = (userId: string, name: string) => {
+    setTransferTarget({ id: userId, name });
+    setTransferDialogOpen(true);
+  };
+
+  const confirmGuardianTransferToTutor = async () => {
+    if (!transferTarget) return;
+    setTransferProcessing(true);
+    const { error } = await supabase.rpc('transfer_user_role', {
+      _target_user_id: transferTarget.id,
+      _new_role: 'tutor',
+    });
+    setTransferProcessing(false);
+    if (error) {
+      toast({ title: 'Transfer Failed', description: error.message, variant: 'destructive' });
+    } else {
+      toast({ title: 'Role Transferred', description: `${transferTarget.name} is now a Tutor.` });
+      fetchUsers();
+    }
+    setTransferDialogOpen(false);
+    setTransferTarget(null);
+  };
   const [editingJob, setEditingJob] = useState<any | null>(null);
   const [editJobForm, setEditJobForm] = useState<{
     title: string; description: string; status: string; teaching_mode: string;
@@ -2529,6 +2557,9 @@ export default function AdminDashboard() {
                                       <UserCheck className="h-4 w-4 text-success" />
                                     </Button>
                                   )}
+                                  <Button variant="ghost" size="sm" onClick={() => openGuardianTransferDialog(u.id, u.full_name)} title="Transfer to Tutor">
+                                    <ArrowUpDown className="h-4 w-4 text-primary" />
+                                  </Button>
                                   <Button
                                     variant="ghost"
                                     size="sm"
@@ -2622,7 +2653,34 @@ export default function AdminDashboard() {
             </Dialog>
 
 
-            {/* ═══════ VERIFICATIONS TAB ═══════ */}
+            {/* Transfer to Tutor Confirmation Dialog */}
+            <Dialog open={transferDialogOpen} onOpenChange={(open) => { if (!open) { setTransferDialogOpen(false); setTransferTarget(null); } }}>
+              <DialogContent className="max-w-md">
+                <DialogHeader>
+                  <DialogTitle className="flex items-center gap-2">
+                    <ArrowUpDown className="h-5 w-5 text-primary" /> Transfer Role
+                  </DialogTitle>
+                </DialogHeader>
+                <div className="space-y-3">
+                  <p className="text-sm text-muted-foreground">
+                    Transfer <strong>{transferTarget?.name}</strong> from <strong>Parent/Guardian</strong> to <strong>Tutor</strong>?
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    A tutor profile will be created for this user. They will be able to apply to jobs and teach students.
+                  </p>
+                </div>
+                <DialogFooter className="gap-2">
+                  <Button variant="outline" onClick={() => { setTransferDialogOpen(false); setTransferTarget(null); }}>
+                    Cancel
+                  </Button>
+                  <Button onClick={confirmGuardianTransferToTutor} disabled={transferProcessing}>
+                    {transferProcessing && <span className="h-4 w-4 mr-1 animate-spin border-2 border-current border-t-transparent rounded-full inline-block" />}
+                    Confirm Transfer
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+
             {activeTab === 'verifications' && (() => {
               // Derive doc-type options from currently-loaded tutors
               const docTypeOptions = Array.from(new Set(
