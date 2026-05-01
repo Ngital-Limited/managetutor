@@ -1873,6 +1873,7 @@ export default function ParentDashboard() {
               <Tabs value={jobStatusFilter} onValueChange={setJobStatusFilter}>
                 <TabsList className="mb-4 flex-wrap">
                   <TabsTrigger value="all">All ({jobs.length})</TabsTrigger>
+                  <TabsTrigger value="draft">Drafts ({draftJobs.length})</TabsTrigger>
                   <TabsTrigger value="open">Active ({openJobs.length})</TabsTrigger>
                   <TabsTrigger value="in_progress">Hired ({activeJobs.length})</TabsTrigger>
                   <TabsTrigger value="cancelled">Paused ({pausedJobs.length})</TabsTrigger>
