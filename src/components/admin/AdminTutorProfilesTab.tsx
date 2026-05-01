@@ -777,7 +777,7 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
       {/* Tutor Table */}
       <Card>
         <CardContent className="p-0">
-          <ScrollArea className="w-full">
+          <div className="w-full overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -982,7 +982,7 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
                 ))}
               </TableBody>
             </Table>
-          </ScrollArea>
+          </div>
 
           {/* Pagination */}
           {!loading && totalCount > 0 && (
