@@ -2624,8 +2624,12 @@ export default function ParentDashboard() {
                                   <Star className="h-3.5 w-3.5" />
                                 </Button>
                               )}
+                              {app.status === 'shortlisted' && (
+                                <Button size="sm" variant="outline" className="h-8 text-xs" onClick={() => handleApplicationAction(app.id, 'contact_requested')} title="Request Contact Info">
+                                  <Phone className="h-3.5 w-3.5" />
+                                </Button>
+                              )}
                               <Button size="sm" variant="secondary" className="h-8 text-xs" onClick={() => {
-                                // Make sure selectedJob is set so the demo dialog has context
                                 const job = jobs.find(j => j.id === app.jobs?.id);
                                 if (job) setSelectedJob(job);
                                 handleInviteToInterview(app);
