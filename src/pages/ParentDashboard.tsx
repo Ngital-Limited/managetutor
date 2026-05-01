@@ -291,7 +291,14 @@ export default function ParentDashboard() {
   const [interviewCommissionPct, setInterviewCommissionPct] = useState(20);
   const [schedulingInterview, setSchedulingInterview] = useState(false);
 
-  const [jobForm, setJobForm] = useState({
+  // Demo feedback state
+  const [feedbackDialogOpen, setFeedbackDialogOpen] = useState(false);
+  const [feedbackBooking, setFeedbackBooking] = useState<any>(null);
+  const [feedbackRating, setFeedbackRating] = useState(5);
+  const [feedbackComments, setFeedbackComments] = useState('');
+  const [feedbackRecommend, setFeedbackRecommend] = useState(false);
+  const [submittedFeedback, setSubmittedFeedback] = useState<Set<string>>(new Set());
+
     title: '',
     description: '',
     subject_ids: [] as string[],
