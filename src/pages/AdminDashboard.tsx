@@ -1588,6 +1588,7 @@ export default function AdminDashboard() {
     setProcessing(false);
   };
 
+
   const handleApproveUser = async (userId: string) => {
     const { error } = await supabase.from('profiles').update({ is_approved: true }).eq('id', userId);
     if (error) toast({ title: 'Error', description: error.message, variant: 'destructive' });
@@ -1811,6 +1812,65 @@ export default function AdminDashboard() {
 
   const [sidebarSearch, setSidebarSearch] = useState('');
 
+  // ──── RBAC: fetch current admin's permissions ────
+  const [adminPerms, setAdminPerms] = useState<Record<string, any> | null>(null);
+  useEffect(() => {
+    if (!user || role !== 'admin') return;
+    (async () => {
+      const { data } = await supabase
+        .from('admin_permissions')
+        .select('*')
+        .eq('user_id', user.id)
+        .maybeSingle();
+      // If no row exists the admin is the "super admin" — grant everything
+      setAdminPerms(data || null);
+    })();
+  }, [user, role]);
+
+  /** Check if current admin has a specific permission.
+   *  Super admins (no admin_permissions row) have full access. */
+  const hasPerm = useCallback((perm: string) => {
+    if (!adminPerms) return true; // super admin
+    return !!adminPerms[perm];
+  }, [adminPerms]);
+
+  // Map each sidebar tab value to the permission key that gates it
+  const TAB_PERM_MAP: Record<string, string> = {
+    // overview is always visible
+    jobs: 'can_manage_jobs',
+    applications: 'can_manage_jobs',
+    demo_requests: 'can_manage_jobs',
+    post_job: 'can_manage_jobs',
+    import_jobs: 'can_manage_jobs',
+    reports: 'can_manage_users',
+    tutor_profiles: 'can_verify_documents',
+    verifications: 'can_verify_documents',
+    guardians: 'can_manage_users',
+    create_user: 'can_manage_users',
+    import_tutors: 'can_manage_users',
+    payments: 'can_manage_revenue',
+    revenue: 'can_manage_revenue',
+    subscriptions: 'can_manage_revenue',
+    broadcast: 'can_send_notifications',
+    contacts: 'can_manage_tickets',
+    tickets: 'can_manage_tickets',
+    geographic: 'can_view_analytics',
+    referrals: 'can_view_analytics',
+    settings: 'can_manage_settings',
+    rbac: 'can_manage_settings',
+    platform_data: 'can_manage_settings',
+    ads: 'can_manage_settings',
+    cache: 'can_manage_settings',
+  };
+
+  // Redirect to overview if current tab isn't permitted for this sub-admin
+  useEffect(() => {
+    const requiredPerm = TAB_PERM_MAP[activeTab];
+    if (requiredPerm && !hasPerm(requiredPerm) && activeTab !== 'overview') {
+      setActiveTab('overview');
+    }
+  }, [activeTab, hasPerm, setActiveTab]);
+
   if (loading || role !== 'admin') {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -1887,6 +1947,7 @@ export default function AdminDashboard() {
     switch (s) {
       case 'open': case 'active': case 'approved': case 'completed': return 'bg-success/10 text-success border-success/20';
       case 'pending': case 'pending_approval': return 'bg-warning/10 text-warning border-warning/20';
+      case 'suspended': return 'bg-orange-100 text-orange-700 border-orange-200 dark:bg-orange-900/20 dark:text-orange-400 dark:border-orange-800/30';
       case 'rejected': case 'cancelled': case 'failed': return 'bg-destructive/10 text-destructive border-destructive/20';
       default: return 'bg-muted text-muted-foreground';
     }
@@ -1941,11 +2002,18 @@ export default function AdminDashboard() {
           </SidebarGroup>
           {(() => {
             const q = sidebarSearch.trim().toLowerCase();
+            // Filter by RBAC permissions first, then by search
+            const permFiltered = sidebarGroups
+              .map(g => ({ ...g, items: g.items.filter(i => {
+                const requiredPerm = TAB_PERM_MAP[i.value];
+                return !requiredPerm || hasPerm(requiredPerm);
+              })}))
+              .filter(g => g.items.length > 0);
             const filteredGroups = q
-              ? sidebarGroups
+              ? permFiltered
                   .map(g => ({ ...g, items: g.items.filter(i => i.title.toLowerCase().includes(q) || g.label.toLowerCase().includes(q)) }))
                   .filter(g => g.items.length > 0)
-              : sidebarGroups;
+              : permFiltered;
             if (q && filteredGroups.length === 0) {
               return (
                 <div className="px-4 py-6 text-center text-xs text-muted-foreground">
@@ -2731,6 +2799,7 @@ export default function AdminDashboard() {
                         <SelectItem value="open">Open</SelectItem>
                         <SelectItem value="in_progress">In Progress</SelectItem>
                         <SelectItem value="completed">Completed</SelectItem>
+                        <SelectItem value="suspended">Suspended</SelectItem>
                         <SelectItem value="cancelled">Cancelled</SelectItem>
                       </SelectContent>
                     </Select>
@@ -2804,10 +2873,38 @@ export default function AdminDashboard() {
                                       <Button
                                         variant="ghost"
                                         size="sm"
+                                        onClick={() => handleUpdateJobStatus(job.id, 'suspended')}
+                                        title="Temporarily Suspend"
+                                      >
+                                        <Ban className="h-4 w-4 text-warning" />
+                                      </Button>
+                                      <Button
+                                        variant="ghost"
+                                        size="sm"
                                         onClick={() => handleUpdateJobStatus(job.id, 'cancelled')}
                                         title="Mark as Expired / Cancelled"
                                       >
                                         <Clock className="h-4 w-4 text-muted-foreground" />
+                                      </Button>
+                                    </>
+                                  )}
+                                  {job.status === 'suspended' && (
+                                    <>
+                                      <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => handleUpdateJobStatus(job.id, 'open')}
+                                        title="Re-open (unsuspend)"
+                                      >
+                                        <CheckCircle2 className="h-4 w-4 text-success" />
+                                      </Button>
+                                      <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => handleUpdateJobStatus(job.id, 'cancelled')}
+                                        title="Permanently Cancel"
+                                      >
+                                        <XCircle className="h-4 w-4 text-destructive" />
                                       </Button>
                                     </>
                                   )}
@@ -3824,6 +3921,7 @@ export default function AdminDashboard() {
                     <SelectItem value="open">Open</SelectItem>
                     <SelectItem value="in_progress">In Progress</SelectItem>
                     <SelectItem value="completed">Completed</SelectItem>
+                    <SelectItem value="suspended">Suspended</SelectItem>
                     <SelectItem value="cancelled">Cancelled</SelectItem>
                   </SelectContent>
                 </Select>
