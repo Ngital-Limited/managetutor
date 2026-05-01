@@ -32,7 +32,7 @@ import { cached, sharedCached, invalidate, sharedInvalidate, invalidatePrefix, s
 import { format } from 'date-fns';
 import {
   GraduationCap, Shield, Users, Briefcase, CheckCircle2, XCircle,
-  Clock, AlertTriangle, BarChart3, FileText, Settings, Search,
+  Clock, AlertTriangle, BarChart3, FileText, Settings, Search, Filter,
   Eye, Ban, UserCheck, FileCheck,
   LogOut, Home, DollarSign, Trash2, CreditCard, Megaphone, Send, Mail,
   Package, Plus, Pencil, ToggleLeft, ToggleRight, Wallet, MapPin, LifeBuoy, ShieldCheck,
@@ -112,6 +112,8 @@ interface TutorVerification {
   experience_years: number;
   gender: string;
   created_at: string;
+  district_id: string | null;
+  district_name: string | null;
   profiles: { full_name: string; email: string; phone: string | null };
   verification_documents: { id: string; document_type: string; document_url: string; status: string }[];
 }
@@ -817,6 +819,9 @@ export default function AdminDashboard() {
   const [loadingParentJobs, setLoadingParentJobs] = useState(false);
   const [pendingTutors, setPendingTutors] = useState<TutorVerification[]>([]);
   const [verificationFilter, setVerificationFilter] = useState('pending');
+  const [verificationDocType, setVerificationDocType] = useState<string>('all');
+  const [verificationDistrict, setVerificationDistrict] = useState<string>('all');
+  const [verificationDistricts, setVerificationDistricts] = useState<{ id: string; name_en: string }[]>([]);
   const [verificationPayments, setVerificationPayments] = useState<PaymentRow[]>([]);
   const [verificationFee, setVerificationFee] = useState<number>(50);
   const [jobs, setJobs] = useState<JobRow[]>([]);
@@ -1402,7 +1407,7 @@ export default function AdminDashboard() {
   const fetchVerifications = useCallback(async () => {
     let query = supabase
       .from('tutor_profiles')
-      .select('id, user_id, verification_status, education, experience_years, gender, created_at, verification_documents (id, document_type, document_url, status)')
+      .select('id, user_id, verification_status, education, experience_years, gender, created_at, district_id, verification_documents (id, document_type, document_url, status)')
       .order('created_at', { ascending: false }).limit(100);
     if (verificationFilter !== 'all') {
       query = query.eq('verification_status', verificationFilter as 'pending' | 'approved' | 'rejected');
@@ -1410,9 +1415,23 @@ export default function AdminDashboard() {
     const { data } = await query;
     if (data) {
       const userIds = [...new Set(data.map(t => t.user_id))];
-      const { data: profilesData } = await supabase.from('profiles').select('id, full_name, email, phone').in('id', userIds);
+      const districtIds = [...new Set(data.map((t: any) => t.district_id).filter(Boolean))];
+      const [{ data: profilesData }, { data: districtsData }] = await Promise.all([
+        supabase.from('profiles').select('id, full_name, email, phone').in('id', userIds),
+        districtIds.length
+          ? supabase.from('districts').select('id, name_en').in('id', districtIds as string[])
+          : Promise.resolve({ data: [] as { id: string; name_en: string }[] }),
+      ]);
       const profileMap = new Map(profilesData?.map(p => [p.id, p]) || []);
-      setPendingTutors(data.map(t => ({ ...t, profiles: profileMap.get(t.user_id) || { full_name: 'Unknown', email: '', phone: null } })) as unknown as TutorVerification[]);
+      const districtMap = new Map((districtsData || []).map(d => [d.id, d.name_en]));
+      // Keep an alphabetised district list for the filter dropdown (all districts that appear in the current result set)
+      const dList = (districtsData || []).slice().sort((a, b) => a.name_en.localeCompare(b.name_en));
+      setVerificationDistricts(dList);
+      setPendingTutors(data.map((t: any) => ({
+        ...t,
+        district_name: t.district_id ? districtMap.get(t.district_id) ?? null : null,
+        profiles: profileMap.get(t.user_id) || { full_name: 'Unknown', email: '', phone: null },
+      })) as unknown as TutorVerification[]);
     }
 
     // Fetch verification badge payments
@@ -2395,26 +2414,85 @@ export default function AdminDashboard() {
 
 
             {/* ═══════ VERIFICATIONS TAB ═══════ */}
-            {activeTab === 'verifications' && (
-              <div className="space-y-6">
+            {activeTab === 'verifications' && (() => {
+              // Derive doc-type options from currently-loaded tutors
+              const docTypeOptions = Array.from(new Set(
+                pendingTutors.flatMap(t => (t.verification_documents || []).map(d => d.document_type).filter(Boolean))
+              )).sort();
+              // Apply client-side filters (status is server-side)
+              const filteredTutors = pendingTutors.filter(t => {
+                if (verificationDocType !== 'all') {
+                  if (!t.verification_documents?.some(d => d.document_type === verificationDocType)) return false;
+                }
+                if (verificationDistrict !== 'all') {
+                  if (t.district_id !== verificationDistrict) return false;
+                }
+                return true;
+              });
+              const activeFilterCount =
+                (verificationFilter !== 'all' ? 1 : 0) +
+                (verificationDocType !== 'all' ? 1 : 0) +
+                (verificationDistrict !== 'all' ? 1 : 0);
+              return (
+              <div className="space-y-5">
                 <div className="flex items-center justify-between flex-wrap gap-3">
-                  <h1 className="text-xl font-semibold">Tutor Verifications</h1>
-                  <Select value={verificationFilter} onValueChange={(v) => setVerificationFilter(v)}>
-                    <SelectTrigger className="w-44"><SelectValue /></SelectTrigger>
+                  <h1 className="text-xl font-semibold">
+                    Tutor Verifications
+                    <span className="ml-2 text-sm font-normal text-muted-foreground">
+                      ({filteredTutors.length}{filteredTutors.length !== pendingTutors.length ? ` of ${pendingTutors.length}` : ''})
+                    </span>
+                  </h1>
+                  {activeFilterCount > 0 && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-xs"
+                      onClick={() => { setVerificationFilter('all'); setVerificationDocType('all'); setVerificationDistrict('all'); }}
+                    >
+                      <X className="h-3 w-3 mr-1" /> Clear filters ({activeFilterCount})
+                    </Button>
+                  )}
+                </div>
+
+                {/* Filter bar — Status, Document Type, City/District */}
+                <div className="admin-filters">
+                  <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                    <Filter className="h-3.5 w-3.5" /> Filters
+                  </div>
+                  <Select value={verificationFilter} onValueChange={setVerificationFilter}>
+                    <SelectTrigger className="h-8 w-40 text-xs"><SelectValue placeholder="Status" /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="all">All Tutors</SelectItem>
+                      <SelectItem value="all">All statuses</SelectItem>
                       <SelectItem value="pending">Pending</SelectItem>
                       <SelectItem value="approved">Verified</SelectItem>
                       <SelectItem value="rejected">Rejected</SelectItem>
                     </SelectContent>
                   </Select>
+                  <Select value={verificationDocType} onValueChange={setVerificationDocType}>
+                    <SelectTrigger className="h-8 w-44 text-xs"><SelectValue placeholder="Document type" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All document types</SelectItem>
+                      {docTypeOptions.map(dt => (
+                        <SelectItem key={dt} value={dt} className="capitalize">{dt.replace(/_/g, ' ')}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Select value={verificationDistrict} onValueChange={setVerificationDistrict}>
+                    <SelectTrigger className="h-8 w-44 text-xs"><SelectValue placeholder="City / District" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All cities</SelectItem>
+                      {verificationDistricts.map(d => (
+                        <SelectItem key={d.id} value={d.id}>{d.name_en}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
 
-                {pendingTutors.length === 0 ? (
+                {filteredTutors.length === 0 ? (
                   <Card><CardContent className="py-16 text-center">
                     <CheckCircle2 className="h-12 w-12 text-success mx-auto mb-4" />
                     <h3 className="font-bold mb-2">No tutors found</h3>
-                    <p className="text-muted-foreground">No tutors match the selected filter</p>
+                    <p className="text-muted-foreground">No tutors match the selected filters</p>
                   </CardContent></Card>
                 ) : (
                   <Card>
@@ -2433,7 +2511,7 @@ export default function AdminDashboard() {
                             </TableRow>
                           </TableHeader>
                           <TableBody>
-                            {pendingTutors.map((tutor) => (
+                            {filteredTutors.map((tutor) => (
                               <TableRow key={tutor.id}>
                                 <TableCell>
                                   <div className="flex items-center gap-2">
@@ -2554,7 +2632,8 @@ export default function AdminDashboard() {
                   );
                 })()}
               </div>
-            )}
+              );
+            })()}
 
             {/* ═══════ JOBS TAB ═══════ */}
             {activeTab === 'jobs' && (
