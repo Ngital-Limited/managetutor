@@ -815,7 +815,7 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
                         : <ArrowUpDown className="h-3 w-3 opacity-50" />}
                     </button>
                   </TableHead>
-                  <TableHead>Mode</TableHead>
+                  <TableHead>Last Education Institution</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>
                     <button
