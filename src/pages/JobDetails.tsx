@@ -301,6 +301,28 @@ export default function JobDetails() {
 
   const isOwner = user?.id === job.parent_id;
   const isTutor = role === 'tutor';
+  const isAdmin = role === 'admin';
+
+  // Hide jobs that are no longer open from the public (confirmed/completed/cancelled/expired/pending_approval).
+  // Owners and admins can still view them for management purposes.
+  const isPubliclyVisible = job.status === 'open';
+  if (!isPubliclyVisible && !isOwner && !isAdmin) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        {!isTutor && <Header />}
+        <div className="flex-1 flex items-center justify-center bg-background px-4">
+          <div className="text-center max-w-md">
+            <h2 className="text-2xl font-bold mb-2">This job is no longer available</h2>
+            <p className="text-muted-foreground mb-6">
+              The position has been filled, cancelled, or is awaiting review. Browse other open jobs to find a great match.
+            </p>
+            <Link to="/jobs"><Button>Browse Open Jobs</Button></Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
 
   const content = (
     <>
