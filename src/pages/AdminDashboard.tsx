@@ -2632,7 +2632,8 @@ export default function AdminDashboard() {
                   );
                 })()}
               </div>
-            )}
+              );
+            })()}
 
             {/* ═══════ JOBS TAB ═══════ */}
             {activeTab === 'jobs' && (
