@@ -475,9 +475,9 @@ export default function TutorDashboard() {
 
   return (
     <TutorSidebarLayout title="Tutor Dashboard">
-      <div className="p-4 md:p-8">
+      <div className="max-w-[1200px] mx-auto p-4 md:p-6 space-y-5">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div className="flex items-center gap-4 min-w-0">
             <Avatar className="h-16 w-16 shrink-0">
               <AvatarImage src={userProfile?.avatar_url || ''} />
