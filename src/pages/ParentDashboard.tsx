@@ -2502,6 +2502,8 @@ export default function ParentDashboard() {
       { key: 'all', label: 'All' },
       { key: 'pending', label: 'Pending' },
       { key: 'shortlisted', label: 'Shortlisted' },
+      { key: 'contact_requested', label: 'Contact Requested' },
+      { key: 'contact_released', label: 'Contact Released' },
       { key: 'invited_to_demo', label: 'Invited' },
       { key: 'accepted', label: 'Accepted' },
       { key: 'rejected', label: 'Rejected' },
