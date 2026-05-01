@@ -692,9 +692,11 @@ export default function BrowseJobs({ embedded = false }: { embedded?: boolean } 
                           )}
                         </div>
 
-                        <h3 className="font-bold text-lg text-foreground group-hover:text-primary transition-colors line-clamp-1 mb-1">
-                          {job.title}
-                        </h3>
+                        <Link to={`/jobs/${job.id}`}>
+                          <h3 className="font-bold text-lg text-foreground hover:text-primary transition-colors line-clamp-1 mb-1 cursor-pointer">
+                            {job.title}
+                          </h3>
+                        </Link>
 
                         <div className="flex items-center gap-3 text-sm text-muted-foreground mb-3">
                           <span className="flex items-center gap-1">
