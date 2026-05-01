@@ -329,12 +329,7 @@ export default function TutorPublicProfile() {
               )}
             </div>
 
-            {/* Desktop CTA */}
-            <div className="hidden md:block w-64 flex-shrink-0">
-              <Card className="border-primary/20">
-                <CardContent className="p-4">{ActionsBlock}</CardContent>
-              </Card>
-            </div>
+            {/* Desktop CTA moved to sidebar to avoid duplication */}
           </div>
         </div>
       </section>
