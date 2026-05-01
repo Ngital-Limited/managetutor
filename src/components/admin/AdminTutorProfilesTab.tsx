@@ -1110,6 +1110,34 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Transfer Role Dialog */}
+      <Dialog open={transferDialogOpen} onOpenChange={(open) => { if (!open) { setTransferDialogOpen(false); setTransferTargetUserId(null); } }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <ArrowUpDown className="h-5 w-5 text-primary" /> Transfer Role
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <p className="text-sm text-muted-foreground">
+              Transfer <strong>{transferTargetName}</strong> from <strong>Tutor</strong> to <strong>Parent</strong>?
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Their tutor profile will be marked unavailable but kept for reference. They will be able to post jobs as a parent.
+            </p>
+          </div>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => { setTransferDialogOpen(false); setTransferTargetUserId(null); }}>
+              Cancel
+            </Button>
+            <Button onClick={confirmTransferToParent} disabled={transferProcessing}>
+              {transferProcessing ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <ArrowUpDown className="h-4 w-4 mr-1" />}
+              Confirm Transfer
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
