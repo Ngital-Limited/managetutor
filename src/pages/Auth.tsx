@@ -79,15 +79,48 @@ export default function Auth() {
   }, [user, authLoading, userRole, navigate, searchParams]);
 
   // Poll for email verification when showing the verify screen
+  // Listen for auth state changes — catches verification link clicked in same browser
+  // Also handles redirect back from email confirmation link
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (session?.user?.email_confirmed_at) {
+        if (showVerifyEmail) {
+          setEmailVerified(true);
+          setVerifyError(null);
+        }
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [showVerifyEmail]);
+
+  // On mount, check if we arrived from a confirmation redirect (URL has access_token hash)
+  useEffect(() => {
+    const hash = window.location.hash;
+    if (hash && hash.includes('access_token')) {
+      // Supabase client will auto-parse the hash and create a session
+      // The onAuthStateChange above will handle the rest
+      setCheckingVerification(true);
+      supabase.auth.getSession().then(({ data }) => {
+        if (data.session?.user?.email_confirmed_at) {
+          setEmailVerified(true);
+          setShowVerifyEmail(true);
+          setSignupEmail(data.session.user.email || '');
+          setEmail(data.session.user.email || '');
+        }
+        setCheckingVerification(false);
+      });
+    }
+  }, []);
+
+  // Poll verification status by checking session periodically
   useEffect(() => {
     if (!showVerifyEmail || emailVerified) return;
-    const EXPIRY_MS = 10 * 60 * 1000; // 10 minutes
+    const EXPIRY_MS = 10 * 60 * 1000;
     const MAX_CONSECUTIVE_ERRORS = 5;
     const startTime = Date.now();
     let errorCount = 0;
 
     const interval = setInterval(async () => {
-      // Check session expiry
       if (Date.now() - startTime > EXPIRY_MS) {
         setVerifyError('Verification session timed out. Please resend the verification email or try signing up again.');
         clearInterval(interval);
@@ -101,7 +134,7 @@ export default function Auth() {
           setVerifyError(null);
           clearInterval(interval);
         } else {
-          errorCount = 0; // reset on successful poll
+          errorCount = 0;
         }
       } catch (err: any) {
         errorCount++;
@@ -112,17 +145,6 @@ export default function Auth() {
       }
     }, 4000);
     return () => clearInterval(interval);
-  }, [showVerifyEmail, emailVerified]);
-
-  // Also listen for auth state changes (user clicks verification link in same browser)
-  useEffect(() => {
-    if (!showVerifyEmail || emailVerified) return;
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (session?.user?.email_confirmed_at) {
-        setEmailVerified(true);
-      }
-    });
-    return () => subscription.unsubscribe();
   }, [showVerifyEmail, emailVerified]);
 
   // Cooldown timer for resend button
