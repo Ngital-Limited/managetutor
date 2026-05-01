@@ -1938,6 +1938,7 @@ export default function AdminDashboard() {
     switch (s) {
       case 'open': case 'active': case 'approved': case 'completed': return 'bg-success/10 text-success border-success/20';
       case 'pending': case 'pending_approval': return 'bg-warning/10 text-warning border-warning/20';
+      case 'suspended': return 'bg-orange-100 text-orange-700 border-orange-200 dark:bg-orange-900/20 dark:text-orange-400 dark:border-orange-800/30';
       case 'rejected': case 'cancelled': case 'failed': return 'bg-destructive/10 text-destructive border-destructive/20';
       default: return 'bg-muted text-muted-foreground';
     }
