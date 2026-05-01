@@ -79,6 +79,7 @@ const App = () => (
               <Route path="/tutor/verify-badge" element={<TutorVerifyBadge />} />
               <Route path="/tutor/profile" element={<TutorProfile />} />
               <Route path="/tutor/settings" element={<TutorSettings />} />
+              <Route path="/tutor/analytics" element={<TutorAnalytics />} />
               <Route path="/tutor/saved-jobs" element={<TutorSavedJobs />} />
               <Route path="/admin/tutor/:userId" element={<TutorProfile />} />
               <Route path="/favorites" element={<Favorites />} />
