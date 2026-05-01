@@ -2557,6 +2557,9 @@ export default function AdminDashboard() {
                                       <UserCheck className="h-4 w-4 text-success" />
                                     </Button>
                                   )}
+                                  <Button variant="ghost" size="sm" onClick={() => openGuardianTransferDialog(u.id, u.full_name)} title="Transfer to Tutor">
+                                    <ArrowUpDown className="h-4 w-4 text-primary" />
+                                  </Button>
                                   <Button
                                     variant="ghost"
                                     size="sm"
