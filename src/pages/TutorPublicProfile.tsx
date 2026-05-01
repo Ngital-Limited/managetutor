@@ -125,6 +125,12 @@ export default function TutorPublicProfile() {
 
     setTutor(tutorData as TutorProfile);
 
+    // Track profile view (fire and forget)
+    supabase.from('profile_views').insert({
+      tutor_id: tutorData.id,
+      viewer_id: user?.id || null,
+    }).then(() => {});
+
     const [profileRes, subjectsRes, eduRes] = await Promise.all([
       supabase.from('profiles_public')
         .select('full_name, avatar_url, district_id, user_reference, districts (name_en), areas (name_en)')

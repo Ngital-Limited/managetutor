@@ -18,7 +18,7 @@ import { useToast } from '@/hooks/use-toast';
 import { 
   Search, MapPin, Briefcase, 
   Users, ArrowRight, ChevronLeft, ChevronRight, Send, Loader2,
-  Clock, Filter, X, Sparkles, Tag, GraduationCap, AlertTriangle
+  Clock, Filter, X, Sparkles, Tag, GraduationCap, AlertTriangle, Bookmark
 } from 'lucide-react';
 import { JOB_CATEGORIES, STUDENT_BACKGROUNDS } from '@/constants/jobCategories';
 import { Progress } from '@/components/ui/progress';
@@ -76,6 +76,7 @@ export default function BrowseJobs({ embedded = false }: { embedded?: boolean } 
   const [totalCount, setTotalCount] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [showFilters, setShowFilters] = useState(false);
+  const [savedJobIds, setSavedJobIds] = useState<Set<string>>(new Set());
 
   // Filters
   const [searchParams] = useSearchParams();
@@ -143,8 +144,28 @@ export default function BrowseJobs({ embedded = false }: { embedded?: boolean } 
   useEffect(() => {
     if (user && role === 'tutor') {
       fetchTutorProfile();
+      fetchSavedJobIds();
     }
   }, [user, role]);
+
+  const fetchSavedJobIds = async () => {
+    if (!user) return;
+    const { data } = await supabase.from('saved_jobs').select('job_id').eq('user_id', user.id);
+    if (data) setSavedJobIds(new Set(data.map(d => d.job_id)));
+  };
+
+  const toggleSaveJob = async (jobId: string) => {
+    if (!user) { navigate('/auth'); return; }
+    if (savedJobIds.has(jobId)) {
+      await supabase.from('saved_jobs').delete().eq('user_id', user.id).eq('job_id', jobId);
+      setSavedJobIds(prev => { const n = new Set(prev); n.delete(jobId); return n; });
+      toast({ title: 'Removed', description: 'Job removed from saved list.' });
+    } else {
+      await supabase.from('saved_jobs').insert({ user_id: user.id, job_id: jobId });
+      setSavedJobIds(prev => new Set(prev).add(jobId));
+      toast({ title: 'Saved', description: 'Job saved for later.' });
+    }
+  };
 
   const fetchTutorProfile = async () => {
     if (!user) return;
@@ -767,6 +788,17 @@ export default function BrowseJobs({ embedded = false }: { embedded?: boolean } 
                         </div>
 
                         <div className="flex gap-2">
+                          {user && (
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-9 w-9 rounded-xl"
+                              onClick={() => toggleSaveJob(job.id)}
+                              title={savedJobIds.has(job.id) ? 'Unsave' : 'Save for later'}
+                            >
+                              <Bookmark className={`h-4 w-4 ${savedJobIds.has(job.id) ? 'fill-primary text-primary' : ''}`} />
+                            </Button>
+                          )}
                           <Link to={`/jobs/${(job as any).slug || job.id}`}>
                             <Button variant="outline" size="sm" className="rounded-xl text-xs h-9">
                               Details
