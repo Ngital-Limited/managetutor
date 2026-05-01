@@ -42,6 +42,7 @@ interface EducationEntry {
   result: string;
   is_current: boolean;
   current_semester: string;
+  medium: string;
 }
 interface JobExperienceEntry {
   id?: string;
@@ -245,6 +246,7 @@ export default function TutorProfile() {
           result: match?.result || '',
           is_current: match?.is_current || false,
           current_semester: (match as any)?.current_semester || '',
+          medium: (match as any)?.medium || '',
         };
       }));
       if (jobRes.data) {
@@ -428,6 +430,7 @@ export default function TutorProfile() {
             result: entry.result || null,
             is_current: entry.is_current,
             current_semester: semesterValue,
+            medium: entry.medium || null,
           } as any).eq('id', entry.id);
         } else {
           const { data: newEdu } = await supabase.from('tutor_education').insert({
@@ -439,6 +442,7 @@ export default function TutorProfile() {
             result: entry.result || null,
             is_current: entry.is_current,
             current_semester: semesterValue,
+            medium: entry.medium || null,
           } as any).select('id').single();
           if (newEdu) entry.id = newEdu.id;
         }
@@ -941,6 +945,19 @@ export default function TutorProfile() {
                             <Input className="rounded-xl mt-1.5 h-11" value={entry.institution} onChange={(e) => updateEducation(index, 'institution', e.target.value)} placeholder={meta.institutionPlaceholder} />
                           )}
                         </div>
+                        {(entry.degree === 'SSC' || entry.degree === 'HSC') && (
+                          <div>
+                            <Label>Medium</Label>
+                            <Select value={entry.medium || ''} onValueChange={(v) => updateEducation(index, 'medium', v)}>
+                              <SelectTrigger className="rounded-xl mt-1.5 h-11"><SelectValue placeholder="Select medium" /></SelectTrigger>
+                              <SelectContent>
+                                {['Bangla Medium', 'English Medium', 'English Version', 'Madrasa Medium'].map(m => (
+                                  <SelectItem key={m} value={m}>{m}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        )}
                         <div>
                           <Label>{entry.degree === 'SSC' || entry.degree === 'HSC' ? 'Background' : 'Field of Study'}</Label>
                           {entry.degree === 'SSC' || entry.degree === 'HSC' ? (

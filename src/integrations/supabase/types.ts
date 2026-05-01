@@ -1538,6 +1538,7 @@ export type Database = {
           id: string
           institution: string
           is_current: boolean | null
+          medium: string | null
           passing_year: number | null
           result: string | null
           tutor_id: string
@@ -1550,6 +1551,7 @@ export type Database = {
           id?: string
           institution: string
           is_current?: boolean | null
+          medium?: string | null
           passing_year?: number | null
           result?: string | null
           tutor_id: string
@@ -1562,6 +1564,7 @@ export type Database = {
           id?: string
           institution?: string
           is_current?: boolean | null
+          medium?: string | null
           passing_year?: number | null
           result?: string | null
           tutor_id?: string
