@@ -303,7 +303,7 @@ export default function Auth() {
                   </p>
                   <Button
                     className="w-full h-11 rounded-lg text-sm font-semibold"
-                    onClick={() => { setShowVerifyEmail(false); setEmailVerified(false); setIsLogin(true); setEmail(signupEmail); setPassword(''); }}
+                    onClick={() => { setShowVerifyEmail(false); setEmailVerified(false); setIsLogin(true); setEmail(signupEmail); }}
                   >
                     <ArrowRight className="h-4 w-4 mr-2" /> Go to Login
                   </Button>
