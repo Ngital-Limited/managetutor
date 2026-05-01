@@ -982,7 +982,7 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
                 ))}
               </TableBody>
             </Table>
-          </ScrollArea>
+          </div>
 
           {/* Pagination */}
           {!loading && totalCount > 0 && (
