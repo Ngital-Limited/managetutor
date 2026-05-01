@@ -353,13 +353,17 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
     const profMap = new Map((profilesData || []).map(p => [p.id, p]));
     const DEGREE_RANK: Record<string, number> = { masters: 4, master: 4, bachelor: 3, hsc: 2, ssc: 1 };
     const lastEduMap = new Map<string, string>();
+    const lastInstMap = new Map<string, string>();
     (eduData || []).forEach((e: any) => {
       if (!e.institution?.trim()) return;
       const key = (e.degree || '').toLowerCase().trim();
       const rank = DEGREE_RANK[key] ?? 0;
       const cur = lastEduMap.get(e.tutor_id);
       const curRank = cur ? (DEGREE_RANK[cur.toLowerCase()] ?? 0) : -1;
-      if (rank > curRank) lastEduMap.set(e.tutor_id, e.degree);
+      if (rank > curRank) {
+        lastEduMap.set(e.tutor_id, e.degree);
+        lastInstMap.set(e.tutor_id, e.institution);
+      }
     });
 
     let result: TutorRow[] = tutorData.map((t: any) => {
