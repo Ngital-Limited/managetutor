@@ -37,7 +37,7 @@ import {
   LogOut, Home, DollarSign, Trash2, CreditCard, Megaphone, Send, Mail,
   Package, Plus, Pencil, ToggleLeft, ToggleRight, Wallet, MapPin, LifeBuoy, ShieldCheck,
   LogIn, BookOpen, UserPlus, TrendingUp, ChevronLeft, ChevronRight, ArrowLeft,
-  Phone, Calendar, X, Activity, HelpCircle, ArrowUpDown
+  Phone, Calendar, X, Activity, HelpCircle, ArrowUpDown, Zap
 } from 'lucide-react';
 import { Tooltip as UITooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { RevenuePayoutTab } from '@/components/admin/RevenuePayoutTab';
@@ -57,6 +57,8 @@ import { AdminHiresTab } from '@/components/admin/AdminHiresTab';
 import { AdminCommissionTab } from '@/components/admin/AdminCommissionTab';
 import { AdminPhoneLogTab } from '@/components/admin/AdminPhoneLogTab';
 import { AdminActivityLogTab } from '@/components/admin/AdminActivityLogTab';
+import { AdminSmartMatchTab } from '@/components/admin/AdminSmartMatchTab';
+import { AdminPipelineTab } from '@/components/admin/AdminPipelineTab';
 import { AdminNotesWidget } from '@/components/admin/AdminNotesWidget';
 import { AutoRefreshControl } from '@/components/AutoRefreshControl';
 import { logAdminAction } from '@/lib/adminLogger';
@@ -2020,6 +2022,13 @@ export default function AdminDashboard() {
       ],
     },
     {
+      label: 'Intelligence',
+      items: [
+        { title: 'Smart Matching', value: 'smart_match', icon: Zap },
+        { title: 'Pipeline & Funnel', value: 'pipeline', icon: TrendingUp },
+      ],
+    },
+    {
       label: 'Tutors',
       items: [
         { title: 'Tutor Profiles', value: 'tutor_profiles', icon: GraduationCap },
@@ -3687,6 +3696,12 @@ export default function AdminDashboard() {
 
             {/* ═══════ PHONE LOG TAB ═══════ */}
             {activeTab === 'phone_log' && <AdminPhoneLogTab toast={toast} />}
+
+            {/* ═══════ SMART MATCHING TAB ═══════ */}
+            {activeTab === 'smart_match' && <AdminSmartMatchTab />}
+
+            {/* ═══════ PIPELINE TAB ═══════ */}
+            {activeTab === 'pipeline' && <AdminPipelineTab toast={toast} />}
 
             {/* ═══════ ACTIVITY LOG TAB ═══════ */}
             {activeTab === 'activity_log' && <AdminActivityLogTab toast={toast} />}

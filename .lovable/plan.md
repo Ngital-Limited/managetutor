@@ -1,79 +1,33 @@
+# Phase A: Commission & Hire System ✅
 
-# Phase A: Commission & Hire System
+Track hires, auto-calculate commission, record offline payments (bKash/cash), overdue reminders.
+- `commission_records`, `commission_payments` tables
+- `AdminHiresTab`, `AdminCommissionTab` components
 
-## What This Builds
+# Phase B: Operations & Accountability ✅
 
-A complete hire-to-commission pipeline in the admin dashboard, covering:
-1. **Hires Management Tab** - View/manage all hiring confirmations, record hires manually, track hire lifecycle
-2. **Commission Tracking** - Auto-calculate 60% commission on confirmed hires, track collection status
-3. **Manual Payment Entry** - Record offline payments (bKash, cash, bank transfer) against commission invoices
-4. **Commission Reminders** - Flag overdue commissions, send reminder notifications
+Internal notes per user, phone follow-up logs, master audit log for all admin actions.
+- `internal_notes`, `phone_followups`, `activity_logs` tables
+- `AdminNotesWidget`, `AdminPhoneLogTab`, `AdminActivityLogTab` components
+- `logAdminAction` helper retrofitted across dashboard
 
----
+# Phase C: User Detail Views ✅
 
-## Database Changes
+360° guardian/tutor detail pages with full activity timelines and financial history.
+- `/admin/guardian-detail/:id` and `/admin/tutor-detail/:id` routes
+- Stats cards, tabbed views (Applications, Hires, Finance, Notes, Activity)
 
-### New table: `commission_records`
-Tracks commission owed and collected per hire:
-- `id`, `hiring_confirmation_id` (FK), `tutor_id`, `parent_id`, `job_id`
-- `agreed_salary`, `commission_pct`, `commission_amount`, `amount_paid`, `amount_due`
-- `status` (pending, partial, paid, waived)
-- `due_date`, `created_at`, `updated_at`
-- RLS: admin-only CRUD
+# Phase D: Intelligence & Pipeline ✅
 
-### New table: `commission_payments`
-Individual payment entries against a commission record:
-- `id`, `commission_id` (FK), `amount`, `payment_method` (bkash/cash/bank/online)
-- `payment_reference`, `received_by` (admin user_id), `notes`
-- `payment_date`, `created_at`
-- RLS: admin-only CRUD
+Smart matching tools, pipeline visualizations, admin "apply/shortlist on behalf" workflows.
+- `AdminSmartMatchTab` — Score-based tutor-job matching (district +30, area +15, gender +15, subject +20 each, budget +10, verified +10, experience up to +15). Apply/shortlist/accept on behalf with notifications.
+- `AdminPipelineTab` — Conversion funnel visualization (Jobs Posted → With Applications → Shortlisted → Demo → Accepted → Hired) with period filters, conversion rate cards, and per-job stage breakdown.
+- New "Intelligence" sidebar group with both tabs.
 
-### Migration on `hiring_confirmations`
-- Add `commission_status` column (text, default 'pending') to quickly filter hires by commission state
-- Add `admin_notes` column (text, nullable) for internal notes
+# Phase E: Financials & Reports (Next)
 
----
+Unified transaction ledger, PDF invoice generation, conversion funnel analytics.
 
-## New Components
+# Phase F: Content & Mobile
 
-### 1. `AdminHiresTab` (`src/components/admin/AdminHiresTab.tsx`)
-- Table of all `hiring_confirmations` joined with profiles, jobs
-- Status filters (pending_tutor, confirmed, cancelled)
-- "Record Hire" dialog for admin to manually create a hire from an application
-- Detail view showing tutor/parent info, agreed salary, commission breakdown
-- Button to create commission record upon hire confirmation
-
-### 2. `AdminCommissionTab` (`src/components/admin/AdminCommissionTab.tsx`)
-- Summary cards: total owed, total collected, overdue count
-- Table of all commission records with status badges
-- "Record Payment" dialog: amount, method (bKash/cash/bank), reference number, date
-- Overdue highlighting (configurable days threshold from platform_settings)
-- "Send Reminder" button that creates a notification for the tutor
-- Waive commission option with reason
-
----
-
-## Admin Dashboard Integration
-
-- Add two new sidebar items under the "Finance" group:
-  - "Hires" (value: `hires`, icon: CheckCircle2)
-  - "Commissions" (value: `commissions`, icon: Percent)
-- Wire `activeTab === 'hires'` and `activeTab === 'commissions'` to render the new components
-
----
-
-## Commission Calculation Logic
-
-Uses existing `src/lib/commission.ts` (`getPlatformCommissionPct`, `computeFeeSplit`). When a hire is confirmed:
-- Fetch `platform_commission_pct` from `platform_settings` (default 20%)
-- Calculate: `commission_amount = agreed_salary * commission_pct / 100`
-- Auto-create a `commission_records` row with `due_date` = hire start_date + 30 days
-
----
-
-## Implementation Order
-
-1. Database migration (2 new tables + alter hiring_confirmations)
-2. `AdminHiresTab` component
-3. `AdminCommissionTab` component  
-4. Wire both into AdminDashboard sidebar and tab renderer
+CMS for FAQ/Terms, notification templates, mobile-optimized quick actions.
