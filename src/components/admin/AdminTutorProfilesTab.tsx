@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { CLASS_LEVELS } from '@/constants/classLevels';
 import { JOB_CATEGORIES } from '@/constants/jobCategories';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -80,15 +79,12 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
   const [search, setSearch] = useState('');
   const [filterAreas, setFilterAreas] = useState<string[]>([]);
   const [filterGender, setFilterGender] = useState('all');
-  const [filterMedium, setFilterMedium] = useState('all');
-  const [filterEducation, setFilterEducation] = useState('');
   const [filterUniversity, setFilterUniversity] = useState('');
   const [filterVerification, setFilterVerification] = useState('all');
   const [filterAvailability, setFilterAvailability] = useState('all');
-  const [filterClassLevel, setFilterClassLevel] = useState('all');
-  const [filterSubject, setFilterSubject] = useState('all');
-  const [filterCategory, setFilterCategory] = useState('all');
-  const [filterLastEducation, setFilterLastEducation] = useState('all');
+  const [filterEduMedium, setFilterEduMedium] = useState('all');
+  const [filterEduBackground, setFilterEduBackground] = useState('all');
+  const [filterFieldOfStudy, setFilterFieldOfStudy] = useState('all');
   const [showFilters, setShowFilters] = useState(false);
   const [sortBy, setSortBy] = useState<'last_education' | 'joined' | null>(null);
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
@@ -126,29 +122,27 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
   const [banProcessing, setBanProcessing] = useState(false);
 
   // ─── Education & subject data ───
-  const [educationOptions, setEducationOptions] = useState<string[]>([]);
   const [universityOptions, setUniversityOptions] = useState<string[]>([]);
-  const [subjects, setSubjects] = useState<{ id: string; name_en: string; category_en: string | null }[]>([]);
+  const [eduMediumOptions, setEduMediumOptions] = useState<string[]>([]);
+  const [fieldOfStudyOptions, setFieldOfStudyOptions] = useState<string[]>([]);
 
   useEffect(() => {
     supabase.from('districts').select('id, name_en').order('name_en').then(({ data }) => setDistricts(data || []));
     supabase.from('areas').select('id, name_en, district_id').order('name_en').then(({ data }) => setAreas(data || []));
-    supabase.from('subjects').select('id, name_en, category_en').order('name_en').then(({ data }) => setSubjects(data || []));
-    supabase.from('tutor_education').select('degree, institution').limit(500).then(({ data }) => {
+    supabase.from('tutor_education').select('degree, institution, medium, field_of_study').limit(2000).then(({ data }) => {
       if (data) {
-        setEducationOptions([...new Set(data.map(d => d.degree).filter(Boolean))].sort());
         setUniversityOptions([...new Set(data.map(d => d.institution).filter(Boolean))].sort());
+        setEduMediumOptions([...new Set(data.map(d => d.medium).filter(Boolean))].sort());
+        // Field of study only from Bachelor/Masters records
+        const higherEdu = data.filter(d => ['Bachelor', 'Bachelors', 'Masters'].includes(d.degree || ''));
+        const fields = [...new Set(higherEdu.map(d => (d.field_of_study || '').trim()).filter(f => f && f.length > 2 && !f.startsWith('.')))].sort();
+        setFieldOfStudyOptions(fields);
       }
     });
   }, []);
 
   const districtMap = useMemo(() => new Map(districts.map(d => [d.id, d.name_en])), [districts]);
   const areaMap = useMemo(() => new Map(areas.map(a => [a.id, a.name_en])), [areas]);
-  const subjectCategories = useMemo(() => [...new Set(subjects.map(s => s.category_en).filter(Boolean))] as string[], [subjects]);
-  const filteredSubjects = useMemo(() =>
-    filterCategory !== 'all' ? subjects.filter(s => s.category_en === filterCategory) : subjects,
-    [subjects, filterCategory]
-  );
 
   // Area options for MultiSearchableSelect
   const areaOptions = useMemo(() =>
@@ -186,19 +180,12 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
   useEffect(() => {
     setCurrentPage(1);
   }, [
-    searchDebounced, filterAreas, filterGender, filterMedium,
-    filterEducation, filterUniversity, filterVerification, filterAvailability,
-    filterClassLevel, filterSubject, filterCategory, filterLastEducation,
+    searchDebounced, filterAreas, filterGender,
+    filterUniversity, filterVerification, filterAvailability,
+    filterEduMedium, filterEduBackground, filterFieldOfStudy,
     sortBy, sortDir, pageSize,
   ]);
 
-  /**
-   * Build a server-side query against tutor_profiles applying every filter
-   * we can express directly. Cross-table filters (subject, education, search)
-   * are pre-resolved into ID sets and intersected via `.in('id', ids)`.
-   *
-   * Returns either { rows, count } for a page, or { ids } when fetchAllIds=true.
-   */
   const queryTutors = useCallback(async (opts: {
     from: number;
     to: number;
@@ -207,27 +194,20 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
     // ─── Pre-resolve cross-table ID filters ───
     const idConstraints: string[][] = [];
 
-    // Subject / category filter → tutor_subjects
-    if (filterSubject !== 'all') {
-      const { data } = await supabase
-        .from('tutor_subjects').select('tutor_profile_id').eq('subject_id', filterSubject);
-      idConstraints.push([...new Set((data || []).map(r => r.tutor_profile_id))]);
-    } else if (filterCategory !== 'all') {
-      const catSubjectIds = subjects.filter(s => s.category_en === filterCategory).map(s => s.id);
-      if (catSubjectIds.length > 0) {
-        const { data } = await supabase
-          .from('tutor_subjects').select('tutor_profile_id').in('subject_id', catSubjectIds);
-        idConstraints.push([...new Set((data || []).map(r => r.tutor_profile_id))]);
-      } else {
-        idConstraints.push([]);
-      }
-    }
-
-    // Education filter → tutor_education
-    if (filterEducation || filterUniversity) {
+    // Education-based filters → tutor_education
+    const hasEduFilter = filterUniversity || filterEduMedium !== 'all' || filterEduBackground !== 'all' || filterFieldOfStudy !== 'all';
+    if (hasEduFilter) {
       let eduQ = supabase.from('tutor_education').select('tutor_id');
-      if (filterEducation) eduQ = eduQ.ilike('degree', `%${filterEducation}%`);
       if (filterUniversity) eduQ = eduQ.ilike('institution', `%${filterUniversity}%`);
+      if (filterEduMedium !== 'all') eduQ = eduQ.eq('medium', filterEduMedium);
+      if (filterEduBackground !== 'all') {
+        // SSC or HSC degree filter
+        eduQ = eduQ.eq('degree', filterEduBackground);
+      }
+      if (filterFieldOfStudy !== 'all') {
+        // Field of study from Bachelor/Masters records
+        eduQ = eduQ.in('degree', ['Bachelor', 'Bachelors', 'Masters']).ilike('field_of_study', `%${filterFieldOfStudy}%`);
+      }
       const { data } = await eduQ;
       idConstraints.push([...new Set((data || []).map(r => r.tutor_id))]);
     }
@@ -270,7 +250,6 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
       if (filterGender !== 'all') q = q.eq('gender', filterGender as any);
       if (filterVerification !== 'all') q = q.eq('verification_status', filterVerification as any);
       if (filterAvailability !== 'all') q = q.eq('is_available', filterAvailability === 'available');
-      if (filterMedium !== 'all') q = q.eq('teaching_mode', filterMedium as any);
 
       // Multi-area: narrow by district_id (then refine on area_id client-side per page)
       if (filterAreas.length > 0) {
@@ -280,17 +259,11 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
         if (districtIds.length > 0) q = q.in('district_id', districtIds);
       }
 
-      // Class level (text[] array contains)
-      if (filterClassLevel !== 'all') {
-        q = q.contains('class_levels', [filterClassLevel] as any);
-      }
-
       if (intersectedIds) q = q.in('id', intersectedIds);
       return q;
     };
 
     if (opts.fetchAllIds) {
-      // Fetch every matching tutor's user_id (used by "Notify All Filtered")
       const all: { user_id: string; id: string }[] = [];
       const PAGE = 1000;
       for (let from = 0; from < 50000; from += PAGE) {
@@ -301,7 +274,6 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
         all.push(...data as any);
         if (data.length < PAGE) break;
       }
-      // If user search is active, intersect with searchUserIds
       let filtered = all;
       if (searchUserIds) {
         const set = new Set(searchUserIds);
@@ -310,8 +282,6 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
       return { rows: [], count: filtered.length, ids: filtered.map(r => r.user_id) };
     }
 
-    // ─── Page query ───
-    // When search by user is active and is small enough, narrow by user_id.in(...)
     let pageQ = buildBase(
       'id, user_id, gender, education, experience_years, teaching_mode, verification_status, is_available, class_levels, district_id, created_at, slug',
       true,
@@ -324,10 +294,10 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
     const { data: tutorData, count } = await pageQ;
     return { rows: tutorData || [], count: count ?? 0, ids: [] as string[] };
   }, [
-    searchDebounced, filterAreas, filterGender, filterMedium,
-    filterEducation, filterUniversity, filterVerification, filterAvailability,
-    filterClassLevel, filterSubject, filterCategory,
-    areas, subjects, sortBy, sortDir,
+    searchDebounced, filterAreas, filterGender,
+    filterUniversity, filterVerification, filterAvailability,
+    filterEduMedium, filterEduBackground, filterFieldOfStudy,
+    areas, sortBy, sortDir,
   ]);
 
   const fetchTutors = useCallback(async () => {
@@ -425,15 +395,11 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
     if (filterAreas.length > 0) {
       result = result.filter(t => t.area_id && filterAreas.includes(t.area_id));
     }
-    // Last-education filter (only knowable after hydration)
-    if (filterLastEducation !== 'all') {
-      result = result.filter(t => (t.last_education || '').toLowerCase() === filterLastEducation.toLowerCase());
-    }
 
     setTutors(result);
     setTotalCount(count);
     setLoading(false);
-  }, [queryTutors, currentPage, pageSize, districtMap, areaMap, filterAreas, filterLastEducation]);
+  }, [queryTutors, currentPage, pageSize, districtMap, areaMap, filterAreas]);
 
   useEffect(() => { fetchTutors(); }, [fetchTutors]);
 
@@ -575,23 +541,20 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
     setSearch('');
     setFilterAreas([]);
     setFilterGender('all');
-    setFilterMedium('all');
-    setFilterEducation('');
     setFilterUniversity('');
     setFilterVerification('all');
     setFilterAvailability('all');
-    setFilterClassLevel('all');
-    setFilterSubject('all');
-    setFilterCategory('all');
-    setFilterLastEducation('all');
+    setFilterEduMedium('all');
+    setFilterEduBackground('all');
+    setFilterFieldOfStudy('all');
   };
 
   const activeFilterCount = [
-    filterAreas.length > 0, filterGender !== 'all', filterMedium !== 'all',
-    filterEducation !== '', filterUniversity !== '',
+    filterAreas.length > 0, filterGender !== 'all',
+    filterUniversity !== '',
     filterVerification !== 'all', filterAvailability !== 'all',
-    filterClassLevel !== 'all', filterSubject !== 'all', filterCategory !== 'all',
-    filterLastEducation !== 'all',
+    filterEduMedium !== 'all', filterEduBackground !== 'all',
+    filterFieldOfStudy !== 'all',
   ].filter(Boolean).length;
 
   const statusColor = (s: string) => {
@@ -702,19 +665,6 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
               </div>
 
               <div>
-                <Label className="text-xs font-medium text-muted-foreground">Teaching Mode</Label>
-                <Select value={filterMedium} onValueChange={setFilterMedium}>
-                  <SelectTrigger className="mt-1 h-9"><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All</SelectItem>
-                    <SelectItem value="online">Online</SelectItem>
-                    <SelectItem value="in_person">In-Person</SelectItem>
-                    <SelectItem value="hybrid">Hybrid</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
                 <Label className="text-xs font-medium text-muted-foreground">Verification</Label>
                 <Select value={filterVerification} onValueChange={setFilterVerification}>
                   <SelectTrigger className="mt-1 h-9"><SelectValue /></SelectTrigger>
@@ -725,12 +675,6 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
                     <SelectItem value="rejected">Rejected</SelectItem>
                   </SelectContent>
                 </Select>
-              </div>
-
-              <div>
-                <Label className="text-xs font-medium text-muted-foreground">Education / Degree</Label>
-                <Input value={filterEducation} onChange={e => setFilterEducation(e.target.value)} className="mt-1 h-9" placeholder="e.g. BSc, MSc, HSC..." list="edu-options" />
-                <datalist id="edu-options">{educationOptions.map(e => <option key={e} value={e} />)}</datalist>
               </div>
 
               <div>
@@ -752,59 +696,40 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
               </div>
 
               <div>
-                <Label className="text-xs font-medium text-muted-foreground">Class Level</Label>
-                <Select value={filterClassLevel} onValueChange={setFilterClassLevel}>
+                <Label className="text-xs font-medium text-muted-foreground">Education Medium</Label>
+                <Select value={filterEduMedium} onValueChange={setFilterEduMedium}>
                   <SelectTrigger className="mt-1 h-9"><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Levels</SelectItem>
-                    {CLASS_LEVELS.map(group => (
-                      <div key={group.group}>
-                        <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground bg-muted/50">{group.group}</div>
-                        {group.items.map(item => (
-                          <SelectItem key={item} value={item}>{item}</SelectItem>
-                        ))}
-                      </div>
-                    ))}
+                    <SelectItem value="all">All</SelectItem>
+                    <SelectItem value="Bangla Medium">Bangla Medium</SelectItem>
+                    <SelectItem value="English Medium">English Medium</SelectItem>
+                    <SelectItem value="English Version">English Version</SelectItem>
+                    <SelectItem value="Madrasa">Madrasa</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
               <div>
-                <Label className="text-xs font-medium text-muted-foreground">Subject Category</Label>
-                <Select value={filterCategory} onValueChange={v => { setFilterCategory(v); if (v !== filterCategory) setFilterSubject('all'); }}>
-                  <SelectTrigger className="mt-1 h-9"><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Categories</SelectItem>
-                    {subjectCategories.map(c => (
-                      <SelectItem key={c} value={c}>{c}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label className="text-xs font-medium text-muted-foreground">Subject</Label>
-                <Select value={filterSubject} onValueChange={setFilterSubject}>
-                  <SelectTrigger className="mt-1 h-9"><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Subjects</SelectItem>
-                    {filteredSubjects.map(s => (
-                      <SelectItem key={s.id} value={s.id}>{s.name_en}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label className="text-xs font-medium text-muted-foreground">Last Education</Label>
-                <Select value={filterLastEducation} onValueChange={setFilterLastEducation}>
+                <Label className="text-xs font-medium text-muted-foreground">Education Background</Label>
+                <Select value={filterEduBackground} onValueChange={setFilterEduBackground}>
                   <SelectTrigger className="mt-1 h-9"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">Any</SelectItem>
-                    <SelectItem value="Masters">Masters</SelectItem>
-                    <SelectItem value="Bachelor">Bachelor</SelectItem>
-                    <SelectItem value="HSC">HSC</SelectItem>
                     <SelectItem value="SSC">SSC</SelectItem>
+                    <SelectItem value="HSC">HSC</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label className="text-xs font-medium text-muted-foreground">Field of Study</Label>
+                <Select value={filterFieldOfStudy} onValueChange={setFilterFieldOfStudy}>
+                  <SelectTrigger className="mt-1 h-9"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Any</SelectItem>
+                    {fieldOfStudyOptions.map(f => (
+                      <SelectItem key={f} value={f}>{f}</SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
