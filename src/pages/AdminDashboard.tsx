@@ -2043,6 +2043,7 @@ export default function AdminDashboard() {
         { title: 'Broadcast', value: 'broadcast', icon: Megaphone },
         { title: 'Contact Messages', value: 'contacts', icon: Mail },
         { title: 'Support Tickets', value: 'tickets', icon: LifeBuoy },
+        { title: 'Phone Log', value: 'phone_log', icon: Phone },
       ],
     },
     {
