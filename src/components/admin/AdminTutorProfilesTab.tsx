@@ -666,19 +666,6 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
               </div>
 
               <div>
-                <Label className="text-xs font-medium text-muted-foreground">Teaching Mode</Label>
-                <Select value={filterMedium} onValueChange={setFilterMedium}>
-                  <SelectTrigger className="mt-1 h-9"><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All</SelectItem>
-                    <SelectItem value="online">Online</SelectItem>
-                    <SelectItem value="in_person">In-Person</SelectItem>
-                    <SelectItem value="hybrid">Hybrid</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
                 <Label className="text-xs font-medium text-muted-foreground">Verification</Label>
                 <Select value={filterVerification} onValueChange={setFilterVerification}>
                   <SelectTrigger className="mt-1 h-9"><SelectValue /></SelectTrigger>
@@ -689,12 +676,6 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
                     <SelectItem value="rejected">Rejected</SelectItem>
                   </SelectContent>
                 </Select>
-              </div>
-
-              <div>
-                <Label className="text-xs font-medium text-muted-foreground">Education / Degree</Label>
-                <Input value={filterEducation} onChange={e => setFilterEducation(e.target.value)} className="mt-1 h-9" placeholder="e.g. BSc, MSc, HSC..." list="edu-options" />
-                <datalist id="edu-options">{educationOptions.map(e => <option key={e} value={e} />)}</datalist>
               </div>
 
               <div>
@@ -716,59 +697,40 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
               </div>
 
               <div>
-                <Label className="text-xs font-medium text-muted-foreground">Class Level</Label>
-                <Select value={filterClassLevel} onValueChange={setFilterClassLevel}>
+                <Label className="text-xs font-medium text-muted-foreground">Education Medium</Label>
+                <Select value={filterEduMedium} onValueChange={setFilterEduMedium}>
                   <SelectTrigger className="mt-1 h-9"><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Levels</SelectItem>
-                    {CLASS_LEVELS.map(group => (
-                      <div key={group.group}>
-                        <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground bg-muted/50">{group.group}</div>
-                        {group.items.map(item => (
-                          <SelectItem key={item} value={item}>{item}</SelectItem>
-                        ))}
-                      </div>
-                    ))}
+                    <SelectItem value="all">All</SelectItem>
+                    <SelectItem value="Bangla Medium">Bangla Medium</SelectItem>
+                    <SelectItem value="English Medium">English Medium</SelectItem>
+                    <SelectItem value="English Version">English Version</SelectItem>
+                    <SelectItem value="Madrasa">Madrasa</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
               <div>
-                <Label className="text-xs font-medium text-muted-foreground">Subject Category</Label>
-                <Select value={filterCategory} onValueChange={v => { setFilterCategory(v); if (v !== filterCategory) setFilterSubject('all'); }}>
-                  <SelectTrigger className="mt-1 h-9"><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Categories</SelectItem>
-                    {subjectCategories.map(c => (
-                      <SelectItem key={c} value={c}>{c}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label className="text-xs font-medium text-muted-foreground">Subject</Label>
-                <Select value={filterSubject} onValueChange={setFilterSubject}>
-                  <SelectTrigger className="mt-1 h-9"><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Subjects</SelectItem>
-                    {filteredSubjects.map(s => (
-                      <SelectItem key={s.id} value={s.id}>{s.name_en}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label className="text-xs font-medium text-muted-foreground">Last Education</Label>
-                <Select value={filterLastEducation} onValueChange={setFilterLastEducation}>
+                <Label className="text-xs font-medium text-muted-foreground">Education Background</Label>
+                <Select value={filterEduBackground} onValueChange={setFilterEduBackground}>
                   <SelectTrigger className="mt-1 h-9"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">Any</SelectItem>
-                    <SelectItem value="Masters">Masters</SelectItem>
-                    <SelectItem value="Bachelor">Bachelor</SelectItem>
-                    <SelectItem value="HSC">HSC</SelectItem>
                     <SelectItem value="SSC">SSC</SelectItem>
+                    <SelectItem value="HSC">HSC</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label className="text-xs font-medium text-muted-foreground">Field of Study</Label>
+                <Select value={filterFieldOfStudy} onValueChange={setFilterFieldOfStudy}>
+                  <SelectTrigger className="mt-1 h-9"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Any</SelectItem>
+                    {fieldOfStudyOptions.map(f => (
+                      <SelectItem key={f} value={f}>{f}</SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
