@@ -112,6 +112,8 @@ interface TutorVerification {
   experience_years: number;
   gender: string;
   created_at: string;
+  district_id: string | null;
+  district_name: string | null;
   profiles: { full_name: string; email: string; phone: string | null };
   verification_documents: { id: string; document_type: string; document_url: string; status: string }[];
 }
