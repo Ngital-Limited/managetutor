@@ -81,14 +81,35 @@ export default function Auth() {
   // Poll for email verification when showing the verify screen
   useEffect(() => {
     if (!showVerifyEmail || emailVerified) return;
+    const EXPIRY_MS = 10 * 60 * 1000; // 10 minutes
+    const MAX_CONSECUTIVE_ERRORS = 5;
+    const startTime = Date.now();
+    let errorCount = 0;
+
     const interval = setInterval(async () => {
+      // Check session expiry
+      if (Date.now() - startTime > EXPIRY_MS) {
+        setVerifyError('Verification session timed out. Please resend the verification email or try signing up again.');
+        clearInterval(interval);
+        return;
+      }
       try {
-        const { data } = await supabase.auth.getSession();
+        const { data, error } = await supabase.auth.getSession();
+        if (error) throw error;
         if (data.session?.user?.email_confirmed_at) {
           setEmailVerified(true);
+          setVerifyError(null);
+          clearInterval(interval);
+        } else {
+          errorCount = 0; // reset on successful poll
+        }
+      } catch (err: any) {
+        errorCount++;
+        if (errorCount >= MAX_CONSECUTIVE_ERRORS) {
+          setVerifyError('Unable to check verification status. Please check your connection and try again.');
           clearInterval(interval);
         }
-      } catch {}
+      }
     }, 4000);
     return () => clearInterval(interval);
   }, [showVerifyEmail, emailVerified]);
