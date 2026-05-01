@@ -32,7 +32,7 @@ import { cached, sharedCached, invalidate, sharedInvalidate, invalidatePrefix, s
 import { format } from 'date-fns';
 import {
   GraduationCap, Shield, Users, Briefcase, CheckCircle2, XCircle,
-  Clock, AlertTriangle, BarChart3, FileText, Settings, Search,
+  Clock, AlertTriangle, BarChart3, FileText, Settings, Search, Filter,
   Eye, Ban, UserCheck, FileCheck,
   LogOut, Home, DollarSign, Trash2, CreditCard, Megaphone, Send, Mail,
   Package, Plus, Pencil, ToggleLeft, ToggleRight, Wallet, MapPin, LifeBuoy, ShieldCheck,
