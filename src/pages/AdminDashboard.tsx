@@ -1412,10 +1412,26 @@ export default function AdminDashboard() {
     if (jobStatusFilter !== 'all') query = query.eq('status', jobStatusFilter as any);
 
     const q = jobSearchDebounced;
+    let phoneMatchedParentIds: string[] | null = null;
     if (q) {
-      // Server-side OR search across reference + title
       const escaped = q.replace(/[%,()]/g, ' ');
-      query = query.or(`job_reference.ilike.%${escaped}%,title.ilike.%${escaped}%`);
+      // If query looks like a phone (contains digits), also search parent profiles by phone
+      if (/\d/.test(q)) {
+        const { data: phoneProfiles } = await supabase
+          .from('profiles')
+          .select('id')
+          .ilike('phone', `%${escaped}%`)
+          .limit(500);
+        phoneMatchedParentIds = (phoneProfiles || []).map(p => p.id);
+      }
+      const orParts = [
+        `job_reference.ilike.%${escaped}%`,
+        `title.ilike.%${escaped}%`,
+      ];
+      if (phoneMatchedParentIds && phoneMatchedParentIds.length > 0) {
+        orParts.push(`parent_id.in.(${phoneMatchedParentIds.join(',')})`);
+      }
+      query = query.or(orParts.join(','));
     }
 
     const { data, count } = await query;
@@ -1423,9 +1439,9 @@ export default function AdminDashboard() {
 
     if (data && data.length > 0) {
       const parentIds = [...new Set(data.map(j => j.parent_id))];
-      const { data: profs } = await supabase.from('profiles').select('id, full_name').in('id', parentIds);
+      const { data: profs } = await supabase.from('profiles').select('id, full_name, phone').in('id', parentIds);
       const pMap = new Map(profs?.map(p => [p.id, p]) || []);
-      setJobs(data.map(j => ({ ...j, profiles: pMap.get(j.parent_id) || { full_name: 'Unknown' } })) as unknown as JobRow[]);
+      setJobs(data.map(j => ({ ...j, profiles: pMap.get(j.parent_id) || { full_name: 'Unknown', phone: null } })) as unknown as JobRow[]);
     } else {
       setJobs([]);
     }
