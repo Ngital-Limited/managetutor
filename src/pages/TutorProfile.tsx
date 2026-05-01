@@ -599,6 +599,21 @@ export default function TutorProfile() {
     setUploading(false);
   };
 
+  const handleViewDoc = async (docUrl: string) => {
+    // Extract storage path from public URL: .../verification-documents/<path>
+    const marker = '/verification-documents/';
+    const idx = docUrl.indexOf(marker);
+    const path = idx >= 0 ? decodeURIComponent(docUrl.substring(idx + marker.length)) : docUrl;
+    const { data, error } = await supabase.storage
+      .from('verification-documents')
+      .createSignedUrl(path, 60);
+    if (error) {
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+      return;
+    }
+    if (data?.signedUrl) window.open(data.signedUrl, '_blank');
+  };
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'approved':
