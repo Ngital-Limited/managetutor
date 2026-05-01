@@ -450,7 +450,7 @@ export default function ParentDashboard() {
     }
 
     // Fetch student profiles
-    const { data: studentsData } = await supabase
+    const { data: studentsData } = await (supabase as any)
       .from('student_profiles')
       .select('*')
       .eq('parent_id', user.id)
@@ -458,7 +458,7 @@ export default function ParentDashboard() {
     if (studentsData) setStudentProfiles(studentsData);
 
     // Fetch hiring confirmations
-    const { data: hcData } = await supabase
+    const { data: hcData } = await (supabase as any)
       .from('hiring_confirmations')
       .select('*')
       .eq('parent_id', user.id)
