@@ -89,6 +89,7 @@ export default function TutorProfile() {
 
   // Education & Job Experience
   const [educationEntries, setEducationEntries] = useState<EducationEntry[]>([]);
+  const [manualInstitution, setManualInstitution] = useState<Record<string, boolean>>({});
   const [jobExperiences, setJobExperiences] = useState<JobExperienceEntry[]>([]);
 
   const [profile, setProfile] = useState({
