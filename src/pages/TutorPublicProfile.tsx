@@ -272,9 +272,9 @@ export default function TutorPublicProfile() {
       {/* HERO */}
       <section className="bg-gradient-to-br from-primary/5 via-background to-accent/5 border-b border-border/60">
         <div className="container mx-auto px-4 md:px-6 py-8 max-w-[1200px]">
-          <div className="flex flex-col md:flex-row gap-6 items-start">
-            <div className="relative">
-              <Avatar className="h-28 w-28 md:h-32 md:w-32 ring-4 ring-background shadow-lg">
+          <div className="flex flex-col md:flex-row gap-6 items-center md:items-start text-center md:text-left">
+            <div className="relative shrink-0">
+              <Avatar className="h-24 w-24 sm:h-28 sm:w-28 md:h-32 md:w-32 ring-4 ring-background shadow-lg">
                 <AvatarImage src={profile.avatar_url} />
                 <AvatarFallback className="text-4xl bg-primary/10 text-primary">
                   {profile.full_name?.charAt(0) || 'T'}
@@ -287,9 +287,9 @@ export default function TutorPublicProfile() {
               )}
             </div>
 
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 flex-wrap mb-2">
-                <h1 className="text-2xl md:text-3xl font-bold leading-tight">{profile.full_name}</h1>
+            <div className="flex-1 min-w-0 w-full">
+              <div className="flex items-center justify-center md:justify-start gap-2 flex-wrap mb-2">
+                <h1 className="text-xl sm:text-2xl md:text-3xl font-bold leading-tight break-words">{profile.full_name}</h1>
                 {profile.user_reference && (
                   <Badge variant="outline" className="font-mono text-[10px]">{profile.user_reference}</Badge>
                 )}
@@ -303,7 +303,7 @@ export default function TutorPublicProfile() {
                 )}
               </div>
 
-              <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-sm text-muted-foreground mb-4">
+              <div className="flex flex-wrap justify-center md:justify-start items-center gap-x-4 gap-y-1.5 text-sm text-muted-foreground mb-4">
                 {locationText && (
                   <span className="flex items-center gap-1.5"><MapPin className="h-4 w-4" />{locationText}</span>
                 )}
@@ -312,7 +312,7 @@ export default function TutorPublicProfile() {
                 <span className="capitalize flex items-center gap-1.5"><User className="h-4 w-4" />{tutor.gender}</span>
               </div>
 
-              <div className="flex flex-wrap items-center gap-4 mb-4">
+              <div className="flex flex-wrap justify-center md:justify-start items-center gap-4 mb-4">
                 <div className="text-base">
                   <span className="font-bold text-primary text-xl">৳{tutor.monthly_salary_min || 0}–{tutor.monthly_salary_max || 0}</span>
                   <span className="text-muted-foreground text-xs ml-1">/month</span>
@@ -320,7 +320,7 @@ export default function TutorPublicProfile() {
               </div>
 
               {subjects.length > 0 && (
-                <div className="flex flex-wrap gap-1.5">
+                <div className="flex flex-wrap justify-center md:justify-start gap-1.5">
                   {subjects.slice(0, 6).map(s => (
                     <Badge key={s.id} variant="secondary" className="text-xs"><BookOpen className="h-3 w-3 mr-1" />{s.name_en}</Badge>
                   ))}
@@ -328,8 +328,6 @@ export default function TutorPublicProfile() {
                 </div>
               )}
             </div>
-
-            {/* Desktop CTA moved to sidebar to avoid duplication */}
           </div>
         </div>
       </section>
