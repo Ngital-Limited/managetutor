@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
+import { toast as sonnerToast } from 'sonner';
 import { Card, CardContent } from '@/components/ui/card';
 import { JOB_CATEGORIES } from '@/constants/jobCategories';
 import { Button } from '@/components/ui/button';
