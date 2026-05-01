@@ -248,24 +248,48 @@ export default function Auth() {
           {showVerifyEmail ? (
             /* ─── Email Verification View ─── */
             <div className="text-center">
-              <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-6">
-                <Mail className="h-8 w-8 text-primary" />
-              </div>
-              <h2 className="text-2xl font-bold text-foreground mb-2">Verify Your Email</h2>
-              <p className="text-muted-foreground mb-6">
-                We've sent a verification link to<br />
-                <strong className="text-foreground">{signupEmail}</strong>
-              </p>
-              <div className="p-4 rounded-lg bg-accent/50 border border-accent text-sm space-y-2">
-                <p>Please check your inbox and click the verification link to activate your account.</p>
-                <p className="text-muted-foreground">Don't forget to check your spam/junk folder.</p>
-              </div>
-              <button
-                onClick={() => { setShowVerifyEmail(false); setIsLogin(true); setEmail(''); setPassword(''); }}
-                className="flex items-center justify-center gap-1.5 mt-6 text-sm text-primary hover:underline font-semibold mx-auto"
-              >
-                <ArrowLeft className="h-4 w-4" /> Back to Login
-              </button>
+              {emailVerified ? (
+                <>
+                  <div className="w-16 h-16 rounded-full bg-success/10 flex items-center justify-center mx-auto mb-6">
+                    <CheckCircle2 className="h-8 w-8 text-success" />
+                  </div>
+                  <h2 className="text-2xl font-bold text-foreground mb-2">Email Verified!</h2>
+                  <p className="text-muted-foreground mb-6">
+                    Your email <strong className="text-foreground">{signupEmail}</strong> has been confirmed.
+                  </p>
+                  <Button
+                    className="w-full h-11 rounded-lg text-sm font-semibold"
+                    onClick={() => { setShowVerifyEmail(false); setEmailVerified(false); setIsLogin(true); setEmail(signupEmail); setPassword(''); }}
+                  >
+                    <ArrowRight className="h-4 w-4 mr-2" /> Go to Login
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-6">
+                    <Mail className="h-8 w-8 text-primary" />
+                  </div>
+                  <h2 className="text-2xl font-bold text-foreground mb-2">Verify Your Email</h2>
+                  <p className="text-muted-foreground mb-6">
+                    We've sent a verification link to<br />
+                    <strong className="text-foreground">{signupEmail}</strong>
+                  </p>
+                  <div className="p-4 rounded-lg bg-accent/50 border border-accent text-sm space-y-2">
+                    <p>Please check your inbox and click the verification link to activate your account.</p>
+                    <p className="text-muted-foreground">Don't forget to check your spam/junk folder.</p>
+                  </div>
+                  <div className="flex items-center justify-center gap-2 mt-4 text-xs text-muted-foreground">
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    <span>Waiting for verification...</span>
+                  </div>
+                  <button
+                    onClick={() => { setShowVerifyEmail(false); setEmailVerified(false); setIsLogin(true); setEmail(''); setPassword(''); }}
+                    className="flex items-center justify-center gap-1.5 mt-4 text-sm text-primary hover:underline font-semibold mx-auto"
+                  >
+                    <ArrowLeft className="h-4 w-4" /> Back to Login
+                  </button>
+                </>
+              )}
             </div>
           ) : showForgotPassword ? (
             /* ─── Forgot Password View ─── */
