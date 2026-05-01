@@ -19,7 +19,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Link } from 'react-router-dom';
 import {
   Search, GraduationCap, Send, Filter, Eye, Pencil,
-  Loader2, Bell, X, LogIn, Ban, CheckCircle2, ShieldOff, ShieldCheck, Download, ArrowUpDown, ArrowUp, ArrowDown, Sparkles
+  Loader2, Bell, X, LogIn, Ban, CheckCircle2, ShieldOff, ShieldCheck, Download, ArrowUpDown, ArrowUp, ArrowDown, Sparkles, Clock, FileText, AlertCircle
 } from 'lucide-react';
 import {
   DropdownMenu as DropdownMenuRoot,
@@ -477,6 +477,14 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
   const [transferTargetName, setTransferTargetName] = useState('');
   const [transferProcessing, setTransferProcessing] = useState(false);
 
+  // ─── Verification Status Dialog ───
+  const [verifyDialogOpen, setVerifyDialogOpen] = useState(false);
+  const [verifyTargetTutorId, setVerifyTargetTutorId] = useState<string | null>(null);
+  const [verifyTargetName, setVerifyTargetName] = useState('');
+  const [verifyNewStatus, setVerifyNewStatus] = useState<string>('');
+  const [verifyNotes, setVerifyNotes] = useState('');
+  const [verifyProcessing, setVerifyProcessing] = useState(false);
+
   const openTransferDialog = (userId: string, name: string) => {
     setTransferTargetUserId(userId);
     setTransferTargetName(name);
@@ -513,15 +521,43 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
     await fetchTutors();
   };
 
-  const handleVerifyToggle = async (tutorId: string, currentStatus: string) => {
-    const newStatus = currentStatus === 'approved' ? 'pending' : 'approved';
-    const { error } = await supabase.from('tutor_profiles').update({
-      verification_status: newStatus as any,
-      verified_at: newStatus === 'approved' ? new Date().toISOString() : null,
-    }).eq('id', tutorId);
-    if (error) { sonnerToast.error('Error', { description: error.message }); return; }
-    sonnerToast.success(newStatus === 'approved' ? 'Tutor Verified' : 'Verification Revoked');
-    await fetchTutors();
+  const openVerifyDialog = (tutorId: string, tutorName: string, newStatus: string) => {
+    setVerifyTargetTutorId(tutorId);
+    setVerifyTargetName(tutorName);
+    setVerifyNewStatus(newStatus);
+    setVerifyNotes('');
+    setVerifyDialogOpen(true);
+  };
+
+  const confirmVerifyStatusChange = async () => {
+    if (!verifyTargetTutorId) return;
+    setVerifyProcessing(true);
+    try {
+      const updateData: any = {
+        verification_status: verifyNewStatus,
+        verification_notes: verifyNotes.trim() || null,
+      };
+      if (verifyNewStatus === 'approved') {
+        updateData.verified_at = new Date().toISOString();
+      } else if (verifyNewStatus === 'pending') {
+        updateData.verified_at = null;
+      }
+      const { error } = await supabase.from('tutor_profiles').update(updateData).eq('id', verifyTargetTutorId);
+      if (error) { sonnerToast.error('Error', { description: error.message }); return; }
+      const statusLabels: Record<string, string> = {
+        pending: 'Reset to Pending',
+        under_review: 'Moved to Under Review',
+        approved: 'Tutor Approved',
+        rejected: 'Tutor Rejected',
+        document_needed: 'Document Requested',
+      };
+      sonnerToast.success(statusLabels[verifyNewStatus] || 'Status Updated');
+      await fetchTutors();
+    } finally {
+      setVerifyProcessing(false);
+      setVerifyDialogOpen(false);
+      setVerifyTargetTutorId(null);
+    }
   };
 
   // ─── Send Notification ───
@@ -597,8 +633,21 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
     switch (s) {
       case 'approved': return 'bg-success/10 text-success border-success/20';
       case 'pending': return 'bg-warning/10 text-warning border-warning/20';
+      case 'under_review': return 'bg-primary/10 text-primary border-primary/20';
       case 'rejected': return 'bg-destructive/10 text-destructive border-destructive/20';
+      case 'document_needed': return 'bg-orange-500/10 text-orange-600 border-orange-500/20';
       default: return 'bg-muted text-muted-foreground';
+    }
+  };
+
+  const statusLabel = (s: string) => {
+    switch (s) {
+      case 'pending': return 'Pending';
+      case 'under_review': return 'Under Review';
+      case 'approved': return 'Approved';
+      case 'rejected': return 'Rejected';
+      case 'document_needed': return 'Document Needed';
+      default: return s;
     }
   };
 
@@ -707,8 +756,10 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
                   <SelectContent>
                     <SelectItem value="all">All</SelectItem>
                     <SelectItem value="pending">Pending</SelectItem>
-                    <SelectItem value="approved">Verified</SelectItem>
+                    <SelectItem value="under_review">Under Review</SelectItem>
+                    <SelectItem value="approved">Approved</SelectItem>
                     <SelectItem value="rejected">Rejected</SelectItem>
+                    <SelectItem value="document_needed">Document Needed</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -919,7 +970,7 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
                     </TableCell>
                     <TableCell>
                       <div className="flex flex-col gap-0.5">
-                        <Badge className={`text-[10px] capitalize ${statusColor(t.verification_status)}`}>{t.verification_status}</Badge>
+                        <Badge className={`text-[10px] ${statusColor(t.verification_status)}`}>{statusLabel(t.verification_status)}</Badge>
                         {!t.is_approved && <Badge variant="outline" className="text-[9px] border-warning/30 text-warning">Unapproved</Badge>}
                       </div>
                     </TableCell>
@@ -956,12 +1007,33 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
                               : <><ShieldCheck className="h-3.5 w-3.5 text-success" /> Approve User</>
                             }
                           </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handleVerifyToggle(t.tutor_id, t.verification_status)} className="flex items-center gap-2">
-                            {t.verification_status === 'approved'
-                              ? <><X className="h-3.5 w-3.5 text-warning" /> Revoke Verification</>
-                              : <><CheckCircle2 className="h-3.5 w-3.5 text-success" /> Verify Tutor</>
-                            }
-                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">Verification Status</div>
+                          {t.verification_status !== 'under_review' && (
+                            <DropdownMenuItem onClick={() => openVerifyDialog(t.tutor_id, t.name, 'under_review')} className="flex items-center gap-2">
+                              <Clock className="h-3.5 w-3.5 text-primary" /> Under Review
+                            </DropdownMenuItem>
+                          )}
+                          {t.verification_status !== 'approved' && (
+                            <DropdownMenuItem onClick={() => openVerifyDialog(t.tutor_id, t.name, 'approved')} className="flex items-center gap-2">
+                              <CheckCircle2 className="h-3.5 w-3.5 text-success" /> Approve
+                            </DropdownMenuItem>
+                          )}
+                          {t.verification_status !== 'rejected' && (
+                            <DropdownMenuItem onClick={() => openVerifyDialog(t.tutor_id, t.name, 'rejected')} className="flex items-center gap-2">
+                              <X className="h-3.5 w-3.5 text-destructive" /> Reject
+                            </DropdownMenuItem>
+                          )}
+                          {t.verification_status !== 'document_needed' && (
+                            <DropdownMenuItem onClick={() => openVerifyDialog(t.tutor_id, t.name, 'document_needed')} className="flex items-center gap-2">
+                              <FileText className="h-3.5 w-3.5 text-orange-500" /> Request Document
+                            </DropdownMenuItem>
+                          )}
+                          {t.verification_status !== 'pending' && (
+                            <DropdownMenuItem onClick={() => openVerifyDialog(t.tutor_id, t.name, 'pending')} className="flex items-center gap-2">
+                              <AlertCircle className="h-3.5 w-3.5 text-warning" /> Reset to Pending
+                            </DropdownMenuItem>
+                          )}
                           <DropdownMenuItem onClick={() => openTransferDialog(t.user_id, t.name)} className="flex items-center gap-2">
                             <ArrowUpDown className="h-3.5 w-3.5 text-primary" /> Transfer to Parent
                           </DropdownMenuItem>
@@ -1140,6 +1212,41 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
             <Button onClick={confirmTransferToParent} disabled={transferProcessing}>
               {transferProcessing ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <ArrowUpDown className="h-4 w-4 mr-1" />}
               Confirm Transfer
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Verification Status Dialog */}
+      <Dialog open={verifyDialogOpen} onOpenChange={(open) => { if (!open) { setVerifyDialogOpen(false); setVerifyTargetTutorId(null); } }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <ShieldCheck className="h-5 w-5 text-primary" /> Change Verification Status
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <p className="text-sm text-muted-foreground">
+              Change <strong>{verifyTargetName}</strong>'s verification status to <Badge className={`ml-1 text-xs ${statusColor(verifyNewStatus)}`}>{statusLabel(verifyNewStatus)}</Badge>
+            </p>
+            <div>
+              <Label className="text-xs font-medium">Notes (optional)</Label>
+              <Textarea
+                value={verifyNotes}
+                onChange={(e) => setVerifyNotes(e.target.value)}
+                placeholder={verifyNewStatus === 'document_needed' ? 'Specify which documents are needed...' : verifyNewStatus === 'rejected' ? 'Reason for rejection...' : 'Add notes...'}
+                className="mt-1"
+                rows={3}
+              />
+            </div>
+          </div>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => { setVerifyDialogOpen(false); setVerifyTargetTutorId(null); }}>
+              Cancel
+            </Button>
+            <Button onClick={confirmVerifyStatusChange} disabled={verifyProcessing}>
+              {verifyProcessing ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <CheckCircle2 className="h-4 w-4 mr-1" />}
+              Confirm
             </Button>
           </DialogFooter>
         </DialogContent>

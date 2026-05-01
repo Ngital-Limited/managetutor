@@ -1574,6 +1574,7 @@ export type Database = {
           total_students: number | null
           updated_at: string | null
           user_id: string
+          verification_notes: string | null
           verification_paid: boolean
           verification_status:
             | Database["public"]["Enums"]["verification_status"]
@@ -1624,6 +1625,7 @@ export type Database = {
           total_students?: number | null
           updated_at?: string | null
           user_id: string
+          verification_notes?: string | null
           verification_paid?: boolean
           verification_status?:
             | Database["public"]["Enums"]["verification_status"]
@@ -1674,6 +1676,7 @@ export type Database = {
           total_students?: number | null
           updated_at?: string | null
           user_id?: string
+          verification_notes?: string | null
           verification_paid?: boolean
           verification_status?:
             | Database["public"]["Enums"]["verification_status"]
@@ -1949,7 +1952,12 @@ export type Database = {
         | "cancelled"
         | "suspended"
       teaching_mode: "online" | "in_person" | "hybrid"
-      verification_status: "pending" | "approved" | "rejected"
+      verification_status:
+        | "pending"
+        | "approved"
+        | "rejected"
+        | "under_review"
+        | "document_needed"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -2097,7 +2105,13 @@ export const Constants = {
         "suspended",
       ],
       teaching_mode: ["online", "in_person", "hybrid"],
-      verification_status: ["pending", "approved", "rejected"],
+      verification_status: [
+        "pending",
+        "approved",
+        "rejected",
+        "under_review",
+        "document_needed",
+      ],
     },
   },
 } as const
