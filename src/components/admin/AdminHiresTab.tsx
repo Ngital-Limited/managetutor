@@ -14,6 +14,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { format } from 'date-fns';
 import { CheckCircle2, Clock, XCircle, Eye, Plus, Search, DollarSign, Users, Briefcase } from 'lucide-react';
 import { getPlatformCommissionPct, computeFeeSplit } from '@/lib/commission';
+import { logAdminAction } from '@/lib/adminLogger';
 
 interface HireRow {
   id: string;
