@@ -610,7 +610,7 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
 
   // ─── CSV Export ───
   const handleExportCSV = () => {
-    if (tutors.length === 0) { toast({ title: 'No data to export', variant: 'destructive' }); return; }
+    if (tutors.length === 0) { sonnerToast.error('No data to export'); return; }
     const headers = ['Reference', 'Name', 'Email', 'Phone', 'Gender', 'District', 'Area/Thana', 'Education', 'Last Education', 'Experience (yrs)', 'Teaching Mode', 'Verification', 'Available', 'Class Levels', 'Approved', 'Banned', 'Joined'];
     const esc = (v: string) => `"${(v || '').replace(/"/g, '""')}"`;
     const rows = tutors.map(t => [
@@ -628,7 +628,7 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
     const a = document.createElement('a');
     a.href = url; a.download = `tutors_export_${new Date().toISOString().slice(0, 10)}.csv`;
     a.click(); URL.revokeObjectURL(url);
-    toast({ title: 'CSV Exported', description: `${tutors.length} tutors exported` });
+    sonnerToast.success('CSV Exported', { description: `${tutors.length} tutors exported` });
   };
 
   return (
