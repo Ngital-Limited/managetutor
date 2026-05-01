@@ -2511,7 +2511,7 @@ export default function AdminDashboard() {
                             </TableRow>
                           </TableHeader>
                           <TableBody>
-                            {pendingTutors.map((tutor) => (
+                            {filteredTutors.map((tutor) => (
                               <TableRow key={tutor.id}>
                                 <TableCell>
                                   <div className="flex items-center gap-2">
