@@ -2491,7 +2491,7 @@ export default function AdminDashboard() {
                       <Input
                         value={jobSearch}
                         onChange={(e) => setJobSearch(e.target.value)}
-                        placeholder="Search by reference or title"
+                        placeholder="Search by reference, title, or phone"
                         className="pl-8 h-9"
                       />
                     </div>
