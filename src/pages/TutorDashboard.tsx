@@ -185,6 +185,7 @@ export default function TutorDashboard() {
     pendingApplications: 0,
     activeJobs: 0,
     totalEarnings: 0,
+    profileViewsThisWeek: 0,
   });
   const [activeFeatured, setActiveFeatured] = useState<FeaturedListing | null>(null);
   const [boostLoading, setBoostLoading] = useState(false);
