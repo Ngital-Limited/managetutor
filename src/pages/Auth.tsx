@@ -363,7 +363,7 @@ export default function Auth() {
                     )}
                   </Button>
                   <button
-                    onClick={() => { setShowVerifyEmail(false); setEmailVerified(false); setIsLogin(true); setEmail(''); setPassword(''); }}
+                    onClick={() => { setShowVerifyEmail(false); setEmailVerified(false); setIsLogin(true); setEmail(signupEmail); }}
                     className="flex items-center justify-center gap-1.5 mt-4 text-sm text-primary hover:underline font-semibold mx-auto"
                   >
                     <ArrowLeft className="h-4 w-4" /> Back to Login
