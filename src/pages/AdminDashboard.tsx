@@ -1013,11 +1013,24 @@ export default function AdminDashboard() {
         if (!eduMap.has(e.tutor_id)) eduMap.set(e.tutor_id, e);
       }
     }
+    // Fetch demo bookings linked to these applications
+    const appIds = data.map((a: any) => a.id).filter(Boolean);
+    const demoMap = new Map<string, any>();
+    if (appIds.length > 0) {
+      const { data: demoData } = await supabase
+        .from('demo_bookings')
+        .select('id, application_id, status, preferred_date')
+        .in('application_id', appIds as string[]);
+      for (const d of demoData || []) {
+        if (d.application_id) demoMap.set(d.application_id, d);
+      }
+    }
     setAllApplications(data.map((a: any) => ({
       ...a,
       tutor_profile: profMap.get((a.tutor_profiles as any)?.user_id) || null,
       parent_profile: profMap.get((a.jobs as any)?.parent_id) || null,
       tutor_last_education: eduMap.get((a.tutor_profiles as any)?.id) || null,
+      demo_booking: demoMap.get(a.id) || null,
     })));
     setLoadingAllApps(false);
   }, []);
