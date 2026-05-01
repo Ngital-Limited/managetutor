@@ -222,3 +222,44 @@
   .animation-delay-400 { animation-delay: 400ms; }
   .animation-delay-500 { animation-delay: 500ms; }
 }
+
+/* ── Admin dashboard layout polish ─────────────────────── */
+@layer components {
+  /* Compact, consistent tables inside admin main */
+  .admin-main table { font-size: 13px; }
+  .admin-main thead th {
+    height: 2.25rem;
+    padding: 0 0.75rem;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    background: hsl(var(--muted) / 0.4);
+    color: hsl(var(--muted-foreground));
+    border-bottom: 1px solid hsl(var(--border));
+  }
+  .admin-main tbody td {
+    padding: 0.625rem 0.75rem;
+    vertical-align: middle;
+  }
+  .admin-main tbody tr { border-bottom: 1px solid hsl(var(--border) / 0.6); }
+  .admin-main tbody tr:hover { background: hsl(var(--muted) / 0.35); }
+
+  /* Consistent page headers (h1 directly under admin-main) */
+  .admin-main h1 {
+    font-size: 1.125rem;     /* 18px */
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+
+  /* Unified filter bar look — wrap filter controls in .admin-filters */
+  .admin-filters {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.625rem 0.75rem;
+    background: hsl(var(--muted) / 0.35);
+    border: 1px solid hsl(var(--border));
+    border-radius: 0.5rem;
+  }
+}
