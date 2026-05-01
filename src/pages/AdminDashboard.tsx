@@ -1042,6 +1042,31 @@ export default function AdminDashboard() {
       tutor_last_education: eduMap.get((a.tutor_profiles as any)?.id) || null,
       demo_booking: demoMap.get(a.id) || null,
     })));
+
+    // Also fetch open / pending jobs that currently have ZERO applications
+    const { data: zeroJobs } = await supabase
+      .from('jobs')
+      .select(`
+        id, title, job_reference, parent_id, status, created_at, total_applications,
+        districts ( name_en ), areas ( name_en ),
+        job_subjects ( subjects ( id, name_en ) )
+      `)
+      .eq('total_applications', 0)
+      .in('status', ['open', 'pending_approval'] as any)
+      .order('created_at', { ascending: false })
+      .limit(200);
+    if (zeroJobs && zeroJobs.length > 0) {
+      const zParentIds = Array.from(new Set(zeroJobs.map((j: any) => j.parent_id).filter(Boolean)));
+      const { data: zProfs } = await supabase
+        .from('profiles')
+        .select('id, full_name, email, phone, user_reference')
+        .in('id', zParentIds as string[]);
+      const zMap = new Map((zProfs || []).map((p: any) => [p.id, p]));
+      setJobsWithoutApps(zeroJobs.map((j: any) => ({ ...j, parent_profile: zMap.get(j.parent_id) || null })));
+    } else {
+      setJobsWithoutApps([]);
+    }
+
     setLoadingAllApps(false);
   }, []);
 
