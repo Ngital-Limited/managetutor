@@ -24,6 +24,7 @@ import {
 import { AdSlot } from '@/components/AdSlot';
 import { Progress } from '@/components/ui/progress';
 import { getMinProfileCompleteness } from '@/lib/profileCompleteness';
+import { TutorSidebarLayout } from '@/components/TutorSidebarLayout';
 
 interface Job {
   id: string;
