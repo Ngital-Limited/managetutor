@@ -1992,11 +1992,18 @@ export default function AdminDashboard() {
           </SidebarGroup>
           {(() => {
             const q = sidebarSearch.trim().toLowerCase();
+            // Filter by RBAC permissions first, then by search
+            const permFiltered = sidebarGroups
+              .map(g => ({ ...g, items: g.items.filter(i => {
+                const requiredPerm = TAB_PERM_MAP[i.value];
+                return !requiredPerm || hasPerm(requiredPerm);
+              })}))
+              .filter(g => g.items.length > 0);
             const filteredGroups = q
-              ? sidebarGroups
+              ? permFiltered
                   .map(g => ({ ...g, items: g.items.filter(i => i.title.toLowerCase().includes(q) || g.label.toLowerCase().includes(q)) }))
                   .filter(g => g.items.length > 0)
-              : sidebarGroups;
+              : permFiltered;
             if (q && filteredGroups.length === 0) {
               return (
                 <div className="px-4 py-6 text-center text-xs text-muted-foreground">
