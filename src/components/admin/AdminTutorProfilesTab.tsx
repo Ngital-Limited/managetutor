@@ -970,7 +970,7 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
                     </TableCell>
                     <TableCell>
                       <div className="flex flex-col gap-0.5">
-                        <Badge className={`text-[10px] capitalize ${statusColor(t.verification_status)}`}>{t.verification_status}</Badge>
+                        <Badge className={`text-[10px] ${statusColor(t.verification_status)}`}>{statusLabel(t.verification_status)}</Badge>
                         {!t.is_approved && <Badge variant="outline" className="text-[9px] border-warning/30 text-warning">Unapproved</Badge>}
                       </div>
                     </TableCell>
