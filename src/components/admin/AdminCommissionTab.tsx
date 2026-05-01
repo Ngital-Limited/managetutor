@@ -14,6 +14,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { format } from 'date-fns';
 import { DollarSign, CheckCircle2, Clock, AlertTriangle, Bell, Search, Percent, Ban } from 'lucide-react';
+import { logAdminAction } from '@/lib/adminLogger';
 
 interface CommissionRow {
   id: string;
@@ -170,6 +171,7 @@ export function AdminCommissionTab({ toast }: { toast: any }) {
         await supabase.from('hiring_confirmations').update({ commission_status: 'paid' } as any).eq('id', selected.hiring_confirmation_id);
       }
 
+      if (user) logAdminAction(user.id, 'payment_recorded', 'commission', selected.id, { amount, method: payMethod });
       toast({ title: 'Payment recorded' });
       setPayAmount(''); setPayRef(''); setPayNotes(''); setShowPaymentForm(false);
       fetchCommissions();
@@ -188,6 +190,7 @@ export function AdminCommissionTab({ toast }: { toast: any }) {
 
     if (!error) {
       await supabase.from('hiring_confirmations').update({ commission_status: 'waived' } as any).eq('id', selected.hiring_confirmation_id);
+      if (user) logAdminAction(user.id, 'commission_waived', 'commission', selected.id, { reason: waiveReason });
       toast({ title: 'Commission waived' });
       setSelected(null); setShowWaiveForm(false); setWaiveReason('');
       fetchCommissions();

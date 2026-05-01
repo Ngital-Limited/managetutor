@@ -14,6 +14,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { format } from 'date-fns';
 import { CheckCircle2, Clock, XCircle, Eye, Plus, Search, DollarSign, Users, Briefcase } from 'lucide-react';
 import { getPlatformCommissionPct, computeFeeSplit } from '@/lib/commission';
+import { logAdminAction } from '@/lib/adminLogger';
 
 interface HireRow {
   id: string;
@@ -112,7 +113,7 @@ export function AdminHiresTab({ toast }: { toast: any }) {
       .update({ status, admin_notes: adminNotes || undefined, updated_at: new Date().toISOString() } as any)
       .eq('id', id);
     if (error) toast({ title: 'Error', description: error.message, variant: 'destructive' });
-    else { toast({ title: `Hire ${status}` }); setSelectedHire(null); setAdminNotes(''); fetchHires(); }
+    else { toast({ title: `Hire ${status}` }); if (user) logAdminAction(user.id, status === 'confirmed' ? 'hire_confirmed' : 'hire_cancelled', 'hire', id); setSelectedHire(null); setAdminNotes(''); fetchHires(); }
     setProcessing(false);
   };
 
@@ -141,6 +142,7 @@ export function AdminHiresTab({ toast }: { toast: any }) {
     } else {
       // Update hire's commission_status
       await supabase.from('hiring_confirmations').update({ commission_status: 'invoiced' } as any).eq('id', hire.id);
+      if (user) logAdminAction(user.id, 'commission_created', 'hire', hire.id, { amount: split.platformCommission });
       toast({ title: 'Commission record created' });
       fetchHires();
     }

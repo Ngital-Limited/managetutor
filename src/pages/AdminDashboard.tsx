@@ -55,7 +55,11 @@ import { AdsManagementTab } from '@/components/admin/AdsManagementTab';
 import { AdminCacheTab } from '@/components/admin/AdminCacheTab';
 import { AdminHiresTab } from '@/components/admin/AdminHiresTab';
 import { AdminCommissionTab } from '@/components/admin/AdminCommissionTab';
+import { AdminPhoneLogTab } from '@/components/admin/AdminPhoneLogTab';
+import { AdminActivityLogTab } from '@/components/admin/AdminActivityLogTab';
+import { AdminNotesWidget } from '@/components/admin/AdminNotesWidget';
 import { AutoRefreshControl } from '@/components/AutoRefreshControl';
+import { logAdminAction } from '@/lib/adminLogger';
 import { getPlatformCommissionPct, computeFeeSplit } from '@/lib/commission';
 
 // ──────────── Types ────────────
@@ -1680,7 +1684,7 @@ export default function AdminDashboard() {
   const handleApproveUser = async (userId: string) => {
     const { error } = await supabase.from('profiles').update({ is_approved: true }).eq('id', userId);
     if (error) toast({ title: 'Error', description: error.message, variant: 'destructive' });
-    else { toast({ title: 'User approved' }); fetchUsers(); invalidate('admin:stats:v1'); void sharedInvalidate('admin:stats:v1'); fetchStats(true); }
+    else { toast({ title: 'User approved' }); if (user) logAdminAction(user.id, 'user_approved', 'user', userId); fetchUsers(); invalidate('admin:stats:v1'); void sharedInvalidate('admin:stats:v1'); fetchStats(true); }
   };
 
   const handleBanUser = async (userId: string, ban: boolean) => {
@@ -1693,6 +1697,7 @@ export default function AdminDashboard() {
     if (error) toast({ title: 'Error', description: error.message, variant: 'destructive' });
     else {
       toast({ title: 'Success', description: `User ${ban ? 'banned' : 'unbanned'}` });
+      if (user) logAdminAction(user.id, ban ? 'user_banned' : 'user_unbanned', 'user', userId);
       setSelectedUser(null);
       setAdminNotes('');
       fetchUsers();
@@ -2040,6 +2045,7 @@ export default function AdminDashboard() {
         { title: 'Broadcast', value: 'broadcast', icon: Megaphone },
         { title: 'Contact Messages', value: 'contacts', icon: Mail },
         { title: 'Support Tickets', value: 'tickets', icon: LifeBuoy },
+        { title: 'Phone Log', value: 'phone_log', icon: Phone },
       ],
     },
     {
@@ -2057,6 +2063,7 @@ export default function AdminDashboard() {
         { title: 'Platform Data', value: 'platform_data', icon: BookOpen },
         { title: 'Ads Management', value: 'ads', icon: Megaphone },
         { title: 'Cache', value: 'cache', icon: Activity },
+        { title: 'Activity Log', value: 'activity_log', icon: FileText },
       ],
     },
   ];
@@ -3675,6 +3682,12 @@ export default function AdminDashboard() {
             {/* ═══════ COMMISSIONS TAB ═══════ */}
             {activeTab === 'commissions' && <AdminCommissionTab toast={toast} />}
 
+            {/* ═══════ PHONE LOG TAB ═══════ */}
+            {activeTab === 'phone_log' && <AdminPhoneLogTab toast={toast} />}
+
+            {/* ═══════ ACTIVITY LOG TAB ═══════ */}
+            {activeTab === 'activity_log' && <AdminActivityLogTab toast={toast} />}
+
             {/* ═══════ CACHE TAB ═══════ */}
             {activeTab === 'cache' && (
               <div className="space-y-4">
@@ -3757,8 +3770,9 @@ export default function AdminDashboard() {
                   <label className="text-sm font-medium">Reason for ban</label>
                   <Textarea value={adminNotes} onChange={(e) => setAdminNotes(e.target.value)} placeholder="Why is this user being banned?" className="mt-1" />
                 </div>
-              )}
-            </div>
+               )}
+               <AdminNotesWidget targetUserId={selectedUser.id} compact />
+             </div>
           )}
           <DialogFooter>
             <Button variant="outline" onClick={() => setSelectedUser(null)}>Cancel</Button>
