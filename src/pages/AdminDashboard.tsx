@@ -2076,6 +2076,34 @@ export default function AdminDashboard() {
                 )}
                 <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/50 shrink-0" />
                 <span className="font-medium text-foreground truncate" aria-current="page">{pageLabel}</span>
+                {(() => {
+                  const sectionHelp: Record<string, string> = {
+                    Applications: 'Review and moderate parent job posts and tutor applications. Approve, reject, or flag pending submissions.',
+                    Tutors: 'Manage tutor profiles, verification documents, badges, and impersonation for support.',
+                    Settings: 'Configure platform-wide options: subscription plans, ads, RBAC, cache, and admin tools.',
+                    Overview: 'High-level platform metrics, recent activity, and quick links to key admin areas.',
+                  };
+                  const helpText = sectionHelp[sectionLabel] ?? sectionHelp.Overview;
+                  return (
+                    <TooltipProvider delayDuration={150}>
+                      <UITooltip>
+                        <TooltipTrigger asChild>
+                          <button
+                            type="button"
+                            aria-label={`What does the ${sectionLabel} section control?`}
+                            className="ml-1 inline-flex items-center justify-center text-muted-foreground/60 hover:text-foreground transition-colors shrink-0"
+                          >
+                            <HelpCircle className="h-3.5 w-3.5" />
+                          </button>
+                        </TooltipTrigger>
+                        <TooltipContent side="bottom" align="start" className="max-w-xs text-xs leading-relaxed">
+                          <p className="font-medium mb-1">{sectionLabel}</p>
+                          <p className="text-muted-foreground">{helpText}</p>
+                        </TooltipContent>
+                      </UITooltip>
+                    </TooltipProvider>
+                  );
+                })()}
               </nav>
             </div>
             <div className="flex items-center gap-2">
