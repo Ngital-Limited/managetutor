@@ -123,6 +123,7 @@ export default function TutorProfile() {
     religion: '',
     height: '',
     weight: '',
+    weekly_availability: {} as Record<string, string[]>,
   });
 
   const [tutorProfileId, setTutorProfileId] = useState<string | null>(null);
