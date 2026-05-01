@@ -3,7 +3,7 @@ import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { lovable } from '@/integrations/lovable/index';
 
-type AppRole = 'parent' | 'tutor' | 'agency' | 'admin';
+type AppRole = 'parent' | 'tutor' | 'admin';
 
 interface UserProfile {
   full_name: string;
@@ -232,11 +232,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         await supabase.from('tutor_profiles').insert({
           user_id: data.user.id,
           gender: 'male',
-        });
-      } else if (selectedRole === 'agency') {
-        await supabase.from('agency_profiles').insert({
-          user_id: data.user.id,
-          agency_name: fullName,
         });
       }
 

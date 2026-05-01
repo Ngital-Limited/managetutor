@@ -8,7 +8,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useToast } from '@/hooks/use-toast';
 import { Logo } from '@/components/Logo';
 import { supabase } from '@/integrations/supabase/client';
-import { GraduationCap, Users, Building2, Loader2, Mail, Lock, User, ArrowRight, Phone, ArrowLeft } from 'lucide-react';
+import { GraduationCap, Users, Loader2, Mail, Lock, User, ArrowRight, Phone, ArrowLeft } from 'lucide-react';
 import { PhoneInput, isValidBDPhone } from '@/components/PhoneInput';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { z } from 'zod';
@@ -22,7 +22,7 @@ const REFERRAL_SOURCES = [
   'Other',
 ];
 
-type AppRole = 'parent' | 'tutor' | 'agency';
+type AppRole = 'parent' | 'tutor';
 
 const emailSchema = z.string().email('Invalid email address');
 const passwordSchema = z.string().min(6, 'Password must be at least 6 characters');
@@ -165,7 +165,6 @@ export default function Auth() {
   const roles = [
     { id: 'parent' as AppRole, icon: Users, label: t('auth.parent'), desc: 'Find tutors for your child' },
     { id: 'tutor' as AppRole, icon: GraduationCap, label: t('auth.tutor'), desc: 'Teach students & earn' },
-    { id: 'agency' as AppRole, icon: Building2, label: t('auth.agency'), desc: 'Manage multiple tutors' },
   ];
 
   return (
