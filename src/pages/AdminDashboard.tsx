@@ -2517,6 +2517,7 @@ export default function AdminDashboard() {
                             <TableHead>Reference</TableHead>
                             <TableHead>Title</TableHead>
                             <TableHead>Posted By</TableHead>
+                            <TableHead>Phone</TableHead>
                             <TableHead>Location</TableHead>
                             <TableHead>Subject</TableHead>
                             <TableHead>Apps</TableHead>
@@ -2527,9 +2528,9 @@ export default function AdminDashboard() {
                         </TableHeader>
                         <TableBody>
                           {jobsLoading ? (
-                            <TableRow><TableCell colSpan={9} className="text-center py-8 text-muted-foreground">Loading…</TableCell></TableRow>
+                            <TableRow><TableCell colSpan={10} className="text-center py-8 text-muted-foreground">Loading…</TableCell></TableRow>
                           ) : jobs.length === 0 ? (
-                            <TableRow><TableCell colSpan={9} className="text-center py-8 text-muted-foreground">No jobs found</TableCell></TableRow>
+                            <TableRow><TableCell colSpan={10} className="text-center py-8 text-muted-foreground">No jobs found</TableCell></TableRow>
                           ) : jobs.map((job) => (
                             <TableRow key={job.id}>
                               <TableCell className="font-mono text-xs">{job.job_reference || '—'}</TableCell>
