@@ -274,6 +274,75 @@ export default function Auth() {
     setResetLoading(false);
   };
 
+  const handleCompleteProfile = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user) return;
+    setCompleteProfileLoading(true);
+
+    if (!fullName.trim()) {
+      toast({ title: 'Validation Error', description: 'Full name is required', variant: 'destructive' });
+      setCompleteProfileLoading(false);
+      return;
+    }
+    if (!phone) {
+      toast({ title: 'Validation Error', description: 'Phone number is required', variant: 'destructive' });
+      setCompleteProfileLoading(false);
+      return;
+    }
+    if (!isValidBDPhone(phone)) {
+      toast({ title: 'Validation Error', description: 'Please enter a valid Bangladesh phone number (+880 1XXX-XXXXXX)', variant: 'destructive' });
+      setCompleteProfileLoading(false);
+      return;
+    }
+
+    try {
+      // Update profile
+      await supabase.from('profiles').update({ full_name: fullName, phone }).eq('id', user.id);
+
+      // Insert role
+      const { error: roleError } = await supabase
+        .from('user_roles')
+        .insert({ user_id: user.id, role: selectedRole });
+      if (roleError) {
+        toast({ title: 'Error', description: roleError.message, variant: 'destructive' });
+        setCompleteProfileLoading(false);
+        return;
+      }
+
+      // Create tutor_profiles entry if tutor
+      if (selectedRole === 'tutor') {
+        await supabase.from('tutor_profiles').insert({ user_id: user.id, gender: 'male' });
+      }
+
+      // Send welcome email
+      supabase.functions.invoke('send-transactional-email', {
+        body: {
+          templateName: selectedRole === 'tutor' ? 'tutor-welcome' : 'parent-welcome',
+          recipientEmail: user.email,
+          idempotencyKey: `${selectedRole}-welcome-${user.id}`,
+          templateData: { name: fullName },
+        },
+      }).catch((err) => console.error('Welcome email failed:', err));
+
+      toast({ title: 'Profile completed!', description: 'Redirecting to your dashboard...' });
+
+      // Force refresh the auth context
+      const { refreshProfile } = await import('@/contexts/AuthContext').then(() => ({ refreshProfile: null }));
+      
+      // Navigate based on role
+      if (selectedRole === 'tutor') {
+        navigate('/tutor/dashboard');
+      } else {
+        navigate('/parent/dashboard');
+      }
+      // Reload to refresh auth context with new role
+      window.location.reload();
+    } catch (err: any) {
+      toast({ title: 'Error', description: err.message || 'Something went wrong', variant: 'destructive' });
+    }
+    setCompleteProfileLoading(false);
+  };
+
 
   const roles = [
     { id: 'parent' as AppRole, icon: Users, label: t('auth.parent'), desc: 'Find tutors for your child' },
