@@ -478,23 +478,23 @@ export default function TutorDashboard() {
       <div className="max-w-[1200px] mx-auto p-4 md:p-6 space-y-5">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <div className="flex items-center gap-4 min-w-0">
-            <Avatar className="h-16 w-16 shrink-0">
+          <div className="flex items-center gap-3 min-w-0">
+            <Avatar className="h-12 w-12 shrink-0 border border-primary/20">
               <AvatarImage src={userProfile?.avatar_url || ''} />
-              <AvatarFallback className="text-xl">{userProfile?.full_name?.charAt(0) || 'T'}</AvatarFallback>
+              <AvatarFallback className="text-base">{userProfile?.full_name?.charAt(0) || 'T'}</AvatarFallback>
             </Avatar>
             <div className="min-w-0">
-              <h1 className="text-xl sm:text-2xl font-bold break-words">Welcome, {userProfile?.full_name || 'Tutor'}!</h1>
-              <div className="flex items-center gap-2 mt-1 flex-wrap">
-                <Badge className="bg-tutor text-tutor-foreground">Tutor</Badge>
+              <h1 className="text-lg sm:text-xl font-bold leading-tight truncate">Welcome, {userProfile?.full_name || 'Tutor'}</h1>
+              <div className="flex items-center gap-1.5 mt-1 flex-wrap">
+                <Badge className="bg-tutor text-tutor-foreground text-[10px] h-5">Tutor</Badge>
                 {userProfile?.user_reference && (
-                  <Badge variant="outline" className="font-mono text-xs">{userProfile.user_reference}</Badge>
+                  <Badge variant="outline" className="font-mono text-[10px] h-5">{userProfile.user_reference}</Badge>
                 )}
                 {profile?.verification_status === 'approved' && profile?.verification_paid && (
-                  <Badge className="bg-success"><CheckCircle2 className="h-3 w-3 mr-1" />Verified</Badge>
+                  <Badge className="bg-success text-[10px] h-5"><CheckCircle2 className="h-3 w-3 mr-0.5" />Verified</Badge>
                 )}
                 {profile?.is_available && (
-                  <Badge variant="outline" className="text-success border-success">Available</Badge>
+                  <Badge variant="outline" className="text-success border-success text-[10px] h-5">Available</Badge>
                 )}
               </div>
             </div>
