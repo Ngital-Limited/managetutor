@@ -76,6 +76,7 @@ export default function BrowseJobs({ embedded = false }: { embedded?: boolean } 
   const [totalCount, setTotalCount] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [showFilters, setShowFilters] = useState(false);
+  const [savedJobIds, setSavedJobIds] = useState<Set<string>>(new Set());
 
   // Filters
   const [searchParams] = useSearchParams();
