@@ -446,9 +446,9 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
       banned_at: !currentlyBanned ? new Date().toISOString() : null,
       banned_reason: !currentlyBanned ? (reason || 'Banned by admin') : null,
     }).eq('id', userId);
-    if (error) { toast({ title: 'Error', description: error.message, variant: 'destructive' }); return; }
-    toast({ title: currentlyBanned ? 'User Unbanned' : 'User Banned' });
-    fetchTutors();
+    if (error) { sonnerToast.error('Error', { description: error.message }); return; }
+    sonnerToast.success(currentlyBanned ? 'User Unbanned' : 'User Banned');
+    await fetchTutors();
   };
 
   const openBanDialog = (userId: string, name: string) => {
@@ -460,7 +460,7 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
 
   const confirmBan = async () => {
     if (!banTargetUserId || !banReason.trim()) {
-      toast({ title: 'Ban reason is required', variant: 'destructive' });
+      sonnerToast.error('Ban reason is required');
       return;
     }
     setBanProcessing(true);
@@ -508,9 +508,9 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
 
   const handleApproveToggle = async (userId: string, currentlyApproved: boolean) => {
     const { error } = await supabase.from('profiles').update({ is_approved: !currentlyApproved }).eq('id', userId);
-    if (error) { toast({ title: 'Error', description: error.message, variant: 'destructive' }); return; }
-    toast({ title: currentlyApproved ? 'Approval Revoked' : 'User Approved' });
-    fetchTutors();
+    if (error) { sonnerToast.error('Error', { description: error.message }); return; }
+    sonnerToast.success(currentlyApproved ? 'Approval Revoked' : 'User Approved');
+    await fetchTutors();
   };
 
   const handleVerifyToggle = async (tutorId: string, currentStatus: string) => {
@@ -519,15 +519,15 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
       verification_status: newStatus as any,
       verified_at: newStatus === 'approved' ? new Date().toISOString() : null,
     }).eq('id', tutorId);
-    if (error) { toast({ title: 'Error', description: error.message, variant: 'destructive' }); return; }
-    toast({ title: newStatus === 'approved' ? 'Tutor Verified' : 'Verification Revoked' });
-    fetchTutors();
+    if (error) { sonnerToast.error('Error', { description: error.message }); return; }
+    sonnerToast.success(newStatus === 'approved' ? 'Tutor Verified' : 'Verification Revoked');
+    await fetchTutors();
   };
 
   // ─── Send Notification ───
   const handleSendNotification = async () => {
     if (!notifyTitle.trim() || !notifyMessage.trim()) {
-      toast({ title: 'Missing fields', description: 'Title and message are required', variant: 'destructive' });
+      sonnerToast.error('Missing fields', { description: 'Title and message are required' });
       return;
     }
     setNotifySending(true);
@@ -536,7 +536,7 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
         ? Array.from(selectedIds)
         : (await queryTutors({ from: 0, to: 0, fetchAllIds: true })).ids;
       if (targetUserIds.length === 0) {
-        toast({ title: 'No tutors selected', description: 'Please select tutors or apply filters first', variant: 'destructive' });
+        sonnerToast.error('No tutors selected', { description: 'Please select tutors or apply filters first' });
         setNotifySending(false);
         return;
       }
@@ -560,14 +560,14 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
         const { error } = await supabase.from('notifications').insert(batch);
         if (error) throw error;
       }
-      toast({ title: 'Notification Sent!', description: `Sent to ${targetUserIds.length} tutor(s)` });
+      sonnerToast.success('Notification Sent!', { description: `Sent to ${targetUserIds.length} tutor(s)` });
       setNotifyDialogOpen(false);
       setNotifyTitle('');
       setNotifyMessage('');
       setNotifySelectedJobs([]);
       setNotifyJobCategory('all');
     } catch (err: any) {
-      toast({ title: 'Error', description: err.message, variant: 'destructive' });
+      sonnerToast.error('Error', { description: err.message });
     } finally {
       setNotifySending(false);
     }
