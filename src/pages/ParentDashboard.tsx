@@ -125,12 +125,13 @@ interface UserProfileFull {
   user_reference: string | null;
 }
 
-type SectionKey = 'overview' | 'jobs' | 'applicants' | 'demo' | 'payments' | 'profile';
+type SectionKey = 'overview' | 'jobs' | 'applicants' | 'demo' | 'tuitions' | 'payments' | 'profile';
 
 const sectionItems: { key: SectionKey; title: string; icon: any }[] = [
   { key: 'overview', title: 'Overview', icon: LayoutDashboard },
   { key: 'jobs', title: 'My Jobs', icon: Briefcase },
   { key: 'applicants', title: 'All Applicants', icon: Users },
+  { key: 'tuitions', title: 'Active Tuitions', icon: GraduationCap },
   { key: 'demo', title: 'Demo Classes', icon: Calendar },
   { key: 'payments', title: 'Payments', icon: CreditCard },
   { key: 'profile', title: 'My Profile', icon: User },
