@@ -1812,7 +1812,7 @@ export default function AdminDashboard() {
   const [sidebarSearch, setSidebarSearch] = useState('');
 
   // ──── RBAC: fetch current admin's permissions ────
-  const [adminPerms, setAdminPerms] = useState<Record<string, boolean> | null>(null);
+  const [adminPerms, setAdminPerms] = useState<Record<string, any> | null>(null);
   useEffect(() => {
     if (!user || role !== 'admin') return;
     (async () => {
