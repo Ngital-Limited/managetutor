@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+// Tabs removed — page now uses stacked sections
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -334,125 +334,213 @@ export default function TutorPublicProfile() {
         </div>
       </section>
 
-      {/* CONTENT WITH TABS */}
+      {/* CONTENT */}
       <main className="container mx-auto px-4 md:px-6 py-8 max-w-[1200px]">
         <div className="grid lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2">
-            <Tabs defaultValue="details" className="w-full">
-              <TabsList className="w-full justify-start overflow-x-auto bg-muted/50">
-                <TabsTrigger value="details">Quick Details</TabsTrigger>
-                <TabsTrigger value="about">About</TabsTrigger>
-                <TabsTrigger value="education">Education</TabsTrigger>
-                {tutor.video_url && <TabsTrigger value="video">Video</TabsTrigger>}
-              </TabsList>
+          <div className="lg:col-span-2 space-y-6 min-w-0">
 
-              <TabsContent value="about" className="mt-4 space-y-4">
+            {/* SUMMARY */}
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <User className="h-4 w-4 text-primary" /> Summary
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
                 {tutor.featured_blurb && (
-                  <Card className="border-accent/40 bg-accent/5">
-                    <CardContent className="pt-5 pb-5 flex gap-3">
-                      <Sparkles className="h-5 w-5 text-accent shrink-0 mt-0.5" />
-                      <p className="text-sm leading-relaxed font-medium">{tutor.featured_blurb}</p>
-                    </CardContent>
-                  </Card>
+                  <div className="flex gap-3 p-3 rounded-lg border border-accent/40 bg-accent/5">
+                    <Sparkles className="h-5 w-5 text-accent shrink-0 mt-0.5" />
+                    <p className="text-sm leading-relaxed font-medium">{tutor.featured_blurb}</p>
+                  </div>
                 )}
-                <Card>
-                  <CardHeader><CardTitle className="flex items-center gap-2 text-base"><User className="h-4 w-4" />About</CardTitle></CardHeader>
-                  <CardContent className="space-y-4">
-                    
-                    {tutor.teaching_philosophy && (
-                      <div>
-                        <h4 className="text-sm font-semibold mb-1">Teaching Philosophy</h4>
-                        <p className="text-muted-foreground whitespace-pre-wrap text-sm">{tutor.teaching_philosophy}</p>
-                      </div>
-                    )}
-                    {tutor.success_stories && (
-                      <div>
-                        <h4 className="text-sm font-semibold mb-1">Success Stories</h4>
-                        <p className="text-muted-foreground whitespace-pre-wrap text-sm">{tutor.success_stories}</p>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              </TabsContent>
+                {tutor.bio && (
+                  <p className="text-sm text-muted-foreground whitespace-pre-wrap leading-relaxed">{tutor.bio}</p>
+                )}
+                {tutor.teaching_philosophy && (
+                  <div>
+                    <h4 className="text-sm font-semibold mb-1">Teaching Philosophy</h4>
+                    <p className="text-muted-foreground whitespace-pre-wrap text-sm">{tutor.teaching_philosophy}</p>
+                  </div>
+                )}
+                {tutor.success_stories && (
+                  <div>
+                    <h4 className="text-sm font-semibold mb-1">Success Stories</h4>
+                    <p className="text-muted-foreground whitespace-pre-wrap text-sm">{tutor.success_stories}</p>
+                  </div>
+                )}
+                {!tutor.bio && !tutor.teaching_philosophy && !tutor.success_stories && !tutor.featured_blurb && (
+                  <p className="text-sm text-muted-foreground italic">No summary provided yet.</p>
+                )}
+              </CardContent>
+            </Card>
 
-              <TabsContent value="education" className="mt-4">
-                <Card>
-                  <CardHeader><CardTitle className="flex items-center gap-2 text-base"><GraduationCap className="h-4 w-4" />Education</CardTitle></CardHeader>
-                  <CardContent>
-                    {(() => {
-                      const FIXED = ['SSC', 'HSC', 'Bachelor', 'Masters'];
-                      const filled = FIXED.map(deg => ({
-                        deg,
-                        entry: educationEntries.find(e => (e.degree || '').toLowerCase() === deg.toLowerCase()),
-                      })).filter(x => x.entry?.institution?.trim());
+            {/* SERVICES */}
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <BookOpen className="h-4 w-4 text-primary" /> Services & Subjects
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <h4 className="text-xs uppercase tracking-wide text-muted-foreground mb-2">Subjects Taught</h4>
+                  {subjects.length > 0 ? (
+                    <div className="flex flex-wrap gap-1.5">
+                      {subjects.map(s => (
+                        <Badge key={s.id} variant="secondary" className="text-xs">
+                          <BookOpen className="h-3 w-3 mr-1" />{s.name_en}
+                        </Badge>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground italic">No subjects listed.</p>
+                  )}
+                </div>
+                <Separator />
+                <div className="grid sm:grid-cols-2 gap-3 text-sm">
+                  <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/40">
+                    <modeInfo.Icon className="h-5 w-5 text-primary" />
+                    <div>
+                      <div className="text-xs text-muted-foreground">Teaching Mode</div>
+                      <div className="font-medium">{modeInfo.label}</div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/40">
+                    <Briefcase className="h-5 w-5 text-primary" />
+                    <div>
+                      <div className="text-xs text-muted-foreground">Experience</div>
+                      <div className="font-medium">{tutor.experience_years || 0} years</div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
 
-                      if (filled.length === 0) {
-                        return <p className="text-muted-foreground text-sm">{tutor.education || 'No education details provided yet.'}</p>;
-                      }
-                      const labels: Record<string, string> = { SSC: 'Secondary School Certificate', HSC: 'Higher School Certificate', Bachelor: 'Bachelor', Masters: 'Masters' };
-                      return (
-                        <div className="grid sm:grid-cols-2 gap-3">
-                          {filled.map(({ deg, entry }) => (
-                            <div key={deg} className="border border-border/60 rounded-xl p-3 bg-muted/30">
-                              <div className="flex items-center justify-between gap-2 mb-1">
-                                <Badge variant="secondary" className="text-[10px] font-semibold">{deg}</Badge>
-                                {entry!.passing_year && <span className="text-[11px] text-muted-foreground">{entry!.passing_year}</span>}
-                              </div>
-                              <p className="text-xs text-muted-foreground">{labels[deg]}</p>
-                              <p className="font-medium text-sm mt-1">{entry!.institution}</p>
-                              {entry!.field_of_study && (
-                                <p className="text-xs text-muted-foreground mt-0.5">{(deg === 'SSC' || deg === 'HSC') ? 'Group: ' : 'Field: '}{entry!.field_of_study}</p>
-                              )}
-                              {entry!.result && <p className="text-xs text-muted-foreground mt-0.5">Result: {entry!.result}</p>}
-                            </div>
-                          ))}
+            {/* FEES */}
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <Award className="h-4 w-4 text-primary" /> Fees
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-baseline gap-2 mb-1">
+                  <span className="text-3xl font-bold text-primary">৳{tutor.monthly_salary_min || 0}–{tutor.monthly_salary_max || 0}</span>
+                  <span className="text-sm text-muted-foreground">/month</span>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Final fee may vary based on subjects, class level, schedule, and location. Confirm with the tutor during the demo class.
+                </p>
+              </CardContent>
+            </Card>
+
+            {/* AVAILABILITY */}
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <CheckCircle2 className="h-4 w-4 text-primary" /> Availability
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid sm:grid-cols-2 gap-3 text-sm">
+                  <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/40">
+                    <div className={`h-2.5 w-2.5 rounded-full ${tutor.is_available ? 'bg-success' : 'bg-muted-foreground'}`} />
+                    <div>
+                      <div className="text-xs text-muted-foreground">Status</div>
+                      <div className="font-medium">{tutor.is_available ? 'Available for new students' : 'Not currently accepting'}</div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/40">
+                    <MapPin className="h-5 w-5 text-primary" />
+                    <div>
+                      <div className="text-xs text-muted-foreground">Location</div>
+                      <div className="font-medium">{locationText || '—'}</div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/40">
+                    <User className="h-5 w-5 text-primary" />
+                    <div>
+                      <div className="text-xs text-muted-foreground">Verification</div>
+                      <div className="font-medium capitalize">{tutor.verification_status}</div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/40">
+                    <Briefcase className="h-5 w-5 text-primary" />
+                    <div>
+                      <div className="text-xs text-muted-foreground">Member Since</div>
+                      <div className="font-medium">{formatExactDate(new Date(tutor.created_at))}</div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* EDUCATION */}
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <GraduationCap className="h-4 w-4 text-primary" /> Education
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {(() => {
+                  const FIXED = ['SSC', 'HSC', 'Bachelor', 'Masters'];
+                  const filled = FIXED.map(deg => ({
+                    deg,
+                    entry: educationEntries.find(e => (e.degree || '').toLowerCase() === deg.toLowerCase()),
+                  })).filter(x => x.entry?.institution?.trim());
+
+                  if (filled.length === 0) {
+                    return <p className="text-muted-foreground text-sm">{tutor.education || 'No education details provided yet.'}</p>;
+                  }
+                  const labels: Record<string, string> = { SSC: 'Secondary School Certificate', HSC: 'Higher School Certificate', Bachelor: 'Bachelor', Masters: 'Masters' };
+                  return (
+                    <div className="grid sm:grid-cols-2 gap-3">
+                      {filled.map(({ deg, entry }) => (
+                        <div key={deg} className="border border-border/60 rounded-xl p-3 bg-muted/30">
+                          <div className="flex items-center justify-between gap-2 mb-1">
+                            <Badge variant="secondary" className="text-[10px] font-semibold">{deg}</Badge>
+                            {entry!.passing_year && <span className="text-[11px] text-muted-foreground">{entry!.passing_year}</span>}
+                          </div>
+                          <p className="text-xs text-muted-foreground">{labels[deg]}</p>
+                          <p className="font-medium text-sm mt-1">{entry!.institution}</p>
+                          {entry!.field_of_study && (
+                            <p className="text-xs text-muted-foreground mt-0.5">{(deg === 'SSC' || deg === 'HSC') ? 'Group: ' : 'Field: '}{entry!.field_of_study}</p>
+                          )}
+                          {entry!.result && <p className="text-xs text-muted-foreground mt-0.5">Result: {entry!.result}</p>}
                         </div>
-                      );
-                    })()}
-                  </CardContent>
-                </Card>
-              </TabsContent>
+                      ))}
+                    </div>
+                  );
+                })()}
+              </CardContent>
+            </Card>
 
-              {tutor.video_url && (() => {
-                const ytMatch = tutor.video_url?.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/);
-                const vimeoMatch = tutor.video_url?.match(/(?:vimeo\.com\/)(\d+)/);
-                const embedUrl = ytMatch ? `https://www.youtube.com/embed/${ytMatch[1]}` : vimeoMatch ? `https://player.vimeo.com/video/${vimeoMatch[1]}` : null;
-                if (!embedUrl) return null;
-                return (
-                  <TabsContent value="video" className="mt-4">
-                    <Card>
-                      <CardHeader><CardTitle className="flex items-center gap-2 text-base"><Video className="h-4 w-4" />Video Introduction</CardTitle></CardHeader>
-                      <CardContent>
-                        <div className="aspect-video rounded-xl overflow-hidden bg-muted">
-                          <iframe src={embedUrl} className="w-full h-full" allowFullScreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" title="Tutor Introduction Video" />
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </TabsContent>
-                );
-              })()}
-
-              <TabsContent value="details" className="mt-4">
+            {/* VIDEO */}
+            {tutor.video_url && (() => {
+              const ytMatch = tutor.video_url?.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/);
+              const vimeoMatch = tutor.video_url?.match(/(?:vimeo\.com\/)(\d+)/);
+              const embedUrl = ytMatch ? `https://www.youtube.com/embed/${ytMatch[1]}` : vimeoMatch ? `https://player.vimeo.com/video/${vimeoMatch[1]}` : null;
+              if (!embedUrl) return null;
+              return (
                 <Card>
-                  <CardHeader><CardTitle className="text-base">Quick Details</CardTitle></CardHeader>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="flex items-center gap-2 text-base">
+                      <Video className="h-4 w-4 text-primary" /> Video Introduction
+                    </CardTitle>
+                  </CardHeader>
                   <CardContent>
-                    <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 text-sm">
-                      <div className="flex justify-between"><dt className="text-muted-foreground">Experience</dt><dd className="font-medium">{tutor.experience_years} years</dd></div>
-                      <div className="flex justify-between"><dt className="text-muted-foreground">Teaching Mode</dt><dd className="font-medium">{modeInfo.label}</dd></div>
-                      <div className="flex justify-between"><dt className="text-muted-foreground">Gender</dt><dd className="font-medium capitalize">{tutor.gender}</dd></div>
-                      <div className="flex justify-between"><dt className="text-muted-foreground">District</dt><dd className="font-medium">{districtName || '—'}</dd></div>
-                      <div className="flex justify-between"><dt className="text-muted-foreground">Area (Thana)</dt><dd className="font-medium">{areaName || '—'}</dd></div>
-                      <div className="flex justify-between"><dt className="text-muted-foreground">Member Since</dt><dd className="font-medium">{formatExactDate(new Date(tutor.created_at))}</dd></div>
-                      <div className="flex justify-between"><dt className="text-muted-foreground">Verification</dt><dd className="font-medium capitalize">{tutor.verification_status}</dd></div>
-                    </dl>
+                    <div className="aspect-video rounded-xl overflow-hidden bg-muted">
+                      <iframe src={embedUrl} className="w-full h-full" allowFullScreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" title="Tutor Introduction Video" />
+                    </div>
                   </CardContent>
                 </Card>
-              </TabsContent>
-            </Tabs>
+              );
+            })()}
           </div>
 
           {/* Sidebar — desktop summary */}
-          <aside className="hidden lg:block">
+          <aside className="hidden lg:block min-w-0">
             <Card className="sticky top-20">
               <CardContent className="p-5 space-y-4">
                 <div>
