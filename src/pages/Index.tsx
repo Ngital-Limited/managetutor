@@ -706,7 +706,7 @@ export default function Index() {
             {[
               { icon: Shield, title: 'Verified Tutors', desc: 'ID, education, and background checks before approval.', grad: 'from-primary to-accent', iconBg: 'bg-primary/15 text-primary' },
               { icon: Clock, title: 'Flexible Scheduling', desc: 'Mornings, evenings, weekends, online or in-person.', grad: 'from-success to-accent', iconBg: 'bg-success/15 text-success' },
-              { icon: Award, title: 'Trusted Platform', desc: 'Secure payments, vetted profiles, dedicated support.', grad: 'from-warning to-agency', iconBg: 'bg-warning/15 text-warning' },
+              { icon: Award, title: 'Trusted Platform', desc: 'Secure payments, vetted profiles, dedicated support.', grad: 'from-warning to-accent', iconBg: 'bg-warning/15 text-warning' },
               { icon: Users, title: 'Trusted Community', desc: '4,000+ matched families and 1,00,000+ tutors.', grad: 'from-tutor to-accent', iconBg: 'bg-tutor/15 text-tutor' },
             ].map((feature, i) => (
               <div
