@@ -342,7 +342,7 @@ export default function Index() {
           <div className="absolute top-0 right-0 w-[500px] h-[400px] bg-primary/10 rounded-full blur-[120px] pointer-events-none" />
           <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-tutor/10 rounded-full blur-[120px] pointer-events-none" />
           <div className="container mx-auto px-4 relative z-10">
-            <div className="flex items-end justify-between mb-8 md:mb-12 max-w-5xl flex-wrap gap-3">
+            <div className="flex items-end justify-between mb-8 md:mb-12 max-w-[1200px] flex-wrap gap-3">
               <div>
                 <span className="inline-block text-[10px] md:text-xs uppercase tracking-[0.2em] text-primary font-bold bg-primary/10 px-3 py-1 rounded-full mb-3">Categories</span>
                 <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight mb-2">Browse by Subject</h2>
