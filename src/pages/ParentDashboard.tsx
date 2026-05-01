@@ -1025,7 +1025,10 @@ export default function ParentDashboard() {
       <CardHeader className="flex flex-row items-start justify-between gap-4">
         <div>
           <CardTitle>{editingJob ? 'Edit Tuition Job' : 'Post a Tuition Job'}</CardTitle>
-          <CardDescription>Fill in the details below. The job will be reviewed by our team before going live.</CardDescription>
+          <CardDescription className="flex items-center gap-2">
+            Fill in the details below. The job will be reviewed by our team before going live.
+            {!editingJob && <Badge className="bg-primary text-primary-foreground">Free Posting</Badge>}
+          </CardDescription>
         </div>
         <Button type="button" variant="outline" size="sm" onClick={() => { setShowPostJob(false); setEditingJob(null); resetJobForm(); }}>Cancel</Button>
       </CardHeader>
