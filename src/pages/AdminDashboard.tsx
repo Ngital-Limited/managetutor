@@ -3770,8 +3770,9 @@ export default function AdminDashboard() {
                   <label className="text-sm font-medium">Reason for ban</label>
                   <Textarea value={adminNotes} onChange={(e) => setAdminNotes(e.target.value)} placeholder="Why is this user being banned?" className="mt-1" />
                 </div>
-              )}
-            </div>
+               )}
+               <AdminNotesWidget targetUserId={selectedUser.id} compact />
+             </div>
           )}
           <DialogFooter>
             <Button variant="outline" onClick={() => setSelectedUser(null)}>Cancel</Button>
