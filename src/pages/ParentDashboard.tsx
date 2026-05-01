@@ -2600,11 +2600,78 @@ export default function ParentDashboard() {
     );
   };
 
+  const renderTuitions = () => {
+    const hiredApps = allApplicants.filter((a: any) => a.status === 'accepted');
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2"><GraduationCap className="h-5 w-5" /> Active Tuitions</CardTitle>
+          <CardDescription>Currently active tutoring engagements</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {hiredApps.length > 0 ? (
+            <div className="space-y-4">
+              {hiredApps.map((app: any) => {
+                const tutor = app.tutor_profiles;
+                const hc = hiringConfirmations.find((h: any) => h.application_id === app.id);
+                return (
+                  <div key={app.id} className="p-4 border rounded-xl">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-11 w-11">
+                          <AvatarImage src={tutor?.profiles?.avatar_url} />
+                          <AvatarFallback>{tutor?.profiles?.full_name?.charAt(0) || 'T'}</AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="font-bold">{tutor?.profiles?.full_name}</span>
+                            {tutor?.verification_status === 'approved' && tutor?.verification_paid && (
+                              <Badge className="bg-primary/10 text-primary text-[10px] px-1.5 py-0">Verified</Badge>
+                            )}
+                          </div>
+                          <p className="text-xs text-muted-foreground">{app.jobs?.title} · {app.jobs?.job_reference}</p>
+                          {hc && (
+                            <div className="flex flex-wrap gap-2 mt-1">
+                              <Badge variant="outline" className="text-xs">৳{hc.agreed_salary}/mo</Badge>
+                              <Badge variant="outline" className="text-xs">Start: {hc.start_date}</Badge>
+                              <Badge variant="outline" className="text-xs">{hc.days_per_week} days/wk</Badge>
+                              {hc.tutor_confirmed ? (
+                                <Badge className="bg-success text-[10px]">Both Confirmed</Badge>
+                              ) : (
+                                <Badge className="bg-warning text-warning-foreground text-[10px]">Awaiting Tutor Confirmation</Badge>
+                              )}
+                            </div>
+                          )}
+                          {!hc && <p className="text-xs text-muted-foreground mt-1">৳{app.proposed_rate}/mo (proposed)</p>}
+                        </div>
+                      </div>
+                      <Link to={`/tutor/${(tutor as any)?.slug || tutor?.id}`}>
+                        <Button size="sm" variant="outline"><Eye className="h-3.5 w-3.5 mr-1" /> Profile</Button>
+                      </Link>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <GraduationCap className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <h3 className="font-bold mb-2">No active tuitions yet</h3>
+              <p className="text-muted-foreground mb-4">Hire a tutor from your applicants to start</p>
+              <Button variant="outline" onClick={() => setActiveSection('applicants')}>View Applicants</Button>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    );
+  };
+
   const renderActiveSection = () => {
     switch (activeSection) {
       case 'overview': return renderOverview();
       case 'jobs': return renderJobs();
       case 'applicants': return renderApplicants();
+      case 'tuitions': return renderTuitions();
       case 'demo': return renderDemoBookings();
       case 'payments': return renderPayments();
       case 'profile': return renderProfile();
