@@ -2724,7 +2724,7 @@ export default function AdminDashboard() {
                               {loadingAllApps ? (
                                 <TableRow><TableCell colSpan={8} className="text-center py-8 text-muted-foreground">Loading…</TableCell></TableRow>
                               ) : filteredJobs.length === 0 ? (
-                                <TableRow><TableCell colSpan={8} className="text-center py-12 text-muted-foreground">No applications yet.</TableCell></TableRow>
+                                <TableRow><TableCell colSpan={8} className="text-center py-12 text-muted-foreground">{appsPipelineTab === 'all' ? 'No applications yet.' : `No jobs with ${PIPELINE_TABS.find(t => t.key === appsPipelineTab)?.label.toLowerCase()} applicants.`}</TableCell></TableRow>
                               ) : filteredJobs.slice((appsJobsPage - 1) * appsJobsPageSize, appsJobsPage * appsJobsPageSize).map(({ jid, job, total, pending, shortlisted, latest }) => {
                                 const guardianApp = allApplications.find(a => a.job_id === jid);
                                 const guardianName = guardianApp?.parent_profile?.full_name || '—';
