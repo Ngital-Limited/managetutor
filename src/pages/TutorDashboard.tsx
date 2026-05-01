@@ -527,7 +527,7 @@ export default function TutorDashboard() {
 
         {/* Profile Completeness Warning */}
         {profileComplete < 100 && (
-          <Card className="mb-6 border-warning/50 bg-warning/5">
+          <Card className="border-warning/50 bg-warning/5">
             <CardContent className="p-4">
               <div className="flex flex-col sm:flex-row sm:items-center gap-4">
                 <AlertCircle className="h-8 w-8 text-warning flex-shrink-0" />
@@ -685,7 +685,7 @@ export default function TutorDashboard() {
 
         {/* Demo Class Bookings */}
         {demoBookings.length > 0 && (
-          <Card className="mb-8" id="demo-classes">
+          <Card className="" id="demo-classes">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Calendar className="h-5 w-5" />
