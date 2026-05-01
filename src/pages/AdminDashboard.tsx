@@ -2757,6 +2757,7 @@ export default function AdminDashboard() {
                           demo: 'bg-amber-500 text-white',
                           confirmed: 'bg-emerald-600 text-white',
                           not_confirmed: 'bg-rose-600 text-white',
+                          no_applicants: 'bg-zinc-600 text-white',
                         };
                         return (
                           <button
