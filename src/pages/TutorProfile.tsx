@@ -42,6 +42,7 @@ interface EducationEntry {
   result: string;
   is_current: boolean;
   current_semester: string;
+  medium: string;
 }
 interface JobExperienceEntry {
   id?: string;
