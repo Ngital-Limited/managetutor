@@ -2707,7 +2707,7 @@ export default function AdminDashboard() {
                   if (!jobMap.has(jid)) jobMap.set(jid, { job: a.jobs, apps: [] });
                   jobMap.get(jid)!.apps.push(a);
                 }
-                const jobsList = Array.from(jobMap.entries()).map(([jid, { job, apps }]) => ({
+                let jobsList = Array.from(jobMap.entries()).map(([jid, { job, apps }]) => ({
                   jid,
                   job,
                   total: apps.length,
@@ -2715,6 +2715,18 @@ export default function AdminDashboard() {
                   shortlisted: apps.filter(a => a.status === 'shortlisted').length,
                   latest: apps.reduce((m, a) => (new Date(a.created_at) > new Date(m) ? a.created_at : m), apps[0].created_at),
                 }));
+
+                // When viewing the "No Applicants" tab, replace list with jobs that have zero applications
+                if (appsPipelineTab === 'no_applicants') {
+                  jobsList = jobsWithoutApps.map((j: any) => ({
+                    jid: j.id,
+                    job: j,
+                    total: 0,
+                    pending: 0,
+                    shortlisted: 0,
+                    latest: j.created_at,
+                  }));
+                }
                 const search = appsJobsSearch.trim().toLowerCase();
                 const filteredJobs = jobsList.filter(j => {
                   if (!search) return true;
