@@ -316,6 +316,18 @@ export default function ParentDashboard() {
   const [featuredJobPrice, setFeaturedJobPrice] = useState<number>(300);
   const [boostingJobId, setBoostingJobId] = useState<string | null>(null);
 
+  // Student profiles state
+  const [studentProfiles, setStudentProfiles] = useState<any[]>([]);
+  const [showStudentForm, setShowStudentForm] = useState(false);
+  const [editingStudent, setEditingStudent] = useState<any>(null);
+  const [studentForm, setStudentForm] = useState({ name: '', age: '', class_level: '', school_name: '', medium: '', learning_needs: '' });
+
+  // Hiring confirmation state
+  const [hiringDialogOpen, setHiringDialogOpen] = useState(false);
+  const [hiringApp, setHiringApp] = useState<Application | null>(null);
+  const [hiringForm, setHiringForm] = useState({ agreed_salary: '', start_date: '', subjects: '', days_per_week: '3' });
+  const [hiringConfirmations, setHiringConfirmations] = useState<any[]>([]);
+
   useEffect(() => {
     supabase.from('platform_settings').select('value').eq('key', 'featured_job_price').maybeSingle()
       .then(({ data }) => {
