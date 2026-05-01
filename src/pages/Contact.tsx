@@ -52,7 +52,7 @@ export default function Contact() {
 
       {/* Hero */}
       <section className="gradient-hero text-white py-16">
-        <div className="max-w-[1200px] mx-auto px-4 text-center">
+        <div className="max-w-[1200px] mx-auto px-4 md:px-6 text-center">
           <h1 className="text-4xl md:text-5xl font-bold mb-4">Contact Us</h1>
           <p className="text-lg text-white/80 max-w-2xl mx-auto">
             Have questions? We're here to help. Reach out and we'll respond within 24 hours.

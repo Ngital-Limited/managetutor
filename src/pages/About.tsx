@@ -13,7 +13,7 @@ export default function About() {
 
       {/* Hero */}
       <section className="gradient-hero text-white py-20">
-        <div className="max-w-[1200px] mx-auto px-4 text-center">
+        <div className="max-w-[1200px] mx-auto px-4 md:px-6 text-center">
           <h1 className="text-4xl md:text-5xl font-bold mb-6">About Manage Tutor</h1>
           <p className="text-lg md:text-xl text-white/80 max-w-3xl mx-auto leading-relaxed">
             Bangladesh's most trusted platform connecting students and parents with verified home tutors. We're on a mission to make quality education accessible to every family.

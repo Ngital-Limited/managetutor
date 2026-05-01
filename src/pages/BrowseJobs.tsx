@@ -438,7 +438,7 @@ export default function BrowseJobs({ embedded = false }: { embedded?: boolean } 
         <section className="relative overflow-hidden bg-gradient-to-br from-primary via-primary to-secondary text-primary-foreground">
           <div className="absolute -top-32 -right-20 w-[420px] h-[420px] rounded-full bg-accent/40 blur-[120px] pointer-events-none" />
           <div className="absolute -bottom-32 -left-20 w-[420px] h-[420px] rounded-full bg-tutor/30 blur-[120px] pointer-events-none" />
-          <div className="container mx-auto px-4 pt-12 pb-14 max-w-[1200px] relative z-10">
+          <div className="container mx-auto px-4 md:px-6 pt-12 pb-14 max-w-[1200px] relative z-10">
             <div className="max-w-3xl">
               <div className="inline-flex items-center gap-2 bg-primary-foreground/15 backdrop-blur-sm rounded-full px-4 py-1.5 text-sm font-medium mb-5 border border-primary-foreground/20">
                 <Sparkles className="h-4 w-4" />
@@ -457,7 +457,7 @@ export default function BrowseJobs({ embedded = false }: { embedded?: boolean } 
 
       {/* Profile-matched banner (embedded tutor view) */}
       {embedded && tutorPrefilterApplied && (tutorClassLevels.length > 0 || tutorSubjectIds.length > 0 || selectedDistrict !== 'all') && (
-        <div className="container mx-auto px-4 pt-3 max-w-[1200px]">
+        <div className="container mx-auto px-4 md:px-6 pt-3 max-w-[1200px]">
           <div className="flex items-center justify-between gap-3 rounded-xl border border-primary/20 bg-primary/5 px-4 py-2.5">
             <div className="flex items-center gap-2 text-sm text-foreground">
               <Sparkles className="h-4 w-4 text-primary shrink-0" />
@@ -486,7 +486,7 @@ export default function BrowseJobs({ embedded = false }: { embedded?: boolean } 
       )}
 
       {/* Search Bar - Floating */}
-      <div className={`container mx-auto px-4 relative z-20 ${embedded ? 'pt-2' : '-mt-7'}`}>
+      <div className={`container mx-auto px-4 md:px-6 relative z-20 ${embedded ? 'pt-2' : '-mt-7'}`}>
         <div className="bg-card rounded-2xl shadow-xl border border-border p-4">
           <div className="flex flex-col md:flex-row gap-3">
             <div className="flex-1 relative">
@@ -614,7 +614,7 @@ export default function BrowseJobs({ embedded = false }: { embedded?: boolean } 
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-8 max-w-[1200px]">
+      <div className="container mx-auto px-4 md:px-6 py-8 max-w-[1200px]">
         {/* Results Header */}
         <div className="flex items-center justify-between mb-6">
           <div>

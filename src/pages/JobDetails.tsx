@@ -306,7 +306,7 @@ export default function JobDetails() {
     <>
       {!isTutor && <Header />}
 
-      <main className={isTutor ? "container mx-auto px-4 py-6 max-w-[1200px]" : "container mx-auto px-4 py-8 max-w-[1200px]"}>
+      <main className={isTutor ? "container mx-auto px-4 md:px-6 py-6 max-w-[1200px]" : "container mx-auto px-4 md:px-6 py-8 max-w-[1200px]"}>
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
