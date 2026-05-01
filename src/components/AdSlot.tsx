@@ -68,8 +68,8 @@ export function AdSlot({ slot, width = 300, height = 250, className }: AdSlotPro
 
   return (
     <div
-      className={className}
-      style={{ width: '100%', maxWidth: w, aspectRatio: `${w} / ${h}` }}
+      className={`ad-slot ${className || ''}`.trim()}
+      style={{ maxWidth: w, aspectRatio: `${w} / ${h}` }}
       aria-label="Sponsored"
     >
       {ad.link_url && ad.ad_type !== 'html' ? (
