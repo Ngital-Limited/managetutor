@@ -470,6 +470,36 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
     setBanReason('');
   };
 
+  // ─── Role Transfer ───
+  const [transferDialogOpen, setTransferDialogOpen] = useState(false);
+  const [transferTargetUserId, setTransferTargetUserId] = useState<string | null>(null);
+  const [transferTargetName, setTransferTargetName] = useState('');
+  const [transferProcessing, setTransferProcessing] = useState(false);
+
+  const openTransferDialog = (userId: string, name: string) => {
+    setTransferTargetUserId(userId);
+    setTransferTargetName(name);
+    setTransferDialogOpen(true);
+  };
+
+  const confirmTransferToParent = async () => {
+    if (!transferTargetUserId) return;
+    setTransferProcessing(true);
+    const { error } = await supabase.rpc('transfer_user_role', {
+      _target_user_id: transferTargetUserId,
+      _new_role: 'parent',
+    });
+    setTransferProcessing(false);
+    if (error) {
+      toast({ title: 'Transfer Failed', description: error.message, variant: 'destructive' });
+    } else {
+      toast({ title: 'Role Transferred', description: `${transferTargetName} is now a Parent.` });
+      fetchTutors();
+    }
+    setTransferDialogOpen(false);
+    setTransferTargetUserId(null);
+  };
+
   const handleApproveToggle = async (userId: string, currentlyApproved: boolean) => {
     const { error } = await supabase.from('profiles').update({ is_approved: !currentlyApproved }).eq('id', userId);
     if (error) { toast({ title: 'Error', description: error.message, variant: 'destructive' }); return; }
