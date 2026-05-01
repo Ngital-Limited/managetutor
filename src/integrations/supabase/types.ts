@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      activity_logs: {
+        Row: {
+          action: string
+          actor_id: string
+          created_at: string
+          details: Json | null
+          id: string
+          target_id: string | null
+          target_type: string
+        }
+        Insert: {
+          action: string
+          actor_id: string
+          created_at?: string
+          details?: Json | null
+          id?: string
+          target_id?: string | null
+          target_type: string
+        }
+        Update: {
+          action?: string
+          actor_id?: string
+          created_at?: string
+          details?: Json | null
+          id?: string
+          target_id?: string | null
+          target_type?: string
+        }
+        Relationships: []
+      }
       ad_placements: {
         Row: {
           ad_type: string
@@ -879,6 +909,36 @@ export type Database = {
           },
         ]
       }
+      internal_notes: {
+        Row: {
+          author_id: string
+          created_at: string
+          id: string
+          note: string
+          note_type: string
+          target_user_id: string
+          updated_at: string
+        }
+        Insert: {
+          author_id: string
+          created_at?: string
+          id?: string
+          note: string
+          note_type?: string
+          target_user_id: string
+          updated_at?: string
+        }
+        Update: {
+          author_id?: string
+          created_at?: string
+          id?: string
+          note?: string
+          note_type?: string
+          target_user_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       job_subjects: {
         Row: {
           created_at: string | null
@@ -1340,6 +1400,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      phone_followups: {
+        Row: {
+          caller_id: string
+          created_at: string
+          follow_up_date: string | null
+          id: string
+          outcome: string
+          phone_number: string | null
+          summary: string | null
+          target_user_id: string
+        }
+        Insert: {
+          caller_id: string
+          created_at?: string
+          follow_up_date?: string | null
+          id?: string
+          outcome?: string
+          phone_number?: string | null
+          summary?: string | null
+          target_user_id: string
+        }
+        Update: {
+          caller_id?: string
+          created_at?: string
+          follow_up_date?: string | null
+          id?: string
+          outcome?: string
+          phone_number?: string | null
+          summary?: string | null
+          target_user_id?: string
+        }
+        Relationships: []
       }
       platform_settings: {
         Row: {
