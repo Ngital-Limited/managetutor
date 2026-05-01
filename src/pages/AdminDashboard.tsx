@@ -36,7 +36,7 @@ import {
   Eye, Ban, UserCheck, FileCheck,
   LogOut, Home, DollarSign, Trash2, CreditCard, Megaphone, Send, Mail,
   Package, Plus, Pencil, ToggleLeft, ToggleRight, Wallet, MapPin, LifeBuoy, ShieldCheck,
-  LogIn, BookOpen, UserPlus, TrendingUp, ChevronLeft, ArrowLeft,
+  LogIn, BookOpen, UserPlus, TrendingUp, ChevronLeft, ChevronRight, ArrowLeft,
   Phone, Calendar, X, Activity
 } from 'lucide-react';
 import { RevenuePayoutTab } from '@/components/admin/RevenuePayoutTab';
