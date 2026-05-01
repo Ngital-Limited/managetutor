@@ -300,6 +300,32 @@ export default function JobDetails() {
       if (status === 'accepted' && job) {
         await supabase.from('jobs').update({ status: 'in_progress' }).eq('id', job.id);
       }
+
+      // Send application status email to the tutor
+      try {
+        const app = applications.find(a => a.id === appId);
+        if (app?.tutor_profiles?.user_id) {
+          const { data: tutorEmail } = await supabase
+            .from('profiles')
+            .select('email, full_name')
+            .eq('id', app.tutor_profiles.user_id)
+            .single();
+          if (tutorEmail?.email) {
+            await supabase.functions.invoke('send-transactional-email', {
+              body: {
+                templateName: 'application-status-update',
+                recipientEmail: tutorEmail.email,
+                idempotencyKey: `app-status-${appId}-${status}`,
+                templateData: {
+                  tutorName: tutorEmail.full_name,
+                  jobTitle: job?.title,
+                  status,
+                },
+              },
+            });
+          }
+        }
+      } catch (e) { console.error('Email send failed:', e); }
       
       fetchJob();
     }
