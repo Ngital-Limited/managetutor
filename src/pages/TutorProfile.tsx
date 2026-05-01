@@ -246,6 +246,7 @@ export default function TutorProfile() {
           result: match?.result || '',
           is_current: match?.is_current || false,
           current_semester: (match as any)?.current_semester || '',
+          medium: (match as any)?.medium || '',
         };
       }));
       if (jobRes.data) {
