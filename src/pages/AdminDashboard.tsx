@@ -3731,41 +3731,6 @@ export default function AdminDashboard() {
 
       {/* ═══════ DIALOGS ═══════ */}
 
-      {/* Review Tutor Dialog */}
-      <Dialog open={!!selectedTutor} onOpenChange={() => setSelectedTutor(null)}>
-        <DialogContent className="max-w-lg">
-          <DialogHeader><DialogTitle>Review Tutor Verification</DialogTitle></DialogHeader>
-          {selectedTutor && (
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div><label className="text-xs font-medium text-muted-foreground">Name</label><p className="font-semibold">{selectedTutor.profiles?.full_name}</p></div>
-                <div><label className="text-xs font-medium text-muted-foreground">Email</label><p className="text-sm">{selectedTutor.profiles?.email}</p></div>
-                <div><label className="text-xs font-medium text-muted-foreground">Gender</label><p className="capitalize">{selectedTutor.gender}</p></div>
-                <div><label className="text-xs font-medium text-muted-foreground">Experience</label><p>{selectedTutor.experience_years} years</p></div>
-                <div className="col-span-2"><label className="text-xs font-medium text-muted-foreground">Education</label><p>{selectedTutor.education || 'Not provided'}</p></div>
-              </div>
-              <div>
-                <label className="text-xs font-medium text-muted-foreground">Uploaded Documents</label>
-                {selectedTutor.verification_documents?.length > 0 ? (
-                  <div className="space-y-2 mt-2">
-                    {selectedTutor.verification_documents.map((doc) => (
-                      <a key={doc.id} href={doc.document_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 p-2 bg-muted/50 rounded-lg hover:bg-muted transition-colors">
-                        <FileText className="h-4 w-4 text-primary" />
-                        <span className="text-sm capitalize">{doc.document_type}</span>
-                        <Badge variant="outline" className="ml-auto text-xs capitalize">{doc.status}</Badge>
-                      </a>
-                    ))}
-                  </div>
-                ) : <p className="text-sm text-muted-foreground mt-1">No documents uploaded</p>}
-              </div>
-            </div>
-          )}
-          <DialogFooter>
-            <Button variant="destructive" onClick={() => handleVerifyTutor(selectedTutor!.id, 'rejected')} disabled={processing}>Reject</Button>
-            <Button className="bg-success hover:bg-success/90" onClick={() => handleVerifyTutor(selectedTutor!.id, 'approved')} disabled={processing}>Approve</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
 
       {/* Ban/Unban User Dialog */}
       <Dialog open={!!selectedUser} onOpenChange={() => setSelectedUser(null)}>
