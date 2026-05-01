@@ -697,7 +697,7 @@ export default function TutorProfile() {
   }
 
   const profileContent = (
-    <div className="px-4 py-6 max-w-5xl mx-auto">
+    <div className="px-4 py-6 max-w-[1200px] mx-auto">
       {/* Sticky header */}
       <div className="sticky top-0 z-30 -mx-4 px-4 py-4 mb-6 bg-background/85 backdrop-blur-xl border-b border-border">
         <div className="flex items-center justify-between gap-4 flex-wrap">

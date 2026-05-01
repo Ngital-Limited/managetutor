@@ -133,7 +133,7 @@ export default function AdminBulkImportJobs() {
   };
 
   return (
-    <div className="container mx-auto py-6 max-w-4xl">
+    <div className="container mx-auto py-6 max-w-[1200px]">
       <Button variant="ghost" size="sm" onClick={() => navigate('/admin')} className="mb-4">
         <ArrowLeft className="h-4 w-4 mr-1" /> Back to Admin
       </Button>

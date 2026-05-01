@@ -161,7 +161,7 @@ export default function ParentProfileEdit() {
         </div>
       </nav>
 
-      <main className="container mx-auto px-4 py-8 max-w-2xl">
+      <main className="container mx-auto px-4 py-8 max-w-[1200px]">
         <h1 className="text-3xl font-bold mb-2">{isAdminEdit ? 'Edit Parent Profile' : 'Edit Profile'}</h1>
         <p className="text-muted-foreground mb-8">{isAdminEdit ? `Editing profile for user` : 'Update your personal information'}</p>
 

@@ -84,7 +84,7 @@ export default function Favorites() {
       {/* Navigation */}
       <Header />
 
-      <main className="container mx-auto px-4 py-8 max-w-4xl">
+      <main className="container mx-auto px-4 py-8 max-w-[1200px]">
         <div className="flex items-center gap-3 mb-8">
           <div className="h-12 w-12 rounded-xl bg-destructive/10 flex items-center justify-center">
             <Heart className="h-6 w-6 text-destructive" />
