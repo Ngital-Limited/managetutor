@@ -18,7 +18,7 @@ import { useToast } from '@/hooks/use-toast';
 import { 
   Search, MapPin, Briefcase, 
   Users, ArrowRight, ChevronLeft, ChevronRight, Send, Loader2,
-  Clock, Filter, X, Sparkles, Tag, GraduationCap, AlertTriangle
+  Clock, Filter, X, Sparkles, Tag, GraduationCap, AlertTriangle, Bookmark
 } from 'lucide-react';
 import { JOB_CATEGORIES, STUDENT_BACKGROUNDS } from '@/constants/jobCategories';
 import { Progress } from '@/components/ui/progress';
