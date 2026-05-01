@@ -115,6 +115,9 @@ interface TutorVerification {
   created_at: string;
   district_id: string | null;
   district_name: string | null;
+  area_id: string | null;
+  area_name: string | null;
+  user_reference: string | null;
   profiles: { full_name: string; email: string; phone: string | null };
   verification_documents: { id: string; document_type: string; document_url: string; status: string }[];
 }
@@ -823,6 +826,9 @@ export default function AdminDashboard() {
   const [verificationDocType, setVerificationDocType] = useState<string>('all');
   const [verificationDistrict, setVerificationDistrict] = useState<string>('all');
   const [verificationDistricts, setVerificationDistricts] = useState<{ id: string; name_en: string }[]>([]);
+  const [verificationSearch, setVerificationSearch] = useState('');
+  const [verificationArea, setVerificationArea] = useState<string>('all');
+  const [verificationAreas, setVerificationAreas] = useState<{ id: string; name_en: string }[]>([]);
   const [verificationPayments, setVerificationPayments] = useState<PaymentRow[]>([]);
   const [verificationFee, setVerificationFee] = useState<number>(50);
   const [jobs, setJobs] = useState<JobRow[]>([]);
