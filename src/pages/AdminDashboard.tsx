@@ -3086,7 +3086,21 @@ export default function AdminDashboard() {
                                       <p className="line-clamp-2 italic border-l-2 border-primary/30 pl-2" title={app.cover_message}>"{app.cover_message}"</p>
                                     ) : '—'}
                                   </TableCell>
-                                  <TableCell className="align-top"><Badge className={`text-[10px] capitalize ${statusColor(app.status)}`}>{app.status}</Badge></TableCell>
+                                  <TableCell className="align-top">
+                                    <Select value={app.status} onValueChange={(v) => handleAdminUpdateAppStatus(app.id, v, app.job_id)}>
+                                      <SelectTrigger className={`h-7 w-[140px] text-[11px] capitalize font-medium border ${statusColor(app.status)}`}>
+                                        <SelectValue />
+                                      </SelectTrigger>
+                                      <SelectContent>
+                                        <SelectItem value="pending" className="text-xs">Pending</SelectItem>
+                                        <SelectItem value="shortlisted" className="text-xs">Shortlisted</SelectItem>
+                                        <SelectItem value="invited_to_demo" className="text-xs">Invited to Demo</SelectItem>
+                                        <SelectItem value="accepted" className="text-xs">Accepted (Confirmed)</SelectItem>
+                                        <SelectItem value="rejected" className="text-xs">Rejected (Not Confirmed)</SelectItem>
+                                        <SelectItem value="withdrawn" className="text-xs">Withdrawn</SelectItem>
+                                      </SelectContent>
+                                    </Select>
+                                  </TableCell>
                                   <TableCell className="align-top">
                                     <div className="space-y-1.5">
                                       {(() => {
