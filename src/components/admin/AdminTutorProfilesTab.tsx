@@ -407,6 +407,7 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
         education: t.education,
         last_education: lastEduMap.get(t.id) || null,
         last_institution: lastInstMap.get(t.id) || null,
+        education_history: eduHistMap.get(t.id) || [],
         experience_years: t.experience_years || 0,
         teaching_mode: t.teaching_mode,
         verification_status: t.verification_status || 'pending',
