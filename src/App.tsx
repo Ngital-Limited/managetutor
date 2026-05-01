@@ -24,6 +24,7 @@ import TutorBoost from "./pages/TutorBoost";
 import TutorVerifyBadge from "./pages/TutorVerifyBadge";
 import TutorSettings from "./pages/TutorSettings";
 import TutorSavedJobs from "./pages/TutorSavedJobs";
+import TutorAnalytics from "./pages/TutorAnalytics";
 import ParentDashboard from "./pages/ParentDashboard";
 import ParentProfileEdit from "./pages/ParentProfileEdit";
 
