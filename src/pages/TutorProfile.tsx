@@ -89,6 +89,7 @@ export default function TutorProfile() {
 
   // Education & Job Experience
   const [educationEntries, setEducationEntries] = useState<EducationEntry[]>([]);
+  const [manualInstitution, setManualInstitution] = useState<Record<string, boolean>>({});
   const [jobExperiences, setJobExperiences] = useState<JobExperienceEntry[]>([]);
 
   const [profile, setProfile] = useState({
@@ -235,11 +236,17 @@ export default function TutorProfile() {
       // Always seed 4 fixed education slots: SSC, HSC, Bachelor, Masters
       const FIXED_DEGREES = ['SSC', 'HSC', 'Bachelor', 'Masters'];
       const existing = eduRes.data || [];
+      const knownUnis = new Set(UNIVERSITY_OPTIONS.map(o => o.value));
+      const manualMap: Record<string, boolean> = {};
       setEducationEntries(FIXED_DEGREES.map((deg) => {
         const match = existing.find((e: any) => (e.degree || '').toLowerCase() === deg.toLowerCase());
+        const inst = match?.institution || '';
+        if ((deg === 'Bachelor' || deg === 'Masters') && inst && !knownUnis.has(inst)) {
+          manualMap[deg] = true;
+        }
         return {
           id: match?.id,
-          institution: match?.institution || '',
+          institution: inst,
           degree: deg,
           field_of_study: match?.field_of_study || '',
           passing_year: match?.passing_year ?? null,
@@ -249,6 +256,7 @@ export default function TutorProfile() {
           medium: (match as any)?.medium || '',
         };
       }));
+      setManualInstitution(manualMap);
       if (jobRes.data) {
         setJobExperiences(jobRes.data.map((j: any) => ({
           id: j.id,
@@ -929,17 +937,39 @@ export default function TutorProfile() {
                         <div>
                           <Label>Institution Name</Label>
                           {entry.degree === 'Bachelor' || entry.degree === 'Masters' ? (
-                            <div className="mt-1.5">
-                              <SearchableSelect
-                                options={UNIVERSITY_OPTIONS}
-                                value={entry.institution}
-                                onValueChange={(v) => updateEducation(index, 'institution', v)}
-                                placeholder={meta.institutionPlaceholder || 'Select university'}
-                                searchPlaceholder="Search universities..."
-                                emptyText="No university found."
-                                grouped
-                                className="h-11 rounded-xl"
-                              />
+                            <div className="mt-1.5 space-y-1.5">
+                              {manualInstitution[entry.degree] ? (
+                                <Input
+                                  className="rounded-xl h-11"
+                                  value={entry.institution}
+                                  onChange={(e) => updateEducation(index, 'institution', e.target.value)}
+                                  placeholder="Type your institution name"
+                                />
+                              ) : (
+                                <SearchableSelect
+                                  options={UNIVERSITY_OPTIONS}
+                                  value={entry.institution}
+                                  onValueChange={(v) => updateEducation(index, 'institution', v)}
+                                  placeholder={meta.institutionPlaceholder || 'Select university'}
+                                  searchPlaceholder="Search universities..."
+                                  emptyText="No university found."
+                                  grouped
+                                  className="h-11 rounded-xl"
+                                />
+                              )}
+                              <button
+                                type="button"
+                                className="text-xs text-primary hover:underline"
+                                onClick={() => {
+                                  setManualInstitution(prev => {
+                                    const next = { ...prev, [entry.degree]: !prev[entry.degree] };
+                                    return next;
+                                  });
+                                  updateEducation(index, 'institution', '');
+                                }}
+                              >
+                                {manualInstitution[entry.degree] ? '← Choose from list instead' : "Can't find your institution? Enter manually"}
+                              </button>
                             </div>
                           ) : (
                             <Input className="rounded-xl mt-1.5 h-11" value={entry.institution} onChange={(e) => updateEducation(index, 'institution', e.target.value)} placeholder={meta.institutionPlaceholder} />
