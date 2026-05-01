@@ -46,7 +46,7 @@ import { SubAdminRBACTab } from '@/components/admin/SubAdminRBACTab';
 import { PlatformDataTab } from '@/components/admin/PlatformDataTab';
 import { AdminCreateUserTab } from '@/components/admin/AdminCreateUserTab';
 import { AdminPostJobTab } from '@/components/admin/AdminPostJobTab';
-import { AdminTutorEditTab } from '@/components/admin/AdminTutorEditTab';
+
 import { AdminTutorProfilesTab } from '@/components/admin/AdminTutorProfilesTab';
 import { ReferralAnalyticsTab } from '@/components/admin/ReferralAnalyticsTab';
 import { AdsManagementTab } from '@/components/admin/AdsManagementTab';
@@ -1808,7 +1808,6 @@ export default function AdminDashboard() {
       label: 'Users',
       items: [
         { title: 'Tutor Profiles', value: 'tutor_profiles', icon: GraduationCap },
-        { title: 'Tutor Editor', value: 'tutor_editor', icon: Pencil },
         { title: 'Guardians / Parents', value: 'guardians', icon: Users },
         { title: 'Verifications', value: 'verifications', icon: UserCheck, badge: stats.pendingVerifications },
         { title: 'Create User', value: 'create_user', icon: UserPlus },
@@ -3427,9 +3426,6 @@ export default function AdminDashboard() {
 
             {/* ═══════ TUTOR PROFILES TAB ═══════ */}
             {activeTab === 'tutor_profiles' && <AdminTutorProfilesTab toast={toast} onImpersonate={handleImpersonate} />}
-
-            {/* ═══════ TUTOR EDITOR TAB ═══════ */}
-            {activeTab === 'tutor_editor' && <AdminTutorEditTab toast={toast} />}
 
             {/* ═══════ PLATFORM DATA TAB ═══════ */}
             {activeTab === 'platform_data' && <PlatformDataTab toast={toast} />}
