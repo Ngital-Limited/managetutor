@@ -2100,7 +2100,7 @@ export default function ParentDashboard() {
                                                   <Send className="h-3.5 w-3.5 mr-1" />
                                                   Invite to Demo
                                                 </Button>
-                                                <Button size="sm" className="h-8 text-xs" onClick={() => handleApplicationAction(app.id, 'accepted')}>
+                                                <Button size="sm" className="h-8 text-xs" onClick={() => openHiringDialog(app)}>
                                                   <CheckCircle2 className="h-3.5 w-3.5 mr-1" />
                                                   Hire
                                                 </Button>
