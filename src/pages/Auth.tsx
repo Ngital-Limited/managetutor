@@ -91,6 +91,12 @@ export default function Auth() {
     if (isLogin) {
       const { error } = await signIn(email, password);
       if (error) {
+        if (error.message?.toLowerCase().includes('email not confirmed')) {
+          setSignupEmail(email);
+          setShowVerifyEmail(true);
+          setLoading(false);
+          return;
+        }
         toast({ title: 'Login Failed', description: error.message, variant: 'destructive' });
       } else {
         // Check ban status after successful sign-in
