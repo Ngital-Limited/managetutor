@@ -1684,7 +1684,7 @@ export default function AdminDashboard() {
   const handleApproveUser = async (userId: string) => {
     const { error } = await supabase.from('profiles').update({ is_approved: true }).eq('id', userId);
     if (error) toast({ title: 'Error', description: error.message, variant: 'destructive' });
-    else { toast({ title: 'User approved' }); fetchUsers(); invalidate('admin:stats:v1'); void sharedInvalidate('admin:stats:v1'); fetchStats(true); }
+    else { toast({ title: 'User approved' }); if (user) logAdminAction(user.id, 'user_approved', 'user', userId); fetchUsers(); invalidate('admin:stats:v1'); void sharedInvalidate('admin:stats:v1'); fetchStats(true); }
   };
 
   const handleBanUser = async (userId: string, ban: boolean) => {
