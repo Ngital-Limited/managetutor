@@ -1216,6 +1216,41 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Verification Status Dialog */}
+      <Dialog open={verifyDialogOpen} onOpenChange={(open) => { if (!open) { setVerifyDialogOpen(false); setVerifyTargetTutorId(null); } }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <ShieldCheck className="h-5 w-5 text-primary" /> Change Verification Status
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <p className="text-sm text-muted-foreground">
+              Change <strong>{verifyTargetName}</strong>'s verification status to <Badge className={`ml-1 text-xs ${statusColor(verifyNewStatus)}`}>{statusLabel(verifyNewStatus)}</Badge>
+            </p>
+            <div>
+              <Label className="text-xs font-medium">Notes (optional)</Label>
+              <Textarea
+                value={verifyNotes}
+                onChange={(e) => setVerifyNotes(e.target.value)}
+                placeholder={verifyNewStatus === 'document_needed' ? 'Specify which documents are needed...' : verifyNewStatus === 'rejected' ? 'Reason for rejection...' : 'Add notes...'}
+                className="mt-1"
+                rows={3}
+              />
+            </div>
+          </div>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => { setVerifyDialogOpen(false); setVerifyTargetTutorId(null); }}>
+              Cancel
+            </Button>
+            <Button onClick={confirmVerifyStatusChange} disabled={verifyProcessing}>
+              {verifyProcessing ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <CheckCircle2 className="h-4 w-4 mr-1" />}
+              Confirm
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
