@@ -138,7 +138,8 @@ export default function Auth() {
       if (error) {
         toast({ title: 'Sign Up Failed', description: error.message, variant: 'destructive' });
       } else {
-        toast({ title: 'Success!', description: 'Account created successfully.' });
+        setSignupEmail(email);
+        setShowVerifyEmail(true);
       }
     }
     setLoading(false);
