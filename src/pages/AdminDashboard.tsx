@@ -2044,9 +2044,11 @@ export default function AdminDashboard() {
     {
       label: 'Finance',
       items: [
+        { title: 'Transaction Ledger', value: 'ledger', icon: FileText },
         { title: 'Payments', value: 'payments', icon: CreditCard },
         { title: 'Hires', value: 'hires', icon: CheckCircle2 },
         { title: 'Commissions', value: 'commissions', icon: DollarSign },
+        { title: 'Invoices', value: 'invoices', icon: FileCheck },
         { title: 'Revenue & Payouts', value: 'revenue', icon: Wallet },
         { title: 'Subscriptions', value: 'subscriptions', icon: Package },
       ],
