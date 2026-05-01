@@ -2679,6 +2679,7 @@ export default function AdminDashboard() {
                 demo: allApplications.filter(a => stageOf(a) === 'demo').length,
                 confirmed: allApplications.filter(a => stageOf(a) === 'confirmed').length,
                 not_confirmed: allApplications.filter(a => stageOf(a) === 'not_confirmed').length,
+                no_applicants: jobsWithoutApps.length,
               };
               const PIPELINE_TABS: { key: typeof appsPipelineTab; label: string }[] = [
                 { key: 'all', label: 'All Applications' },
@@ -2686,12 +2687,15 @@ export default function AdminDashboard() {
                 { key: 'demo', label: 'Demo Class' },
                 { key: 'confirmed', label: 'Confirmed' },
                 { key: 'not_confirmed', label: 'Not Confirmed' },
+                { key: 'no_applicants', label: 'No Applicants' },
               ];
 
               // Apps filtered by pipeline tab (used for Level-1 grouping)
               const pipelineApps = appsPipelineTab === 'all'
                 ? pendingApps
-                : allApplications.filter(a => stageOf(a) === appsPipelineTab);
+                : appsPipelineTab === 'no_applicants'
+                  ? []
+                  : allApplications.filter(a => stageOf(a) === appsPipelineTab);
 
               // ───── LEVEL 1: Jobs list ─────
               if (appsView === 'jobs' || !selectedAppsJobId) {
