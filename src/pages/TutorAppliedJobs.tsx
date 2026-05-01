@@ -13,19 +13,11 @@ import {
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { Logo } from '@/components/Logo';
-import { NotificationBell } from '@/components/NotificationBell';
-import {
-  Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent,
-  SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem,
-  SidebarProvider, SidebarTrigger, useSidebar,
-} from '@/components/ui/sidebar';
-import { NavLink } from '@/components/NavLink';
+import { TutorSidebarLayout } from '@/components/TutorSidebarLayout';
 import {
   Briefcase, Clock, CheckCircle2, XCircle, MapPin, BookOpen,
-  Eye, ArrowRight, ArrowLeft, User, Phone, Mail, LogOut, Globe,
-  Home, Search, CreditCard, FileText, Calendar, GraduationCap,
-  Star, Hourglass, Sparkles, Zap, ShieldCheck,
+  Eye, ArrowRight, User, Phone, Mail,
+  Star, Hourglass,
 } from 'lucide-react';
 
 interface Application {
@@ -47,62 +39,6 @@ interface Application {
   };
 }
 
-const sidebarItems = [
-  { title: 'Dashboard', url: '/tutor/dashboard', icon: Home },
-  { title: 'My Applications', url: '/tutor/applications', icon: FileText },
-  { title: 'Demo Classes', url: '/tutor/dashboard#demo-classes', icon: Calendar },
-  { title: 'Find Jobs', url: '/tutor/find-jobs', icon: Briefcase },
-  { title: 'Job Recommendations', url: '/tutor/recommendations', icon: Sparkles },
-  { title: 'My Profile', url: '/tutor/profile', icon: User },
-  { title: 'Boost Your Profile', url: '/tutor/boost', icon: Zap },
-  { title: 'Verify Badge Payment', url: '/tutor/verify-badge', icon: ShieldCheck },
-  { title: 'Monthly Plan', url: '/pricing', icon: CreditCard },
-];
-
-function TutorAppSidebar() {
-  const { state } = useSidebar();
-  const collapsed = state === 'collapsed';
-  const { profile, user } = useAuth();
-  const initials = profile?.full_name
-    ? profile.full_name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
-    : user?.email?.[0]?.toUpperCase() || '?';
-
-  return (
-    <Sidebar collapsible="offcanvas">
-      <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupLabel>{!collapsed && <Logo size="sm" />}</SidebarGroupLabel>
-          <div className={`flex items-center gap-3 px-3 py-3 ${collapsed ? 'justify-center' : ''}`}>
-            <Avatar className="h-9 w-9 shrink-0 border-2 border-primary/20">
-              <AvatarImage src={profile?.avatar_url || ''} />
-              <AvatarFallback className="bg-primary/10 text-primary text-xs font-bold">{initials}</AvatarFallback>
-            </Avatar>
-            {!collapsed && (
-              <div className="min-w-0">
-                <p className="text-sm font-semibold truncate">{profile?.full_name || user?.email?.split('@')[0]}</p>
-                <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
-              </div>
-            )}
-          </div>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {sidebarItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <NavLink to={item.url} end={item.url === '/tutor/dashboard'} className="hover:bg-muted/50" activeClassName="bg-muted text-primary font-medium">
-                      <item.icon className="mr-2 h-4 w-4" />
-                      {!collapsed && <span>{item.title}</span>}
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-      </SidebarContent>
-    </Sidebar>
-  );
-}
 
 export default function TutorAppliedJobs() {
   const { user, signOut, loading: authLoading } = useAuth();
@@ -169,32 +105,8 @@ export default function TutorAppliedJobs() {
   }
 
   return (
-    <SidebarProvider>
-      <div className="min-h-screen flex w-full">
-        <TutorAppSidebar />
-        <div className="flex-1 flex flex-col">
-          <header className="sticky top-0 z-30 flex items-center justify-between px-4 py-3 border-b bg-background/95 backdrop-blur">
-            <div className="flex items-center gap-2">
-              <SidebarTrigger />
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => navigate('/tutor/dashboard')}
-                className="gap-1 px-2"
-                aria-label="Back to dashboard"
-              >
-                <ArrowLeft className="h-4 w-4" />
-                <span className="hidden sm:inline">Back</span>
-              </Button>
-              <h1 className="text-lg font-bold">My Applications</h1>
-            </div>
-            <div className="flex items-center gap-2">
-              <NotificationBell />
-              <Button variant="ghost" size="sm" onClick={signOut}><LogOut className="h-4 w-4" /></Button>
-            </div>
-          </header>
-
-          <main className="flex-1 p-4 md:p-6 max-w-[1200px] mx-auto w-full">
+    <TutorSidebarLayout title="My Applications">
+      <div className="p-4 md:p-6 max-w-[1200px] mx-auto w-full">
             {/* Stats */}
             <div className="grid grid-cols-2 md:grid-cols-7 gap-3 mb-6">
               {[
@@ -339,10 +251,8 @@ export default function TutorAppliedJobs() {
                   </div>
                 )}
               </CardContent>
-            </Card>
-          </main>
+          </Card>
         </div>
-      </div>
 
       <AlertDialog open={!!withdrawId} onOpenChange={(open) => !open && setWithdrawId(null)}>
         <AlertDialogContent>
@@ -364,6 +274,6 @@ export default function TutorAppliedJobs() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </SidebarProvider>
+    </TutorSidebarLayout>
   );
 }
