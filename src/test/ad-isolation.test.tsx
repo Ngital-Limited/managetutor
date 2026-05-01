@@ -48,30 +48,40 @@ describe("Ad isolation: HTML ads must not affect site fonts or layout", () => {
     const { container } = render(
       <div className="page-container" style={{ width: 1200 }}>
         <header data-testid="sibling-header">Header text</header>
+        {/* Plain class only — no inline maxWidth so we read the CSS rule. */}
+        <div className="ad-slot" data-testid="ad-wrapper" />
+        {/* Also render the AdSlot-shaped wrapper to confirm inline cap works. */}
         <div
           className="ad-slot"
-          data-testid="ad-wrapper"
+          data-testid="ad-wrapper-sized"
           style={{ maxWidth: 300, aspectRatio: "300 / 250" }}
         />
         <footer data-testid="sibling-footer">Footer text</footer>
       </div>
     );
 
-    const adWrapper = container.querySelector(".ad-slot") as HTMLElement;
+    const adWrapper = container.querySelector(
+      '[data-testid="ad-wrapper"]'
+    ) as HTMLElement;
+    const sized = container.querySelector(
+      '[data-testid="ad-wrapper-sized"]'
+    ) as HTMLElement;
     const page = container.querySelector(".page-container") as HTMLElement;
 
     const adStyles = getComputedStyle(adWrapper);
     expect(adStyles.overflow).toBe("hidden");
     expect(adStyles.contain).toMatch(/layout|size|paint|style/);
     expect(adStyles.isolation).toBe("isolate");
+    // Class-only wrapper inherits max-width: 100% from .ad-slot rule.
     expect(adStyles.maxWidth).toBe("100%");
     expect(adStyles.minWidth).toBe("0px");
 
     const pageStyles = getComputedStyle(page);
     expect(["clip", "hidden"]).toContain(pageStyles.overflowX);
 
-    // Inline cap on the declared ad size — wrapper cannot grow past it.
-    expect(adWrapper.style.maxWidth).toBe("300px");
+    // Sized wrapper: the inline cap from AdSlot's declared ad size wins,
+    // but it can never exceed its parent because of overflow: hidden.
+    expect(sized.style.maxWidth).toBe("300px");
   });
 
   it("a sandboxed iframe ad cannot leak fonts or colors into siblings", async () => {
