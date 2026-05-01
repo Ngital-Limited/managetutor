@@ -1261,10 +1261,16 @@ export default function TutorProfile() {
                 ).map((docType) => {
                   const exists = documents.some(d => d.document_type === docType);
                   const label = docType.replace(/_/g, ' ');
+                  const isRequired = profile.is_student
+                    ? (docType === 'university_id_card' || docType === 'university_payslip')
+                    : (docType === 'education_certificate');
                   return (
                     <div key={docType} className={`border-2 border-dashed rounded-2xl p-5 text-center ${exists ? 'border-success/50 bg-success/5' : 'border-border'}`}>
                       <Upload className={`h-8 w-8 mx-auto mb-2 ${exists ? 'text-success' : 'text-muted-foreground'}`} />
-                      <p className="font-medium capitalize">{label}</p>
+                      <p className="font-medium capitalize">
+                        {label}
+                        {isRequired && <span className="text-destructive ml-1">*</span>}
+                      </p>
                       <p className="text-xs text-muted-foreground mb-3">
                         {exists ? 'Uploaded' : 'PDF, JPG, PNG (max 5MB)'}
                       </p>
