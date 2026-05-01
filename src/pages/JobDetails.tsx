@@ -676,7 +676,7 @@ export default function JobDetails() {
           </div>
 
           {/* Sidebar */}
-          <div className="space-y-6">
+          <div className="space-y-6 min-w-0">
             {/* Budget Card */}
             <Card>
               <CardContent className="p-6 text-center">
