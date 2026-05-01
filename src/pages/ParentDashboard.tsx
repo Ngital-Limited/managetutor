@@ -805,7 +805,7 @@ export default function ParentDashboard() {
       }
 
       // Notify tutor
-      const { data: tp } = await supabase.from('tutor_profiles').select('user_id').eq('id', booking.tutor_id).maybeSingle();
+      const { data: tp } = await supabase.from('tutor_profiles_public').select('user_id').eq('id', booking.tutor_id).maybeSingle();
       if (tp?.user_id) {
         await supabase.from('notifications').insert({
           user_id: tp.user_id,
@@ -823,7 +823,7 @@ export default function ParentDashboard() {
       }).eq('id', booking.id);
       if (error) { toast({ title: 'Error', description: error.message, variant: 'destructive' }); return; }
 
-      const { data: tp } = await supabase.from('tutor_profiles').select('user_id').eq('id', booking.tutor_id).maybeSingle();
+      const { data: tp } = await supabase.from('tutor_profiles_public').select('user_id').eq('id', booking.tutor_id).maybeSingle();
       if (tp?.user_id) {
         await supabase.from('notifications').insert({
           user_id: tp.user_id,
