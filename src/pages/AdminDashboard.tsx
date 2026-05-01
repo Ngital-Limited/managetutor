@@ -1808,7 +1808,6 @@ export default function AdminDashboard() {
       label: 'Users',
       items: [
         { title: 'Tutor Profiles', value: 'tutor_profiles', icon: GraduationCap },
-        { title: 'Tutor Editor', value: 'tutor_editor', icon: Pencil },
         { title: 'Guardians / Parents', value: 'guardians', icon: Users },
         { title: 'Verifications', value: 'verifications', icon: UserCheck, badge: stats.pendingVerifications },
         { title: 'Create User', value: 'create_user', icon: UserPlus },
