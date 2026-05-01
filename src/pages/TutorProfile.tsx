@@ -24,7 +24,7 @@ import { getMinProfileCompleteness } from '@/lib/profileCompleteness';
 import {
   GraduationCap, ArrowLeft, Save, Upload, FileText, CheckCircle2,
   Clock, XCircle, AlertCircle, Video, MessageSquare, Send,
-  Plus, Trash2, Briefcase, BookOpen, Users, Sparkles, Loader2, RefreshCw
+  Plus, Trash2, Briefcase, BookOpen, Users, Sparkles, Loader2, RefreshCw, Calendar
 } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -123,6 +123,7 @@ export default function TutorProfile() {
     religion: '',
     height: '',
     weight: '',
+    weekly_availability: {} as Record<string, string[]>,
   });
 
   const [tutorProfileId, setTutorProfileId] = useState<string | null>(null);
@@ -220,6 +221,7 @@ export default function TutorProfile() {
         religion: td.religion || '',
         height: td.height || '',
         weight: td.weight || '',
+        weekly_availability: td.weekly_availability || {},
       });
       setSelectedClassLevels(td.class_levels || []);
       setTutorProfileId(td.id);
@@ -398,6 +400,7 @@ export default function TutorProfile() {
         religion: profile.religion || null,
         height: profile.height || null,
         weight: profile.weight || null,
+        weekly_availability: profile.weekly_availability || {},
         district_id: userProfile.district_id || null,
         area_id: userProfile.area_id || null,
       } as any).eq('id', tutorData.id);
@@ -1242,6 +1245,61 @@ export default function TutorProfile() {
                   <Checkbox checked={profile.is_student} onCheckedChange={(checked) => setProfile({ ...profile, is_student: !!checked })} />
                   <span className="text-sm">I am currently a student</span>
                 </label>
+              </div>
+
+              {/* Weekly Availability Calendar */}
+              <div className="pt-4">
+                <h3 className="font-semibold flex items-center gap-2 mb-3"><Calendar className="h-4 w-4" /> Weekly Availability</h3>
+                <p className="text-sm text-muted-foreground mb-4">Click time slots to mark when you're available to teach.</p>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm border-collapse">
+                    <thead>
+                      <tr>
+                        <th className="p-2 text-left text-xs font-medium text-muted-foreground">Day</th>
+                        {['Morning', 'Afternoon', 'Evening'].map(slot => (
+                          <th key={slot} className="p-2 text-center text-xs font-medium text-muted-foreground">{slot}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {['Saturday', 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'].map(day => (
+                        <tr key={day} className="border-t border-border/40">
+                          <td className="p-2 text-xs font-medium">{day}</td>
+                          {['morning', 'afternoon', 'evening'].map(slot => {
+                            const isActive = (profile.weekly_availability[day] || []).includes(slot);
+                            return (
+                              <td key={slot} className="p-1 text-center">
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const current = profile.weekly_availability[day] || [];
+                                    const updated = isActive
+                                      ? current.filter((s: string) => s !== slot)
+                                      : [...current, slot];
+                                    setProfile({
+                                      ...profile,
+                                      weekly_availability: {
+                                        ...profile.weekly_availability,
+                                        [day]: updated,
+                                      },
+                                    });
+                                  }}
+                                  className={`w-full py-2 rounded-lg text-xs font-medium transition-colors ${
+                                    isActive
+                                      ? 'bg-primary text-primary-foreground'
+                                      : 'bg-muted/40 text-muted-foreground hover:bg-muted'
+                                  }`}
+                                >
+                                  {isActive ? '✓' : '—'}
+                                </button>
+                              </td>
+                            );
+                          })}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </CardContent>
           </Card>

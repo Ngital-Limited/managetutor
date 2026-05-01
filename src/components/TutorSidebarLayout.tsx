@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/sidebar';
 import {
   Home, FileText, Calendar, Briefcase, User, CreditCard, LogOut,
-  Sparkles, Zap, ShieldCheck, X, Bookmark, Settings,
+  Sparkles, Zap, ShieldCheck, X, Bookmark, Settings, BarChart3,
 } from 'lucide-react';
 import { TutorBottomNav } from '@/components/TutorBottomNav';
 
@@ -45,6 +45,7 @@ const tutorSidebarGroups: { label: string; items: { title: string; url: string; 
   {
     label: 'Account',
     items: [
+      { title: 'Analytics', url: '/tutor/analytics', icon: BarChart3 },
       { title: 'Monthly Plan', url: '/pricing', icon: CreditCard },
       { title: 'Settings', url: '/tutor/settings', icon: Settings },
     ],
