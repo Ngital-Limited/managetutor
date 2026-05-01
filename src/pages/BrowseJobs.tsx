@@ -788,6 +788,17 @@ export default function BrowseJobs({ embedded = false }: { embedded?: boolean } 
                         </div>
 
                         <div className="flex gap-2">
+                          {user && (
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-9 w-9 rounded-xl"
+                              onClick={() => toggleSaveJob(job.id)}
+                              title={savedJobIds.has(job.id) ? 'Unsave' : 'Save for later'}
+                            >
+                              <Bookmark className={`h-4 w-4 ${savedJobIds.has(job.id) ? 'fill-primary text-primary' : ''}`} />
+                            </Button>
+                          )}
                           <Link to={`/jobs/${(job as any).slug || job.id}`}>
                             <Button variant="outline" size="sm" className="rounded-xl text-xs h-9">
                               Details
