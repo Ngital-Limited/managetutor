@@ -1007,12 +1007,33 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
                               : <><ShieldCheck className="h-3.5 w-3.5 text-success" /> Approve User</>
                             }
                           </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handleVerifyToggle(t.tutor_id, t.verification_status)} className="flex items-center gap-2">
-                            {t.verification_status === 'approved'
-                              ? <><X className="h-3.5 w-3.5 text-warning" /> Revoke Verification</>
-                              : <><CheckCircle2 className="h-3.5 w-3.5 text-success" /> Verify Tutor</>
-                            }
-                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">Verification Status</div>
+                          {t.verification_status !== 'under_review' && (
+                            <DropdownMenuItem onClick={() => openVerifyDialog(t.tutor_id, t.name, 'under_review')} className="flex items-center gap-2">
+                              <Clock className="h-3.5 w-3.5 text-primary" /> Under Review
+                            </DropdownMenuItem>
+                          )}
+                          {t.verification_status !== 'approved' && (
+                            <DropdownMenuItem onClick={() => openVerifyDialog(t.tutor_id, t.name, 'approved')} className="flex items-center gap-2">
+                              <CheckCircle2 className="h-3.5 w-3.5 text-success" /> Approve
+                            </DropdownMenuItem>
+                          )}
+                          {t.verification_status !== 'rejected' && (
+                            <DropdownMenuItem onClick={() => openVerifyDialog(t.tutor_id, t.name, 'rejected')} className="flex items-center gap-2">
+                              <X className="h-3.5 w-3.5 text-destructive" /> Reject
+                            </DropdownMenuItem>
+                          )}
+                          {t.verification_status !== 'document_needed' && (
+                            <DropdownMenuItem onClick={() => openVerifyDialog(t.tutor_id, t.name, 'document_needed')} className="flex items-center gap-2">
+                              <FileText className="h-3.5 w-3.5 text-orange-500" /> Request Document
+                            </DropdownMenuItem>
+                          )}
+                          {t.verification_status !== 'pending' && (
+                            <DropdownMenuItem onClick={() => openVerifyDialog(t.tutor_id, t.name, 'pending')} className="flex items-center gap-2">
+                              <AlertCircle className="h-3.5 w-3.5 text-warning" /> Reset to Pending
+                            </DropdownMenuItem>
+                          )}
                           <DropdownMenuItem onClick={() => openTransferDialog(t.user_id, t.name)} className="flex items-center gap-2">
                             <ArrowUpDown className="h-3.5 w-3.5 text-primary" /> Transfer to Parent
                           </DropdownMenuItem>
