@@ -79,7 +79,7 @@ export function Header() {
             : 'bg-card/80 backdrop-blur-xl border-b border-transparent'
         }`}
       >
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+        <div className="container mx-auto px-4 md:px-6 max-w-[1200px] h-16 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-3 shrink-0">
             <Logo size="md" />
           </Link>
@@ -184,7 +184,7 @@ export function Header() {
             onClick={() => setMobileOpen(false)}
           />
           <div className="fixed top-16 left-0 right-0 z-50 md:hidden bg-card border-b border-border shadow-lg animate-in slide-in-from-top-2 duration-200">
-            <div className="container mx-auto px-4 py-4 space-y-1">
+            <div className="container mx-auto px-4 md:px-6 max-w-[1200px] py-4 space-y-1">
               {/* Mobile user info */}
               {user && (
                 <div className="flex items-center gap-3 px-4 py-3 mb-2 bg-muted/40 rounded-xl">
