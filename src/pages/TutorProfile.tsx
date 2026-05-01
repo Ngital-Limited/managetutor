@@ -1299,7 +1299,7 @@ export default function TutorProfile() {
 
               {/* Identity Document (NID / Passport / Birth Certificate) */}
               <div className="border-t pt-5 mt-2">
-                <h4 className="font-semibold flex items-center gap-2"><FileText className="h-4 w-4 text-primary" /> Identity Document</h4>
+                <h4 className="font-semibold flex items-center gap-2"><FileText className="h-4 w-4 text-primary" /> Identity Document <span className="text-destructive">*</span></h4>
                 <p className="text-sm text-muted-foreground mb-4">
                   Upload your NID Card, Passport, or Birth Certificate. Required for verification approval.
                   Accepted: JPG, PNG, WEBP, PDF (max 10MB). Your document is private and only visible to admins.
