@@ -2536,6 +2536,7 @@ export default function AdminDashboard() {
                               <TableCell className="font-mono text-xs">{job.job_reference || '—'}</TableCell>
                               <TableCell className="font-medium text-sm max-w-[200px] truncate">{job.title}</TableCell>
                               <TableCell className="text-sm">{(job.profiles as any)?.full_name}</TableCell>
+                              <TableCell className="text-xs font-mono">{(job.profiles as any)?.phone || '—'}</TableCell>
                               <TableCell className="text-sm">{(job.districts as any)?.name_en}</TableCell>
                               <TableCell className="text-sm">{(job.subjects as any)?.name_en || '—'}</TableCell>
                               <TableCell>
