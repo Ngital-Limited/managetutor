@@ -1505,9 +1505,45 @@ export default function ParentDashboard() {
             ))}
           </div>
 
-          <Button type="submit" className="w-full" disabled={submitting}>
-            {submitting ? (editingJob ? 'Updating...' : 'Posting...') : (editingJob ? 'Update Job' : 'Post Job')}
-          </Button>
+          <div className="flex gap-3">
+            {!editingJob && (
+              <Button type="button" variant="outline" className="flex-1" disabled={submitting} onClick={async () => {
+                if (!user) return;
+                setSubmitting(true);
+                const { error } = await supabase.from('jobs').insert({
+                  parent_id: user.id,
+                  title: jobForm.title || 'Untitled Draft',
+                  description: jobForm.description || '',
+                  subject_id: jobForm.subject_ids.length > 0 ? jobForm.subject_ids[0] : null,
+                  district_id: jobForm.district_id || districts[0]?.id,
+                  area_id: jobForm.area_id || null,
+                  class_level: jobForm.class_levels.length > 0 ? jobForm.class_levels.join(', ') : null,
+                  days_per_week: jobForm.days_per_week,
+                  duration_hours: jobForm.duration_hours,
+                  budget_min: jobForm.budget_min,
+                  budget_max: jobForm.budget_max,
+                  teaching_mode: jobForm.teaching_mode as any,
+                  preferred_tutor_gender: jobForm.preferred_tutor_gender as any,
+                  student_gender: jobForm.student_gender as any,
+                  status: 'draft' as any,
+                } as any);
+                if (error) {
+                  toast({ title: 'Error', description: error.message, variant: 'destructive' });
+                } else {
+                  toast({ title: 'Draft Saved', description: 'You can resume editing from your jobs list.' });
+                  setShowPostJob(false);
+                  resetJobForm();
+                  fetchData();
+                }
+                setSubmitting(false);
+              }}>
+                Save as Draft
+              </Button>
+            )}
+            <Button type="submit" className="flex-1" disabled={submitting}>
+              {submitting ? (editingJob ? 'Updating...' : 'Posting...') : (editingJob ? 'Update Job' : 'Post Job')}
+            </Button>
+          </div>
         </form>
       </CardContent>
     </Card>
