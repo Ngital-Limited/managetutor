@@ -17,16 +17,36 @@ import {
 } from 'lucide-react';
 import { TutorBottomNav } from '@/components/TutorBottomNav';
 
-const tutorSidebarItems = [
-  { title: 'Dashboard', url: '/tutor/dashboard', icon: Home },
-  { title: 'My Applications', url: '/tutor/applications', icon: FileText },
-  { title: 'Demo Classes', url: '/tutor/dashboard#demo-classes', icon: Calendar },
-  { title: 'Find Jobs', url: '/tutor/find-jobs', icon: Briefcase },
-  { title: 'Job Recommendations', url: '/tutor/recommendations', icon: Sparkles },
-  { title: 'My Profile', url: '/tutor/profile', icon: User },
-  { title: 'Boost Your Profile', url: '/tutor/boost', icon: Zap },
-  { title: 'Verify Badge Payment', url: '/tutor/verify-badge', icon: ShieldCheck },
-  { title: 'Monthly Plan', url: '/pricing', icon: CreditCard },
+const tutorSidebarGroups: { label: string; items: { title: string; url: string; icon: any; end?: boolean }[] }[] = [
+  {
+    label: 'Main',
+    items: [
+      { title: 'Dashboard', url: '/tutor/dashboard', icon: Home, end: true },
+      { title: 'My Applications', url: '/tutor/applications', icon: FileText },
+      { title: 'Demo Classes', url: '/tutor/dashboard#demo-classes', icon: Calendar },
+    ],
+  },
+  {
+    label: 'Find Work',
+    items: [
+      { title: 'Find Jobs', url: '/tutor/find-jobs', icon: Briefcase },
+      { title: 'Job Recommendations', url: '/tutor/recommendations', icon: Sparkles },
+    ],
+  },
+  {
+    label: 'Profile',
+    items: [
+      { title: 'My Profile', url: '/tutor/profile', icon: User },
+      { title: 'Boost Your Profile', url: '/tutor/boost', icon: Zap },
+      { title: 'Verify Badge Payment', url: '/tutor/verify-badge', icon: ShieldCheck },
+    ],
+  },
+  {
+    label: 'Billing',
+    items: [
+      { title: 'Monthly Plan', url: '/pricing', icon: CreditCard },
+    ],
+  },
 ];
 
 function TutorSidebarInner() {
@@ -72,27 +92,37 @@ function TutorSidebarInner() {
               </div>
             )}
           </div>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {tutorSidebarItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <NavLink
-                      to={item.url}
-                      end={item.url === '/tutor/dashboard'}
-                      onClick={handleNavClick}
-                      className="hover:bg-muted/50"
-                      activeClassName="bg-muted text-primary font-medium"
-                    >
-                      <item.icon className="mr-2 h-4 w-4" />
-                      {!collapsed && <span>{item.title}</span>}
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
         </SidebarGroup>
+
+        {tutorSidebarGroups.map((group) => (
+          <SidebarGroup key={group.label}>
+            {!collapsed && (
+              <SidebarGroupLabel className="text-[10px] uppercase tracking-wider text-muted-foreground/70 font-semibold px-3">
+                {group.label}
+              </SidebarGroupLabel>
+            )}
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {group.items.map((item) => (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton asChild>
+                      <NavLink
+                        to={item.url}
+                        end={item.end}
+                        onClick={handleNavClick}
+                        className="hover:bg-muted/50"
+                        activeClassName="bg-primary/10 text-primary font-medium"
+                      >
+                        <item.icon className="mr-2 h-4 w-4" />
+                        {!collapsed && <span>{item.title}</span>}
+                      </NavLink>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        ))}
       </SidebarContent>
     </Sidebar>
   );

@@ -475,26 +475,26 @@ export default function TutorDashboard() {
 
   return (
     <TutorSidebarLayout title="Tutor Dashboard">
-      <div className="p-4 md:p-8">
+      <div className="max-w-[1200px] mx-auto p-4 md:p-6 space-y-5">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-8">
-          <div className="flex items-center gap-4 min-w-0">
-            <Avatar className="h-16 w-16 shrink-0">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div className="flex items-center gap-3 min-w-0">
+            <Avatar className="h-12 w-12 shrink-0 border border-primary/20">
               <AvatarImage src={userProfile?.avatar_url || ''} />
-              <AvatarFallback className="text-xl">{userProfile?.full_name?.charAt(0) || 'T'}</AvatarFallback>
+              <AvatarFallback className="text-base">{userProfile?.full_name?.charAt(0) || 'T'}</AvatarFallback>
             </Avatar>
             <div className="min-w-0">
-              <h1 className="text-xl sm:text-2xl font-bold break-words">Welcome, {userProfile?.full_name || 'Tutor'}!</h1>
-              <div className="flex items-center gap-2 mt-1 flex-wrap">
-                <Badge className="bg-tutor text-tutor-foreground">Tutor</Badge>
+              <h1 className="text-lg sm:text-xl font-bold leading-tight truncate">Welcome, {userProfile?.full_name || 'Tutor'}</h1>
+              <div className="flex items-center gap-1.5 mt-1 flex-wrap">
+                <Badge className="bg-tutor text-tutor-foreground text-[10px] h-5">Tutor</Badge>
                 {userProfile?.user_reference && (
-                  <Badge variant="outline" className="font-mono text-xs">{userProfile.user_reference}</Badge>
+                  <Badge variant="outline" className="font-mono text-[10px] h-5">{userProfile.user_reference}</Badge>
                 )}
                 {profile?.verification_status === 'approved' && profile?.verification_paid && (
-                  <Badge className="bg-success"><CheckCircle2 className="h-3 w-3 mr-1" />Verified</Badge>
+                  <Badge className="bg-success text-[10px] h-5"><CheckCircle2 className="h-3 w-3 mr-0.5" />Verified</Badge>
                 )}
                 {profile?.is_available && (
-                  <Badge variant="outline" className="text-success border-success">Available</Badge>
+                  <Badge variant="outline" className="text-success border-success text-[10px] h-5">Available</Badge>
                 )}
               </div>
             </div>
@@ -527,7 +527,7 @@ export default function TutorDashboard() {
 
         {/* Profile Completeness Warning */}
         {profileComplete < 100 && (
-          <Card className="mb-6 border-warning/50 bg-warning/5">
+          <Card className="border-warning/50 bg-warning/5">
             <CardContent className="p-4">
               <div className="flex flex-col sm:flex-row sm:items-center gap-4">
                 <AlertCircle className="h-8 w-8 text-warning flex-shrink-0" />
@@ -547,44 +547,44 @@ export default function TutorDashboard() {
         )}
 
         {/* Stats Grid */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div className="grid sm:grid-cols-3 gap-3">
           <Card>
-            <CardContent className="p-6">
+            <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-muted-foreground">Total Applications</p>
-                  <p className="text-3xl font-bold">{stats.totalApplications}</p>
+                  <p className="text-2xl font-bold">{stats.totalApplications}</p>
                 </div>
-                <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center">
-                  <Briefcase className="h-6 w-6 text-primary" />
+                <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <Briefcase className="h-5 w-5 text-primary" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
           <Card>
-            <CardContent className="p-6">
+            <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-muted-foreground">Accepted</p>
-                  <p className="text-3xl font-bold text-success">{stats.acceptedApplications}</p>
+                  <p className="text-2xl font-bold text-success">{stats.acceptedApplications}</p>
                 </div>
-                <div className="h-12 w-12 rounded-xl bg-success/10 flex items-center justify-center">
-                  <CheckCircle2 className="h-6 w-6 text-success" />
+                <div className="h-10 w-10 rounded-lg bg-success/10 flex items-center justify-center">
+                  <CheckCircle2 className="h-5 w-5 text-success" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
           <Card>
-            <CardContent className="p-6">
+            <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-muted-foreground">Active Jobs</p>
-                  <p className="text-3xl font-bold text-tutor">{stats.activeJobs}</p>
+                  <p className="text-2xl font-bold text-tutor">{stats.activeJobs}</p>
                 </div>
-                <div className="h-12 w-12 rounded-xl bg-tutor/10 flex items-center justify-center">
-                  <TrendingUp className="h-6 w-6 text-tutor" />
+                <div className="h-10 w-10 rounded-lg bg-tutor/10 flex items-center justify-center">
+                  <TrendingUp className="h-5 w-5 text-tutor" />
                 </div>
               </div>
             </CardContent>
@@ -593,7 +593,7 @@ export default function TutorDashboard() {
         </div>
 
         {/* Compact Summary Widgets */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+        <div className="grid sm:grid-cols-3 gap-3">
           {/* Boost Status Widget */}
           <Link to="/tutor/boost">
             <Card className="hover-lift cursor-pointer h-full">
@@ -685,7 +685,7 @@ export default function TutorDashboard() {
 
         {/* Demo Class Bookings */}
         {demoBookings.length > 0 && (
-          <Card className="mb-8" id="demo-classes">
+          <Card className="" id="demo-classes">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Calendar className="h-5 w-5" />
