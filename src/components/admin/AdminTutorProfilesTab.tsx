@@ -123,29 +123,27 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
   const [banProcessing, setBanProcessing] = useState(false);
 
   // ─── Education & subject data ───
-  const [educationOptions, setEducationOptions] = useState<string[]>([]);
   const [universityOptions, setUniversityOptions] = useState<string[]>([]);
-  const [subjects, setSubjects] = useState<{ id: string; name_en: string; category_en: string | null }[]>([]);
+  const [eduMediumOptions, setEduMediumOptions] = useState<string[]>([]);
+  const [fieldOfStudyOptions, setFieldOfStudyOptions] = useState<string[]>([]);
 
   useEffect(() => {
     supabase.from('districts').select('id, name_en').order('name_en').then(({ data }) => setDistricts(data || []));
     supabase.from('areas').select('id, name_en, district_id').order('name_en').then(({ data }) => setAreas(data || []));
-    supabase.from('subjects').select('id, name_en, category_en').order('name_en').then(({ data }) => setSubjects(data || []));
-    supabase.from('tutor_education').select('degree, institution').limit(500).then(({ data }) => {
+    supabase.from('tutor_education').select('degree, institution, medium, field_of_study').limit(2000).then(({ data }) => {
       if (data) {
-        setEducationOptions([...new Set(data.map(d => d.degree).filter(Boolean))].sort());
         setUniversityOptions([...new Set(data.map(d => d.institution).filter(Boolean))].sort());
+        setEduMediumOptions([...new Set(data.map(d => d.medium).filter(Boolean))].sort());
+        // Field of study only from Bachelor/Masters records
+        const higherEdu = data.filter(d => ['Bachelor', 'Bachelors', 'Masters'].includes(d.degree || ''));
+        const fields = [...new Set(higherEdu.map(d => (d.field_of_study || '').trim()).filter(f => f && f.length > 2 && !f.startsWith('.')))].sort();
+        setFieldOfStudyOptions(fields);
       }
     });
   }, []);
 
   const districtMap = useMemo(() => new Map(districts.map(d => [d.id, d.name_en])), [districts]);
   const areaMap = useMemo(() => new Map(areas.map(a => [a.id, a.name_en])), [areas]);
-  const subjectCategories = useMemo(() => [...new Set(subjects.map(s => s.category_en).filter(Boolean))] as string[], [subjects]);
-  const filteredSubjects = useMemo(() =>
-    filterCategory !== 'all' ? subjects.filter(s => s.category_en === filterCategory) : subjects,
-    [subjects, filterCategory]
-  );
 
   // Area options for MultiSearchableSelect
   const areaOptions = useMemo(() =>
