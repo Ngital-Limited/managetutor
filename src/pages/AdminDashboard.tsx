@@ -2687,7 +2687,7 @@ export default function AdminDashboard() {
                 { key: 'demo', label: 'Demo Class' },
                 { key: 'confirmed', label: 'Confirmed' },
                 { key: 'not_confirmed', label: 'Not Confirmed' },
-                { key: 'no_applicants', label: 'No Applicants' },
+                { key: 'no_applicants', label: 'Unapplied Jobs' },
               ];
 
               // Apps filtered by pipeline tab (used for Level-1 grouping)
