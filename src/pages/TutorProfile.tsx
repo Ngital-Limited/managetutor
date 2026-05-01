@@ -236,11 +236,17 @@ export default function TutorProfile() {
       // Always seed 4 fixed education slots: SSC, HSC, Bachelor, Masters
       const FIXED_DEGREES = ['SSC', 'HSC', 'Bachelor', 'Masters'];
       const existing = eduRes.data || [];
+      const knownUnis = new Set(UNIVERSITY_OPTIONS.map(o => o.value));
+      const manualMap: Record<string, boolean> = {};
       setEducationEntries(FIXED_DEGREES.map((deg) => {
         const match = existing.find((e: any) => (e.degree || '').toLowerCase() === deg.toLowerCase());
+        const inst = match?.institution || '';
+        if ((deg === 'Bachelor' || deg === 'Masters') && inst && !knownUnis.has(inst)) {
+          manualMap[deg] = true;
+        }
         return {
           id: match?.id,
-          institution: match?.institution || '',
+          institution: inst,
           degree: deg,
           field_of_study: match?.field_of_study || '',
           passing_year: match?.passing_year ?? null,
@@ -250,6 +256,7 @@ export default function TutorProfile() {
           medium: (match as any)?.medium || '',
         };
       }));
+      setManualInstitution(manualMap);
       if (jobRes.data) {
         setJobExperiences(jobRes.data.map((j: any) => ({
           id: j.id,
