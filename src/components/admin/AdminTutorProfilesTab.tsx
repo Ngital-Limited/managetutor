@@ -956,6 +956,9 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
                               : <><CheckCircle2 className="h-3.5 w-3.5 text-success" /> Verify Tutor</>
                             }
                           </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => openTransferDialog(t.user_id, t.name)} className="flex items-center gap-2">
+                            <ArrowUpDown className="h-3.5 w-3.5 text-primary" /> Transfer to Parent
+                          </DropdownMenuItem>
                           <DropdownMenuSeparator />
                           <DropdownMenuItem
                             onClick={() => t.is_banned ? handleBanToggle(t.user_id, true) : openBanDialog(t.user_id, t.name)}
