@@ -187,19 +187,36 @@ export default function FindTutors() {
 
   const fetchTutors = async () => {
     setLoading(true);
-    let query = supabase
-      .from('tutor_profiles_public')
-      .select(`*, profiles:user_id (full_name, avatar_url, district_id, districts (name_en), areas (name_en)), districts (name_en, division_en), areas (name_en), tutor_subjects (subjects (*))`)
-      .eq('is_available', true);
+    const selectStr = `*, profiles:user_id (full_name, avatar_url, district_id, districts (name_en), areas (name_en)), districts (name_en, division_en), areas (name_en), tutor_subjects (subjects (*))`;
 
-    if (selectedGender && selectedGender !== 'any') query = query.eq('gender', selectedGender as 'male' | 'female');
-    if (priceRange[0] > 0) query = query.gte('monthly_salary_min', priceRange[0]);
-    if (priceRange[1] < 10000) query = query.lte('monthly_salary_max', priceRange[1]);
-    if (verifiedOnly) query = query.eq('verification_status', 'approved');
+    const buildQuery = () => {
+      let q = supabase.from('tutor_profiles_public').select(selectStr).eq('is_available', true);
+      if (selectedGender && selectedGender !== 'any') q = q.eq('gender', selectedGender as 'male' | 'female');
+      if (priceRange[0] > 0) q = q.gte('monthly_salary_min', priceRange[0]);
+      if (priceRange[1] < 10000) q = q.lte('monthly_salary_max', priceRange[1]);
+      if (verifiedOnly) q = q.eq('verification_status', 'approved');
+      return q.order('is_featured', { ascending: false }).order('created_at', { ascending: false });
+    };
 
-    const { data } = await query.order('is_featured', { ascending: false }).order('created_at', { ascending: false }).range(0, 4999);
+    // Fetch in batches of 1000 to bypass the API row limit
+    const PAGE_SIZE = 1000;
+    let allData: any[] = [];
+    let page = 0;
+    let hasMore = true;
+    while (hasMore) {
+      const from = page * PAGE_SIZE;
+      const to = from + PAGE_SIZE - 1;
+      const { data } = await buildQuery().range(from, to);
+      if (data && data.length > 0) {
+        allData = allData.concat(data);
+        hasMore = data.length === PAGE_SIZE;
+        page++;
+      } else {
+        hasMore = false;
+      }
+    }
 
-    setAllTutors((data as unknown as TutorProfile[]) || []);
+    setAllTutors(allData as unknown as TutorProfile[]);
     setLoading(false);
   };
 
