@@ -1811,6 +1811,57 @@ export default function AdminDashboard() {
 
   const [sidebarSearch, setSidebarSearch] = useState('');
 
+  // ──── RBAC: fetch current admin's permissions ────
+  const [adminPerms, setAdminPerms] = useState<Record<string, boolean> | null>(null);
+  useEffect(() => {
+    if (!user || role !== 'admin') return;
+    (async () => {
+      const { data } = await supabase
+        .from('admin_permissions')
+        .select('*')
+        .eq('user_id', user.id)
+        .maybeSingle();
+      // If no row exists the admin is the "super admin" — grant everything
+      setAdminPerms(data || null);
+    })();
+  }, [user, role]);
+
+  /** Check if current admin has a specific permission.
+   *  Super admins (no admin_permissions row) have full access. */
+  const hasPerm = useCallback((perm: string) => {
+    if (!adminPerms) return true; // super admin
+    return !!adminPerms[perm];
+  }, [adminPerms]);
+
+  // Map each sidebar tab value to the permission key that gates it
+  const TAB_PERM_MAP: Record<string, string> = {
+    // overview is always visible
+    jobs: 'can_manage_jobs',
+    applications: 'can_manage_jobs',
+    demo_requests: 'can_manage_jobs',
+    post_job: 'can_manage_jobs',
+    import_jobs: 'can_manage_jobs',
+    reports: 'can_manage_users',
+    tutor_profiles: 'can_verify_documents',
+    verifications: 'can_verify_documents',
+    guardians: 'can_manage_users',
+    create_user: 'can_manage_users',
+    import_tutors: 'can_manage_users',
+    payments: 'can_manage_revenue',
+    revenue: 'can_manage_revenue',
+    subscriptions: 'can_manage_revenue',
+    broadcast: 'can_send_notifications',
+    contacts: 'can_manage_tickets',
+    tickets: 'can_manage_tickets',
+    geographic: 'can_view_analytics',
+    referrals: 'can_view_analytics',
+    settings: 'can_manage_settings',
+    rbac: 'can_manage_settings',
+    platform_data: 'can_manage_settings',
+    ads: 'can_manage_settings',
+    cache: 'can_manage_settings',
+  };
+
   if (loading || role !== 'admin') {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
