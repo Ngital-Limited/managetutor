@@ -774,7 +774,13 @@ export default function JobDetails() {
           </div>
         </div>
       </main>
-      <Footer />
-    </div>
+      {!isTutor && <Footer />}
+    </>
   );
+
+  if (isTutor) {
+    return <TutorSidebarLayout title="Job Details">{content}</TutorSidebarLayout>;
+  }
+
+  return <div className="min-h-screen bg-background">{content}</div>;
 }
