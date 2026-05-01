@@ -14,6 +14,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { format } from 'date-fns';
 import { DollarSign, CheckCircle2, Clock, AlertTriangle, Bell, Search, Percent, Ban } from 'lucide-react';
+import { logAdminAction } from '@/lib/adminLogger';
 
 interface CommissionRow {
   id: string;
