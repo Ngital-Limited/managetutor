@@ -855,6 +855,34 @@ export default function AdminDashboard() {
   const [selectedUser, setSelectedUser] = useState<UserRow | null>(null);
   const [adminNotes, setAdminNotes] = useState('');
   const [processing, setProcessing] = useState(false);
+
+  // ─── Role Transfer (Guardian → Tutor) ───
+  const [transferDialogOpen, setTransferDialogOpen] = useState(false);
+  const [transferTarget, setTransferTarget] = useState<{ id: string; name: string } | null>(null);
+  const [transferProcessing, setTransferProcessing] = useState(false);
+
+  const openGuardianTransferDialog = (userId: string, name: string) => {
+    setTransferTarget({ id: userId, name });
+    setTransferDialogOpen(true);
+  };
+
+  const confirmGuardianTransferToTutor = async () => {
+    if (!transferTarget) return;
+    setTransferProcessing(true);
+    const { error } = await supabase.rpc('transfer_user_role', {
+      _target_user_id: transferTarget.id,
+      _new_role: 'tutor',
+    });
+    setTransferProcessing(false);
+    if (error) {
+      toast({ title: 'Transfer Failed', description: error.message, variant: 'destructive' });
+    } else {
+      toast({ title: 'Role Transferred', description: `${transferTarget.name} is now a Tutor.` });
+      fetchUsers();
+    }
+    setTransferDialogOpen(false);
+    setTransferTarget(null);
+  };
   const [editingJob, setEditingJob] = useState<any | null>(null);
   const [editJobForm, setEditJobForm] = useState<{
     title: string; description: string; status: string; teaching_mode: string;
