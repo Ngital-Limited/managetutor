@@ -59,6 +59,7 @@ import { AdminPhoneLogTab } from '@/components/admin/AdminPhoneLogTab';
 import { AdminActivityLogTab } from '@/components/admin/AdminActivityLogTab';
 import { AdminNotesWidget } from '@/components/admin/AdminNotesWidget';
 import { AutoRefreshControl } from '@/components/AutoRefreshControl';
+import { logAdminAction } from '@/lib/adminLogger';
 import { getPlatformCommissionPct, computeFeeSplit } from '@/lib/commission';
 
 // ──────────── Types ────────────
