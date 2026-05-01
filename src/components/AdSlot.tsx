@@ -46,9 +46,12 @@ export function AdSlot({ slot, width = 300, height = 250, className }: AdSlotPro
   const h = ad.height || height;
 
   const inner = ad.ad_type === 'html' ? (
-    <div
-      style={{ width: '100%', height: '100%', overflow: 'hidden' }}
-      dangerouslySetInnerHTML={{ __html: ad.html_content || '' }}
+    <iframe
+      title="Advertisement"
+      sandbox="allow-scripts allow-popups allow-popups-to-escape-sandbox"
+      srcDoc={`<!doctype html><html><head><meta charset="utf-8"><base target="_blank"><style>html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden;}</style></head><body>${ad.html_content || ''}</body></html>`}
+      style={{ width: '100%', height: '100%', border: 0, display: 'block' }}
+      scrolling="no"
     />
   ) : ad.image_url ? (
     <img
