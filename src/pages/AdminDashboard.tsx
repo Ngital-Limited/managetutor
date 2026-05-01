@@ -1967,7 +1967,12 @@ export default function AdminDashboard() {
                       <SidebarMenu>
                         {group.items.map((item) => {
                           const itemHref = (item as any).href as string | undefined;
-                          const buttonClass = `w-full justify-start text-sm ${activeTab === item.value ? 'bg-primary/8 text-primary font-medium' : 'text-muted-foreground hover:text-foreground'}`;
+                          const isItemActive = !itemHref && activeTab === item.value;
+                          const buttonClass = `relative w-full justify-start text-sm transition-colors ${
+                            isItemActive
+                              ? 'bg-primary/10 text-primary font-semibold shadow-sm hover:bg-primary/15'
+                              : 'text-muted-foreground hover:text-foreground hover:bg-muted/60'
+                          }`;
                           return (
                             <SidebarMenuItem key={item.value}>
                               {itemHref ? (
@@ -1988,9 +1993,17 @@ export default function AdminDashboard() {
                                     setSidebarSearch('');
                                     closeOnMobile();
                                   }}
+                                  isActive={isItemActive}
+                                  aria-current={isItemActive ? 'page' : undefined}
                                   className={buttonClass}
                                 >
-                                  <item.icon className="h-4 w-4 mr-2.5 shrink-0" />
+                                  {isItemActive && (
+                                    <span
+                                      aria-hidden="true"
+                                      className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-0.5 rounded-r-full bg-primary"
+                                    />
+                                  )}
+                                  <item.icon className={`h-4 w-4 mr-2.5 shrink-0 ${isItemActive ? 'text-primary' : ''}`} />
                                   <span className="flex-1 text-left truncate">{item.title}</span>
                                   {'badge' in item && item.badge ? (
                                     <span className="ml-auto text-[10px] font-medium bg-destructive/10 text-destructive px-1.5 py-0.5 rounded-full">{item.badge}</span>
