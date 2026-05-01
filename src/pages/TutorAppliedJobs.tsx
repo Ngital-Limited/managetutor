@@ -194,7 +194,7 @@ export default function TutorAppliedJobs() {
             </div>
           </header>
 
-          <main className="flex-1 p-4 md:p-6 max-w-5xl mx-auto w-full">
+          <main className="flex-1 p-4 md:p-6 max-w-[1200px] mx-auto w-full">
             {/* Stats */}
             <div className="grid grid-cols-2 md:grid-cols-7 gap-3 mb-6">
               {[

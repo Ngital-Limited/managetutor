@@ -227,7 +227,7 @@ export default function LocationTutors() {
 
       {/* SEO Content */}
       <section className="py-12 bg-muted/50">
-        <div className="container mx-auto px-4 max-w-4xl">
+        <div className="container mx-auto px-4 max-w-[1200px]">
           <h2 className="text-2xl font-bold mb-6">Why Choose Our Tutors in {locationName}?</h2>
           
           <div className="prose prose-lg max-w-none text-muted-foreground">

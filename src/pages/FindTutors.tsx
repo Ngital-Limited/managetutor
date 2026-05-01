@@ -479,7 +479,7 @@ export default function FindTutors() {
       <section className="relative overflow-hidden bg-gradient-to-br from-primary via-primary to-secondary text-primary-foreground">
         <div className="absolute -top-32 -right-20 w-[420px] h-[420px] rounded-full bg-accent/40 blur-[120px] pointer-events-none" />
         <div className="absolute -bottom-32 -left-20 w-[420px] h-[420px] rounded-full bg-tutor/30 blur-[120px] pointer-events-none" />
-        <div className="container mx-auto px-4 max-w-6xl pt-12 pb-14 relative z-10">
+        <div className="container mx-auto px-4 max-w-[1200px] pt-12 pb-14 relative z-10">
           <div className="max-w-3xl">
             <div className="inline-flex items-center gap-2 bg-primary-foreground/15 backdrop-blur-sm rounded-full px-4 py-1.5 text-sm font-medium mb-5 border border-primary-foreground/20">
               <Award className="h-4 w-4" />
@@ -496,7 +496,7 @@ export default function FindTutors() {
       </section>
 
       {/* Search Bar - Floating */}
-      <div className="container mx-auto px-4 max-w-6xl relative z-20 -mt-7">
+      <div className="container mx-auto px-4 max-w-[1200px] relative z-20 -mt-7">
         <div className="bg-card rounded-2xl shadow-xl border border-border p-4">
           <div className="flex flex-col md:flex-row gap-3">
             <div className="flex-1 relative">
@@ -527,7 +527,7 @@ export default function FindTutors() {
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-6 max-w-6xl">
+      <div className="container mx-auto px-4 py-6 max-w-[1200px]">
         {/* Toolbar: Filters toggle, sort, view mode, count */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-5">
           <div className="flex items-center gap-2">
