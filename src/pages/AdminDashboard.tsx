@@ -2789,10 +2789,25 @@ export default function AdminDashboard() {
                                       </Button>
                                     </>
                                   )}
-                                  {job.status === 'open' && (
-                                    <Button variant="ghost" size="sm" onClick={() => handleUpdateJobStatus(job.id, 'cancelled')}>
-                                      <XCircle className="h-4 w-4 text-destructive" />
-                                    </Button>
+                                  {(job.status === 'open' || job.status === 'in_progress') && (
+                                    <>
+                                      <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => handleUpdateJobStatus(job.id, 'completed')}
+                                        title="Mark as Fulfilled (tutor hired)"
+                                      >
+                                        <CheckCircle2 className="h-4 w-4 text-success" />
+                                      </Button>
+                                      <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => handleUpdateJobStatus(job.id, 'cancelled')}
+                                        title="Mark as Expired / Cancelled"
+                                      >
+                                        <Clock className="h-4 w-4 text-muted-foreground" />
+                                      </Button>
+                                    </>
                                   )}
                                   <Button variant="ghost" size="sm" onClick={() => handleDeleteJob(job.id)}>
                                     <Trash2 className="h-4 w-4 text-destructive" />
