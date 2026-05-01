@@ -547,44 +547,44 @@ export default function TutorDashboard() {
         )}
 
         {/* Stats Grid */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div className="grid sm:grid-cols-3 gap-3">
           <Card>
-            <CardContent className="p-6">
+            <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-muted-foreground">Total Applications</p>
-                  <p className="text-3xl font-bold">{stats.totalApplications}</p>
+                  <p className="text-2xl font-bold">{stats.totalApplications}</p>
                 </div>
-                <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center">
-                  <Briefcase className="h-6 w-6 text-primary" />
+                <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <Briefcase className="h-5 w-5 text-primary" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
           <Card>
-            <CardContent className="p-6">
+            <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-muted-foreground">Accepted</p>
-                  <p className="text-3xl font-bold text-success">{stats.acceptedApplications}</p>
+                  <p className="text-2xl font-bold text-success">{stats.acceptedApplications}</p>
                 </div>
-                <div className="h-12 w-12 rounded-xl bg-success/10 flex items-center justify-center">
-                  <CheckCircle2 className="h-6 w-6 text-success" />
+                <div className="h-10 w-10 rounded-lg bg-success/10 flex items-center justify-center">
+                  <CheckCircle2 className="h-5 w-5 text-success" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
           <Card>
-            <CardContent className="p-6">
+            <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-muted-foreground">Active Jobs</p>
-                  <p className="text-3xl font-bold text-tutor">{stats.activeJobs}</p>
+                  <p className="text-2xl font-bold text-tutor">{stats.activeJobs}</p>
                 </div>
-                <div className="h-12 w-12 rounded-xl bg-tutor/10 flex items-center justify-center">
-                  <TrendingUp className="h-6 w-6 text-tutor" />
+                <div className="h-10 w-10 rounded-lg bg-tutor/10 flex items-center justify-center">
+                  <TrendingUp className="h-5 w-5 text-tutor" />
                 </div>
               </div>
             </CardContent>
@@ -593,7 +593,7 @@ export default function TutorDashboard() {
         </div>
 
         {/* Compact Summary Widgets */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+        <div className="grid sm:grid-cols-3 gap-3">
           {/* Boost Status Widget */}
           <Link to="/tutor/boost">
             <Card className="hover-lift cursor-pointer h-full">
