@@ -53,7 +53,7 @@ export function Header() {
     { to: '/jobs', label: t('nav.browseJobs') },
     { to: '/about', label: 'About' },
     { to: '/contact', label: 'Contact' },
-    ...(isInstalled ? [] : [{ to: '/install', label: 'Install App' }]),
+    
   ];
 
   const isActive = (path: string) => location.pathname === path;
