@@ -547,21 +547,32 @@ export default function TutorDashboard() {
           </div>
         </div>
 
-        {/* Profile Completeness Warning */}
+        {/* Profile Strength */}
         {profileComplete < 100 && (
           <Card className="border-warning/50 bg-warning/5">
             <CardContent className="p-4">
-              <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-                <AlertCircle className="h-8 w-8 text-warning flex-shrink-0" />
+              <div className="flex flex-col sm:flex-row sm:items-start gap-4">
+                <AlertCircle className="h-8 w-8 text-warning flex-shrink-0 mt-0.5" />
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-bold">Complete Your Profile</h3>
-                  <p className="text-sm text-muted-foreground">
-                    A complete profile helps you get more job applications
-                  </p>
-                  <Progress value={profileComplete} className="mt-2 h-2" />
+                  <div className="flex items-center gap-2 mb-1">
+                    <h3 className="font-bold">Profile Strength: {profileComplete}%</h3>
+                    {profileComplete >= 80 && <Badge className="bg-success text-[10px]">Strong</Badge>}
+                    {profileComplete >= 50 && profileComplete < 80 && <Badge className="bg-warning text-warning-foreground text-[10px]">Fair</Badge>}
+                    {profileComplete < 50 && <Badge variant="destructive" className="text-[10px]">Weak</Badge>}
+                  </div>
+                  <Progress value={profileComplete} className="mt-1 h-2 mb-2" />
+                  {profileSuggestions.length > 0 && (
+                    <ul className="space-y-1">
+                      {profileSuggestions.slice(0, 3).map((s, i) => (
+                        <li key={i} className="text-xs text-muted-foreground flex items-start gap-1.5">
+                          <span className="text-warning mt-0.5">•</span> {s}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                 </div>
                 <Link to="/tutor/profile" className="shrink-0">
-                  <Button className="w-full sm:w-auto">Complete Profile</Button>
+                  <Button size="sm" className="w-full sm:w-auto">Complete Profile</Button>
                 </Link>
               </div>
             </CardContent>
