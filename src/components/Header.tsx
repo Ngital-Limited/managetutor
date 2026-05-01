@@ -73,13 +73,13 @@ export function Header() {
   return (
     <>
       <nav
-        className={`sticky top-0 z-50 transition-all duration-300 ${
+        className={`sticky top-0 z-50 w-full transition-all duration-300 ${
           scrolled
             ? 'bg-card/95 backdrop-blur-xl shadow-sm border-b border-border'
             : 'bg-card/80 backdrop-blur-xl border-b border-transparent'
         }`}
       >
-        <div className="container mx-auto px-4 md:px-6 max-w-[1200px] h-16 flex items-center justify-between">
+        <div className="container mx-auto w-full px-4 md:px-6 max-w-[1200px] min-w-0 h-16 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-3 shrink-0">
             <Logo size="md" />
           </Link>
@@ -184,7 +184,7 @@ export function Header() {
             onClick={() => setMobileOpen(false)}
           />
           <div className="fixed top-16 left-0 right-0 z-50 md:hidden bg-card border-b border-border shadow-lg animate-in slide-in-from-top-2 duration-200">
-            <div className="container mx-auto px-4 md:px-6 max-w-[1200px] py-4 space-y-1">
+            <div className="container mx-auto w-full px-4 md:px-6 max-w-[1200px] min-w-0 py-4 space-y-1">
               {/* Mobile user info */}
               {user && (
                 <div className="flex items-center gap-3 px-4 py-3 mb-2 bg-muted/40 rounded-xl">
