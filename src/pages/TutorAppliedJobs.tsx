@@ -274,6 +274,6 @@ export default function TutorAppliedJobs() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </SidebarProvider>
+    </TutorSidebarLayout>
   );
 }
