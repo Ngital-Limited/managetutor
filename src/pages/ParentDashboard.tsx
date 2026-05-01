@@ -2566,7 +2566,7 @@ export default function ParentDashboard() {
                               }} title="Invite to demo class">
                                 <Send className="h-3.5 w-3.5" />
                               </Button>
-                              <Button size="sm" className="h-8 text-xs" onClick={() => handleApplicationAction(app.id, 'accepted')} title="Hire">
+                              <Button size="sm" className="h-8 text-xs" onClick={() => { const job = jobs.find(j => j.id === app.jobs?.id); if (job) setSelectedJob(job); openHiringDialog(app); }} title="Hire">
                                 <CheckCircle2 className="h-3.5 w-3.5" />
                               </Button>
                               <Button size="sm" variant="outline" className="h-8 text-xs" onClick={() => handleApplicationAction(app.id, 'rejected')} title="Reject">
