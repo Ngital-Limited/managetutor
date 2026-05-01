@@ -1135,6 +1135,26 @@ export default function AdminDashboard() {
           reference_id: jobId,
         });
       }
+      // Send application status email to tutor
+      if (app?.tutor_user_id && (status === 'accepted' || status === 'rejected')) {
+        try {
+          const { data: tutorProfile } = await supabase.from('profiles').select('email, full_name').eq('id', app.tutor_user_id).single();
+          if (tutorProfile?.email) {
+            await supabase.functions.invoke('send-transactional-email', {
+              body: {
+                templateName: 'application-status-update',
+                recipientEmail: tutorProfile.email,
+                idempotencyKey: `app-status-${appId}-${status}`,
+                templateData: {
+                  tutorName: tutorProfile.full_name,
+                  jobTitle: viewingJobApps?.jobTitle,
+                  status,
+                },
+              },
+            });
+          }
+        } catch (e) { console.error('Email send failed:', e); }
+      }
       toast({ title: `Application ${status}` });
       fetchJobApplications(jobId);
       fetchAllApplications();
@@ -1580,6 +1600,26 @@ export default function AdminDashboard() {
     if (error) toast({ title: 'Error', description: error.message, variant: 'destructive' });
     else {
       toast({ title: 'Success', description: `Tutor ${status}` });
+
+      // Send tutor approval/rejection email
+      try {
+        const tutor = pendingTutors.find((v: any) => v.id === tutorId);
+        const tutorUserId = tutor?.user_id;
+        if (tutorUserId) {
+          const { data: profile } = await supabase.from('profiles').select('email, full_name').eq('id', tutorUserId).single();
+          if (profile?.email) {
+            await supabase.functions.invoke('send-transactional-email', {
+              body: {
+                templateName: 'tutor-approval-status',
+                recipientEmail: profile.email,
+                idempotencyKey: `tutor-verify-${tutorId}-${status}`,
+                templateData: { tutorName: profile.full_name, status },
+              },
+            });
+          }
+        }
+      } catch (e) { console.error('Email send failed:', e); }
+
       setSelectedTutor(null);
       fetchVerifications();
       invalidate('admin:stats:v1'); void sharedInvalidate('admin:stats:v1');
@@ -1643,7 +1683,35 @@ export default function AdminDashboard() {
   const handleUpdateJobStatus = async (jobId: string, status: string) => {
     const { error } = await supabase.from('jobs').update({ status: status as any }).eq('id', jobId);
     if (error) toast({ title: 'Error', description: error.message, variant: 'destructive' });
-    else { toast({ title: `Job status updated to ${status}` }); fetchJobs(); invalidate('admin:stats:v1'); void sharedInvalidate('admin:stats:v1'); fetchStats(true); }
+    else {
+      toast({ title: `Job status updated to ${status}` });
+
+      // Send job approval email when status moves to 'open'
+      if (status === 'open') {
+        try {
+          const { data: jobData } = await supabase.from('jobs').select('title, job_reference, parent_id').eq('id', jobId).single();
+          if (jobData?.parent_id) {
+            const { data: parentProfile } = await supabase.from('profiles').select('email, full_name').eq('id', jobData.parent_id).single();
+            if (parentProfile?.email) {
+              await supabase.functions.invoke('send-transactional-email', {
+                body: {
+                  templateName: 'job-approval-notification',
+                  recipientEmail: parentProfile.email,
+                  idempotencyKey: `job-approved-${jobId}`,
+                  templateData: {
+                    parentName: parentProfile.full_name,
+                    jobTitle: jobData.title,
+                    jobReference: jobData.job_reference,
+                  },
+                },
+              });
+            }
+          }
+        } catch (e) { console.error('Email send failed:', e); }
+      }
+
+      fetchJobs(); invalidate('admin:stats:v1'); void sharedInvalidate('admin:stats:v1'); fetchStats(true);
+    }
   };
 
   const openEditJob = async (jobId: string) => {
