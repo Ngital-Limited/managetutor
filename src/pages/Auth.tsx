@@ -53,6 +53,8 @@ export default function Auth() {
   const [resetSent, setResetSent] = useState(false);
   const [emailVerified, setEmailVerified] = useState(false);
   const [checkingVerification, setCheckingVerification] = useState(false);
+  const [resendLoading, setResendLoading] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(0);
 
   const { role: userRole } = useAuth();
 
@@ -100,6 +102,26 @@ export default function Auth() {
     });
     return () => subscription.unsubscribe();
   }, [showVerifyEmail, emailVerified]);
+
+  // Cooldown timer for resend button
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const timer = setTimeout(() => setResendCooldown(c => c - 1), 1000);
+    return () => clearTimeout(timer);
+  }, [resendCooldown]);
+
+  const handleResendVerification = async () => {
+    if (resendLoading || resendCooldown > 0 || !signupEmail) return;
+    setResendLoading(true);
+    const { error } = await supabase.auth.resend({ type: 'signup', email: signupEmail });
+    if (error) {
+      toast({ title: 'Failed to resend', description: error.message, variant: 'destructive' });
+    } else {
+      toast({ title: 'Verification email sent', description: `Check your inbox at ${signupEmail}` });
+      setResendCooldown(60);
+    }
+    setResendLoading(false);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -282,6 +304,20 @@ export default function Auth() {
                     <Loader2 className="h-3.5 w-3.5 animate-spin" />
                     <span>Waiting for verification...</span>
                   </div>
+                  <Button
+                    variant="outline"
+                    className="w-full mt-4 h-10 rounded-lg text-sm"
+                    onClick={handleResendVerification}
+                    disabled={resendLoading || resendCooldown > 0}
+                  >
+                    {resendLoading ? (
+                      <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Sending...</>
+                    ) : resendCooldown > 0 ? (
+                      `Resend in ${resendCooldown}s`
+                    ) : (
+                      <><Mail className="h-4 w-4 mr-2" /> Resend Verification Email</>
+                    )}
+                  </Button>
                   <button
                     onClick={() => { setShowVerifyEmail(false); setEmailVerified(false); setIsLogin(true); setEmail(''); setPassword(''); }}
                     className="flex items-center justify-center gap-1.5 mt-4 text-sm text-primary hover:underline font-semibold mx-auto"
