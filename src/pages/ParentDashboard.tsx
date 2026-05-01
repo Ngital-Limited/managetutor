@@ -2933,6 +2933,47 @@ export default function ParentDashboard() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Demo Feedback Dialog */}
+      <Dialog open={feedbackDialogOpen} onOpenChange={setFeedbackDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Rate Your Demo Class</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            {feedbackBooking && (
+              <p className="text-sm text-muted-foreground">
+                How was your demo class with <span className="font-medium text-foreground">{feedbackBooking.tutor_profiles?.profiles?.full_name}</span>?
+              </p>
+            )}
+            <div>
+              <Label>Rating</Label>
+              <div className="flex gap-1 mt-1">
+                {[1, 2, 3, 4, 5].map(n => (
+                  <button key={n} type="button" onClick={() => setFeedbackRating(n)}
+                    className={`p-1 transition-colors ${n <= feedbackRating ? 'text-yellow-500' : 'text-muted-foreground/30'}`}>
+                    <Star className="h-6 w-6 fill-current" />
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div>
+              <Label>Comments (optional)</Label>
+              <Textarea value={feedbackComments} onChange={e => setFeedbackComments(e.target.value)} placeholder="Share your experience..." rows={3} />
+            </div>
+            <div className="flex items-center gap-2">
+              <Checkbox checked={feedbackRecommend} onCheckedChange={(v) => setFeedbackRecommend(!!v)} id="recommend" />
+              <Label htmlFor="recommend" className="text-sm">I would recommend this tutor</Label>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setFeedbackDialogOpen(false)}>Cancel</Button>
+            <Button onClick={handleSubmitFeedback} disabled={submitting}>
+              {submitting ? 'Submitting...' : 'Submit Feedback'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </SidebarProvider>
   );
 }
