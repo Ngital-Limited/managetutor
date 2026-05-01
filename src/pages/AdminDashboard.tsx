@@ -887,7 +887,7 @@ export default function AdminDashboard() {
   const [selectedAppsJobId, setSelectedAppsJobId] = useState<string | null>(null);
   const [appsJobsSearch, setAppsJobsSearch] = useState('');
   const [loadingAllApps, setLoadingAllApps] = useState(false);
-  const [appsPipelineTab, setAppsPipelineTab] = useState<'all' | 'shortlisted' | 'demo' | 'confirmed' | 'not_confirmed'>('all');
+  const [appsPipelineTab, setAppsPipelineTab] = useState<'all' | 'shortlisted' | 'demo' | 'confirmed' | 'not_confirmed' | 'no_applicants'>('all');
   const [selectedAppIds, setSelectedAppIds] = useState<Set<string>>(new Set());
   const [bulkProcessing, setBulkProcessing] = useState(false);
 
