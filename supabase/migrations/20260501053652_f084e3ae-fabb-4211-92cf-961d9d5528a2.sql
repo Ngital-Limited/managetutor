@@ -1,0 +1,1 @@
+ALTER TABLE public.tutor_education ADD COLUMN IF NOT EXISTS medium TEXT;
