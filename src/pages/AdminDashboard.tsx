@@ -59,6 +59,9 @@ import { AdminPhoneLogTab } from '@/components/admin/AdminPhoneLogTab';
 import { AdminActivityLogTab } from '@/components/admin/AdminActivityLogTab';
 import { AdminSmartMatchTab } from '@/components/admin/AdminSmartMatchTab';
 import { AdminPipelineTab } from '@/components/admin/AdminPipelineTab';
+import { AdminTransactionLedgerTab } from '@/components/admin/AdminTransactionLedgerTab';
+import { AdminInvoiceTab } from '@/components/admin/AdminInvoiceTab';
+import { AdminConversionFunnelTab } from '@/components/admin/AdminConversionFunnelTab';
 import { AdminNotesWidget } from '@/components/admin/AdminNotesWidget';
 import { AutoRefreshControl } from '@/components/AutoRefreshControl';
 import { logAdminAction } from '@/lib/adminLogger';
@@ -2041,9 +2044,11 @@ export default function AdminDashboard() {
     {
       label: 'Finance',
       items: [
+        { title: 'Transaction Ledger', value: 'ledger', icon: FileText },
         { title: 'Payments', value: 'payments', icon: CreditCard },
         { title: 'Hires', value: 'hires', icon: CheckCircle2 },
         { title: 'Commissions', value: 'commissions', icon: DollarSign },
+        { title: 'Invoices', value: 'invoices', icon: FileCheck },
         { title: 'Revenue & Payouts', value: 'revenue', icon: Wallet },
         { title: 'Subscriptions', value: 'subscriptions', icon: Package },
       ],
@@ -2060,6 +2065,7 @@ export default function AdminDashboard() {
     {
       label: 'Analytics',
       items: [
+        { title: 'Conversion Funnel', value: 'conversion_funnel', icon: TrendingUp },
         { title: 'Geographic Analytics', value: 'geographic', icon: MapPin },
         { title: 'Referral Sources', value: 'referrals', icon: TrendingUp },
       ],
@@ -3702,6 +3708,15 @@ export default function AdminDashboard() {
 
             {/* ═══════ PIPELINE TAB ═══════ */}
             {activeTab === 'pipeline' && <AdminPipelineTab toast={toast} />}
+
+            {/* ═══════ TRANSACTION LEDGER TAB ═══════ */}
+            {activeTab === 'ledger' && <AdminTransactionLedgerTab toast={toast} />}
+
+            {/* ═══════ INVOICES TAB ═══════ */}
+            {activeTab === 'invoices' && <AdminInvoiceTab toast={toast} />}
+
+            {/* ═══════ CONVERSION FUNNEL TAB ═══════ */}
+            {activeTab === 'conversion_funnel' && <AdminConversionFunnelTab />}
 
             {/* ═══════ ACTIVITY LOG TAB ═══════ */}
             {activeTab === 'activity_log' && <AdminActivityLogTab toast={toast} />}
