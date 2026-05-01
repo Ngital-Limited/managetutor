@@ -266,7 +266,7 @@ export default function ParentDashboard() {
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const [applications, setApplications] = useState<Application[]>([]);
   const [allApplicants, setAllApplicants] = useState<(Application & { jobs: { id: string; title: string; job_reference: string } })[]>([]);
-  const [applicantsStatusFilter, setApplicantsStatusFilter] = useState<'all' | 'pending' | 'shortlisted' | 'invited_to_demo' | 'accepted' | 'rejected'>('all');
+  const [applicantsStatusFilter, setApplicantsStatusFilter] = useState<'all' | 'pending' | 'shortlisted' | 'invited_to_demo' | 'accepted' | 'rejected' | 'contact_requested' | 'contact_released'>('all');
   const [loading, setLoading] = useState(true);
   const [demoBookings, setDemoBookings] = useState<any[]>([]);
   const [transactions, setTransactions] = useState<any[]>([]);
