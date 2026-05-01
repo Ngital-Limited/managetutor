@@ -158,12 +158,26 @@ export default function TutorPublicProfile() {
     if (tutorData.district_id) {
       const { data: relData } = await supabase
         .from('tutor_profiles_public')
-        .select('id, slug, user_id, display_name, monthly_salary_min, monthly_salary_max, experience_years, teaching_mode, bio, profiles:user_id(full_name, avatar_url)')
+        .select('id, slug, user_id, display_name, monthly_salary_min, monthly_salary_max, experience_years, teaching_mode, bio')
         .eq('district_id', tutorData.district_id)
         .eq('is_available', true)
         .neq('id', tutorData.id)
         .limit(4);
-      setRelatedTutors(relData || []);
+
+      if (relData && relData.length > 0) {
+        const userIds = relData.map(r => r.user_id).filter(Boolean);
+        const { data: profs } = await supabase
+          .from('profiles_public')
+          .select('id, full_name, avatar_url')
+          .in('id', userIds);
+        const profMap = new Map((profs || []).map(p => [p.id, p]));
+        setRelatedTutors(relData.map(t => ({
+          ...t,
+          profiles: profMap.get(t.user_id) || { full_name: t.display_name || 'Tutor', avatar_url: null },
+        })));
+      } else {
+        setRelatedTutors([]);
+      }
     }
 
     setLoading(false);
