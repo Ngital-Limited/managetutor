@@ -2032,10 +2032,34 @@ export default function AdminDashboard() {
 
         {/* Main Content */}
         <div className="flex-1 flex flex-col min-h-screen overflow-hidden">
+          {(() => {
+            const currentGroup = sidebarGroups.find(g => g.items.some(i => i.value === activeTab));
+            const currentItem = currentGroup?.items.find(i => i.value === activeTab);
+            const sectionLabel = currentGroup?.label ?? 'Overview';
+            const pageLabel = currentItem?.title ?? 'Dashboard';
+            const showSection = sectionLabel !== 'Overview';
+            return (
           <header className="sticky top-0 z-50 h-12 flex items-center justify-between border-b border-border/50 bg-background/95 backdrop-blur-sm px-4">
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 min-w-0">
               <SidebarTrigger className="text-muted-foreground hidden md:inline-flex" />
-              <span className="text-sm font-medium text-muted-foreground hidden sm:inline">Super Admin</span>
+              {/* Breadcrumb: Admin › [Section] › Page */}
+              <nav aria-label="Breadcrumb" className="flex items-center gap-1 text-sm min-w-0">
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('overview')}
+                  className="text-muted-foreground hover:text-foreground transition-colors shrink-0"
+                >
+                  Admin
+                </button>
+                {showSection && (
+                  <>
+                    <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/50 shrink-0" />
+                    <span className="text-muted-foreground shrink-0">{sectionLabel}</span>
+                  </>
+                )}
+                <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/50 shrink-0" />
+                <span className="font-medium text-foreground truncate" aria-current="page">{pageLabel}</span>
+              </nav>
             </div>
             <div className="flex items-center gap-2">
               <NotificationBell />
@@ -2044,6 +2068,8 @@ export default function AdminDashboard() {
               </Button>
             </div>
           </header>
+            );
+          })()}
 
           <main className="admin-main flex-1 px-4 md:px-6 py-5 overflow-auto pb-24 md:pb-6">
             <div className="max-w-[1200px] mx-auto w-full">
