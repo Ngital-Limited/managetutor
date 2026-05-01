@@ -1131,6 +1131,27 @@ export type Database = {
         }
         Relationships: []
       }
+      profile_views: {
+        Row: {
+          id: string
+          tutor_id: string
+          viewed_at: string
+          viewer_id: string | null
+        }
+        Insert: {
+          id?: string
+          tutor_id: string
+          viewed_at?: string
+          viewer_id?: string | null
+        }
+        Update: {
+          id?: string
+          tutor_id?: string
+          viewed_at?: string
+          viewer_id?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           area_id: string | null
@@ -1326,6 +1347,27 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      saved_jobs: {
+        Row: {
+          created_at: string
+          id: string
+          job_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          job_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          job_id?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       subjects: {
         Row: {
@@ -1876,6 +1918,45 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      tutor_settings: {
+        Row: {
+          created_at: string
+          email_application_updates: boolean
+          email_new_jobs: boolean
+          email_promotions: boolean
+          hide_last_name: boolean
+          id: string
+          profile_visibility: string
+          push_notifications: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          email_application_updates?: boolean
+          email_new_jobs?: boolean
+          email_promotions?: boolean
+          hide_last_name?: boolean
+          id?: string
+          profile_visibility?: string
+          push_notifications?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          email_application_updates?: boolean
+          email_new_jobs?: boolean
+          email_promotions?: boolean
+          hide_last_name?: boolean
+          id?: string
+          profile_visibility?: string
+          push_notifications?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       tutor_subjects: {
         Row: {
