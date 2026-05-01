@@ -1191,38 +1191,38 @@ export default function TutorProfile() {
             <CardContent className="p-6 space-y-5">
               <div>
                 <h3 className="font-semibold flex items-center gap-2"><Users className="h-4 w-4" /> Family & Emergency Contact</h3>
-                <p className="text-sm text-muted-foreground mb-4">Provide family info for verification and trust building.</p>
+                <p className="text-sm text-muted-foreground mb-4">All fields below are required for verification and trust building.</p>
               </div>
 
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
-                  <Label>Father's Name</Label>
-                  <Input className="rounded-xl mt-1.5 h-11" value={profile.father_name} onChange={(e) => setProfile({ ...profile, father_name: e.target.value })} placeholder="Father's full name" />
+                  <Label>Father's Name <span className="text-destructive">*</span></Label>
+                  <Input className="rounded-xl mt-1.5 h-11" value={profile.father_name} onChange={(e) => setProfile({ ...profile, father_name: e.target.value })} placeholder="Father's full name" required />
                 </div>
                 <div>
-                  <Label>Mother's Name</Label>
-                  <Input className="rounded-xl mt-1.5 h-11" value={profile.mother_name} onChange={(e) => setProfile({ ...profile, mother_name: e.target.value })} placeholder="Mother's full name" />
+                  <Label>Mother's Name <span className="text-destructive">*</span></Label>
+                  <Input className="rounded-xl mt-1.5 h-11" value={profile.mother_name} onChange={(e) => setProfile({ ...profile, mother_name: e.target.value })} placeholder="Mother's full name" required />
                 </div>
               </div>
 
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
-                  <Label>Father's Phone</Label>
+                  <Label>Father's Phone <span className="text-destructive">*</span></Label>
                   <div className="mt-1.5"><PhoneInput value={profile.father_phone} onChange={(v) => setProfile({ ...profile, father_phone: v })} /></div>
                 </div>
                 <div>
-                  <Label>Mother's Phone</Label>
+                  <Label>Mother's Phone <span className="text-destructive">*</span></Label>
                   <div className="mt-1.5"><PhoneInput value={profile.mother_phone} onChange={(v) => setProfile({ ...profile, mother_phone: v })} /></div>
                 </div>
               </div>
 
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
-                  <Label>Emergency Contact Name</Label>
-                  <Input className="rounded-xl mt-1.5 h-11" value={profile.emergency_contact_name} onChange={(e) => setProfile({ ...profile, emergency_contact_name: e.target.value })} placeholder="e.g., Uncle, Guardian" />
+                  <Label>Emergency Contact Name <span className="text-destructive">*</span></Label>
+                  <Input className="rounded-xl mt-1.5 h-11" value={profile.emergency_contact_name} onChange={(e) => setProfile({ ...profile, emergency_contact_name: e.target.value })} placeholder="e.g., Uncle, Guardian" required />
                 </div>
                 <div>
-                  <Label>Emergency Contact Phone</Label>
+                  <Label>Emergency Contact Phone <span className="text-destructive">*</span></Label>
                   <div className="mt-1.5"><PhoneInput value={profile.emergency_contact_phone} onChange={(v) => setProfile({ ...profile, emergency_contact_phone: v })} /></div>
                 </div>
               </div>
