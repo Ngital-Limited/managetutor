@@ -24,7 +24,7 @@ export function Footer() {
 
   return (
     <footer className="bg-secondary text-secondary-foreground border-t border-secondary-foreground/10 w-full overflow-x-hidden">
-      <div className="container mx-auto w-full px-4 md:px-6 max-w-[1200px] min-w-0">
+      <div className="page-container">
         {/* Main */}
         <div className="py-12 grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-10">
           {/* Brand */}
