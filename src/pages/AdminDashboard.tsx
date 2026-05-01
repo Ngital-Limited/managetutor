@@ -880,6 +880,7 @@ export default function AdminDashboard() {
 
   // All-applications (admin Applications tab)
   const [allApplications, setAllApplications] = useState<any[]>([]);
+  const [jobsWithoutApps, setJobsWithoutApps] = useState<any[]>([]);
   const [allAppsStatusFilter, setAllAppsStatusFilter] = useState('all');
   const [allAppsSearch, setAllAppsSearch] = useState('');
   const [appsView, setAppsView] = useState<'jobs' | 'applicants'>('jobs');
