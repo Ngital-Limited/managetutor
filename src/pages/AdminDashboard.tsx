@@ -2575,6 +2575,9 @@ export default function AdminDashboard() {
                               <TableCell className="text-xs text-muted-foreground whitespace-nowrap">{formatExactDate(new Date(u.created_at))}</TableCell>
                               <TableCell className="text-right">
                                 <div className="flex gap-1 justify-end">
+                                  <Button variant="ghost" size="sm" asChild title="View Guardian Detail">
+                                    <Link to={`/admin/guardian/${u.id}`}><Eye className="h-4 w-4" /></Link>
+                                  </Button>
                                   <Button variant="ghost" size="sm" onClick={() => handleImpersonate(u.id)} title={`Login as ${u.full_name}`}>
                                     <LogIn className="h-4 w-4 text-primary" />
                                   </Button>
