@@ -1354,8 +1354,8 @@ export default function ParentDashboard() {
             {submitting ? (editingJob ? 'Updating...' : 'Posting...') : (editingJob ? 'Update Job' : 'Post Job')}
           </Button>
         </form>
-      </DialogContent>
-    </Dialog>
+      </CardContent>
+    </Card>
   );
 
   // ─── Report Dialog (shared) ───
