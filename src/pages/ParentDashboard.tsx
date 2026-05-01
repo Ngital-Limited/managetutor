@@ -183,6 +183,9 @@ function ParentSidebar({ activeSection, setActiveSection, onPostJob, pendingAppl
               </div>
             )}
           </div>
+          {!collapsed && (
+            <SidebarGroupLabel className="text-[10px] uppercase tracking-wider text-muted-foreground/70 font-semibold px-3">Main</SidebarGroupLabel>
+          )}
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
