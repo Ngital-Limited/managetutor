@@ -756,8 +756,10 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
                   <SelectContent>
                     <SelectItem value="all">All</SelectItem>
                     <SelectItem value="pending">Pending</SelectItem>
-                    <SelectItem value="approved">Verified</SelectItem>
+                    <SelectItem value="under_review">Under Review</SelectItem>
+                    <SelectItem value="approved">Approved</SelectItem>
                     <SelectItem value="rejected">Rejected</SelectItem>
+                    <SelectItem value="document_needed">Document Needed</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
