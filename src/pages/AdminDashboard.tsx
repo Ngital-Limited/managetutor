@@ -3697,6 +3697,12 @@ export default function AdminDashboard() {
             {/* ═══════ PHONE LOG TAB ═══════ */}
             {activeTab === 'phone_log' && <AdminPhoneLogTab toast={toast} />}
 
+            {/* ═══════ SMART MATCHING TAB ═══════ */}
+            {activeTab === 'smart_match' && <AdminSmartMatchTab />}
+
+            {/* ═══════ PIPELINE TAB ═══════ */}
+            {activeTab === 'pipeline' && <AdminPipelineTab toast={toast} />}
+
             {/* ═══════ ACTIVITY LOG TAB ═══════ */}
             {activeTab === 'activity_log' && <AdminActivityLogTab toast={toast} />}
 
