@@ -3680,6 +3680,12 @@ export default function AdminDashboard() {
             {/* ═══════ COMMISSIONS TAB ═══════ */}
             {activeTab === 'commissions' && <AdminCommissionTab toast={toast} />}
 
+            {/* ═══════ PHONE LOG TAB ═══════ */}
+            {activeTab === 'phone_log' && <AdminPhoneLogTab toast={toast} />}
+
+            {/* ═══════ ACTIVITY LOG TAB ═══════ */}
+            {activeTab === 'activity_log' && <AdminActivityLogTab toast={toast} />}
+
             {/* ═══════ CACHE TAB ═══════ */}
             {activeTab === 'cache' && (
               <div className="space-y-4">
