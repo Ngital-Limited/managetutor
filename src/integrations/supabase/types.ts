@@ -2035,6 +2035,7 @@ export type Database = {
         | "in_progress"
         | "completed"
         | "cancelled"
+        | "suspended"
       teaching_mode: "online" | "in_person" | "hybrid"
       verification_status: "pending" | "approved" | "rejected"
     }
@@ -2181,6 +2182,7 @@ export const Constants = {
         "in_progress",
         "completed",
         "cancelled",
+        "suspended",
       ],
       teaching_mode: ["online", "in_person", "hybrid"],
       verification_status: ["pending", "approved", "rejected"],
