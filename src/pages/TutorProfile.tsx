@@ -1255,26 +1255,14 @@ export default function TutorProfile() {
                 <p className="text-sm text-muted-foreground mb-4">Upload documents to get verified and build trust.</p>
               </div>
 
-              {documents.length > 0 && (
-                <div className="space-y-2 mb-4">
-                  {documents.map((doc) => (
-                    <div key={doc.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-xl">
-                      <div className="flex items-center gap-3">
-                        <FileText className="h-5 w-5 text-muted-foreground" />
-                        <span className="capitalize">{doc.document_type.replace(/_/g, ' ')}</span>
-                      </div>
-                      {getStatusBadge(doc.status)}
-                    </div>
-                  ))}
-                </div>
-              )}
-
+              {/* Verification document grid (NID handled separately in Identity Document section below) */}
               <div className="grid md:grid-cols-2 gap-4">
                 {(profile.is_student
                   ? ['university_id_card', 'university_payslip']
-                  : ['national_id', 'education_certificate', 'experience_certificate']
+                  : ['education_certificate', 'experience_certificate']
                 ).map((docType) => {
-                  const exists = documents.some(d => d.document_type === docType);
+                  const doc = documents.find(d => d.document_type === docType);
+                  const exists = !!doc;
                   const label = docType.replace(/_/g, ' ');
                   const isRequired = profile.is_student
                     ? (docType === 'university_id_card' || docType === 'university_payslip')
@@ -1286,15 +1274,27 @@ export default function TutorProfile() {
                         {label}
                         {isRequired && <span className="text-destructive ml-1">*</span>}
                       </p>
-                      <p className="text-xs text-muted-foreground mb-3">
+                      <p className="text-xs text-muted-foreground mb-2">
                         {exists ? 'Uploaded' : 'PDF, JPG, PNG (max 5MB)'}
                       </p>
-                      <label className="cursor-pointer">
-                        <Button variant="outline" size="sm" disabled={uploading} asChild className="rounded-xl">
-                          <span>{exists ? 'Replace' : 'Upload'}</span>
-                        </Button>
-                        <input type="file" className="hidden" accept=".pdf,.jpg,.jpeg,.png" onChange={(e) => handleFileUpload(e, docType)} disabled={uploading} />
-                      </label>
+                      {exists && doc && (
+                        <div className="flex items-center justify-center mb-3">
+                          {getStatusBadge(doc.status)}
+                        </div>
+                      )}
+                      <div className="flex items-center justify-center gap-2 flex-wrap">
+                        <label className="cursor-pointer">
+                          <Button variant="outline" size="sm" disabled={uploading} asChild className="rounded-xl">
+                            <span>{exists ? 'Replace' : 'Upload'}</span>
+                          </Button>
+                          <input type="file" className="hidden" accept=".pdf,.jpg,.jpeg,.png" onChange={(e) => handleFileUpload(e, docType)} disabled={uploading} />
+                        </label>
+                        {exists && doc && (
+                          <Button type="button" variant="ghost" size="sm" className="rounded-xl" onClick={() => handleViewDoc(doc.document_url)}>
+                            View
+                          </Button>
+                        )}
+                      </div>
                     </div>
                   );
                 })}
@@ -1307,7 +1307,7 @@ export default function TutorProfile() {
                   <p className="opacity-80">
                     {profile.is_student
                       ? 'As a student, please upload your University ID Card or University Payment Slip for verification.'
-                      : 'Please upload your National ID and at least your highest/last educational certificate. Experience certificates are optional but recommended.'}
+                      : 'Please upload your highest/last educational certificate. Experience certificate is optional but recommended. Your National ID / Passport / Birth Certificate goes in the Identity Document section below.'}
                   </p>
                 </div>
               </div>
