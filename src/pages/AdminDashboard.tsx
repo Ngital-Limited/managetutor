@@ -1580,6 +1580,25 @@ export default function AdminDashboard() {
     if (error) toast({ title: 'Error', description: error.message, variant: 'destructive' });
     else {
       toast({ title: 'Success', description: `Tutor ${status}` });
+
+      // Send tutor approval/rejection email
+      try {
+        const tutor = verifications.find((v: any) => v.id === tutorId);
+        if (tutor?.user_id) {
+          const { data: profile } = await supabase.from('profiles').select('email, full_name').eq('id', tutor.user_id).single();
+          if (profile?.email) {
+            await supabase.functions.invoke('send-transactional-email', {
+              body: {
+                templateName: 'tutor-approval-status',
+                recipientEmail: profile.email,
+                idempotencyKey: `tutor-verify-${tutorId}-${status}`,
+                templateData: { tutorName: profile.full_name, status },
+              },
+            });
+          }
+        }
+      } catch (e) { console.error('Email send failed:', e); }
+
       setSelectedTutor(null);
       fetchVerifications();
       invalidate('admin:stats:v1'); void sharedInvalidate('admin:stats:v1');
