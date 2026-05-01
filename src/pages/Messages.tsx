@@ -247,7 +247,7 @@ export default function Messages() {
       {/* Navigation */}
       <Header />
 
-      <main className="container mx-auto px-4 py-4">
+      <main className="container mx-auto px-4 py-4 max-w-[1200px]">
         <div className="grid lg:grid-cols-3 gap-4 h-[calc(100vh-120px)]">
           {/* Conversations List */}
           <Card className="lg:col-span-1 flex flex-col">
