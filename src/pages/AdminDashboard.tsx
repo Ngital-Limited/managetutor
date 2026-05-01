@@ -1588,13 +1588,6 @@ export default function AdminDashboard() {
     setProcessing(false);
   };
 
-  // Redirect to overview if current tab isn't permitted for this sub-admin
-  useEffect(() => {
-    const requiredPerm = TAB_PERM_MAP[activeTab];
-    if (requiredPerm && !hasPerm(requiredPerm) && activeTab !== 'overview') {
-      setActiveTab('overview');
-    }
-  }, [activeTab, hasPerm, setActiveTab]);
 
   const handleApproveUser = async (userId: string) => {
     const { error } = await supabase.from('profiles').update({ is_approved: true }).eq('id', userId);
