@@ -2690,45 +2690,57 @@ export default function AdminDashboard() {
                     </div>
 
                     {/* Pipeline tabs */}
-                    <div className="flex items-center gap-1.5 flex-wrap p-1 rounded-lg bg-muted/40 border border-border/40 w-fit">
+                    <div className="flex items-center gap-1 flex-wrap p-1 rounded-xl bg-muted/50 border border-border/60 shadow-sm w-fit">
                       {PIPELINE_TABS.map(t => {
                         const count = pipelineCounts[t.key];
                         const active = appsPipelineTab === t.key;
+                        const accent: Record<string, string> = {
+                          all: 'bg-slate-600 text-white',
+                          shortlisted: 'bg-blue-600 text-white',
+                          demo: 'bg-amber-500 text-white',
+                          confirmed: 'bg-emerald-600 text-white',
+                          not_confirmed: 'bg-rose-600 text-white',
+                        };
                         return (
                           <button
                             key={t.key}
                             type="button"
                             onClick={() => { setAppsPipelineTab(t.key); setAppsJobsPage(1); }}
-                            className={`text-xs px-3 py-1.5 rounded-md font-medium transition-all ${active ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+                            className={`group text-xs px-3.5 py-2 rounded-lg font-medium transition-all flex items-center gap-2 ${active ? 'bg-background text-foreground shadow-sm ring-1 ring-border' : 'text-muted-foreground hover:text-foreground hover:bg-background/50'}`}
                           >
-                            {t.label}
-                            <span className={`ml-1.5 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] ${active ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>{count}</span>
+                            <span>{t.label}</span>
+                            <span className={`inline-flex items-center justify-center min-w-[22px] h-[20px] px-1.5 rounded-md text-[11px] font-semibold transition-colors ${active ? accent[t.key] : 'bg-muted text-muted-foreground group-hover:bg-background'}`}>{count}</span>
                           </button>
                         );
                       })}
                     </div>
 
-                    <Card>
+                    <Card className="overflow-hidden border-border/60 shadow-sm">
                       <CardContent className="p-0">
                         <ScrollArea className="w-full">
                           <Table>
                             <TableHeader>
-                              <TableRow>
-                                <TableHead className="font-mono">Ref ID</TableHead>
-                                <TableHead>Job Name</TableHead>
-                                <TableHead>Guardian</TableHead>
-                                <TableHead>Phone</TableHead>
-                                <TableHead>Posted</TableHead>
-                                <TableHead>Job Status</TableHead>
-                                <TableHead>Applicants</TableHead>
-                                <TableHead className="text-right">Action</TableHead>
+                              <TableRow className="bg-muted/40 hover:bg-muted/40 border-b border-border/60">
+                                <TableHead className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground h-11">Ref ID</TableHead>
+                                <TableHead className="text-[11px] uppercase tracking-wider text-muted-foreground">Job Name</TableHead>
+                                <TableHead className="text-[11px] uppercase tracking-wider text-muted-foreground">Guardian</TableHead>
+                                <TableHead className="text-[11px] uppercase tracking-wider text-muted-foreground">Phone</TableHead>
+                                <TableHead className="text-[11px] uppercase tracking-wider text-muted-foreground">Posted</TableHead>
+                                <TableHead className="text-[11px] uppercase tracking-wider text-muted-foreground">Status</TableHead>
+                                <TableHead className="text-[11px] uppercase tracking-wider text-muted-foreground">Applicants</TableHead>
+                                <TableHead className="text-right text-[11px] uppercase tracking-wider text-muted-foreground">Action</TableHead>
                               </TableRow>
                             </TableHeader>
                             <TableBody>
                               {loadingAllApps ? (
-                                <TableRow><TableCell colSpan={8} className="text-center py-8 text-muted-foreground">Loading…</TableCell></TableRow>
+                                <TableRow><TableCell colSpan={8} className="text-center py-10 text-muted-foreground">Loading…</TableCell></TableRow>
                               ) : filteredJobs.length === 0 ? (
-                                <TableRow><TableCell colSpan={8} className="text-center py-12 text-muted-foreground">{appsPipelineTab === 'all' ? 'No applications yet.' : `No jobs with ${PIPELINE_TABS.find(t => t.key === appsPipelineTab)?.label.toLowerCase()} applicants.`}</TableCell></TableRow>
+                                <TableRow><TableCell colSpan={8} className="text-center py-16 text-muted-foreground">
+                                  <div className="flex flex-col items-center gap-2">
+                                    <Users className="h-8 w-8 opacity-30" />
+                                    <div className="text-sm">{appsPipelineTab === 'all' ? 'No applications yet.' : `No jobs with ${PIPELINE_TABS.find(t => t.key === appsPipelineTab)?.label.toLowerCase()} applicants.`}</div>
+                                  </div>
+                                </TableCell></TableRow>
                               ) : filteredJobs.slice((appsJobsPage - 1) * appsJobsPageSize, appsJobsPage * appsJobsPageSize).map(({ jid, job, total, pending, shortlisted, latest }) => {
                                 const guardianApp = allApplications.find(a => a.job_id === jid);
                                 const guardianName = guardianApp?.parent_profile?.full_name || '—';
@@ -2736,31 +2748,33 @@ export default function AdminDashboard() {
                                 return (
                                 <TableRow
                                   key={jid}
-                                  className="cursor-pointer"
+                                  className="cursor-pointer transition-colors hover:bg-muted/40 border-b border-border/40"
                                   onClick={() => { setSelectedAppsJobId(jid); setAppsView('applicants'); setSelectedAppIds(new Set()); }}
                                 >
-                                  <TableCell className="text-xs font-mono">{job?.job_reference || '—'}</TableCell>
-                                  <TableCell>
-                                    <div className="text-sm font-medium max-w-[280px] truncate">{job?.title || '—'}</div>
+                                  <TableCell className="text-xs font-mono text-muted-foreground py-3">{job?.job_reference || '—'}</TableCell>
+                                  <TableCell className="py-3">
+                                    <div className="text-sm font-medium max-w-[280px] truncate text-foreground">{job?.title || '—'}</div>
                                   </TableCell>
-                                  <TableCell className="text-sm max-w-[160px] truncate">{guardianName}</TableCell>
-                                  <TableCell className="text-xs font-mono whitespace-nowrap">{guardianPhone}</TableCell>
-                                  <TableCell className="text-xs text-muted-foreground">{formatExactDate(new Date(latest))}</TableCell>
-                                  <TableCell>
-                                    <Badge className={`text-xs capitalize ${statusColor(job?.status)}`}>{(job?.status || '—').replace('_', ' ')}</Badge>
+                                  <TableCell className="text-sm max-w-[160px] truncate py-3">{guardianName}</TableCell>
+                                  <TableCell className="text-xs font-mono whitespace-nowrap text-muted-foreground py-3">{guardianPhone}</TableCell>
+                                  <TableCell className="text-xs text-muted-foreground py-3 whitespace-nowrap">{formatExactDate(new Date(latest))}</TableCell>
+                                  <TableCell className="py-3">
+                                    <Badge className={`text-[11px] capitalize font-medium ${statusColor(job?.status)}`}>{(job?.status || '—').replace('_', ' ')}</Badge>
                                   </TableCell>
-                                  <TableCell>
+                                  <TableCell className="py-3">
                                     <div className="flex items-center gap-1.5 flex-wrap">
-                                      <Badge variant="secondary" className="text-xs gap-1"><Users className="h-3 w-3" />{total}</Badge>
-                                      {pending > 0 && <Badge variant="outline" className="text-xs">Pending: {pending}</Badge>}
-                                      {shortlisted > 0 && <Badge variant="outline" className="text-xs gap-1"><CheckCircle2 className="h-3 w-3" />{shortlisted}</Badge>}
+                                      <span className="inline-flex items-center gap-1 h-6 px-2 rounded-md bg-primary/10 text-primary text-xs font-semibold">
+                                        <Users className="h-3 w-3" />{total}
+                                      </span>
+                                      {pending > 0 && <span className="inline-flex items-center h-6 px-2 rounded-md bg-amber-50 text-amber-700 border border-amber-200 text-[11px] font-medium dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-900">Pending: {pending}</span>}
+                                      {shortlisted > 0 && <span className="inline-flex items-center gap-1 h-6 px-2 rounded-md bg-blue-50 text-blue-700 border border-blue-200 text-[11px] font-medium dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-900"><CheckCircle2 className="h-3 w-3" />{shortlisted}</span>}
                                     </div>
                                   </TableCell>
-                                  <TableCell className="text-right">
+                                  <TableCell className="text-right py-3">
                                     <Button
                                       variant="outline"
                                       size="sm"
-                                      className="h-8 text-xs gap-1"
+                                      className="h-8 text-xs gap-1.5 hover:bg-primary hover:text-primary-foreground hover:border-primary transition-colors"
                                       onClick={(e) => { e.stopPropagation(); setSelectedAppsJobId(jid); setAppsView('applicants'); setSelectedAppIds(new Set()); }}
                                     >
                                       <UserCheck className="h-3.5 w-3.5" /> View Applicants
