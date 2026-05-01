@@ -937,17 +937,39 @@ export default function TutorProfile() {
                         <div>
                           <Label>Institution Name</Label>
                           {entry.degree === 'Bachelor' || entry.degree === 'Masters' ? (
-                            <div className="mt-1.5">
-                              <SearchableSelect
-                                options={UNIVERSITY_OPTIONS}
-                                value={entry.institution}
-                                onValueChange={(v) => updateEducation(index, 'institution', v)}
-                                placeholder={meta.institutionPlaceholder || 'Select university'}
-                                searchPlaceholder="Search universities..."
-                                emptyText="No university found."
-                                grouped
-                                className="h-11 rounded-xl"
-                              />
+                            <div className="mt-1.5 space-y-1.5">
+                              {manualInstitution[entry.degree] ? (
+                                <Input
+                                  className="rounded-xl h-11"
+                                  value={entry.institution}
+                                  onChange={(e) => updateEducation(index, 'institution', e.target.value)}
+                                  placeholder="Type your institution name"
+                                />
+                              ) : (
+                                <SearchableSelect
+                                  options={UNIVERSITY_OPTIONS}
+                                  value={entry.institution}
+                                  onValueChange={(v) => updateEducation(index, 'institution', v)}
+                                  placeholder={meta.institutionPlaceholder || 'Select university'}
+                                  searchPlaceholder="Search universities..."
+                                  emptyText="No university found."
+                                  grouped
+                                  className="h-11 rounded-xl"
+                                />
+                              )}
+                              <button
+                                type="button"
+                                className="text-xs text-primary hover:underline"
+                                onClick={() => {
+                                  setManualInstitution(prev => {
+                                    const next = { ...prev, [entry.degree]: !prev[entry.degree] };
+                                    return next;
+                                  });
+                                  updateEducation(index, 'institution', '');
+                                }}
+                              >
+                                {manualInstitution[entry.degree] ? '← Choose from list instead' : "Can't find your institution? Enter manually"}
+                              </button>
                             </div>
                           ) : (
                             <Input className="rounded-xl mt-1.5 h-11" value={entry.institution} onChange={(e) => updateEducation(index, 'institution', e.target.value)} placeholder={meta.institutionPlaceholder} />
