@@ -48,8 +48,11 @@ import {
   Star, Briefcase, Users, Clock, CheckCircle2, XCircle, Search, ArrowRight,
   Eye, Edit, Trash2, Calendar, Home, Heart, AlertCircle,
   User, CreditCard, Pause, Play, Flag, Zap,
-  Send, AlertTriangle, Receipt, DollarSign, LayoutDashboard, X
+  Send, AlertTriangle, Receipt, DollarSign, LayoutDashboard, X,
+  LifeBuoy, Settings, Phone
 } from 'lucide-react';
+import { ParentHelpSupport } from '@/components/parent/ParentHelpSupport';
+import { ParentSettings } from '@/components/parent/ParentSettings';
 
 interface District { id: string; name_en: string; division_en: string; }
 interface Subject { id: string; name_en: string; }
@@ -125,7 +128,7 @@ interface UserProfileFull {
   user_reference: string | null;
 }
 
-type SectionKey = 'overview' | 'jobs' | 'applicants' | 'demo' | 'tuitions' | 'payments' | 'profile';
+type SectionKey = 'overview' | 'jobs' | 'applicants' | 'demo' | 'tuitions' | 'payments' | 'profile' | 'help' | 'settings';
 
 const sectionItems: { key: SectionKey; title: string; icon: any }[] = [
   { key: 'overview', title: 'Overview', icon: LayoutDashboard },
@@ -135,6 +138,8 @@ const sectionItems: { key: SectionKey; title: string; icon: any }[] = [
   { key: 'demo', title: 'Demo Classes', icon: Calendar },
   { key: 'payments', title: 'Payments', icon: CreditCard },
   { key: 'profile', title: 'My Profile', icon: User },
+  { key: 'help', title: 'Help & Support', icon: LifeBuoy },
+  { key: 'settings', title: 'Settings', icon: Settings },
 ];
 
 const externalLinks = [
@@ -261,7 +266,7 @@ export default function ParentDashboard() {
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const [applications, setApplications] = useState<Application[]>([]);
   const [allApplicants, setAllApplicants] = useState<(Application & { jobs: { id: string; title: string; job_reference: string } })[]>([]);
-  const [applicantsStatusFilter, setApplicantsStatusFilter] = useState<'all' | 'pending' | 'shortlisted' | 'invited_to_demo' | 'accepted' | 'rejected'>('all');
+  const [applicantsStatusFilter, setApplicantsStatusFilter] = useState<'all' | 'pending' | 'shortlisted' | 'invited_to_demo' | 'accepted' | 'rejected' | 'contact_requested' | 'contact_released'>('all');
   const [loading, setLoading] = useState(true);
   const [demoBookings, setDemoBookings] = useState<any[]>([]);
   const [transactions, setTransactions] = useState<any[]>([]);
@@ -767,7 +772,7 @@ export default function ParentDashboard() {
     setSubmitting(false);
   };
 
-  const handleApplicationAction = async (appId: string, status: 'accepted' | 'rejected' | 'shortlisted') => {
+  const handleApplicationAction = async (appId: string, status: 'accepted' | 'rejected' | 'shortlisted' | 'contact_requested' | 'contact_released') => {
     const { error } = await supabase.from('applications').update({ status: status as any }).eq('id', appId);
 
     if (error) {
@@ -775,14 +780,13 @@ export default function ParentDashboard() {
       return;
     }
 
-    // Find the app & job for this action (works from inline list OR All-Applicants table)
     const inlineApp = applications.find(a => a.id === appId);
     const allApp = allApplicants.find((a: any) => a.id === appId);
     const tutorUserId = inlineApp?.tutor_profiles?.user_id || (allApp as any)?.tutor_profiles?.user_id;
     const jobTitle = selectedJob?.title || (allApp as any)?.jobs?.title || '';
     const jobId = selectedJob?.id || (allApp as any)?.jobs?.id;
 
-    toast({ title: 'Updated', description: `Application ${status}.` });
+    toast({ title: 'Updated', description: `Application ${status.replace('_', ' ')}.` });
 
     if (status === 'accepted' && jobId) {
       await supabase.from('jobs').update({ status: 'in_progress' as any }).eq('id', jobId);
@@ -801,6 +805,15 @@ export default function ParentDashboard() {
         title: 'You have been shortlisted!',
         message: `Great news — you've been shortlisted for "${jobTitle}". The guardian may invite you for a demo class soon.`,
         type: 'application_shortlisted',
+        reference_id: jobId,
+      });
+    } else if (status === 'contact_requested' && tutorUserId) {
+      // Notify admin that parent wants tutor contact info
+      await supabase.from('notifications').insert({
+        user_id: tutorUserId,
+        title: 'Contact info requested',
+        message: `A guardian has requested your contact details for "${jobTitle}". Admin will review and release shortly.`,
+        type: 'contact_requested',
         reference_id: jobId,
       });
     } else if (status === 'rejected' && tutorUserId) {
@@ -2497,6 +2510,8 @@ export default function ParentDashboard() {
       { key: 'all', label: 'All' },
       { key: 'pending', label: 'Pending' },
       { key: 'shortlisted', label: 'Shortlisted' },
+      { key: 'contact_requested', label: 'Contact Requested' },
+      { key: 'contact_released', label: 'Contact Released' },
       { key: 'invited_to_demo', label: 'Invited' },
       { key: 'accepted', label: 'Accepted' },
       { key: 'rejected', label: 'Rejected' },
@@ -2598,22 +2613,31 @@ export default function ParentDashboard() {
                           app.status === 'rejected' ? 'bg-destructive' :
                           app.status === 'shortlisted' ? 'bg-primary' :
                           app.status === 'invited_to_demo' ? 'bg-accent text-accent-foreground' :
+                          app.status === 'contact_requested' ? 'bg-warning text-warning-foreground' :
+                          app.status === 'contact_released' ? 'bg-success/80' :
                           'bg-warning text-warning-foreground'
                         }>
-                          {app.status === 'invited_to_demo' ? 'Invited' : app.status.charAt(0).toUpperCase() + app.status.slice(1)}
+                          {app.status === 'invited_to_demo' ? 'Invited' : 
+                           app.status === 'contact_requested' ? 'Contact Requested' :
+                           app.status === 'contact_released' ? 'Contact Released' :
+                           app.status.charAt(0).toUpperCase() + app.status.slice(1)}
                         </Badge>
                       </td>
                       <td className="py-3 px-2">
                         <div className="flex items-center gap-1 justify-center flex-wrap">
-                          {(app.status === 'pending' || app.status === 'shortlisted') && (
+                          {(app.status === 'pending' || app.status === 'shortlisted' || app.status === 'contact_released') && (
                             <>
                               {app.status === 'pending' && (
                                 <Button size="sm" variant="outline" className="h-8 text-xs" onClick={() => handleApplicationAction(app.id, 'shortlisted')} title="Shortlist">
                                   <Star className="h-3.5 w-3.5" />
                                 </Button>
                               )}
+                              {app.status === 'shortlisted' && (
+                                <Button size="sm" variant="outline" className="h-8 text-xs" onClick={() => handleApplicationAction(app.id, 'contact_requested')} title="Request Contact Info">
+                                  <Phone className="h-3.5 w-3.5" />
+                                </Button>
+                              )}
                               <Button size="sm" variant="secondary" className="h-8 text-xs" onClick={() => {
-                                // Make sure selectedJob is set so the demo dialog has context
                                 const job = jobs.find(j => j.id === app.jobs?.id);
                                 if (job) setSelectedJob(job);
                                 handleInviteToInterview(app);
@@ -2729,6 +2753,8 @@ export default function ParentDashboard() {
       case 'demo': return renderDemoBookings();
       case 'payments': return renderPayments();
       case 'profile': return renderProfile();
+      case 'help': return <ParentHelpSupport />;
+      case 'settings': return <ParentSettings />;
       default: return renderOverview();
     }
   };

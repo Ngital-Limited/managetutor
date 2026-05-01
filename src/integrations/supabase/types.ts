@@ -121,6 +121,7 @@ export type Database = {
       }
       applications: {
         Row: {
+          contact_released_at: string | null
           cover_message: string | null
           created_at: string | null
           id: string
@@ -131,6 +132,7 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          contact_released_at?: string | null
           cover_message?: string | null
           created_at?: string | null
           id?: string
@@ -141,6 +143,7 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          contact_released_at?: string | null
           cover_message?: string | null
           created_at?: string | null
           id?: string
@@ -668,6 +671,65 @@ export type Database = {
             columns: ["tutor_id"]
             isOneToOne: false
             referencedRelation: "tutor_profiles_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hiring_confirmations: {
+        Row: {
+          agreed_salary: number
+          application_id: string
+          created_at: string
+          days_per_week: number
+          guardian_confirmed: boolean
+          id: string
+          job_id: string
+          parent_id: string
+          start_date: string
+          status: string
+          subjects: string | null
+          tutor_confirmed: boolean
+          tutor_id: string
+          updated_at: string
+        }
+        Insert: {
+          agreed_salary: number
+          application_id: string
+          created_at?: string
+          days_per_week?: number
+          guardian_confirmed?: boolean
+          id?: string
+          job_id: string
+          parent_id: string
+          start_date: string
+          status?: string
+          subjects?: string | null
+          tutor_confirmed?: boolean
+          tutor_id: string
+          updated_at?: string
+        }
+        Update: {
+          agreed_salary?: number
+          application_id?: string
+          created_at?: string
+          days_per_week?: number
+          guardian_confirmed?: boolean
+          id?: string
+          job_id?: string
+          parent_id?: string
+          start_date?: string
+          status?: string
+          subjects?: string | null
+          tutor_confirmed?: boolean
+          tutor_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hiring_confirmations_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "applications"
             referencedColumns: ["id"]
           },
         ]
@@ -1466,6 +1528,45 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      student_profiles: {
+        Row: {
+          age: number | null
+          class_level: string | null
+          created_at: string
+          id: string
+          learning_needs: string | null
+          medium: string | null
+          name: string
+          parent_id: string
+          school_name: string | null
+          updated_at: string
+        }
+        Insert: {
+          age?: number | null
+          class_level?: string | null
+          created_at?: string
+          id?: string
+          learning_needs?: string | null
+          medium?: string | null
+          name: string
+          parent_id: string
+          school_name?: string | null
+          updated_at?: string
+        }
+        Update: {
+          age?: number | null
+          class_level?: string | null
+          created_at?: string
+          id?: string
+          learning_needs?: string | null
+          medium?: string | null
+          name?: string
+          parent_id?: string
+          school_name?: string | null
+          updated_at?: string
+        }
+        Relationships: []
       }
       subjects: {
         Row: {
@@ -2588,6 +2689,8 @@ export type Database = {
         | "shortlisted"
         | "waiting"
         | "invited_to_demo"
+        | "contact_requested"
+        | "contact_released"
       gender: "male" | "female" | "any"
       job_status:
         | "pending_approval"
@@ -2739,6 +2842,8 @@ export const Constants = {
         "shortlisted",
         "waiting",
         "invited_to_demo",
+        "contact_requested",
+        "contact_released",
       ],
       gender: ["male", "female", "any"],
       job_status: [
