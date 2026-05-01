@@ -672,6 +672,65 @@ export type Database = {
           },
         ]
       }
+      hiring_confirmations: {
+        Row: {
+          agreed_salary: number
+          application_id: string
+          created_at: string
+          days_per_week: number
+          guardian_confirmed: boolean
+          id: string
+          job_id: string
+          parent_id: string
+          start_date: string
+          status: string
+          subjects: string | null
+          tutor_confirmed: boolean
+          tutor_id: string
+          updated_at: string
+        }
+        Insert: {
+          agreed_salary: number
+          application_id: string
+          created_at?: string
+          days_per_week?: number
+          guardian_confirmed?: boolean
+          id?: string
+          job_id: string
+          parent_id: string
+          start_date: string
+          status?: string
+          subjects?: string | null
+          tutor_confirmed?: boolean
+          tutor_id: string
+          updated_at?: string
+        }
+        Update: {
+          agreed_salary?: number
+          application_id?: string
+          created_at?: string
+          days_per_week?: number
+          guardian_confirmed?: boolean
+          id?: string
+          job_id?: string
+          parent_id?: string
+          start_date?: string
+          status?: string
+          subjects?: string | null
+          tutor_confirmed?: boolean
+          tutor_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hiring_confirmations_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       job_subjects: {
         Row: {
           created_at: string | null
@@ -1466,6 +1525,45 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      student_profiles: {
+        Row: {
+          age: number | null
+          class_level: string | null
+          created_at: string
+          id: string
+          learning_needs: string | null
+          medium: string | null
+          name: string
+          parent_id: string
+          school_name: string | null
+          updated_at: string
+        }
+        Insert: {
+          age?: number | null
+          class_level?: string | null
+          created_at?: string
+          id?: string
+          learning_needs?: string | null
+          medium?: string | null
+          name: string
+          parent_id: string
+          school_name?: string | null
+          updated_at?: string
+        }
+        Update: {
+          age?: number | null
+          class_level?: string | null
+          created_at?: string
+          id?: string
+          learning_needs?: string | null
+          medium?: string | null
+          name?: string
+          parent_id?: string
+          school_name?: string | null
+          updated_at?: string
+        }
+        Relationships: []
       }
       subjects: {
         Row: {
