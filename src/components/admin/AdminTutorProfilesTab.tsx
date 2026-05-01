@@ -521,15 +521,43 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
     await fetchTutors();
   };
 
-  const handleVerifyToggle = async (tutorId: string, currentStatus: string) => {
-    const newStatus = currentStatus === 'approved' ? 'pending' : 'approved';
-    const { error } = await supabase.from('tutor_profiles').update({
-      verification_status: newStatus as any,
-      verified_at: newStatus === 'approved' ? new Date().toISOString() : null,
-    }).eq('id', tutorId);
-    if (error) { sonnerToast.error('Error', { description: error.message }); return; }
-    sonnerToast.success(newStatus === 'approved' ? 'Tutor Verified' : 'Verification Revoked');
-    await fetchTutors();
+  const openVerifyDialog = (tutorId: string, tutorName: string, newStatus: string) => {
+    setVerifyTargetTutorId(tutorId);
+    setVerifyTargetName(tutorName);
+    setVerifyNewStatus(newStatus);
+    setVerifyNotes('');
+    setVerifyDialogOpen(true);
+  };
+
+  const confirmVerifyStatusChange = async () => {
+    if (!verifyTargetTutorId) return;
+    setVerifyProcessing(true);
+    try {
+      const updateData: any = {
+        verification_status: verifyNewStatus,
+        verification_notes: verifyNotes.trim() || null,
+      };
+      if (verifyNewStatus === 'approved') {
+        updateData.verified_at = new Date().toISOString();
+      } else if (verifyNewStatus === 'pending') {
+        updateData.verified_at = null;
+      }
+      const { error } = await supabase.from('tutor_profiles').update(updateData).eq('id', verifyTargetTutorId);
+      if (error) { sonnerToast.error('Error', { description: error.message }); return; }
+      const statusLabels: Record<string, string> = {
+        pending: 'Reset to Pending',
+        under_review: 'Moved to Under Review',
+        approved: 'Tutor Approved',
+        rejected: 'Tutor Rejected',
+        document_needed: 'Document Requested',
+      };
+      sonnerToast.success(statusLabels[verifyNewStatus] || 'Status Updated');
+      await fetchTutors();
+    } finally {
+      setVerifyProcessing(false);
+      setVerifyDialogOpen(false);
+      setVerifyTargetTutorId(null);
+    }
   };
 
   // ─── Send Notification ───
