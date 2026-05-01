@@ -121,6 +121,7 @@ export type Database = {
       }
       applications: {
         Row: {
+          contact_released_at: string | null
           cover_message: string | null
           created_at: string | null
           id: string
@@ -131,6 +132,7 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          contact_released_at?: string | null
           cover_message?: string | null
           created_at?: string | null
           id?: string
@@ -141,6 +143,7 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          contact_released_at?: string | null
           cover_message?: string | null
           created_at?: string | null
           id?: string
@@ -2686,6 +2689,8 @@ export type Database = {
         | "shortlisted"
         | "waiting"
         | "invited_to_demo"
+        | "contact_requested"
+        | "contact_released"
       gender: "male" | "female" | "any"
       job_status:
         | "pending_approval"
@@ -2837,6 +2842,8 @@ export const Constants = {
         "shortlisted",
         "waiting",
         "invited_to_demo",
+        "contact_requested",
+        "contact_released",
       ],
       gender: ["male", "female", "any"],
       job_status: [
