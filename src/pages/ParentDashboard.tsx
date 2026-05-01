@@ -2411,7 +2411,6 @@ export default function ParentDashboard() {
         </div>
       </div>
 
-      {postJobDialog}
       {reportDialog}
       {interviewDialog}
     </SidebarProvider>
