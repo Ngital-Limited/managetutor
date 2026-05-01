@@ -2022,6 +2022,12 @@ export default function AdminDashboard() {
       ],
     },
     {
+      label: 'Intelligence',
+      items: [
+        { title: 'Smart Matching', value: 'smart_match', icon: Zap },
+        { title: 'Pipeline & Funnel', value: 'pipeline', icon: TrendingUp },
+      ],
+    {
       label: 'Tutors',
       items: [
         { title: 'Tutor Profiles', value: 'tutor_profiles', icon: GraduationCap },
