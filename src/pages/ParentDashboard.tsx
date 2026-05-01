@@ -449,6 +449,22 @@ export default function ParentDashboard() {
       setAllApplicants([]);
     }
 
+    // Fetch student profiles
+    const { data: studentsData } = await supabase
+      .from('student_profiles')
+      .select('*')
+      .eq('parent_id', user.id)
+      .order('created_at', { ascending: false });
+    if (studentsData) setStudentProfiles(studentsData);
+
+    // Fetch hiring confirmations
+    const { data: hcData } = await supabase
+      .from('hiring_confirmations')
+      .select('*')
+      .eq('parent_id', user.id)
+      .order('created_at', { ascending: false });
+    if (hcData) setHiringConfirmations(hcData);
+
     setLoading(false);
   };
 
