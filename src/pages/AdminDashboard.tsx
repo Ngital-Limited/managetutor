@@ -1809,6 +1809,8 @@ export default function AdminDashboard() {
     toast({ title: 'Export complete', description: `${users.length} guardians exported.` });
   };
 
+  const [sidebarSearch, setSidebarSearch] = useState('');
+
   if (loading || role !== 'admin') {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -1817,7 +1819,7 @@ export default function AdminDashboard() {
     );
   }
 
-  const [sidebarSearch, setSidebarSearch] = useState('');
+
   const sidebarGroups = [
     {
       label: 'Overview',
