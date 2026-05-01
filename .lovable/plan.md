@@ -24,9 +24,12 @@ Smart matching tools, pipeline visualizations, admin "apply/shortlist on behalf"
 - `AdminPipelineTab` — Conversion funnel visualization (Jobs Posted → With Applications → Shortlisted → Demo → Accepted → Hired) with period filters, conversion rate cards, and per-job stage breakdown.
 - New "Intelligence" sidebar group with both tabs.
 
-# Phase E: Financials & Reports (Next)
+# Phase E: Financials & Reports ✅
 
 Unified transaction ledger, PDF invoice generation, conversion funnel analytics.
+- `AdminTransactionLedgerTab` — Unified ledger merging payment_transactions, commission_records, and commission_payments with filters (type, status, date range), summary cards, and CSV export.
+- `AdminInvoiceTab` — Invoice generation from commission records with print and HTML download. Professional branded invoice template.
+- `AdminConversionFunnelTab` — Visual funnel (Signups → Tutor Profiles → Jobs → Applications → Shortlisted → Accepted → Hired) with period filters and 6-month trend table.
 
 # Phase F: Content & Mobile
 
