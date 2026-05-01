@@ -251,10 +251,8 @@ export default function TutorAppliedJobs() {
                   </div>
                 )}
               </CardContent>
-            </Card>
-          </main>
+          </Card>
         </div>
-      </div>
 
       <AlertDialog open={!!withdrawId} onOpenChange={(open) => !open && setWithdrawId(null)}>
         <AlertDialogContent>
