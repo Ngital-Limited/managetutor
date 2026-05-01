@@ -37,7 +37,7 @@ import {
   LogOut, Home, DollarSign, Trash2, CreditCard, Megaphone, Send, Mail,
   Package, Plus, Pencil, ToggleLeft, ToggleRight, Wallet, MapPin, LifeBuoy, ShieldCheck,
   LogIn, BookOpen, UserPlus, TrendingUp, ChevronLeft, ChevronRight, ArrowLeft,
-  Phone, Calendar, X, Activity, HelpCircle, ArrowUpDown
+  Phone, Calendar, X, Activity, HelpCircle, ArrowUpDown, Zap
 } from 'lucide-react';
 import { Tooltip as UITooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { RevenuePayoutTab } from '@/components/admin/RevenuePayoutTab';
