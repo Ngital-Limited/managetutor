@@ -322,10 +322,32 @@ export default function Auth() {
                     <p>Please check your inbox and click the verification link to activate your account.</p>
                     <p className="text-muted-foreground">Don't forget to check your spam/junk folder.</p>
                   </div>
-                  <div className="flex items-center justify-center gap-2 mt-4 text-xs text-muted-foreground">
-                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                    <span>Waiting for verification...</span>
-                  </div>
+                  {verifyError ? (
+                    <div className="p-4 rounded-lg bg-destructive/10 border border-destructive/20 text-sm space-y-3 mt-4">
+                      <div className="flex items-center gap-2 text-destructive font-medium">
+                        <AlertTriangle className="h-4 w-4 shrink-0" />
+                        <span>{verifyError}</span>
+                      </div>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="w-full"
+                        onClick={() => {
+                          setVerifyError(null);
+                          // Re-trigger polling by toggling showVerifyEmail
+                          setShowVerifyEmail(false);
+                          setTimeout(() => setShowVerifyEmail(true), 50);
+                        }}
+                      >
+                        <RefreshCw className="h-3.5 w-3.5 mr-2" /> Retry Verification Check
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-center gap-2 mt-4 text-xs text-muted-foreground">
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      <span>Waiting for verification...</span>
+                    </div>
+                  )}
                   <Button
                     variant="outline"
                     className="w-full mt-4 h-10 rounded-lg text-sm"
