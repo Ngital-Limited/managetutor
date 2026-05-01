@@ -48,8 +48,11 @@ import {
   Star, Briefcase, Users, Clock, CheckCircle2, XCircle, Search, ArrowRight,
   Eye, Edit, Trash2, Calendar, Home, Heart, AlertCircle,
   User, CreditCard, Pause, Play, Flag, Zap,
-  Send, AlertTriangle, Receipt, DollarSign, LayoutDashboard, X
+  Send, AlertTriangle, Receipt, DollarSign, LayoutDashboard, X,
+  LifeBuoy, Settings, Phone
 } from 'lucide-react';
+import { ParentHelpSupport } from '@/components/parent/ParentHelpSupport';
+import { ParentSettings } from '@/components/parent/ParentSettings';
 
 interface District { id: string; name_en: string; division_en: string; }
 interface Subject { id: string; name_en: string; }
