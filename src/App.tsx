@@ -15,6 +15,8 @@ import JobDetails from "./pages/JobDetails";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminBulkImportTutors from "./pages/AdminBulkImportTutors";
 import AdminBulkImportJobs from "./pages/AdminBulkImportJobs";
+import AdminGuardianDetail from "./pages/AdminGuardianDetail";
+import AdminTutorDetail from "./pages/AdminTutorDetail";
 import TutorProfile from "./pages/TutorProfile";
 import TutorDashboard from "./pages/TutorDashboard";
 import TutorAppliedJobs from "./pages/TutorAppliedJobs";
@@ -96,6 +98,8 @@ const App = () => (
               <Route path="/admin" element={<AdminDashboard />} />
               <Route path="/admin/import-tutors" element={<AdminBulkImportTutors />} />
               <Route path="/admin/import-jobs" element={<AdminBulkImportJobs />} />
+              <Route path="/admin/guardian/:id" element={<AdminGuardianDetail />} />
+              <Route path="/admin/tutor-detail/:id" element={<AdminTutorDetail />} />
               <Route path="/about" element={<About />} />
               <Route path="/contact" element={<Contact />} />
               <Route path="/privacy" element={<Privacy />} />
