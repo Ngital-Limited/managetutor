@@ -292,10 +292,11 @@ export default function BrowseJobs({ embedded = false }: { embedded?: boolean } 
       filtered = filtered.filter(j => matchesText(j, selectedBackground));
     }
     if (searchQuery) {
-      const q = searchQuery.toLowerCase();
+      const q = searchQuery.toLowerCase().trim();
       filtered = filtered.filter(j =>
         j.title?.toLowerCase().includes(q) ||
-        j.description?.toLowerCase().includes(q)
+        j.description?.toLowerCase().includes(q) ||
+        j.job_reference?.toLowerCase().includes(q)
       );
     }
 
