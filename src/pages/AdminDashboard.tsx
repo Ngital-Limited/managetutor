@@ -1135,6 +1135,26 @@ export default function AdminDashboard() {
           reference_id: jobId,
         });
       }
+      // Send application status email to tutor
+      if (app?.tutor_user_id && (status === 'accepted' || status === 'rejected')) {
+        try {
+          const { data: tutorProfile } = await supabase.from('profiles').select('email, full_name').eq('id', app.tutor_user_id).single();
+          if (tutorProfile?.email) {
+            await supabase.functions.invoke('send-transactional-email', {
+              body: {
+                templateName: 'application-status-update',
+                recipientEmail: tutorProfile.email,
+                idempotencyKey: `app-status-${appId}-${status}`,
+                templateData: {
+                  tutorName: tutorProfile.full_name,
+                  jobTitle: viewingJobApps?.jobTitle,
+                  status,
+                },
+              },
+            });
+          }
+        } catch (e) { console.error('Email send failed:', e); }
+      }
       toast({ title: `Application ${status}` });
       fetchJobApplications(jobId);
       fetchAllApplications();
