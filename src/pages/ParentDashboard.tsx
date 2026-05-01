@@ -1148,6 +1148,7 @@ export default function ParentDashboard() {
       case 'completed': return 'bg-accent';
       case 'cancelled': return 'bg-muted text-muted-foreground';
       case 'pending_approval': return 'bg-warning text-warning-foreground';
+      case 'draft': return 'bg-secondary text-secondary-foreground';
       default: return 'bg-secondary';
     }
   };
@@ -1159,6 +1160,7 @@ export default function ParentDashboard() {
       case 'completed': return 'Completed';
       case 'cancelled': return 'Paused';
       case 'pending_approval': return 'Pending Approval';
+      case 'draft': return 'Draft';
       default: return status;
     }
   };
