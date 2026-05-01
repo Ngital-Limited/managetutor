@@ -2061,6 +2061,7 @@ export default function AdminDashboard() {
         { title: 'Platform Data', value: 'platform_data', icon: BookOpen },
         { title: 'Ads Management', value: 'ads', icon: Megaphone },
         { title: 'Cache', value: 'cache', icon: Activity },
+        { title: 'Activity Log', value: 'activity_log', icon: FileText },
       ],
     },
   ];
