@@ -3669,6 +3669,12 @@ export default function AdminDashboard() {
             {/* ═══════ ADS MANAGEMENT TAB ═══════ */}
             {activeTab === 'ads' && <AdsManagementTab toast={toast} />}
 
+            {/* ═══════ HIRES TAB ═══════ */}
+            {activeTab === 'hires' && <AdminHiresTab toast={toast} />}
+
+            {/* ═══════ COMMISSIONS TAB ═══════ */}
+            {activeTab === 'commissions' && <AdminCommissionTab toast={toast} />}
+
             {/* ═══════ CACHE TAB ═══════ */}
             {activeTab === 'cache' && (
               <div className="space-y-4">
