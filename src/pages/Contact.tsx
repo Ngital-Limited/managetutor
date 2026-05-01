@@ -61,7 +61,7 @@ export default function Contact() {
       </section>
 
       <section className="py-16 px-4">
-        <div className="max-w-[1200px] mx-auto grid md:grid-cols-5 gap-10">
+        <div className="max-w-[1200px] mx-auto px-4 md:px-6 grid md:grid-cols-5 gap-10">
           {/* Contact Info */}
           <div className="md:col-span-2 space-y-6">
             <h2 className="text-2xl font-bold mb-6">Get in Touch</h2>

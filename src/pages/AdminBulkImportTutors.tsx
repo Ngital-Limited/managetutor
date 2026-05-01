@@ -179,7 +179,7 @@ export default function AdminBulkImportTutors() {
   };
 
   return (
-    <div className="container mx-auto py-6 max-w-[1200px]">
+    <div className="container mx-auto px-4 md:px-6 py-6 max-w-[1200px]">
       <Button variant="ghost" size="sm" onClick={() => navigate('/admin')} className="mb-4">
         <ArrowLeft className="h-4 w-4 mr-1" /> Back to Admin
       </Button>

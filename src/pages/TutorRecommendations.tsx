@@ -147,7 +147,7 @@ export default function TutorRecommendations() {
 
   return (
     <TutorSidebarLayout title="Job Recommendations">
-      <div className="container max-w-[1200px] py-6">
+      <div className="container max-w-[1200px] px-4 md:px-6 py-6">
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">

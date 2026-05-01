@@ -137,7 +137,7 @@ export default function TutorVerifyBadge() {
 
   return (
     <TutorSidebarLayout title="Verify Badge Payment">
-      <div className="container max-w-[1200px] py-6">
+      <div className="container max-w-[1200px] px-4 md:px-6 py-6">
         <Card className="border-primary/30 bg-primary/5">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">

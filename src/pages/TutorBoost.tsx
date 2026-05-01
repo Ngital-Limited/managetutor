@@ -96,7 +96,7 @@ export default function TutorBoost() {
 
   return (
     <TutorSidebarLayout title="Boost Your Profile">
-      <div className="container max-w-[1200px] py-6">
+      <div className="container max-w-[1200px] px-4 md:px-6 py-6">
         <Card className="border-accent/30 bg-gradient-to-r from-accent/5 to-primary/5">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
