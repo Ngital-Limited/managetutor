@@ -262,12 +262,22 @@ export default function TutorDashboard() {
         const pending = apps.filter(a => a.status === 'pending');
         const activeJobs = accepted.filter(a => a.jobs?.status === 'in_progress');
         
+        // Fetch profile views this week
+        const weekAgo = new Date();
+        weekAgo.setDate(weekAgo.getDate() - 7);
+        const { count: viewCount } = await supabase
+          .from('profile_views')
+          .select('*', { count: 'exact', head: true })
+          .eq('tutor_id', tutorData.id)
+          .gte('viewed_at', weekAgo.toISOString());
+
         setStats({
           totalApplications: apps.length,
           acceptedApplications: accepted.length,
           pendingApplications: pending.length,
           activeJobs: activeJobs.length,
           totalEarnings: accepted.reduce((sum, a) => sum + (a.proposed_rate || 0), 0),
+          profileViewsThisWeek: viewCount || 0,
         });
       }
       // Fetch active featured listing
