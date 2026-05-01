@@ -126,7 +126,7 @@ interface JobRow {
   created_at: string;
   districts: { name_en: string };
   subjects: { name_en: string } | null;
-  profiles: { full_name: string };
+  profiles: { full_name: string; phone?: string | null };
 }
 
 interface Report {
