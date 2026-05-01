@@ -888,6 +888,31 @@ export default function ParentDashboard() {
     fetchData();
   };
 
+  const handleSubmitFeedback = async () => {
+    if (!user || !feedbackBooking) return;
+    setSubmitting(true);
+    const { error } = await supabase.from('demo_feedback' as any).insert({
+      demo_booking_id: feedbackBooking.id,
+      parent_id: user.id,
+      tutor_id: feedbackBooking.tutor_id,
+      rating: feedbackRating,
+      comments: feedbackComments || null,
+      would_recommend: feedbackRecommend,
+    } as any);
+    if (error) {
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+    } else {
+      toast({ title: 'Feedback Submitted', description: 'Thank you for your feedback!' });
+      setSubmittedFeedback(prev => new Set(prev).add(feedbackBooking.id));
+      setFeedbackDialogOpen(false);
+      setFeedbackBooking(null);
+      setFeedbackRating(5);
+      setFeedbackComments('');
+      setFeedbackRecommend(false);
+    }
+    setSubmitting(false);
+  };
+
   const handleInviteToInterview = (app: Application) => {
     setInterviewApp(app);
     setInterviewDate(undefined);
