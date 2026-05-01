@@ -1955,8 +1955,11 @@ export default function AdminDashboard() {
             return (
               <Collapsible key={group.label} defaultOpen={!!q || groupIsActive || group.label === 'Overview'}>
                 <SidebarGroup className="py-0">
-                  <CollapsibleTrigger className="flex items-center justify-between w-full px-4 py-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors group">
-                    <span>{group.label}</span>
+                  <CollapsibleTrigger className={`flex items-center justify-between w-full px-4 py-2 text-xs font-semibold uppercase tracking-wider transition-colors group ${groupIsActive ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}>
+                    <span className="flex items-center gap-1.5">
+                      {groupIsActive && <span className="h-1.5 w-1.5 rounded-full bg-primary" aria-hidden="true" />}
+                      {group.label}
+                    </span>
                     <ChevronDown className="h-3.5 w-3.5 transition-transform group-data-[state=closed]:-rotate-90" />
                   </CollapsibleTrigger>
                   <CollapsibleContent>
