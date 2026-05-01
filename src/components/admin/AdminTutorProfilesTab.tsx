@@ -819,7 +819,7 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
                         : <ArrowUpDown className="h-3 w-3 opacity-50" />}
                     </button>
                   </TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead className="text-right sticky right-0 bg-background z-10 shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.1)]">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -926,7 +926,7 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
                     <TableCell className="text-[11px] text-muted-foreground whitespace-nowrap">
                       {t.created_at ? new Date(t.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '—'}
                     </TableCell>
-                    <TableCell className="text-right">
+                    <TableCell className="text-right sticky right-0 bg-background z-10 shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.1)]">
                       <DropdownMenuRoot>
                         <DropdownMenuTrigger asChild>
                           <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
