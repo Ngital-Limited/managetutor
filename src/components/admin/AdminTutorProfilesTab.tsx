@@ -841,6 +841,7 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
                     </button>
                   </TableHead>
                   <TableHead>Last Education Institution</TableHead>
+                  <TableHead>Education Background</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>
                     <button
