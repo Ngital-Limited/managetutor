@@ -60,10 +60,10 @@ export default function LocationTutors() {
 
       // Fetch tutors in this district
       const { data: tutorData, count } = await supabase
-        .from('tutor_profiles')
+        .from('tutor_profiles_public')
         .select(`
           *,
-          profiles!inner (full_name, avatar_url, district_id, districts (name_en)),
+          profiles:user_id!inner (full_name, avatar_url, district_id, districts (name_en)),
           tutor_subjects (subjects (name_en))
         `, { count: 'exact' })
         .eq('is_available', true)
