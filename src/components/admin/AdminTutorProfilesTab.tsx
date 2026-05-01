@@ -876,7 +876,7 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
                         <span className="text-muted-foreground">—</span>
                       )}
                     </TableCell>
-                    <TableCell className="text-xs capitalize">{t.teaching_mode?.replace('_', ' ') || '—'}</TableCell>
+                    <TableCell className="text-xs max-w-[200px] truncate" title={t.last_institution || ''}>{t.last_institution || '—'}</TableCell>
                     <TableCell>
                       <div className="flex flex-col gap-0.5">
                         <Badge className={`text-[10px] capitalize ${statusColor(t.verification_status)}`}>{t.verification_status}</Badge>
