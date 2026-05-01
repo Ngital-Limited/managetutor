@@ -477,6 +477,14 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
   const [transferTargetName, setTransferTargetName] = useState('');
   const [transferProcessing, setTransferProcessing] = useState(false);
 
+  // ─── Verification Status Dialog ───
+  const [verifyDialogOpen, setVerifyDialogOpen] = useState(false);
+  const [verifyTargetTutorId, setVerifyTargetTutorId] = useState<string | null>(null);
+  const [verifyTargetName, setVerifyTargetName] = useState('');
+  const [verifyNewStatus, setVerifyNewStatus] = useState<string>('');
+  const [verifyNotes, setVerifyNotes] = useState('');
+  const [verifyProcessing, setVerifyProcessing] = useState(false);
+
   const openTransferDialog = (userId: string, name: string) => {
     setTransferTargetUserId(userId);
     setTransferTargetName(name);
