@@ -75,7 +75,33 @@ export default function Auth() {
     }
   }, [user, authLoading, userRole, navigate, searchParams]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  // Poll for email verification when showing the verify screen
+  useEffect(() => {
+    if (!showVerifyEmail || emailVerified) return;
+    const interval = setInterval(async () => {
+      try {
+        const { data } = await supabase.auth.getSession();
+        if (data.session?.user?.email_confirmed_at) {
+          setEmailVerified(true);
+          clearInterval(interval);
+        }
+      } catch {}
+    }, 4000);
+    return () => clearInterval(interval);
+  }, [showVerifyEmail, emailVerified]);
+
+  // Also listen for auth state changes (user clicks verification link in same browser)
+  useEffect(() => {
+    if (!showVerifyEmail || emailVerified) return;
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (session?.user?.email_confirmed_at) {
+        setEmailVerified(true);
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [showVerifyEmail, emailVerified]);
+
+
     e.preventDefault();
     setLoading(true);
 
