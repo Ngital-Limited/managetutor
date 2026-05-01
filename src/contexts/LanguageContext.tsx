@@ -43,13 +43,13 @@ const translations: Record<string, string> = {
   'auth.selectRole': 'I am a...',
   'auth.parent': 'Parent/Guardian',
   'auth.tutor': 'Tutor',
-  'auth.agency': 'Agency/Institution',
+  
   'auth.continueWithGoogle': 'Continue with Google',
   'auth.continueWithFacebook': 'Continue with Facebook',
   'auth.or': 'or',
   'role.parent': 'Parent',
   'role.tutor': 'Tutor',
-  'role.agency': 'Agency',
+  
   'role.admin': 'Admin',
   'common.search': 'Search',
   'common.filter': 'Filter',
