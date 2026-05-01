@@ -48,6 +48,7 @@ interface TutorRow {
   district_id: string | null;
   education: string | null;
   last_education: string | null;
+  last_institution: string | null;
   experience_years: number;
   teaching_mode: string | null;
   verification_status: string;
@@ -352,13 +353,17 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
     const profMap = new Map((profilesData || []).map(p => [p.id, p]));
     const DEGREE_RANK: Record<string, number> = { masters: 4, master: 4, bachelor: 3, hsc: 2, ssc: 1 };
     const lastEduMap = new Map<string, string>();
+    const lastInstMap = new Map<string, string>();
     (eduData || []).forEach((e: any) => {
       if (!e.institution?.trim()) return;
       const key = (e.degree || '').toLowerCase().trim();
       const rank = DEGREE_RANK[key] ?? 0;
       const cur = lastEduMap.get(e.tutor_id);
       const curRank = cur ? (DEGREE_RANK[cur.toLowerCase()] ?? 0) : -1;
-      if (rank > curRank) lastEduMap.set(e.tutor_id, e.degree);
+      if (rank > curRank) {
+        lastEduMap.set(e.tutor_id, e.degree);
+        lastInstMap.set(e.tutor_id, e.institution);
+      }
     });
 
     let result: TutorRow[] = tutorData.map((t: any) => {
@@ -377,6 +382,7 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
         district_id: t.district_id,
         education: t.education,
         last_education: lastEduMap.get(t.id) || null,
+        last_institution: lastInstMap.get(t.id) || null,
         experience_years: t.experience_years || 0,
         teaching_mode: t.teaching_mode,
         verification_status: t.verification_status || 'pending',
@@ -809,7 +815,7 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
                         : <ArrowUpDown className="h-3 w-3 opacity-50" />}
                     </button>
                   </TableHead>
-                  <TableHead>Mode</TableHead>
+                  <TableHead>Last Education Institution</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>
                     <button
@@ -870,7 +876,7 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
                         <span className="text-muted-foreground">—</span>
                       )}
                     </TableCell>
-                    <TableCell className="text-xs capitalize">{t.teaching_mode?.replace('_', ' ') || '—'}</TableCell>
+                    <TableCell className="text-xs max-w-[200px] truncate" title={t.last_institution || ''}>{t.last_institution || '—'}</TableCell>
                     <TableCell>
                       <div className="flex flex-col gap-0.5">
                         <Badge className={`text-[10px] capitalize ${statusColor(t.verification_status)}`}>{t.verification_status}</Badge>
