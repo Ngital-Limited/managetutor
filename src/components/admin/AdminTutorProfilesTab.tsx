@@ -356,8 +356,9 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
         .select('id, full_name, email, phone, avatar_url, user_reference, is_approved, is_banned, area_id')
         .in('id', userIds),
       supabase.from('tutor_education')
-        .select('tutor_id, degree, institution')
-        .in('tutor_id', tutorIds),
+        .select('tutor_id, degree, institution, field_of_study, passing_year, result, medium, is_current')
+        .in('tutor_id', tutorIds)
+        .order('passing_year', { ascending: false, nullsFirst: false }),
     ]);
 
     const profMap = new Map((profilesData || []).map(p => [p.id, p]));
