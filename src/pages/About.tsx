@@ -13,7 +13,7 @@ export default function About() {
 
       {/* Hero */}
       <section className="gradient-hero text-white py-20">
-        <div className="max-w-5xl mx-auto px-4 text-center">
+        <div className="max-w-[1200px] mx-auto px-4 text-center">
           <h1 className="text-4xl md:text-5xl font-bold mb-6">About Manage Tutor</h1>
           <p className="text-lg md:text-xl text-white/80 max-w-3xl mx-auto leading-relaxed">
             Bangladesh's most trusted platform connecting students and parents with verified home tutors. We're on a mission to make quality education accessible to every family.
@@ -23,7 +23,7 @@ export default function About() {
 
       {/* Mission & Vision */}
       <section className="py-16 px-4">
-        <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-10">
+        <div className="max-w-[1200px] mx-auto grid md:grid-cols-2 gap-10">
           <div className="bg-card rounded-2xl p-8 border border-border shadow-sm hover-lift">
             <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-5">
               <Target className="h-6 w-6 text-primary" />
@@ -47,7 +47,7 @@ export default function About() {
 
       {/* Stats */}
       <section className="py-16 px-4 bg-muted/50">
-        <div className="max-w-5xl mx-auto">
+        <div className="max-w-[1200px] mx-auto">
           <h2 className="text-3xl font-bold text-center mb-12">Our Impact in Numbers</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {[
@@ -68,7 +68,7 @@ export default function About() {
 
       {/* Why Choose Us */}
       <section className="py-16 px-4">
-        <div className="max-w-5xl mx-auto">
+        <div className="max-w-[1200px] mx-auto">
           <h2 className="text-3xl font-bold text-center mb-12">Why Choose Manage Tutor?</h2>
           <div className="grid md:grid-cols-3 gap-8">
             {[

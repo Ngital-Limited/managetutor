@@ -144,7 +144,7 @@ const Pricing = () => {
         </div>
 
         {/* Plans Grid */}
-        <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+        <div className="grid md:grid-cols-3 gap-8 max-w-[1200px] mx-auto">
           {plans.map((plan, index) => {
             const Icon = getPlanIcon(plan.name);
             const isPopular = index === 1; // Middle plan is "popular"

@@ -312,7 +312,7 @@ export default function Index() {
       {/* Stats — vibrant gradient tiles */}
       <section className="py-12 md:py-16 bg-background -mt-px">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 max-w-5xl mx-auto">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 max-w-[1200px] mx-auto">
             {[
               { icon: Users, value: '1,00,000+', label: t('stats.tutors'), gradient: 'from-primary to-accent', iconBg: 'bg-primary/15', iconColor: 'text-primary' },
               { icon: Award, value: '4,000+', label: t('stats.matches'), gradient: 'from-tutor to-accent', iconBg: 'bg-tutor/15', iconColor: 'text-tutor' },
@@ -342,7 +342,7 @@ export default function Index() {
           <div className="absolute top-0 right-0 w-[500px] h-[400px] bg-primary/10 rounded-full blur-[120px] pointer-events-none" />
           <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-tutor/10 rounded-full blur-[120px] pointer-events-none" />
           <div className="container mx-auto px-4 relative z-10">
-            <div className="flex items-end justify-between mb-8 md:mb-12 max-w-5xl flex-wrap gap-3">
+            <div className="flex items-end justify-between mb-8 md:mb-12 max-w-[1200px] flex-wrap gap-3">
               <div>
                 <span className="inline-block text-[10px] md:text-xs uppercase tracking-[0.2em] text-primary font-bold bg-primary/10 px-3 py-1 rounded-full mb-3">Categories</span>
                 <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight mb-2">Browse by Subject</h2>
@@ -663,7 +663,7 @@ export default function Index() {
               From posting your requirement to starting your first lesson — three simple steps. No middlemen, no hidden fees.
             </p>
           </div>
-          <div className="grid md:grid-cols-3 gap-4 md:gap-5 max-w-5xl mx-auto">
+          <div className="grid md:grid-cols-3 gap-4 md:gap-5 max-w-[1200px] mx-auto">
             {[
               { icon: FileText, title: t('howItWorks.step1.title'), desc: t('howItWorks.step1.desc'), step: '01', grad: 'from-primary to-accent', iconBg: 'bg-primary/15 text-primary' },
               { icon: Users, title: t('howItWorks.step2.title'), desc: t('howItWorks.step2.desc'), step: '02', grad: 'from-tutor to-accent', iconBg: 'bg-tutor/15 text-tutor' },
@@ -702,7 +702,7 @@ export default function Index() {
               Built for trust, designed for results — rigorous tutor vetting, transparent pricing, and a smooth booking experience.
             </p>
           </div>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 max-w-6xl mx-auto">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 max-w-[1200px] mx-auto">
             {[
               { icon: Shield, title: 'Verified Tutors', desc: 'ID, education, and background checks before approval.', grad: 'from-primary to-accent', iconBg: 'bg-primary/15 text-primary' },
               { icon: Clock, title: 'Flexible Scheduling', desc: 'Mornings, evenings, weekends, online or in-person.', grad: 'from-success to-accent', iconBg: 'bg-success/15 text-success' },
