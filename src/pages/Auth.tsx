@@ -123,7 +123,7 @@ export default function Auth() {
     setResendLoading(false);
   };
 
-
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
