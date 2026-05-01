@@ -2,7 +2,7 @@ import { useSidebar } from '@/components/ui/sidebar';
 import { Home, Briefcase, Users, Calendar, Menu } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-type SectionKey = 'overview' | 'jobs' | 'applicants' | 'demo' | 'payments' | 'profile';
+type SectionKey = 'overview' | 'jobs' | 'applicants' | 'demo' | 'tuitions' | 'payments' | 'profile';
 
 interface Props {
   activeSection: SectionKey;
