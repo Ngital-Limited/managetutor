@@ -142,6 +142,7 @@ export function AdminHiresTab({ toast }: { toast: any }) {
     } else {
       // Update hire's commission_status
       await supabase.from('hiring_confirmations').update({ commission_status: 'invoiced' } as any).eq('id', hire.id);
+      if (user) logAdminAction(user.id, 'commission_created', 'hire', hire.id, { amount: split.platformCommission });
       toast({ title: 'Commission record created' });
       fetchHires();
     }
