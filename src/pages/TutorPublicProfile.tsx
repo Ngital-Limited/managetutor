@@ -271,7 +271,7 @@ export default function TutorPublicProfile() {
 
       {/* HERO */}
       <section className="bg-gradient-to-br from-primary/5 via-background to-accent/5 border-b border-border/60">
-        <div className="container mx-auto px-4 py-8 max-w-[1200px]">
+        <div className="container mx-auto px-4 md:px-6 py-8 max-w-[1200px]">
           <div className="flex flex-col md:flex-row gap-6 items-start">
             <div className="relative">
               <Avatar className="h-28 w-28 md:h-32 md:w-32 ring-4 ring-background shadow-lg">
@@ -340,7 +340,7 @@ export default function TutorPublicProfile() {
       </section>
 
       {/* CONTENT WITH TABS */}
-      <main className="container mx-auto px-4 py-8 max-w-[1200px]">
+      <main className="container mx-auto px-4 md:px-6 py-8 max-w-[1200px]">
         <div className="grid lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
             <Tabs defaultValue="details" className="w-full">
@@ -480,7 +480,7 @@ export default function TutorPublicProfile() {
 
       {/* Related Tutors */}
       {relatedTutors.length > 0 && (
-        <section className="container mx-auto px-4 pb-12 max-w-[1200px]">
+        <section className="container mx-auto px-4 md:px-6 pb-12 max-w-[1200px]">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-bold flex items-center gap-2">
               <Users className="h-5 w-5 text-primary" /> Related Tutors

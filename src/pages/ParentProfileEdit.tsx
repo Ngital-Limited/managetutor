@@ -150,7 +150,7 @@ export default function ParentProfileEdit() {
   return (
     <div className="min-h-screen bg-background">
       <nav className="sticky top-0 z-50 bg-card/80 backdrop-blur-xl border-b border-border">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+        <div className="container mx-auto px-4 md:px-6 py-4 flex items-center justify-between">
           <Link to={backLink}>
             <Button variant="ghost">
               <ArrowLeft className="h-4 w-4 mr-2" />
@@ -161,7 +161,7 @@ export default function ParentProfileEdit() {
         </div>
       </nav>
 
-      <main className="container mx-auto px-4 py-8 max-w-[1200px]">
+      <main className="container mx-auto px-4 md:px-6 py-8 max-w-[1200px]">
         <h1 className="text-3xl font-bold mb-2">{isAdminEdit ? 'Edit Parent Profile' : 'Edit Profile'}</h1>
         <p className="text-muted-foreground mb-8">{isAdminEdit ? `Editing profile for user` : 'Update your personal information'}</p>
 

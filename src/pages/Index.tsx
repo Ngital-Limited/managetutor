@@ -312,7 +312,7 @@ export default function Index() {
       {/* Stats — vibrant gradient tiles */}
       <section className="py-12 md:py-16 bg-background -mt-px">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 max-w-[1200px] mx-auto">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 max-w-[1200px] mx-auto px-4 md:px-6">
             {[
               { icon: Users, value: '1,00,000+', label: t('stats.tutors'), gradient: 'from-primary to-accent', iconBg: 'bg-primary/15', iconColor: 'text-primary' },
               { icon: Award, value: '4,000+', label: t('stats.matches'), gradient: 'from-tutor to-accent', iconBg: 'bg-tutor/15', iconColor: 'text-tutor' },
@@ -663,7 +663,7 @@ export default function Index() {
               From posting your requirement to starting your first lesson — three simple steps. No middlemen, no hidden fees.
             </p>
           </div>
-          <div className="grid md:grid-cols-3 gap-4 md:gap-5 max-w-[1200px] mx-auto">
+          <div className="grid md:grid-cols-3 gap-4 md:gap-5 max-w-[1200px] mx-auto px-4 md:px-6">
             {[
               { icon: FileText, title: t('howItWorks.step1.title'), desc: t('howItWorks.step1.desc'), step: '01', grad: 'from-primary to-accent', iconBg: 'bg-primary/15 text-primary' },
               { icon: Users, title: t('howItWorks.step2.title'), desc: t('howItWorks.step2.desc'), step: '02', grad: 'from-tutor to-accent', iconBg: 'bg-tutor/15 text-tutor' },
@@ -702,7 +702,7 @@ export default function Index() {
               Built for trust, designed for results — rigorous tutor vetting, transparent pricing, and a smooth booking experience.
             </p>
           </div>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 max-w-[1200px] mx-auto">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 max-w-[1200px] mx-auto px-4 md:px-6">
             {[
               { icon: Shield, title: 'Verified Tutors', desc: 'ID, education, and background checks before approval.', grad: 'from-primary to-accent', iconBg: 'bg-primary/15 text-primary' },
               { icon: Clock, title: 'Flexible Scheduling', desc: 'Mornings, evenings, weekends, online or in-person.', grad: 'from-success to-accent', iconBg: 'bg-success/15 text-success' },

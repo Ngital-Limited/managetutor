@@ -87,7 +87,7 @@ export default function LocationTutors() {
 
       {/* Hero Section - SEO Optimized */}
       <section className="gradient-hero text-primary-foreground py-16">
-        <div className="container mx-auto px-4">
+        <div className="container mx-auto px-4 md:px-6">
           <nav className="text-sm mb-4 opacity-80">
             <Link to="/" className="hover:underline">Home</Link>
             <span className="mx-2">/</span>
@@ -121,7 +121,7 @@ export default function LocationTutors() {
 
       {/* Stats */}
       <section className="py-8 bg-muted/50">
-        <div className="container mx-auto px-4">
+        <div className="container mx-auto px-4 md:px-6">
           <div className="grid sm:grid-cols-4 gap-6 text-center">
             <div>
               <div className="text-3xl font-bold text-primary">{totalTutors}+</div>
@@ -145,7 +145,7 @@ export default function LocationTutors() {
 
       {/* Tutors Grid */}
       <section className="py-12">
-        <div className="container mx-auto px-4">
+        <div className="container mx-auto px-4 md:px-6">
           <h2 className="text-2xl font-bold mb-6">Top Rated Tutors in {locationName}</h2>
           
           {loading ? (
@@ -227,7 +227,7 @@ export default function LocationTutors() {
 
       {/* SEO Content */}
       <section className="py-12 bg-muted/50">
-        <div className="container mx-auto px-4 max-w-[1200px]">
+        <div className="container mx-auto px-4 md:px-6 max-w-[1200px]">
           <h2 className="text-2xl font-bold mb-6">Why Choose Our Tutors in {locationName}?</h2>
           
           <div className="prose prose-lg max-w-none text-muted-foreground">
@@ -261,7 +261,7 @@ export default function LocationTutors() {
 
       {/* CTA */}
       <section className="py-12">
-        <div className="container mx-auto px-4 text-center">
+        <div className="container mx-auto px-4 md:px-6 text-center">
           <h2 className="text-2xl font-bold mb-4">Ready to Find Your Perfect Tutor?</h2>
           <p className="text-muted-foreground mb-6 max-w-xl mx-auto">
             Join thousands of parents and students who found their ideal tutors through Manage Tutor
