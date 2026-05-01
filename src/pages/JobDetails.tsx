@@ -123,6 +123,12 @@ export default function JobDetails() {
         proposed_rate: jobData.budget_min || 0
       }));
 
+      // Track job view
+      supabase.from('job_views' as any).insert({
+        job_id: jobData.id,
+        viewer_id: user?.id || null,
+      } as any).then(() => {});
+
       // Fetch related job posts (same district, open status, exclude current)
       const { data: related } = await supabase
         .from('jobs')

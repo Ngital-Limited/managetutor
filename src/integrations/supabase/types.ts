@@ -418,6 +418,39 @@ export type Database = {
           },
         ]
       }
+      demo_feedback: {
+        Row: {
+          comments: string | null
+          created_at: string
+          demo_booking_id: string
+          id: string
+          parent_id: string
+          rating: number
+          tutor_id: string
+          would_recommend: boolean | null
+        }
+        Insert: {
+          comments?: string | null
+          created_at?: string
+          demo_booking_id: string
+          id?: string
+          parent_id: string
+          rating: number
+          tutor_id: string
+          would_recommend?: boolean | null
+        }
+        Update: {
+          comments?: string | null
+          created_at?: string
+          demo_booking_id?: string
+          id?: string
+          parent_id?: string
+          rating?: number
+          tutor_id?: string
+          would_recommend?: boolean | null
+        }
+        Relationships: []
+      }
       demo_profiles: {
         Row: {
           avatar_url: string | null
@@ -770,6 +803,27 @@ export type Database = {
           },
         ]
       }
+      job_views: {
+        Row: {
+          id: string
+          job_id: string
+          viewed_at: string
+          viewer_id: string | null
+        }
+        Insert: {
+          id?: string
+          job_id: string
+          viewed_at?: string
+          viewer_id?: string | null
+        }
+        Update: {
+          id?: string
+          job_id?: string
+          viewed_at?: string
+          viewer_id?: string | null
+        }
+        Relationships: []
+      }
       jobs: {
         Row: {
           area_id: string | null
@@ -781,6 +835,7 @@ export type Database = {
           description: string
           district_id: string
           duration_hours: number | null
+          expires_at: string | null
           fixed_time: string | null
           id: string
           is_featured: boolean | null
@@ -801,6 +856,7 @@ export type Database = {
           teaching_mode: Database["public"]["Enums"]["teaching_mode"] | null
           title: string
           total_applications: number | null
+          total_views: number | null
           updated_at: string | null
         }
         Insert: {
@@ -813,6 +869,7 @@ export type Database = {
           description: string
           district_id: string
           duration_hours?: number | null
+          expires_at?: string | null
           fixed_time?: string | null
           id?: string
           is_featured?: boolean | null
@@ -833,6 +890,7 @@ export type Database = {
           teaching_mode?: Database["public"]["Enums"]["teaching_mode"] | null
           title: string
           total_applications?: number | null
+          total_views?: number | null
           updated_at?: string | null
         }
         Update: {
@@ -845,6 +903,7 @@ export type Database = {
           description?: string
           district_id?: string
           duration_hours?: number | null
+          expires_at?: string | null
           fixed_time?: string | null
           id?: string
           is_featured?: boolean | null
@@ -865,6 +924,7 @@ export type Database = {
           teaching_mode?: Database["public"]["Enums"]["teaching_mode"] | null
           title?: string
           total_applications?: number | null
+          total_views?: number | null
           updated_at?: string | null
         }
         Relationships: [
@@ -2699,6 +2759,7 @@ export type Database = {
         | "completed"
         | "cancelled"
         | "suspended"
+        | "draft"
       teaching_mode: "online" | "in_person" | "hybrid"
       verification_status:
         | "pending"
@@ -2853,6 +2914,7 @@ export const Constants = {
         "completed",
         "cancelled",
         "suspended",
+        "draft",
       ],
       teaching_mode: ["online", "in_person", "hybrid"],
       verification_status: [

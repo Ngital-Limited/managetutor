@@ -291,6 +291,14 @@ export default function ParentDashboard() {
   const [interviewCommissionPct, setInterviewCommissionPct] = useState(20);
   const [schedulingInterview, setSchedulingInterview] = useState(false);
 
+  // Demo feedback state
+  const [feedbackDialogOpen, setFeedbackDialogOpen] = useState(false);
+  const [feedbackBooking, setFeedbackBooking] = useState<any>(null);
+  const [feedbackRating, setFeedbackRating] = useState(5);
+  const [feedbackComments, setFeedbackComments] = useState('');
+  const [feedbackRecommend, setFeedbackRecommend] = useState(false);
+  const [submittedFeedback, setSubmittedFeedback] = useState<Set<string>>(new Set());
+
   const [jobForm, setJobForm] = useState({
     title: '',
     description: '',
@@ -880,6 +888,31 @@ export default function ParentDashboard() {
     fetchData();
   };
 
+  const handleSubmitFeedback = async () => {
+    if (!user || !feedbackBooking) return;
+    setSubmitting(true);
+    const { error } = await supabase.from('demo_feedback' as any).insert({
+      demo_booking_id: feedbackBooking.id,
+      parent_id: user.id,
+      tutor_id: feedbackBooking.tutor_id,
+      rating: feedbackRating,
+      comments: feedbackComments || null,
+      would_recommend: feedbackRecommend,
+    } as any);
+    if (error) {
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+    } else {
+      toast({ title: 'Feedback Submitted', description: 'Thank you for your feedback!' });
+      setSubmittedFeedback(prev => new Set(prev).add(feedbackBooking.id));
+      setFeedbackDialogOpen(false);
+      setFeedbackBooking(null);
+      setFeedbackRating(5);
+      setFeedbackComments('');
+      setFeedbackRecommend(false);
+    }
+    setSubmitting(false);
+  };
+
   const handleInviteToInterview = (app: Application) => {
     setInterviewApp(app);
     setInterviewDate(undefined);
@@ -1128,6 +1161,7 @@ export default function ParentDashboard() {
   const activeJobs = jobs.filter(j => j.status === 'in_progress');
   const completedJobs = jobs.filter(j => j.status === 'completed');
   const pausedJobs = jobs.filter(j => j.status === 'cancelled');
+  const draftJobs = jobs.filter(j => j.status === 'draft');
   const totalApplicants = jobs.reduce((sum, j) => sum + (j.total_applications || 0), 0);
   const profileInfo = getProfileCompleteness();
 
@@ -1147,6 +1181,7 @@ export default function ParentDashboard() {
       case 'completed': return 'bg-accent';
       case 'cancelled': return 'bg-muted text-muted-foreground';
       case 'pending_approval': return 'bg-warning text-warning-foreground';
+      case 'draft': return 'bg-secondary text-secondary-foreground';
       default: return 'bg-secondary';
     }
   };
@@ -1158,6 +1193,7 @@ export default function ParentDashboard() {
       case 'completed': return 'Completed';
       case 'cancelled': return 'Paused';
       case 'pending_approval': return 'Pending Approval';
+      case 'draft': return 'Draft';
       default: return status;
     }
   };
@@ -1502,9 +1538,45 @@ export default function ParentDashboard() {
             ))}
           </div>
 
-          <Button type="submit" className="w-full" disabled={submitting}>
-            {submitting ? (editingJob ? 'Updating...' : 'Posting...') : (editingJob ? 'Update Job' : 'Post Job')}
-          </Button>
+          <div className="flex gap-3">
+            {!editingJob && (
+              <Button type="button" variant="outline" className="flex-1" disabled={submitting} onClick={async () => {
+                if (!user) return;
+                setSubmitting(true);
+                const { error } = await supabase.from('jobs').insert({
+                  parent_id: user.id,
+                  title: jobForm.title || 'Untitled Draft',
+                  description: jobForm.description || '',
+                  subject_id: jobForm.subject_ids.length > 0 ? jobForm.subject_ids[0] : null,
+                  district_id: jobForm.district_id || districts[0]?.id,
+                  area_id: jobForm.area_id || null,
+                  class_level: jobForm.class_levels.length > 0 ? jobForm.class_levels.join(', ') : null,
+                  days_per_week: jobForm.days_per_week,
+                  duration_hours: jobForm.duration_hours,
+                  budget_min: jobForm.budget_min,
+                  budget_max: jobForm.budget_max,
+                  teaching_mode: jobForm.teaching_mode as any,
+                  preferred_tutor_gender: jobForm.preferred_tutor_gender as any,
+                  student_gender: jobForm.student_gender as any,
+                  status: 'draft' as any,
+                } as any);
+                if (error) {
+                  toast({ title: 'Error', description: error.message, variant: 'destructive' });
+                } else {
+                  toast({ title: 'Draft Saved', description: 'You can resume editing from your jobs list.' });
+                  setShowPostJob(false);
+                  resetJobForm();
+                  fetchData();
+                }
+                setSubmitting(false);
+              }}>
+                Save as Draft
+              </Button>
+            )}
+            <Button type="submit" className="flex-1" disabled={submitting}>
+              {submitting ? (editingJob ? 'Updating...' : 'Posting...') : (editingJob ? 'Update Job' : 'Post Job')}
+            </Button>
+          </div>
         </form>
       </CardContent>
     </Card>
@@ -1870,6 +1942,7 @@ export default function ParentDashboard() {
               <Tabs value={jobStatusFilter} onValueChange={setJobStatusFilter}>
                 <TabsList className="mb-4 flex-wrap">
                   <TabsTrigger value="all">All ({jobs.length})</TabsTrigger>
+                  <TabsTrigger value="draft">Drafts ({draftJobs.length})</TabsTrigger>
                   <TabsTrigger value="open">Active ({openJobs.length})</TabsTrigger>
                   <TabsTrigger value="in_progress">Hired ({activeJobs.length})</TabsTrigger>
                   <TabsTrigger value="cancelled">Paused ({pausedJobs.length})</TabsTrigger>
@@ -1941,6 +2014,10 @@ export default function ParentDashboard() {
                             </div>
                           </div>
                           <div className="flex items-center gap-2 flex-shrink-0">
+                            <div className="text-center mr-1">
+                              <div className="text-lg font-bold text-muted-foreground">{(job as any).total_views || 0}</div>
+                              <div className="text-xs text-muted-foreground">views</div>
+                            </div>
                             <div className="text-center mr-2">
                               <div className="text-lg font-bold text-primary">{job.total_applications}</div>
                               <div className="text-xs text-muted-foreground">applicants</div>
@@ -2266,6 +2343,17 @@ export default function ParentDashboard() {
                           </Button>
                         </div>
                       </div>
+                    )}
+                    {booking.status === 'completed' && !submittedFeedback.has(booking.id) && (
+                      <Button size="sm" variant="outline" className="h-7 text-xs mt-1" onClick={() => {
+                        setFeedbackBooking(booking);
+                        setFeedbackDialogOpen(true);
+                      }}>
+                        <Star className="h-3 w-3 mr-1" /> Leave Feedback
+                      </Button>
+                    )}
+                    {submittedFeedback.has(booking.id) && (
+                      <Badge variant="outline" className="text-xs mt-1">Feedback Submitted</Badge>
                     )}
                   </div>
                 </div>
@@ -2841,6 +2929,47 @@ export default function ParentDashboard() {
             <Button variant="outline" onClick={() => setHiringDialogOpen(false)}>Cancel</Button>
             <Button onClick={handleConfirmHiring} disabled={!hiringForm.agreed_salary || !hiringForm.start_date}>
               <CheckCircle2 className="h-4 w-4 mr-2" /> Confirm & Hire
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Demo Feedback Dialog */}
+      <Dialog open={feedbackDialogOpen} onOpenChange={setFeedbackDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Rate Your Demo Class</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            {feedbackBooking && (
+              <p className="text-sm text-muted-foreground">
+                How was your demo class with <span className="font-medium text-foreground">{feedbackBooking.tutor_profiles?.profiles?.full_name}</span>?
+              </p>
+            )}
+            <div>
+              <Label>Rating</Label>
+              <div className="flex gap-1 mt-1">
+                {[1, 2, 3, 4, 5].map(n => (
+                  <button key={n} type="button" onClick={() => setFeedbackRating(n)}
+                    className={`p-1 transition-colors ${n <= feedbackRating ? 'text-yellow-500' : 'text-muted-foreground/30'}`}>
+                    <Star className="h-6 w-6 fill-current" />
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div>
+              <Label>Comments (optional)</Label>
+              <Textarea value={feedbackComments} onChange={e => setFeedbackComments(e.target.value)} placeholder="Share your experience..." rows={3} />
+            </div>
+            <div className="flex items-center gap-2">
+              <Checkbox checked={feedbackRecommend} onCheckedChange={(v) => setFeedbackRecommend(!!v)} id="recommend" />
+              <Label htmlFor="recommend" className="text-sm">I would recommend this tutor</Label>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setFeedbackDialogOpen(false)}>Cancel</Button>
+            <Button onClick={handleSubmitFeedback} disabled={submitting}>
+              {submitting ? 'Submitting...' : 'Submit Feedback'}
             </Button>
           </DialogFooter>
         </DialogContent>
