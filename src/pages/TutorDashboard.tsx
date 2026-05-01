@@ -94,11 +94,13 @@ interface FeaturedListing {
 const tutorSidebarItems = [
   { title: 'Dashboard', url: '/tutor/dashboard', icon: Home },
   { title: 'My Applications', url: '/tutor/applications', icon: FileText },
+  { title: 'Saved Jobs', url: '/tutor/saved-jobs', icon: BookOpen },
   { title: 'Demo Classes', url: '/tutor/dashboard#demo-classes', icon: Calendar },
   { title: 'Browse Jobs', url: '/jobs', icon: Briefcase },
   { title: 'My Profile', url: '/tutor/profile', icon: User },
   { title: 'Find Tutors', url: '/tutors', icon: Search },
   { title: 'Pricing', url: '/pricing', icon: CreditCard },
+  { title: 'Settings', url: '/tutor/settings', icon: Settings },
 ];
 
 function TutorSidebar() {
