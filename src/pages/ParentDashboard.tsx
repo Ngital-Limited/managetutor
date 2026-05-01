@@ -2716,6 +2716,55 @@ export default function ParentDashboard() {
 
       {reportDialog}
       {interviewDialog}
+
+      {/* Hiring Confirmation Dialog */}
+      <Dialog open={hiringDialogOpen} onOpenChange={setHiringDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2"><CheckCircle2 className="h-5 w-5 text-success" /> Confirm Hiring Details</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            {hiringApp && (
+              <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
+                <Avatar className="h-10 w-10">
+                  <AvatarImage src={hiringApp.tutor_profiles?.profiles?.avatar_url} />
+                  <AvatarFallback>{hiringApp.tutor_profiles?.profiles?.full_name?.charAt(0)}</AvatarFallback>
+                </Avatar>
+                <div>
+                  <p className="font-medium text-sm">{hiringApp.tutor_profiles?.profiles?.full_name}</p>
+                  <p className="text-xs text-muted-foreground">Proposed: ৳{hiringApp.proposed_rate}/mo</p>
+                </div>
+              </div>
+            )}
+            <div>
+              <Label>Agreed Monthly Salary (৳) *</Label>
+              <Input type="number" min={0} value={hiringForm.agreed_salary} onChange={e => setHiringForm({ ...hiringForm, agreed_salary: e.target.value })} placeholder="e.g. 5000" />
+              <p className="text-xs text-muted-foreground mt-1">This triggers the tutor's commission obligation.</p>
+            </div>
+            <div>
+              <Label>Start Date *</Label>
+              <Input type="date" value={hiringForm.start_date} onChange={e => setHiringForm({ ...hiringForm, start_date: e.target.value })} />
+            </div>
+            <div>
+              <Label>Subjects</Label>
+              <Input value={hiringForm.subjects} onChange={e => setHiringForm({ ...hiringForm, subjects: e.target.value })} placeholder="e.g. Math, Physics" />
+            </div>
+            <div>
+              <Label>Days per Week</Label>
+              <Select value={hiringForm.days_per_week} onValueChange={v => setHiringForm({ ...hiringForm, days_per_week: v })}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>{[1,2,3,4,5,6,7].map(n => <SelectItem key={n} value={String(n)}>{n} day{n>1?'s':''}</SelectItem>)}</SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setHiringDialogOpen(false)}>Cancel</Button>
+            <Button onClick={handleConfirmHiring} disabled={!hiringForm.agreed_salary || !hiringForm.start_date}>
+              <CheckCircle2 className="h-4 w-4 mr-2" /> Confirm & Hire
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </SidebarProvider>
   );
 }
