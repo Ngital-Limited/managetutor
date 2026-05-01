@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/sidebar';
 import {
   Home, FileText, Calendar, Briefcase, User, CreditCard, LogOut,
-  Sparkles, Zap, ShieldCheck, X, Bookmark, Settings,
+  Sparkles, Zap, ShieldCheck, X, Bookmark, Settings, BarChart3,
 } from 'lucide-react';
 import { TutorBottomNav } from '@/components/TutorBottomNav';
 
