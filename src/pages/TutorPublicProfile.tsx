@@ -611,7 +611,7 @@ export default function TutorPublicProfile() {
                           <p className="text-xs text-muted-foreground">{rt.experience_years || 0} yrs exp</p>
                         </div>
                       </div>
-                      {snippet && (
+                      {snippet && !(/^(father|mother|present|permanent|experience|background|medium|preferred)/im.test(snippet)) && (
                         <p className="text-xs text-muted-foreground line-clamp-2 mb-2">{snippet}</p>
                       )}
                       <p className="text-sm font-bold text-primary">৳{rt.monthly_salary_min || 0}–{rt.monthly_salary_max || 0}<span className="text-[10px] text-muted-foreground font-normal ml-1">/month</span></p>
