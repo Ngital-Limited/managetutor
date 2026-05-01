@@ -2603,11 +2603,44 @@ export default function AdminDashboard() {
                 { key: 'withdrawn', label: 'Withdrawn' },
               ] as const;
 
+              // Pipeline stage classifier for a single application
+              const stageOf = (a: any): 'shortlisted' | 'demo' | 'confirmed' | 'not_confirmed' | 'pending' => {
+                if (a.status === 'accepted') return 'confirmed';
+                if (a.status === 'rejected' || a.status === 'withdrawn') {
+                  // If it had a demo and demo was completed but not accepted → not_confirmed
+                  return 'not_confirmed';
+                }
+                if (a.status === 'invited_to_demo' || a.demo_booking) return 'demo';
+                if (a.status === 'shortlisted') return 'shortlisted';
+                return 'pending';
+              };
+
+              // Pipeline tab counts (across ALL applications, not filtered)
+              const pipelineCounts = {
+                all: allApplications.length,
+                shortlisted: allApplications.filter(a => stageOf(a) === 'shortlisted').length,
+                demo: allApplications.filter(a => stageOf(a) === 'demo').length,
+                confirmed: allApplications.filter(a => stageOf(a) === 'confirmed').length,
+                not_confirmed: allApplications.filter(a => stageOf(a) === 'not_confirmed').length,
+              };
+              const PIPELINE_TABS: { key: typeof appsPipelineTab; label: string }[] = [
+                { key: 'all', label: 'All Applications' },
+                { key: 'shortlisted', label: 'Shortlisted' },
+                { key: 'demo', label: 'Demo Class' },
+                { key: 'confirmed', label: 'Confirmed' },
+                { key: 'not_confirmed', label: 'Not Confirmed' },
+              ];
+
+              // Apps filtered by pipeline tab (used for Level-1 grouping)
+              const pipelineApps = appsPipelineTab === 'all'
+                ? allApplications
+                : allApplications.filter(a => stageOf(a) === appsPipelineTab);
+
               // ───── LEVEL 1: Jobs list ─────
               if (appsView === 'jobs' || !selectedAppsJobId) {
-                // Group apps by job_id
+                // Group apps by job_id (use pipeline-filtered apps)
                 const jobMap = new Map<string, { job: any; apps: any[] }>();
-                for (const a of allApplications) {
+                for (const a of pipelineApps) {
                   const jid = a.job_id;
                   if (!jid) continue;
                   if (!jobMap.has(jid)) jobMap.set(jid, { job: a.jobs, apps: [] });
@@ -2624,8 +2657,7 @@ export default function AdminDashboard() {
                 const search = appsJobsSearch.trim().toLowerCase();
                 const filteredJobs = jobsList.filter(j => {
                   if (!search) return true;
-                  // Match against job title, ref, parent name/email/phone/user_reference, or any applicant's tutor name/email/phone/user_reference
-                  const apps = allApplications.filter(a => a.job_id === j.jid);
+                  const apps = pipelineApps.filter(a => a.job_id === j.jid);
                   const haystacks: string[] = [
                     j.job?.title, j.job?.job_reference,
                     apps[0]?.parent_profile?.full_name, apps[0]?.parent_profile?.email,
@@ -2643,7 +2675,7 @@ export default function AdminDashboard() {
                     <div className="flex items-center justify-between flex-wrap gap-3">
                       <div>
                         <h1 className="text-xl font-semibold">Applications</h1>
-                        <p className="text-sm text-muted-foreground mt-0.5">Search by job title, reference, parent/tutor name, email, phone, or user ID.</p>
+                        <p className="text-sm text-muted-foreground mt-0.5">Pipeline view — click a stage to filter jobs by where their applicants are.</p>
                       </div>
                       <Input
                         placeholder="Search title, ref, name, email, phone, user ID…"
@@ -2651,6 +2683,25 @@ export default function AdminDashboard() {
                         onChange={(e) => setAppsJobsSearch(e.target.value)}
                         className="w-96 h-9"
                       />
+                    </div>
+
+                    {/* Pipeline tabs */}
+                    <div className="flex items-center gap-1.5 flex-wrap p-1 rounded-lg bg-muted/40 border border-border/40 w-fit">
+                      {PIPELINE_TABS.map(t => {
+                        const count = pipelineCounts[t.key];
+                        const active = appsPipelineTab === t.key;
+                        return (
+                          <button
+                            key={t.key}
+                            type="button"
+                            onClick={() => { setAppsPipelineTab(t.key); setAppsJobsPage(1); }}
+                            className={`text-xs px-3 py-1.5 rounded-md font-medium transition-all ${active ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+                          >
+                            {t.label}
+                            <span className={`ml-1.5 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] ${active ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>{count}</span>
+                          </button>
+                        );
+                      })}
                     </div>
 
                     <Card>
