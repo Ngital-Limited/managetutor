@@ -46,6 +46,8 @@ export default function Auth() {
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [showVerifyEmail, setShowVerifyEmail] = useState(false);
+  const [signupEmail, setSignupEmail] = useState('');
   const [resetEmail, setResetEmail] = useState('');
   const [resetLoading, setResetLoading] = useState(false);
   const [resetSent, setResetSent] = useState(false);
@@ -89,6 +91,12 @@ export default function Auth() {
     if (isLogin) {
       const { error } = await signIn(email, password);
       if (error) {
+        if (error.message?.toLowerCase().includes('email not confirmed')) {
+          setSignupEmail(email);
+          setShowVerifyEmail(true);
+          setLoading(false);
+          return;
+        }
         toast({ title: 'Login Failed', description: error.message, variant: 'destructive' });
       } else {
         // Check ban status after successful sign-in
@@ -136,7 +144,8 @@ export default function Auth() {
       if (error) {
         toast({ title: 'Sign Up Failed', description: error.message, variant: 'destructive' });
       } else {
-        toast({ title: 'Success!', description: 'Account created successfully.' });
+        setSignupEmail(email);
+        setShowVerifyEmail(true);
       }
     }
     setLoading(false);
@@ -208,7 +217,29 @@ export default function Auth() {
             <Logo size="md" />
           </Link>
 
-          {showForgotPassword ? (
+          {showVerifyEmail ? (
+            /* ─── Email Verification View ─── */
+            <div className="text-center">
+              <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-6">
+                <Mail className="h-8 w-8 text-primary" />
+              </div>
+              <h2 className="text-2xl font-bold text-foreground mb-2">Verify Your Email</h2>
+              <p className="text-muted-foreground mb-6">
+                We've sent a verification link to<br />
+                <strong className="text-foreground">{signupEmail}</strong>
+              </p>
+              <div className="p-4 rounded-lg bg-accent/50 border border-accent text-sm space-y-2">
+                <p>Please check your inbox and click the verification link to activate your account.</p>
+                <p className="text-muted-foreground">Don't forget to check your spam/junk folder.</p>
+              </div>
+              <button
+                onClick={() => { setShowVerifyEmail(false); setIsLogin(true); setEmail(''); setPassword(''); }}
+                className="flex items-center justify-center gap-1.5 mt-6 text-sm text-primary hover:underline font-semibold mx-auto"
+              >
+                <ArrowLeft className="h-4 w-4" /> Back to Login
+              </button>
+            </div>
+          ) : showForgotPassword ? (
             /* ─── Forgot Password View ─── */
             <div>
               <div className="mb-8">
