@@ -211,7 +211,29 @@ export default function Auth() {
             <Logo size="md" />
           </Link>
 
-          {showForgotPassword ? (
+          {showVerifyEmail ? (
+            /* ─── Email Verification View ─── */
+            <div className="text-center">
+              <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-6">
+                <Mail className="h-8 w-8 text-primary" />
+              </div>
+              <h2 className="text-2xl font-bold text-foreground mb-2">Verify Your Email</h2>
+              <p className="text-muted-foreground mb-6">
+                We've sent a verification link to<br />
+                <strong className="text-foreground">{signupEmail}</strong>
+              </p>
+              <div className="p-4 rounded-lg bg-accent/50 border border-accent text-sm space-y-2">
+                <p>Please check your inbox and click the verification link to activate your account.</p>
+                <p className="text-muted-foreground">Don't forget to check your spam/junk folder.</p>
+              </div>
+              <button
+                onClick={() => { setShowVerifyEmail(false); setIsLogin(true); setEmail(''); setPassword(''); }}
+                className="flex items-center justify-center gap-1.5 mt-6 text-sm text-primary hover:underline font-semibold mx-auto"
+              >
+                <ArrowLeft className="h-4 w-4" /> Back to Login
+              </button>
+            </div>
+          ) : showForgotPassword ? (
             /* ─── Forgot Password View ─── */
             <div>
               <div className="mb-8">
