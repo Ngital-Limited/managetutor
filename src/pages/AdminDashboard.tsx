@@ -1462,8 +1462,8 @@ export default function AdminDashboard() {
   const fetchVerifications = useCallback(async () => {
     let query = supabase
       .from('tutor_profiles')
-      .select('id, user_id, verification_status, education, experience_years, gender, created_at, district_id, verification_documents (id, document_type, document_url, status)')
-      .order('created_at', { ascending: false }).limit(100);
+      .select('id, user_id, verification_status, education, experience_years, gender, created_at, district_id, area_id, verification_documents (id, document_type, document_url, status)')
+      .order('created_at', { ascending: false }).limit(200);
     if (verificationFilter !== 'all') {
       query = query.eq('verification_status', verificationFilter as 'pending' | 'approved' | 'rejected');
     }
@@ -1471,22 +1471,33 @@ export default function AdminDashboard() {
     if (data) {
       const userIds = [...new Set(data.map(t => t.user_id))];
       const districtIds = [...new Set(data.map((t: any) => t.district_id).filter(Boolean))];
-      const [{ data: profilesData }, { data: districtsData }] = await Promise.all([
-        supabase.from('profiles').select('id, full_name, email, phone').in('id', userIds),
+      const areaIds = [...new Set(data.map((t: any) => t.area_id).filter(Boolean))];
+      const [{ data: profilesData }, { data: districtsData }, { data: areasData }] = await Promise.all([
+        supabase.from('profiles').select('id, full_name, email, phone, user_reference').in('id', userIds),
         districtIds.length
           ? supabase.from('districts').select('id, name_en').in('id', districtIds as string[])
+          : Promise.resolve({ data: [] as { id: string; name_en: string }[] }),
+        areaIds.length
+          ? supabase.from('areas').select('id, name_en').in('id', areaIds as string[])
           : Promise.resolve({ data: [] as { id: string; name_en: string }[] }),
       ]);
       const profileMap = new Map(profilesData?.map(p => [p.id, p]) || []);
       const districtMap = new Map((districtsData || []).map(d => [d.id, d.name_en]));
-      // Keep an alphabetised district list for the filter dropdown (all districts that appear in the current result set)
+      const areaMap = new Map((areasData || []).map(a => [a.id, a.name_en]));
       const dList = (districtsData || []).slice().sort((a, b) => a.name_en.localeCompare(b.name_en));
+      const aList = (areasData || []).slice().sort((a, b) => a.name_en.localeCompare(b.name_en));
       setVerificationDistricts(dList);
-      setPendingTutors(data.map((t: any) => ({
-        ...t,
-        district_name: t.district_id ? districtMap.get(t.district_id) ?? null : null,
-        profiles: profileMap.get(t.user_id) || { full_name: 'Unknown', email: '', phone: null },
-      })) as unknown as TutorVerification[]);
+      setVerificationAreas(aList);
+      setPendingTutors(data.map((t: any) => {
+        const prof = profileMap.get(t.user_id) || { full_name: 'Unknown', email: '', phone: null, user_reference: null };
+        return {
+          ...t,
+          district_name: t.district_id ? districtMap.get(t.district_id) ?? null : null,
+          area_name: t.area_id ? areaMap.get(t.area_id) ?? null : null,
+          user_reference: prof.user_reference ?? null,
+          profiles: { full_name: prof.full_name, email: prof.email, phone: prof.phone },
+        };
+      }) as unknown as TutorVerification[]);
     }
 
     // Fetch verification badge payments
