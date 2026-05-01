@@ -1583,9 +1583,10 @@ export default function AdminDashboard() {
 
       // Send tutor approval/rejection email
       try {
-        const tutor = verifications.find((v: any) => v.id === tutorId);
-        if (tutor?.user_id) {
-          const { data: profile } = await supabase.from('profiles').select('email, full_name').eq('id', tutor.user_id).single();
+        const tutor = pendingTutors.find((v: any) => v.id === tutorId);
+        const tutorUserId = tutor?.user_id;
+        if (tutorUserId) {
+          const { data: profile } = await supabase.from('profiles').select('email, full_name').eq('id', tutorUserId).single();
           if (profile?.email) {
             await supabase.functions.invoke('send-transactional-email', {
               body: {
