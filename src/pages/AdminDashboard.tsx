@@ -46,7 +46,7 @@ import { SubAdminRBACTab } from '@/components/admin/SubAdminRBACTab';
 import { PlatformDataTab } from '@/components/admin/PlatformDataTab';
 import { AdminCreateUserTab } from '@/components/admin/AdminCreateUserTab';
 import { AdminPostJobTab } from '@/components/admin/AdminPostJobTab';
-import { AdminTutorEditTab } from '@/components/admin/AdminTutorEditTab';
+
 import { AdminTutorProfilesTab } from '@/components/admin/AdminTutorProfilesTab';
 import { ReferralAnalyticsTab } from '@/components/admin/ReferralAnalyticsTab';
 import { AdsManagementTab } from '@/components/admin/AdsManagementTab';
