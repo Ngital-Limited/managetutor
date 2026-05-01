@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { formatExactDate } from '@/lib/date';
 import { Logo } from '@/components/Logo';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -781,9 +781,18 @@ function SubscriptionPlansTab({ toast }: { toast: ReturnType<typeof useToast>['t
 export default function AdminDashboard() {
   const { user, role, loading, impersonateUser, impersonation, stopImpersonation } = useAuth();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { toast } = useToast();
 
-  const [activeTab, setActiveTab] = useState('overview');
+  const activeTab = searchParams.get('tab') || 'overview';
+  const setActiveTab = useCallback((tab: string) => {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      if (tab === 'overview') next.delete('tab');
+      else next.set('tab', tab);
+      return next;
+    });
+  }, [setSearchParams]);
   const [stats, setStats] = useState<Stats>({
     totalUsers: 0, totalTutors: 0, totalParents: 0,
     pendingVerifications: 0, activeJobs: 0, totalJobs: 0, completedJobs: 0, acceptedJobs: 0,
