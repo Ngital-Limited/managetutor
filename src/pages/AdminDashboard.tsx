@@ -1797,6 +1797,7 @@ export default function AdminDashboard() {
     );
   }
 
+  const [sidebarSearch, setSidebarSearch] = useState('');
   const sidebarGroups = [
     {
       label: 'Overview',
