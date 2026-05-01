@@ -880,13 +880,14 @@ export default function AdminDashboard() {
 
   // All-applications (admin Applications tab)
   const [allApplications, setAllApplications] = useState<any[]>([]);
+  const [jobsWithoutApps, setJobsWithoutApps] = useState<any[]>([]);
   const [allAppsStatusFilter, setAllAppsStatusFilter] = useState('all');
   const [allAppsSearch, setAllAppsSearch] = useState('');
   const [appsView, setAppsView] = useState<'jobs' | 'applicants'>('jobs');
   const [selectedAppsJobId, setSelectedAppsJobId] = useState<string | null>(null);
   const [appsJobsSearch, setAppsJobsSearch] = useState('');
   const [loadingAllApps, setLoadingAllApps] = useState(false);
-  const [appsPipelineTab, setAppsPipelineTab] = useState<'all' | 'shortlisted' | 'demo' | 'confirmed' | 'not_confirmed'>('all');
+  const [appsPipelineTab, setAppsPipelineTab] = useState<'all' | 'shortlisted' | 'demo' | 'confirmed' | 'not_confirmed' | 'no_applicants'>('all');
   const [selectedAppIds, setSelectedAppIds] = useState<Set<string>>(new Set());
   const [bulkProcessing, setBulkProcessing] = useState(false);
 
@@ -1041,6 +1042,31 @@ export default function AdminDashboard() {
       tutor_last_education: eduMap.get((a.tutor_profiles as any)?.id) || null,
       demo_booking: demoMap.get(a.id) || null,
     })));
+
+    // Also fetch open / pending jobs that currently have ZERO applications
+    const { data: zeroJobs } = await supabase
+      .from('jobs')
+      .select(`
+        id, title, job_reference, parent_id, status, created_at, total_applications,
+        districts ( name_en ), areas ( name_en ),
+        job_subjects ( subjects ( id, name_en ) )
+      `)
+      .eq('total_applications', 0)
+      .in('status', ['open', 'pending_approval'] as any)
+      .order('created_at', { ascending: false })
+      .limit(200);
+    if (zeroJobs && zeroJobs.length > 0) {
+      const zParentIds = Array.from(new Set(zeroJobs.map((j: any) => j.parent_id).filter(Boolean)));
+      const { data: zProfs } = await supabase
+        .from('profiles')
+        .select('id, full_name, email, phone, user_reference')
+        .in('id', zParentIds as string[]);
+      const zMap = new Map((zProfs || []).map((p: any) => [p.id, p]));
+      setJobsWithoutApps(zeroJobs.map((j: any) => ({ ...j, parent_profile: zMap.get(j.parent_id) || null })));
+    } else {
+      setJobsWithoutApps([]);
+    }
+
     setLoadingAllApps(false);
   }, []);
 
@@ -2653,6 +2679,7 @@ export default function AdminDashboard() {
                 demo: allApplications.filter(a => stageOf(a) === 'demo').length,
                 confirmed: allApplications.filter(a => stageOf(a) === 'confirmed').length,
                 not_confirmed: allApplications.filter(a => stageOf(a) === 'not_confirmed').length,
+                no_applicants: jobsWithoutApps.length,
               };
               const PIPELINE_TABS: { key: typeof appsPipelineTab; label: string }[] = [
                 { key: 'all', label: 'All Applications' },
@@ -2660,12 +2687,15 @@ export default function AdminDashboard() {
                 { key: 'demo', label: 'Demo Class' },
                 { key: 'confirmed', label: 'Confirmed' },
                 { key: 'not_confirmed', label: 'Not Confirmed' },
+                { key: 'no_applicants', label: 'No Applicants' },
               ];
 
               // Apps filtered by pipeline tab (used for Level-1 grouping)
               const pipelineApps = appsPipelineTab === 'all'
                 ? pendingApps
-                : allApplications.filter(a => stageOf(a) === appsPipelineTab);
+                : appsPipelineTab === 'no_applicants'
+                  ? []
+                  : allApplications.filter(a => stageOf(a) === appsPipelineTab);
 
               // ───── LEVEL 1: Jobs list ─────
               if (appsView === 'jobs' || !selectedAppsJobId) {
@@ -2677,7 +2707,7 @@ export default function AdminDashboard() {
                   if (!jobMap.has(jid)) jobMap.set(jid, { job: a.jobs, apps: [] });
                   jobMap.get(jid)!.apps.push(a);
                 }
-                const jobsList = Array.from(jobMap.entries()).map(([jid, { job, apps }]) => ({
+                let jobsList = Array.from(jobMap.entries()).map(([jid, { job, apps }]) => ({
                   jid,
                   job,
                   total: apps.length,
@@ -2685,14 +2715,27 @@ export default function AdminDashboard() {
                   shortlisted: apps.filter(a => a.status === 'shortlisted').length,
                   latest: apps.reduce((m, a) => (new Date(a.created_at) > new Date(m) ? a.created_at : m), apps[0].created_at),
                 }));
+
+                // When viewing the "No Applicants" tab, replace list with jobs that have zero applications
+                if (appsPipelineTab === 'no_applicants') {
+                  jobsList = jobsWithoutApps.map((j: any) => ({
+                    jid: j.id,
+                    job: j,
+                    total: 0,
+                    pending: 0,
+                    shortlisted: 0,
+                    latest: j.created_at,
+                  }));
+                }
                 const search = appsJobsSearch.trim().toLowerCase();
                 const filteredJobs = jobsList.filter(j => {
                   if (!search) return true;
                   const apps = pipelineApps.filter(a => a.job_id === j.jid);
+                  const parent = apps[0]?.parent_profile || (j.job as any)?.parent_profile;
                   const haystacks: string[] = [
                     j.job?.title, j.job?.job_reference,
-                    apps[0]?.parent_profile?.full_name, apps[0]?.parent_profile?.email,
-                    apps[0]?.parent_profile?.phone, apps[0]?.parent_profile?.user_reference,
+                    parent?.full_name, parent?.email,
+                    parent?.phone, parent?.user_reference,
                     ...apps.flatMap(a => [
                       a.tutor_profile?.full_name, a.tutor_profile?.email,
                       a.tutor_profile?.phone, a.tutor_profile?.user_reference,
@@ -2727,6 +2770,7 @@ export default function AdminDashboard() {
                           demo: 'bg-amber-500 text-white',
                           confirmed: 'bg-emerald-600 text-white',
                           not_confirmed: 'bg-rose-600 text-white',
+                          no_applicants: 'bg-zinc-600 text-white',
                         };
                         return (
                           <button
@@ -2765,13 +2809,13 @@ export default function AdminDashboard() {
                                 <TableRow><TableCell colSpan={8} className="text-center py-16 text-muted-foreground">
                                   <div className="flex flex-col items-center gap-2">
                                     <Users className="h-8 w-8 opacity-30" />
-                                    <div className="text-sm">{appsPipelineTab === 'all' ? 'No applications yet.' : `No jobs with ${PIPELINE_TABS.find(t => t.key === appsPipelineTab)?.label.toLowerCase()} applicants.`}</div>
+                                    <div className="text-sm">{appsPipelineTab === 'all' ? 'No applications yet.' : appsPipelineTab === 'no_applicants' ? 'All open jobs have at least one applicant.' : `No jobs with ${PIPELINE_TABS.find(t => t.key === appsPipelineTab)?.label.toLowerCase()} applicants.`}</div>
                                   </div>
                                 </TableCell></TableRow>
                               ) : filteredJobs.slice((appsJobsPage - 1) * appsJobsPageSize, appsJobsPage * appsJobsPageSize).map(({ jid, job, total, pending, shortlisted, latest }) => {
                                 const guardianApp = allApplications.find(a => a.job_id === jid);
-                                const guardianName = guardianApp?.parent_profile?.full_name || '—';
-                                const guardianPhone = guardianApp?.parent_profile?.phone || '—';
+                                const guardianName = guardianApp?.parent_profile?.full_name || (job as any)?.parent_profile?.full_name || '—';
+                                const guardianPhone = guardianApp?.parent_profile?.phone || (job as any)?.parent_profile?.phone || '—';
                                 return (
                                 <TableRow
                                   key={jid}
