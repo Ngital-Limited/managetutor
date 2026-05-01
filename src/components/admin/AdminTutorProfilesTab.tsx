@@ -181,19 +181,12 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
   useEffect(() => {
     setCurrentPage(1);
   }, [
-    searchDebounced, filterAreas, filterGender, filterMedium,
-    filterEducation, filterUniversity, filterVerification, filterAvailability,
-    filterClassLevel, filterSubject, filterCategory, filterLastEducation,
+    searchDebounced, filterAreas, filterGender,
+    filterUniversity, filterVerification, filterAvailability,
+    filterEduMedium, filterEduBackground, filterFieldOfStudy,
     sortBy, sortDir, pageSize,
   ]);
 
-  /**
-   * Build a server-side query against tutor_profiles applying every filter
-   * we can express directly. Cross-table filters (subject, education, search)
-   * are pre-resolved into ID sets and intersected via `.in('id', ids)`.
-   *
-   * Returns either { rows, count } for a page, or { ids } when fetchAllIds=true.
-   */
   const queryTutors = useCallback(async (opts: {
     from: number;
     to: number;
@@ -202,27 +195,20 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
     // ─── Pre-resolve cross-table ID filters ───
     const idConstraints: string[][] = [];
 
-    // Subject / category filter → tutor_subjects
-    if (filterSubject !== 'all') {
-      const { data } = await supabase
-        .from('tutor_subjects').select('tutor_profile_id').eq('subject_id', filterSubject);
-      idConstraints.push([...new Set((data || []).map(r => r.tutor_profile_id))]);
-    } else if (filterCategory !== 'all') {
-      const catSubjectIds = subjects.filter(s => s.category_en === filterCategory).map(s => s.id);
-      if (catSubjectIds.length > 0) {
-        const { data } = await supabase
-          .from('tutor_subjects').select('tutor_profile_id').in('subject_id', catSubjectIds);
-        idConstraints.push([...new Set((data || []).map(r => r.tutor_profile_id))]);
-      } else {
-        idConstraints.push([]);
-      }
-    }
-
-    // Education filter → tutor_education
-    if (filterEducation || filterUniversity) {
+    // Education-based filters → tutor_education
+    const hasEduFilter = filterUniversity || filterEduMedium !== 'all' || filterEduBackground !== 'all' || filterFieldOfStudy !== 'all';
+    if (hasEduFilter) {
       let eduQ = supabase.from('tutor_education').select('tutor_id');
-      if (filterEducation) eduQ = eduQ.ilike('degree', `%${filterEducation}%`);
       if (filterUniversity) eduQ = eduQ.ilike('institution', `%${filterUniversity}%`);
+      if (filterEduMedium !== 'all') eduQ = eduQ.eq('medium', filterEduMedium);
+      if (filterEduBackground !== 'all') {
+        // SSC or HSC degree filter
+        eduQ = eduQ.eq('degree', filterEduBackground);
+      }
+      if (filterFieldOfStudy !== 'all') {
+        // Field of study from Bachelor/Masters records
+        eduQ = eduQ.in('degree', ['Bachelor', 'Bachelors', 'Masters']).ilike('field_of_study', `%${filterFieldOfStudy}%`);
+      }
       const { data } = await eduQ;
       idConstraints.push([...new Set((data || []).map(r => r.tutor_id))]);
     }
@@ -265,7 +251,6 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
       if (filterGender !== 'all') q = q.eq('gender', filterGender as any);
       if (filterVerification !== 'all') q = q.eq('verification_status', filterVerification as any);
       if (filterAvailability !== 'all') q = q.eq('is_available', filterAvailability === 'available');
-      if (filterMedium !== 'all') q = q.eq('teaching_mode', filterMedium as any);
 
       // Multi-area: narrow by district_id (then refine on area_id client-side per page)
       if (filterAreas.length > 0) {
@@ -275,17 +260,11 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
         if (districtIds.length > 0) q = q.in('district_id', districtIds);
       }
 
-      // Class level (text[] array contains)
-      if (filterClassLevel !== 'all') {
-        q = q.contains('class_levels', [filterClassLevel] as any);
-      }
-
       if (intersectedIds) q = q.in('id', intersectedIds);
       return q;
     };
 
     if (opts.fetchAllIds) {
-      // Fetch every matching tutor's user_id (used by "Notify All Filtered")
       const all: { user_id: string; id: string }[] = [];
       const PAGE = 1000;
       for (let from = 0; from < 50000; from += PAGE) {
@@ -296,7 +275,6 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
         all.push(...data as any);
         if (data.length < PAGE) break;
       }
-      // If user search is active, intersect with searchUserIds
       let filtered = all;
       if (searchUserIds) {
         const set = new Set(searchUserIds);
@@ -305,8 +283,6 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
       return { rows: [], count: filtered.length, ids: filtered.map(r => r.user_id) };
     }
 
-    // ─── Page query ───
-    // When search by user is active and is small enough, narrow by user_id.in(...)
     let pageQ = buildBase(
       'id, user_id, gender, education, experience_years, teaching_mode, verification_status, is_available, class_levels, district_id, created_at, slug',
       true,
@@ -319,10 +295,10 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
     const { data: tutorData, count } = await pageQ;
     return { rows: tutorData || [], count: count ?? 0, ids: [] as string[] };
   }, [
-    searchDebounced, filterAreas, filterGender, filterMedium,
-    filterEducation, filterUniversity, filterVerification, filterAvailability,
-    filterClassLevel, filterSubject, filterCategory,
-    areas, subjects, sortBy, sortDir,
+    searchDebounced, filterAreas, filterGender,
+    filterUniversity, filterVerification, filterAvailability,
+    filterEduMedium, filterEduBackground, filterFieldOfStudy,
+    areas, sortBy, sortDir,
   ]);
 
   const fetchTutors = useCallback(async () => {
