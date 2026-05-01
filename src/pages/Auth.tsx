@@ -304,6 +304,20 @@ export default function Auth() {
                     <Loader2 className="h-3.5 w-3.5 animate-spin" />
                     <span>Waiting for verification...</span>
                   </div>
+                  <Button
+                    variant="outline"
+                    className="w-full mt-4 h-10 rounded-lg text-sm"
+                    onClick={handleResendVerification}
+                    disabled={resendLoading || resendCooldown > 0}
+                  >
+                    {resendLoading ? (
+                      <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Sending...</>
+                    ) : resendCooldown > 0 ? (
+                      `Resend in ${resendCooldown}s`
+                    ) : (
+                      <><Mail className="h-4 w-4 mr-2" /> Resend Verification Email</>
+                    )}
+                  </Button>
                   <button
                     onClick={() => { setShowVerifyEmail(false); setEmailVerified(false); setIsLogin(true); setEmail(''); setPassword(''); }}
                     className="flex items-center justify-center gap-1.5 mt-4 text-sm text-primary hover:underline font-semibold mx-auto"
