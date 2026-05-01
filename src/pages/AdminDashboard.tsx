@@ -2784,11 +2784,11 @@ export default function AdminDashboard() {
                     <Select value={jobStatusFilter} onValueChange={setJobStatusFilter}>
                       <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="all">All Status</SelectItem>
                         <SelectItem value="pending_approval">Pending Approval</SelectItem>
                         <SelectItem value="open">Open</SelectItem>
                         <SelectItem value="in_progress">In Progress</SelectItem>
                         <SelectItem value="completed">Completed</SelectItem>
+                        <SelectItem value="suspended">Suspended</SelectItem>
                         <SelectItem value="cancelled">Cancelled</SelectItem>
                       </SelectContent>
                     </Select>
