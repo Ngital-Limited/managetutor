@@ -3709,6 +3709,15 @@ export default function AdminDashboard() {
             {/* ═══════ PIPELINE TAB ═══════ */}
             {activeTab === 'pipeline' && <AdminPipelineTab toast={toast} />}
 
+            {/* ═══════ TRANSACTION LEDGER TAB ═══════ */}
+            {activeTab === 'ledger' && <AdminTransactionLedgerTab toast={toast} />}
+
+            {/* ═══════ INVOICES TAB ═══════ */}
+            {activeTab === 'invoices' && <AdminInvoiceTab toast={toast} />}
+
+            {/* ═══════ CONVERSION FUNNEL TAB ═══════ */}
+            {activeTab === 'conversion_funnel' && <AdminConversionFunnelTab />}
+
             {/* ═══════ ACTIVITY LOG TAB ═══════ */}
             {activeTab === 'activity_log' && <AdminActivityLogTab toast={toast} />}
 
