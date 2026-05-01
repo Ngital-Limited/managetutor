@@ -125,12 +125,13 @@ interface UserProfileFull {
   user_reference: string | null;
 }
 
-type SectionKey = 'overview' | 'jobs' | 'applicants' | 'demo' | 'payments' | 'profile';
+type SectionKey = 'overview' | 'jobs' | 'applicants' | 'demo' | 'tuitions' | 'payments' | 'profile';
 
 const sectionItems: { key: SectionKey; title: string; icon: any }[] = [
   { key: 'overview', title: 'Overview', icon: LayoutDashboard },
   { key: 'jobs', title: 'My Jobs', icon: Briefcase },
   { key: 'applicants', title: 'All Applicants', icon: Users },
+  { key: 'tuitions', title: 'Active Tuitions', icon: GraduationCap },
   { key: 'demo', title: 'Demo Classes', icon: Calendar },
   { key: 'payments', title: 'Payments', icon: CreditCard },
   { key: 'profile', title: 'My Profile', icon: User },
@@ -315,6 +316,18 @@ export default function ParentDashboard() {
   const [featuredJobPrice, setFeaturedJobPrice] = useState<number>(300);
   const [boostingJobId, setBoostingJobId] = useState<string | null>(null);
 
+  // Student profiles state
+  const [studentProfiles, setStudentProfiles] = useState<any[]>([]);
+  const [showStudentForm, setShowStudentForm] = useState(false);
+  const [editingStudent, setEditingStudent] = useState<any>(null);
+  const [studentForm, setStudentForm] = useState({ name: '', age: '', class_level: '', school_name: '', medium: '', learning_needs: '' });
+
+  // Hiring confirmation state
+  const [hiringDialogOpen, setHiringDialogOpen] = useState(false);
+  const [hiringApp, setHiringApp] = useState<Application | null>(null);
+  const [hiringForm, setHiringForm] = useState({ agreed_salary: '', start_date: '', subjects: '', days_per_week: '3' });
+  const [hiringConfirmations, setHiringConfirmations] = useState<any[]>([]);
+
   useEffect(() => {
     supabase.from('platform_settings').select('value').eq('key', 'featured_job_price').maybeSingle()
       .then(({ data }) => {
@@ -435,6 +448,22 @@ export default function ParentDashboard() {
     } else {
       setAllApplicants([]);
     }
+
+    // Fetch student profiles
+    const { data: studentsData } = await (supabase as any)
+      .from('student_profiles')
+      .select('*')
+      .eq('parent_id', user.id)
+      .order('created_at', { ascending: false });
+    if (studentsData) setStudentProfiles(studentsData);
+
+    // Fetch hiring confirmations
+    const { data: hcData } = await (supabase as any)
+      .from('hiring_confirmations')
+      .select('*')
+      .eq('parent_id', user.id)
+      .order('created_at', { ascending: false });
+    if (hcData) setHiringConfirmations(hcData);
 
     setLoading(false);
   };
@@ -914,6 +943,110 @@ export default function ParentDashboard() {
       setReportDescription('');
       setReportTargetApp(null);
     }
+  };
+
+  // ─── Student Profile CRUD ───
+  const resetStudentForm = () => {
+    setStudentForm({ name: '', age: '', class_level: '', school_name: '', medium: '', learning_needs: '' });
+    setEditingStudent(null);
+    setShowStudentForm(false);
+  };
+
+  const handleSaveStudent = async () => {
+    if (!user || !studentForm.name.trim()) {
+      toast({ title: 'Required', description: 'Student name is required.', variant: 'destructive' });
+      return;
+    }
+    const payload = {
+      parent_id: user.id,
+      name: studentForm.name.trim(),
+      age: studentForm.age ? Number(studentForm.age) : null,
+      class_level: studentForm.class_level || null,
+      school_name: studentForm.school_name || null,
+      medium: studentForm.medium || null,
+      learning_needs: studentForm.learning_needs || null,
+    };
+    if (editingStudent) {
+      const { error } = await (supabase as any).from('student_profiles').update(payload).eq('id', editingStudent.id);
+      if (error) { toast({ title: 'Error', description: error.message, variant: 'destructive' }); return; }
+      toast({ title: 'Updated', description: 'Student profile updated.' });
+    } else {
+      const { error } = await (supabase as any).from('student_profiles').insert(payload);
+      if (error) { toast({ title: 'Error', description: error.message, variant: 'destructive' }); return; }
+      toast({ title: 'Added', description: 'Student profile added.' });
+    }
+    resetStudentForm();
+    fetchData();
+  };
+
+  const deleteStudent = async (id: string) => {
+    if (!confirm('Delete this student profile?')) return;
+    await (supabase as any).from('student_profiles').delete().eq('id', id);
+    toast({ title: 'Deleted', description: 'Student profile removed.' });
+    fetchData();
+  };
+
+  const startEditStudent = (s: any) => {
+    setStudentForm({ name: s.name, age: s.age?.toString() || '', class_level: s.class_level || '', school_name: s.school_name || '', medium: s.medium || '', learning_needs: s.learning_needs || '' });
+    setEditingStudent(s);
+    setShowStudentForm(true);
+  };
+
+  // ─── Hiring Confirmation Flow ───
+  const openHiringDialog = (app: Application) => {
+    const job = selectedJob || jobs.find(j => j.id === (app as any).job_id);
+    const subjectNames = job?.job_subjects?.map((js: any) => js.subjects?.name_en).filter(Boolean).join(', ') || job?.subjects?.name_en || '';
+    setHiringApp(app);
+    setHiringForm({
+      agreed_salary: app.proposed_rate?.toString() || '',
+      start_date: '',
+      subjects: subjectNames,
+      days_per_week: job?.days_per_week?.toString() || '3',
+    });
+    setHiringDialogOpen(true);
+  };
+
+  const handleConfirmHiring = async () => {
+    if (!user || !hiringApp) return;
+    if (!hiringForm.agreed_salary || !hiringForm.start_date) {
+      toast({ title: 'Required', description: 'Please fill in salary and start date.', variant: 'destructive' });
+      return;
+    }
+    const tutor = hiringApp.tutor_profiles;
+    const jobId = selectedJob?.id || (hiringApp as any).jobs?.id;
+
+    const { error: hcError } = await (supabase as any).from('hiring_confirmations').insert({
+      application_id: hiringApp.id,
+      job_id: jobId,
+      parent_id: user.id,
+      tutor_id: tutor.id,
+      agreed_salary: Number(hiringForm.agreed_salary),
+      start_date: hiringForm.start_date,
+      subjects: hiringForm.subjects || null,
+      days_per_week: Number(hiringForm.days_per_week) || 3,
+    });
+
+    if (hcError) {
+      toast({ title: 'Error', description: hcError.message, variant: 'destructive' });
+      return;
+    }
+
+    await handleApplicationAction(hiringApp.id, 'accepted');
+
+    if (tutor?.user_id) {
+      await supabase.from('notifications').insert({
+        user_id: tutor.user_id,
+        title: 'Hiring Confirmed — Please Review Details',
+        message: `You have been hired! Agreed salary: ৳${hiringForm.agreed_salary}/mo, Start: ${hiringForm.start_date}, Days/week: ${hiringForm.days_per_week}. Please confirm these details in your dashboard.`,
+        type: 'hiring_confirmation',
+        reference_id: jobId,
+      });
+    }
+
+    setHiringDialogOpen(false);
+    setHiringApp(null);
+    toast({ title: 'Tutor Hired!', description: 'Hiring confirmation created. The tutor has been notified to confirm the details.' });
+    fetchData();
   };
 
   const handleSignOut = async () => {
@@ -1967,7 +2100,7 @@ export default function ParentDashboard() {
                                                   <Send className="h-3.5 w-3.5 mr-1" />
                                                   Invite to Demo
                                                 </Button>
-                                                <Button size="sm" className="h-8 text-xs" onClick={() => handleApplicationAction(app.id, 'accepted')}>
+                                                <Button size="sm" className="h-8 text-xs" onClick={() => openHiringDialog(app)}>
                                                   <CheckCircle2 className="h-3.5 w-3.5 mr-1" />
                                                   Hire
                                                 </Button>
@@ -2258,51 +2391,105 @@ export default function ParentDashboard() {
   );
 
   const renderProfile = () => (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <User className="h-5 w-5" />
-          My Profile
-        </CardTitle>
-        <CardDescription>Manage your personal information</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="flex items-center gap-4 mb-6">
-          <Avatar className="h-20 w-20">
-            <AvatarImage src={userProfile?.avatar_url || ''} />
-            <AvatarFallback className="text-2xl">{userProfile?.full_name?.charAt(0) || 'P'}</AvatarFallback>
-          </Avatar>
-          <div>
-            <h3 className="text-xl font-bold">{userProfile?.full_name || 'Parent'}</h3>
-            <p className="text-sm text-muted-foreground">{userProfile?.email}</p>
-            {userProfile?.phone && <p className="text-sm text-muted-foreground">{userProfile.phone}</p>}
-            {userProfile?.user_reference && (
-              <Badge variant="outline" className="font-mono text-xs mt-1">{userProfile.user_reference}</Badge>
-            )}
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2"><User className="h-5 w-5" /> My Profile</CardTitle>
+          <CardDescription>Manage your personal information</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center gap-4 mb-6">
+            <Avatar className="h-20 w-20">
+              <AvatarImage src={userProfile?.avatar_url || ''} />
+              <AvatarFallback className="text-2xl">{userProfile?.full_name?.charAt(0) || 'P'}</AvatarFallback>
+            </Avatar>
+            <div>
+              <h3 className="text-xl font-bold">{userProfile?.full_name || 'Parent'}</h3>
+              <p className="text-sm text-muted-foreground">{userProfile?.email}</p>
+              {userProfile?.phone && <p className="text-sm text-muted-foreground">{userProfile.phone}</p>}
+              {userProfile?.user_reference && <Badge variant="outline" className="font-mono text-xs mt-1">{userProfile.user_reference}</Badge>}
+            </div>
           </div>
-        </div>
+          <Progress value={profileInfo.percent} className="h-2 mb-3" />
+          <p className="text-sm text-muted-foreground mb-4">{profileInfo.percent}% complete</p>
+          {profileInfo.missing.length > 0 && (
+            <div className="flex flex-wrap gap-2 mb-4">
+              {profileInfo.missing.map((item) => <Badge key={item} variant="outline" className="text-warning border-warning/50">Missing: {item}</Badge>)}
+            </div>
+          )}
+          <Link to="/parent/profile"><Button><Edit className="h-4 w-4 mr-2" /> Edit Profile</Button></Link>
+        </CardContent>
+      </Card>
 
-        <Progress value={profileInfo.percent} className="h-2 mb-3" />
-        <p className="text-sm text-muted-foreground mb-4">{profileInfo.percent}% complete</p>
-
-        {profileInfo.missing.length > 0 && (
-          <div className="flex flex-wrap gap-2 mb-4">
-            {profileInfo.missing.map((item) => (
-              <Badge key={item} variant="outline" className="text-warning border-warning/50">
-                Missing: {item}
-              </Badge>
-            ))}
+      {/* Student Profiles */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="flex items-center gap-2"><GraduationCap className="h-5 w-5" /> Student Profiles</CardTitle>
+              <CardDescription>Manage your children's learning profiles</CardDescription>
+            </div>
+            <Button size="sm" onClick={() => { resetStudentForm(); setShowStudentForm(true); }}><Plus className="h-4 w-4 mr-1" /> Add Student</Button>
           </div>
-        )}
-
-        <Link to="/parent/profile">
-          <Button>
-            <Edit className="h-4 w-4 mr-2" />
-            Edit Profile
-          </Button>
-        </Link>
-      </CardContent>
-    </Card>
+        </CardHeader>
+        <CardContent>
+          {showStudentForm && (
+            <div className="p-4 border rounded-xl mb-4 bg-muted/30 space-y-3">
+              <h4 className="font-semibold text-sm">{editingStudent ? 'Edit Student' : 'Add Student'}</h4>
+              <div className="grid grid-cols-2 gap-3">
+                <div><Label>Name *</Label><Input value={studentForm.name} onChange={e => setStudentForm({...studentForm, name: e.target.value})} placeholder="Student name" /></div>
+                <div><Label>Age</Label><Input type="number" value={studentForm.age} onChange={e => setStudentForm({...studentForm, age: e.target.value})} placeholder="e.g. 12" /></div>
+                <div><Label>Class Level</Label><Input value={studentForm.class_level} onChange={e => setStudentForm({...studentForm, class_level: e.target.value})} placeholder="e.g. Class 8" /></div>
+                <div><Label>School</Label><Input value={studentForm.school_name} onChange={e => setStudentForm({...studentForm, school_name: e.target.value})} placeholder="School name" /></div>
+                <div><Label>Medium</Label>
+                  <Select value={studentForm.medium} onValueChange={v => setStudentForm({...studentForm, medium: v})}>
+                    <SelectTrigger><SelectValue placeholder="Select medium" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Bangla">Bangla Medium</SelectItem>
+                      <SelectItem value="English">English Medium</SelectItem>
+                      <SelectItem value="Madrasa">Madrasa</SelectItem>
+                      <SelectItem value="English Version">English Version</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div><Label>Learning Needs</Label><Input value={studentForm.learning_needs} onChange={e => setStudentForm({...studentForm, learning_needs: e.target.value})} placeholder="e.g. Needs help with Math" /></div>
+              </div>
+              <div className="flex gap-2">
+                <Button size="sm" onClick={handleSaveStudent}>{editingStudent ? 'Update' : 'Save'}</Button>
+                <Button size="sm" variant="outline" onClick={resetStudentForm}>Cancel</Button>
+              </div>
+            </div>
+          )}
+          {studentProfiles.length > 0 ? (
+            <div className="space-y-3">
+              {studentProfiles.map((s: any) => (
+                <div key={s.id} className="p-4 border rounded-xl flex items-start justify-between">
+                  <div>
+                    <h4 className="font-bold">{s.name}</h4>
+                    <div className="flex flex-wrap gap-2 mt-1">
+                      {s.age && <Badge variant="outline" className="text-xs">Age: {s.age}</Badge>}
+                      {s.class_level && <Badge variant="outline" className="text-xs">{s.class_level}</Badge>}
+                      {s.school_name && <Badge variant="outline" className="text-xs">{s.school_name}</Badge>}
+                      {s.medium && <Badge variant="outline" className="text-xs">{s.medium}</Badge>}
+                    </div>
+                    {s.learning_needs && <p className="text-xs text-muted-foreground mt-1">{s.learning_needs}</p>}
+                  </div>
+                  <div className="flex gap-1">
+                    <Button size="icon" variant="ghost" onClick={() => startEditStudent(s)}><Edit className="h-4 w-4" /></Button>
+                    <Button size="icon" variant="ghost" className="text-destructive" onClick={() => deleteStudent(s.id)}><Trash2 className="h-4 w-4" /></Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : !showStudentForm && (
+            <div className="text-center py-8">
+              <GraduationCap className="h-10 w-10 text-muted-foreground mx-auto mb-2" />
+              <p className="text-sm text-muted-foreground">No student profiles yet. Add your children's details.</p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
   );
 
   const renderApplicants = () => {
@@ -2433,7 +2620,7 @@ export default function ParentDashboard() {
                               }} title="Invite to demo class">
                                 <Send className="h-3.5 w-3.5" />
                               </Button>
-                              <Button size="sm" className="h-8 text-xs" onClick={() => handleApplicationAction(app.id, 'accepted')} title="Hire">
+                              <Button size="sm" className="h-8 text-xs" onClick={() => { const job = jobs.find(j => j.id === app.jobs?.id); if (job) setSelectedJob(job); openHiringDialog(app); }} title="Hire">
                                 <CheckCircle2 className="h-3.5 w-3.5" />
                               </Button>
                               <Button size="sm" variant="outline" className="h-8 text-xs" onClick={() => handleApplicationAction(app.id, 'rejected')} title="Reject">
@@ -2467,11 +2654,78 @@ export default function ParentDashboard() {
     );
   };
 
+  const renderTuitions = () => {
+    const hiredApps = allApplicants.filter((a: any) => a.status === 'accepted');
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2"><GraduationCap className="h-5 w-5" /> Active Tuitions</CardTitle>
+          <CardDescription>Currently active tutoring engagements</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {hiredApps.length > 0 ? (
+            <div className="space-y-4">
+              {hiredApps.map((app: any) => {
+                const tutor = app.tutor_profiles;
+                const hc = hiringConfirmations.find((h: any) => h.application_id === app.id);
+                return (
+                  <div key={app.id} className="p-4 border rounded-xl">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-11 w-11">
+                          <AvatarImage src={tutor?.profiles?.avatar_url} />
+                          <AvatarFallback>{tutor?.profiles?.full_name?.charAt(0) || 'T'}</AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="font-bold">{tutor?.profiles?.full_name}</span>
+                            {tutor?.verification_status === 'approved' && tutor?.verification_paid && (
+                              <Badge className="bg-primary/10 text-primary text-[10px] px-1.5 py-0">Verified</Badge>
+                            )}
+                          </div>
+                          <p className="text-xs text-muted-foreground">{app.jobs?.title} · {app.jobs?.job_reference}</p>
+                          {hc && (
+                            <div className="flex flex-wrap gap-2 mt-1">
+                              <Badge variant="outline" className="text-xs">৳{hc.agreed_salary}/mo</Badge>
+                              <Badge variant="outline" className="text-xs">Start: {hc.start_date}</Badge>
+                              <Badge variant="outline" className="text-xs">{hc.days_per_week} days/wk</Badge>
+                              {hc.tutor_confirmed ? (
+                                <Badge className="bg-success text-[10px]">Both Confirmed</Badge>
+                              ) : (
+                                <Badge className="bg-warning text-warning-foreground text-[10px]">Awaiting Tutor Confirmation</Badge>
+                              )}
+                            </div>
+                          )}
+                          {!hc && <p className="text-xs text-muted-foreground mt-1">৳{app.proposed_rate}/mo (proposed)</p>}
+                        </div>
+                      </div>
+                      <Link to={`/tutor/${(tutor as any)?.slug || tutor?.id}`}>
+                        <Button size="sm" variant="outline"><Eye className="h-3.5 w-3.5 mr-1" /> Profile</Button>
+                      </Link>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <GraduationCap className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <h3 className="font-bold mb-2">No active tuitions yet</h3>
+              <p className="text-muted-foreground mb-4">Hire a tutor from your applicants to start</p>
+              <Button variant="outline" onClick={() => setActiveSection('applicants')}>View Applicants</Button>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    );
+  };
+
   const renderActiveSection = () => {
     switch (activeSection) {
       case 'overview': return renderOverview();
       case 'jobs': return renderJobs();
       case 'applicants': return renderApplicants();
+      case 'tuitions': return renderTuitions();
       case 'demo': return renderDemoBookings();
       case 'payments': return renderPayments();
       case 'profile': return renderProfile();
@@ -2516,6 +2770,55 @@ export default function ParentDashboard() {
 
       {reportDialog}
       {interviewDialog}
+
+      {/* Hiring Confirmation Dialog */}
+      <Dialog open={hiringDialogOpen} onOpenChange={setHiringDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2"><CheckCircle2 className="h-5 w-5 text-success" /> Confirm Hiring Details</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            {hiringApp && (
+              <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
+                <Avatar className="h-10 w-10">
+                  <AvatarImage src={hiringApp.tutor_profiles?.profiles?.avatar_url} />
+                  <AvatarFallback>{hiringApp.tutor_profiles?.profiles?.full_name?.charAt(0)}</AvatarFallback>
+                </Avatar>
+                <div>
+                  <p className="font-medium text-sm">{hiringApp.tutor_profiles?.profiles?.full_name}</p>
+                  <p className="text-xs text-muted-foreground">Proposed: ৳{hiringApp.proposed_rate}/mo</p>
+                </div>
+              </div>
+            )}
+            <div>
+              <Label>Agreed Monthly Salary (৳) *</Label>
+              <Input type="number" min={0} value={hiringForm.agreed_salary} onChange={e => setHiringForm({ ...hiringForm, agreed_salary: e.target.value })} placeholder="e.g. 5000" />
+              <p className="text-xs text-muted-foreground mt-1">This triggers the tutor's commission obligation.</p>
+            </div>
+            <div>
+              <Label>Start Date *</Label>
+              <Input type="date" value={hiringForm.start_date} onChange={e => setHiringForm({ ...hiringForm, start_date: e.target.value })} />
+            </div>
+            <div>
+              <Label>Subjects</Label>
+              <Input value={hiringForm.subjects} onChange={e => setHiringForm({ ...hiringForm, subjects: e.target.value })} placeholder="e.g. Math, Physics" />
+            </div>
+            <div>
+              <Label>Days per Week</Label>
+              <Select value={hiringForm.days_per_week} onValueChange={v => setHiringForm({ ...hiringForm, days_per_week: v })}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>{[1,2,3,4,5,6,7].map(n => <SelectItem key={n} value={String(n)}>{n} day{n>1?'s':''}</SelectItem>)}</SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setHiringDialogOpen(false)}>Cancel</Button>
+            <Button onClick={handleConfirmHiring} disabled={!hiringForm.agreed_salary || !hiringForm.start_date}>
+              <CheckCircle2 className="h-4 w-4 mr-2" /> Confirm & Hire
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </SidebarProvider>
   );
 }
