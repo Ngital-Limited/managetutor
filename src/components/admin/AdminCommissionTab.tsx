@@ -190,6 +190,7 @@ export function AdminCommissionTab({ toast }: { toast: any }) {
 
     if (!error) {
       await supabase.from('hiring_confirmations').update({ commission_status: 'waived' } as any).eq('id', selected.hiring_confirmation_id);
+      if (user) logAdminAction(user.id, 'commission_waived', 'commission', selected.id, { reason: waiveReason });
       toast({ title: 'Commission waived' });
       setSelected(null); setShowWaiveForm(false); setWaiveReason('');
       fetchCommissions();
