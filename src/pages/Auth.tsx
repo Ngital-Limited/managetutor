@@ -53,6 +53,8 @@ export default function Auth() {
   const [resetSent, setResetSent] = useState(false);
   const [emailVerified, setEmailVerified] = useState(false);
   const [checkingVerification, setCheckingVerification] = useState(false);
+  const [resendLoading, setResendLoading] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(0);
 
   const { role: userRole } = useAuth();
 
