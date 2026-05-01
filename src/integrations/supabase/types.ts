@@ -286,6 +286,112 @@ export type Database = {
         }
         Relationships: []
       }
+      commission_payments: {
+        Row: {
+          amount: number
+          commission_id: string
+          created_at: string
+          id: string
+          notes: string | null
+          payment_date: string
+          payment_method: string
+          payment_reference: string | null
+          received_by: string | null
+        }
+        Insert: {
+          amount: number
+          commission_id: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          payment_date?: string
+          payment_method?: string
+          payment_reference?: string | null
+          received_by?: string | null
+        }
+        Update: {
+          amount?: number
+          commission_id?: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          payment_date?: string
+          payment_method?: string
+          payment_reference?: string | null
+          received_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "commission_payments_commission_id_fkey"
+            columns: ["commission_id"]
+            isOneToOne: false
+            referencedRelation: "commission_records"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      commission_records: {
+        Row: {
+          agreed_salary: number
+          amount_due: number | null
+          amount_paid: number
+          commission_amount: number
+          commission_pct: number
+          created_at: string
+          due_date: string | null
+          hiring_confirmation_id: string
+          id: string
+          job_id: string
+          parent_id: string
+          status: string
+          tutor_id: string
+          updated_at: string
+          waive_reason: string | null
+        }
+        Insert: {
+          agreed_salary: number
+          amount_due?: number | null
+          amount_paid?: number
+          commission_amount: number
+          commission_pct?: number
+          created_at?: string
+          due_date?: string | null
+          hiring_confirmation_id: string
+          id?: string
+          job_id: string
+          parent_id: string
+          status?: string
+          tutor_id: string
+          updated_at?: string
+          waive_reason?: string | null
+        }
+        Update: {
+          agreed_salary?: number
+          amount_due?: number | null
+          amount_paid?: number
+          commission_amount?: number
+          commission_pct?: number
+          created_at?: string
+          due_date?: string | null
+          hiring_confirmation_id?: string
+          id?: string
+          job_id?: string
+          parent_id?: string
+          status?: string
+          tutor_id?: string
+          updated_at?: string
+          waive_reason?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "commission_records_hiring_confirmation_id_fkey"
+            columns: ["hiring_confirmation_id"]
+            isOneToOne: false
+            referencedRelation: "hiring_confirmations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       contact_messages: {
         Row: {
           admin_notes: string | null
@@ -710,8 +816,10 @@ export type Database = {
       }
       hiring_confirmations: {
         Row: {
+          admin_notes: string | null
           agreed_salary: number
           application_id: string
+          commission_status: string
           created_at: string
           days_per_week: number
           guardian_confirmed: boolean
@@ -726,8 +834,10 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          admin_notes?: string | null
           agreed_salary: number
           application_id: string
+          commission_status?: string
           created_at?: string
           days_per_week?: number
           guardian_confirmed?: boolean
@@ -742,8 +852,10 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          admin_notes?: string | null
           agreed_salary?: number
           application_id?: string
+          commission_status?: string
           created_at?: string
           days_per_week?: number
           guardian_confirmed?: boolean

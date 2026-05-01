@@ -53,6 +53,8 @@ import { AdminVerificationsTab } from '@/components/admin/AdminVerificationsTab'
 import { ReferralAnalyticsTab } from '@/components/admin/ReferralAnalyticsTab';
 import { AdsManagementTab } from '@/components/admin/AdsManagementTab';
 import { AdminCacheTab } from '@/components/admin/AdminCacheTab';
+import { AdminHiresTab } from '@/components/admin/AdminHiresTab';
+import { AdminCommissionTab } from '@/components/admin/AdminCommissionTab';
 import { AutoRefreshControl } from '@/components/AutoRefreshControl';
 import { getPlatformCommissionPct, computeFeeSplit } from '@/lib/commission';
 
@@ -2026,6 +2028,8 @@ export default function AdminDashboard() {
       label: 'Finance',
       items: [
         { title: 'Payments', value: 'payments', icon: CreditCard },
+        { title: 'Hires', value: 'hires', icon: CheckCircle2 },
+        { title: 'Commissions', value: 'commissions', icon: DollarSign },
         { title: 'Revenue & Payouts', value: 'revenue', icon: Wallet },
         { title: 'Subscriptions', value: 'subscriptions', icon: Package },
       ],
@@ -3664,6 +3668,12 @@ export default function AdminDashboard() {
 
             {/* ═══════ ADS MANAGEMENT TAB ═══════ */}
             {activeTab === 'ads' && <AdsManagementTab toast={toast} />}
+
+            {/* ═══════ HIRES TAB ═══════ */}
+            {activeTab === 'hires' && <AdminHiresTab toast={toast} />}
+
+            {/* ═══════ COMMISSIONS TAB ═══════ */}
+            {activeTab === 'commissions' && <AdminCommissionTab toast={toast} />}
 
             {/* ═══════ CACHE TAB ═══════ */}
             {activeTab === 'cache' && (
