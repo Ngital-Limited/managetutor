@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+// Dialog removed — post-job form now renders inline as a full page section
 import { supabase } from '@/integrations/supabase/client';
 import { Search, CheckCircle2, Clock, Plus, XCircle } from 'lucide-react';
 import { MultiSearchableSelect } from '@/components/MultiSearchableSelect';
@@ -287,13 +287,19 @@ export function AdminPostJobTab({ toast }: Props) {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-semibold">Post Job</h1>
-        <Button onClick={() => setShowPostJob(true)}>
-          <Plus className="h-4 w-4 mr-2" /> Post New Job
-        </Button>
+        {!showPostJob ? (
+          <Button onClick={() => setShowPostJob(true)}>
+            <Plus className="h-4 w-4 mr-2" /> Post New Job
+          </Button>
+        ) : (
+          <Button variant="outline" onClick={() => { setShowPostJob(false); resetAll(); }}>
+            <XCircle className="h-4 w-4 mr-2" /> Cancel
+          </Button>
+        )}
       </div>
 
       {/* Recently Posted */}
-      {postedJobs.length > 0 && (
+      {!showPostJob && postedJobs.length > 0 && (
         <Card>
           <CardHeader>
             <CardTitle className="text-base">Recently Posted</CardTitle>
@@ -316,16 +322,15 @@ export function AdminPostJobTab({ toast }: Props) {
         </Card>
       )}
 
-      {/* Post Job Dialog */}
-      <Dialog open={showPostJob} onOpenChange={(open) => {
-        setShowPostJob(open);
-        if (!open) resetAll();
-      }}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Post a Tuition Job</DialogTitle>
-          </DialogHeader>
-          <form onSubmit={handlePost} className="space-y-5 mt-4">
+      {/* Post Job Form (inline page) */}
+      {showPostJob && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Post a Tuition Job</CardTitle>
+            <CardDescription>Fill in the details below to create a new tuition job for a guardian.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handlePost} className="space-y-5">
 
             {/* Section: Guardian / Parent */}
             <div className="space-y-1">
@@ -696,9 +701,10 @@ export function AdminPostJobTab({ toast }: Props) {
             <Button type="submit" className="w-full" disabled={submitting || !hasParent}>
               {submitting ? <><Clock className="h-4 w-4 mr-2 animate-spin" /> Posting...</> : 'Post Job'}
             </Button>
-          </form>
-        </DialogContent>
-      </Dialog>
+            </form>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

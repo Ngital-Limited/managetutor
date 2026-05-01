@@ -1016,17 +1016,19 @@ export default function ParentDashboard() {
   // ─── Section title for header ───
   const sectionTitle = sectionItems.find(s => s.key === activeSection)?.title || 'Dashboard';
 
-  // ─── Post Job Dialog (shared) ───
-  const postJobDialog = (
-    <Dialog open={showPostJob} onOpenChange={(open) => {
-      setShowPostJob(open);
-      if (!open) { setEditingJob(null); resetJobForm(); }
-    }}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>{editingJob ? 'Edit Tuition Job' : 'Post a Tuition Job'}</DialogTitle>
-        </DialogHeader>
-        <form onSubmit={editingJob ? handleUpdateJob : handlePostJob} className="space-y-5 mt-4">
+  // Post Job Inline Page
+  const postJobPage = (
+    <Card>
+      <CardHeader className="flex flex-row items-start justify-between gap-4">
+        <div>
+          <CardTitle>{editingJob ? 'Edit Tuition Job' : 'Post a Tuition Job'}</CardTitle>
+          <CardDescription>Fill in the details below. The job will be reviewed by our team before going live.</CardDescription>
+        </div>
+        <Button type="button" variant="outline" size="sm" onClick={() => { setShowPostJob(false); setEditingJob(null); resetJobForm(); }}>Cancel</Button>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={editingJob ? handleUpdateJob : handlePostJob} className="space-y-5">
+
           {prefilled && !editingJob && (
             <div className="flex items-center gap-2 p-3 rounded-md bg-accent/50 border border-accent text-sm">
               <CheckCircle2 className="h-4 w-4 text-primary shrink-0" />
@@ -1352,8 +1354,8 @@ export default function ParentDashboard() {
             {submitting ? (editingJob ? 'Updating...' : 'Posting...') : (editingJob ? 'Update Job' : 'Post Job')}
           </Button>
         </form>
-      </DialogContent>
-    </Dialog>
+      </CardContent>
+    </Card>
   );
 
   // ─── Report Dialog (shared) ───
@@ -2399,7 +2401,7 @@ export default function ParentDashboard() {
           </header>
 
           <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto pb-24 md:pb-8">
-            {renderActiveSection()}
+            {showPostJob ? postJobPage : renderActiveSection()}
           </main>
           <ParentBottomNav
             activeSection={activeSection}
@@ -2409,7 +2411,6 @@ export default function ParentDashboard() {
         </div>
       </div>
 
-      {postJobDialog}
       {reportDialog}
       {interviewDialog}
     </SidebarProvider>
