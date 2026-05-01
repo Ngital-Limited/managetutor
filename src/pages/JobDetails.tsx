@@ -315,15 +315,37 @@ export default function JobDetails() {
                   <div className="w-16 h-16 rounded-xl bg-tutor/10 flex items-center justify-center flex-shrink-0">
                     <Briefcase className="h-8 w-8 text-tutor" />
                   </div>
-                    <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <h1 className="text-2xl font-bold">{job.title}</h1>
-                      {job.job_reference && (
-                        <Badge variant="outline" className="text-xs font-mono">{job.job_reference}</Badge>
-                      )}
-                      <Badge variant={job.status === 'open' ? 'default' : 'secondary'}>
-                        {job.status}
-                      </Badge>
+                    <div className="flex-1 min-w-0">
+                    <div className="flex items-start justify-between gap-2 mb-2">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <h1 className="text-2xl font-bold">{job.title}</h1>
+                        {job.job_reference && (
+                          <Badge variant="outline" className="text-xs font-mono">{job.job_reference}</Badge>
+                        )}
+                        <Badge variant={job.status === 'open' ? 'default' : 'secondary'}>
+                          {job.status}
+                        </Badge>
+                      </div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="shrink-0 gap-1.5"
+                        onClick={async () => {
+                          const url = window.location.href;
+                          const shareData = { title: job.title, text: `Tuition opportunity: ${job.title}`, url };
+                          if (navigator.share) {
+                            try { await navigator.share(shareData); return; } catch { /* cancelled */ }
+                          }
+                          try {
+                            await navigator.clipboard.writeText(url);
+                            toast({ title: 'Link copied', description: 'Job link copied to clipboard.' });
+                          } catch {
+                            toast({ title: 'Share', description: url });
+                          }
+                        }}
+                      >
+                        <Share2 className="h-4 w-4" /> Share
+                      </Button>
                     </div>
                     <p className="text-muted-foreground flex items-center gap-2">
                       <MapPin className="h-4 w-4" />
