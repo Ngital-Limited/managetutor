@@ -2065,6 +2065,7 @@ export default function AdminDashboard() {
     {
       label: 'Analytics',
       items: [
+        { title: 'Conversion Funnel', value: 'conversion_funnel', icon: TrendingUp },
         { title: 'Geographic Analytics', value: 'geographic', icon: MapPin },
         { title: 'Referral Sources', value: 'referrals', icon: TrendingUp },
       ],
