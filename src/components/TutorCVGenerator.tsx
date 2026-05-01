@@ -281,6 +281,11 @@ function openCVPrintWindow(data: TutorCVData) {
   </div>
 </div>
 
+<div style="width:210mm;margin:0 auto;padding:8px 14mm;display:flex;justify-content:space-between;align-items:center;font-size:11px;color:#6b7280;border-top:1px solid #e5e7eb;background:#fff;">
+  <span>Powered by <strong style="color:#1f3a5f;">Manage Tutor</strong></span>
+  <a href="https://managetutor.com" style="color:#1f3a5f;text-decoration:none;">managetutor.com</a>
+</div>
+
 </body></html>`;
 
   win.document.write(html);
