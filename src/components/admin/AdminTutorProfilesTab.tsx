@@ -991,6 +991,11 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
                             </Link>
                           </DropdownMenuItem>
                           <DropdownMenuItem asChild>
+                            <Link to={`/admin/tutor-detail/${t.id}`} className="flex items-center gap-2">
+                              <FileText className="h-3.5 w-3.5" /> Full Detail
+                            </Link>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem asChild>
                             <Link to={`/admin/tutor/${t.user_id}`} className="flex items-center gap-2">
                               <Pencil className="h-3.5 w-3.5" /> Edit Profile
                             </Link>
