@@ -1663,7 +1663,35 @@ export default function AdminDashboard() {
   const handleUpdateJobStatus = async (jobId: string, status: string) => {
     const { error } = await supabase.from('jobs').update({ status: status as any }).eq('id', jobId);
     if (error) toast({ title: 'Error', description: error.message, variant: 'destructive' });
-    else { toast({ title: `Job status updated to ${status}` }); fetchJobs(); invalidate('admin:stats:v1'); void sharedInvalidate('admin:stats:v1'); fetchStats(true); }
+    else {
+      toast({ title: `Job status updated to ${status}` });
+
+      // Send job approval email when status moves to 'open'
+      if (status === 'open') {
+        try {
+          const { data: jobData } = await supabase.from('jobs').select('title, job_reference, parent_id').eq('id', jobId).single();
+          if (jobData?.parent_id) {
+            const { data: parentProfile } = await supabase.from('profiles').select('email, full_name').eq('id', jobData.parent_id).single();
+            if (parentProfile?.email) {
+              await supabase.functions.invoke('send-transactional-email', {
+                body: {
+                  templateName: 'job-approval-notification',
+                  recipientEmail: parentProfile.email,
+                  idempotencyKey: `job-approved-${jobId}`,
+                  templateData: {
+                    parentName: parentProfile.full_name,
+                    jobTitle: jobData.title,
+                    jobReference: jobData.job_reference,
+                  },
+                },
+              });
+            }
+          }
+        } catch (e) { console.error('Email send failed:', e); }
+      }
+
+      fetchJobs(); invalidate('admin:stats:v1'); void sharedInvalidate('admin:stats:v1'); fetchStats(true);
+    }
   };
 
   const openEditJob = async (jobId: string) => {
