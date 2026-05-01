@@ -101,7 +101,7 @@ export default function Auth() {
     return () => subscription.unsubscribe();
   }, [showVerifyEmail, emailVerified]);
 
-
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
