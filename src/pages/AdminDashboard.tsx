@@ -2863,10 +2863,38 @@ export default function AdminDashboard() {
                                       <Button
                                         variant="ghost"
                                         size="sm"
+                                        onClick={() => handleUpdateJobStatus(job.id, 'suspended')}
+                                        title="Temporarily Suspend"
+                                      >
+                                        <Ban className="h-4 w-4 text-warning" />
+                                      </Button>
+                                      <Button
+                                        variant="ghost"
+                                        size="sm"
                                         onClick={() => handleUpdateJobStatus(job.id, 'cancelled')}
                                         title="Mark as Expired / Cancelled"
                                       >
                                         <Clock className="h-4 w-4 text-muted-foreground" />
+                                      </Button>
+                                    </>
+                                  )}
+                                  {job.status === 'suspended' && (
+                                    <>
+                                      <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => handleUpdateJobStatus(job.id, 'open')}
+                                        title="Re-open (unsuspend)"
+                                      >
+                                        <CheckCircle2 className="h-4 w-4 text-success" />
+                                      </Button>
+                                      <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => handleUpdateJobStatus(job.id, 'cancelled')}
+                                        title="Permanently Cancel"
+                                      >
+                                        <XCircle className="h-4 w-4 text-destructive" />
                                       </Button>
                                     </>
                                   )}
