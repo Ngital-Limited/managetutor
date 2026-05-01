@@ -1797,6 +1797,7 @@ export default function AdminDashboard() {
     );
   }
 
+  const [sidebarSearch, setSidebarSearch] = useState('');
   const sidebarGroups = [
     {
       label: 'Overview',
@@ -1892,11 +1893,48 @@ export default function AdminDashboard() {
                 </button>
               )}
             </SidebarGroupLabel>
+            <SidebarGroupContent className="px-3 pb-2">
+              <div className="relative">
+                <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
+                <Input
+                  type="search"
+                  value={sidebarSearch}
+                  onChange={(e) => setSidebarSearch(e.target.value)}
+                  placeholder="Search admin…"
+                  className="h-8 pl-7 pr-7 text-xs"
+                  aria-label="Search admin sections"
+                />
+                {sidebarSearch && (
+                  <button
+                    type="button"
+                    onClick={() => setSidebarSearch('')}
+                    className="absolute right-1.5 top-1/2 -translate-y-1/2 inline-flex h-5 w-5 items-center justify-center rounded hover:bg-muted text-muted-foreground"
+                    aria-label="Clear search"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                )}
+              </div>
+            </SidebarGroupContent>
           </SidebarGroup>
-          {sidebarGroups.map((group) => {
+          {(() => {
+            const q = sidebarSearch.trim().toLowerCase();
+            const filteredGroups = q
+              ? sidebarGroups
+                  .map(g => ({ ...g, items: g.items.filter(i => i.title.toLowerCase().includes(q) || g.label.toLowerCase().includes(q)) }))
+                  .filter(g => g.items.length > 0)
+              : sidebarGroups;
+            if (q && filteredGroups.length === 0) {
+              return (
+                <div className="px-4 py-6 text-center text-xs text-muted-foreground">
+                  No matches for "{sidebarSearch}"
+                </div>
+              );
+            }
+            return filteredGroups.map((group) => {
             const groupIsActive = group.items.some(i => i.value === activeTab);
             return (
-              <Collapsible key={group.label} defaultOpen={groupIsActive || group.label === 'Dashboard'}>
+              <Collapsible key={group.label} defaultOpen={!!q || groupIsActive || group.label === 'Overview'}>
                 <SidebarGroup className="py-0">
                   <CollapsibleTrigger className="flex items-center justify-between w-full px-4 py-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors group">
                     <span>{group.label}</span>
@@ -1925,6 +1963,7 @@ export default function AdminDashboard() {
                                       setAllAppsStatusFilter('pending');
                                       setSelectedAppIds(new Set());
                                     }
+                                    setSidebarSearch('');
                                     closeOnMobile();
                                   }}
                                   className={buttonClass}
@@ -1945,7 +1984,8 @@ export default function AdminDashboard() {
                 </SidebarGroup>
               </Collapsible>
             );
-          })}
+            });
+          })()}
           <SidebarGroup className="mt-auto">
             <SidebarGroupContent>
               <SidebarMenu>
