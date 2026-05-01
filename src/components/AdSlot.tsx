@@ -66,11 +66,11 @@ export function AdSlot({ slot, width = 300, height = 250, className }: AdSlotPro
   return (
     <div
       className={className}
-      style={{ width: w, height: h }}
+      style={{ width: '100%', maxWidth: w, aspectRatio: `${w} / ${h}` }}
       aria-label="Sponsored"
     >
       {ad.link_url && ad.ad_type !== 'html' ? (
-        <a href={ad.link_url} target="_blank" rel="noopener noreferrer sponsored">
+        <a href={ad.link_url} target="_blank" rel="noopener noreferrer sponsored" style={{ display: 'block', width: '100%', height: '100%' }}>
           {inner}
         </a>
       ) : (
