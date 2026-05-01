@@ -1863,6 +1863,14 @@ export default function AdminDashboard() {
     cache: 'can_manage_settings',
   };
 
+  // Redirect to overview if current tab isn't permitted for this sub-admin
+  useEffect(() => {
+    const requiredPerm = TAB_PERM_MAP[activeTab];
+    if (requiredPerm && !hasPerm(requiredPerm) && activeTab !== 'overview') {
+      setActiveTab('overview');
+    }
+  }, [activeTab, hasPerm, setActiveTab]);
+
   if (loading || role !== 'admin') {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
