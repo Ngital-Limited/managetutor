@@ -2731,10 +2731,11 @@ export default function AdminDashboard() {
                 const filteredJobs = jobsList.filter(j => {
                   if (!search) return true;
                   const apps = pipelineApps.filter(a => a.job_id === j.jid);
+                  const parent = apps[0]?.parent_profile || (j.job as any)?.parent_profile;
                   const haystacks: string[] = [
                     j.job?.title, j.job?.job_reference,
-                    apps[0]?.parent_profile?.full_name, apps[0]?.parent_profile?.email,
-                    apps[0]?.parent_profile?.phone, apps[0]?.parent_profile?.user_reference,
+                    parent?.full_name, parent?.email,
+                    parent?.phone, parent?.user_reference,
                     ...apps.flatMap(a => [
                       a.tutor_profile?.full_name, a.tutor_profile?.email,
                       a.tutor_profile?.phone, a.tutor_profile?.user_reference,
