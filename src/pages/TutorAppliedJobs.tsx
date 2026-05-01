@@ -39,62 +39,6 @@ interface Application {
   };
 }
 
-const sidebarItems = [
-  { title: 'Dashboard', url: '/tutor/dashboard', icon: Home },
-  { title: 'My Applications', url: '/tutor/applications', icon: FileText },
-  { title: 'Demo Classes', url: '/tutor/dashboard#demo-classes', icon: Calendar },
-  { title: 'Find Jobs', url: '/tutor/find-jobs', icon: Briefcase },
-  { title: 'Job Recommendations', url: '/tutor/recommendations', icon: Sparkles },
-  { title: 'My Profile', url: '/tutor/profile', icon: User },
-  { title: 'Boost Your Profile', url: '/tutor/boost', icon: Zap },
-  { title: 'Verify Badge Payment', url: '/tutor/verify-badge', icon: ShieldCheck },
-  { title: 'Monthly Plan', url: '/pricing', icon: CreditCard },
-];
-
-function TutorAppSidebar() {
-  const { state } = useSidebar();
-  const collapsed = state === 'collapsed';
-  const { profile, user } = useAuth();
-  const initials = profile?.full_name
-    ? profile.full_name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
-    : user?.email?.[0]?.toUpperCase() || '?';
-
-  return (
-    <Sidebar collapsible="offcanvas">
-      <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupLabel>{!collapsed && <Logo size="sm" />}</SidebarGroupLabel>
-          <div className={`flex items-center gap-3 px-3 py-3 ${collapsed ? 'justify-center' : ''}`}>
-            <Avatar className="h-9 w-9 shrink-0 border-2 border-primary/20">
-              <AvatarImage src={profile?.avatar_url || ''} />
-              <AvatarFallback className="bg-primary/10 text-primary text-xs font-bold">{initials}</AvatarFallback>
-            </Avatar>
-            {!collapsed && (
-              <div className="min-w-0">
-                <p className="text-sm font-semibold truncate">{profile?.full_name || user?.email?.split('@')[0]}</p>
-                <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
-              </div>
-            )}
-          </div>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {sidebarItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <NavLink to={item.url} end={item.url === '/tutor/dashboard'} className="hover:bg-muted/50" activeClassName="bg-muted text-primary font-medium">
-                      <item.icon className="mr-2 h-4 w-4" />
-                      {!collapsed && <span>{item.title}</span>}
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-      </SidebarContent>
-    </Sidebar>
-  );
-}
 
 export default function TutorAppliedJobs() {
   const { user, signOut, loading: authLoading } = useAuth();
