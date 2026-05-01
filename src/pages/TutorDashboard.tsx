@@ -433,14 +433,23 @@ export default function TutorDashboard() {
     }
   };
 
-  const getProfileCompleteness = () => {
-    if (!profile) return 0;
-    let complete = 0;
-    if (profile.education) complete += 25;
-    if (profile.experience_years > 0) complete += 25;
-    if (profile.monthly_salary_min > 0) complete += 25;
-    if (profile.verification_status === 'approved') complete += 25;
-    return complete;
+  const getProfileStrength = () => {
+    if (!profile) return { score: 0, suggestions: [] as string[] };
+    const suggestions: string[] = [];
+    let score = 0;
+    const total = 8;
+
+    if (profile.education) score++; else suggestions.push('Add your education details to build credibility');
+    if (profile.experience_years > 0) score++; else suggestions.push('Add teaching experience — tutors with experience get 2x more views');
+    if (profile.monthly_salary_min > 0) score++; else suggestions.push('Set your expected salary range so parents can match budgets');
+    if (profile.verification_status === 'approved') score++; else suggestions.push('Get verified to earn a trust badge — verified tutors get hired 3x more');
+    if (userProfile?.avatar_url) score++; else suggestions.push('Upload a profile photo to get 40% more profile views');
+    if (profile.bio && profile.bio.length > 30) score++; else suggestions.push('Write a detailed bio (at least 30 characters) to stand out');
+    if (profile.is_available) score++; else suggestions.push('Mark yourself as available so parents can find you');
+    // Check if verification paid
+    if (profile.verification_paid) score++; else suggestions.push('Pay for verification badge to appear in premium results');
+
+    return { score: Math.round((score / total) * 100), suggestions };
   };
 
   const handlePayForVerification = async () => {
