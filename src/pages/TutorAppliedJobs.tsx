@@ -105,32 +105,8 @@ export default function TutorAppliedJobs() {
   }
 
   return (
-    <SidebarProvider>
-      <div className="min-h-screen flex w-full">
-        <TutorAppSidebar />
-        <div className="flex-1 flex flex-col">
-          <header className="sticky top-0 z-30 flex items-center justify-between px-4 py-3 border-b bg-background/95 backdrop-blur">
-            <div className="flex items-center gap-2">
-              <SidebarTrigger />
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => navigate('/tutor/dashboard')}
-                className="gap-1 px-2"
-                aria-label="Back to dashboard"
-              >
-                <ArrowLeft className="h-4 w-4" />
-                <span className="hidden sm:inline">Back</span>
-              </Button>
-              <h1 className="text-lg font-bold">My Applications</h1>
-            </div>
-            <div className="flex items-center gap-2">
-              <NotificationBell />
-              <Button variant="ghost" size="sm" onClick={signOut}><LogOut className="h-4 w-4" /></Button>
-            </div>
-          </header>
-
-          <main className="flex-1 p-4 md:p-6 max-w-[1200px] mx-auto w-full">
+    <TutorSidebarLayout title="My Applications">
+      <div className="p-4 md:p-6 max-w-[1200px] mx-auto w-full">
             {/* Stats */}
             <div className="grid grid-cols-2 md:grid-cols-7 gap-3 mb-6">
               {[
