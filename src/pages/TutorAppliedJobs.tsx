@@ -25,7 +25,7 @@ import {
   Briefcase, Clock, CheckCircle2, XCircle, MapPin, BookOpen,
   Eye, ArrowRight, ArrowLeft, User, Phone, Mail, LogOut, Globe,
   Home, Search, CreditCard, FileText, Calendar, GraduationCap,
-  Star, Hourglass,
+  Star, Hourglass, Sparkles, Zap, ShieldCheck,
 } from 'lucide-react';
 
 interface Application {
