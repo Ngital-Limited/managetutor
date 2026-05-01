@@ -25,7 +25,7 @@ import {
   Briefcase, Clock, CheckCircle2, XCircle, MapPin, BookOpen,
   Eye, ArrowRight, ArrowLeft, User, Phone, Mail, LogOut, Globe,
   Home, Search, CreditCard, FileText, Calendar, GraduationCap,
-  Star, Hourglass,
+  Star, Hourglass, Sparkles, Zap, ShieldCheck,
 } from 'lucide-react';
 
 interface Application {
@@ -51,10 +51,12 @@ const sidebarItems = [
   { title: 'Dashboard', url: '/tutor/dashboard', icon: Home },
   { title: 'My Applications', url: '/tutor/applications', icon: FileText },
   { title: 'Demo Classes', url: '/tutor/dashboard#demo-classes', icon: Calendar },
-  { title: 'Browse Jobs', url: '/jobs', icon: Briefcase },
+  { title: 'Find Jobs', url: '/tutor/find-jobs', icon: Briefcase },
+  { title: 'Job Recommendations', url: '/tutor/recommendations', icon: Sparkles },
   { title: 'My Profile', url: '/tutor/profile', icon: User },
-  { title: 'Find Tutors', url: '/tutors', icon: Search },
-  { title: 'Pricing', url: '/pricing', icon: CreditCard },
+  { title: 'Boost Your Profile', url: '/tutor/boost', icon: Zap },
+  { title: 'Verify Badge Payment', url: '/tutor/verify-badge', icon: ShieldCheck },
+  { title: 'Monthly Plan', url: '/pricing', icon: CreditCard },
 ];
 
 function TutorAppSidebar() {
