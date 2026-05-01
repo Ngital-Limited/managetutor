@@ -633,8 +633,21 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
     switch (s) {
       case 'approved': return 'bg-success/10 text-success border-success/20';
       case 'pending': return 'bg-warning/10 text-warning border-warning/20';
+      case 'under_review': return 'bg-primary/10 text-primary border-primary/20';
       case 'rejected': return 'bg-destructive/10 text-destructive border-destructive/20';
+      case 'document_needed': return 'bg-orange-500/10 text-orange-600 border-orange-500/20';
       default: return 'bg-muted text-muted-foreground';
+    }
+  };
+
+  const statusLabel = (s: string) => {
+    switch (s) {
+      case 'pending': return 'Pending';
+      case 'under_review': return 'Under Review';
+      case 'approved': return 'Approved';
+      case 'rejected': return 'Rejected';
+      case 'document_needed': return 'Document Needed';
+      default: return s;
     }
   };
 
