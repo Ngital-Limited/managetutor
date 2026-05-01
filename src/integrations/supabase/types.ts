@@ -110,6 +110,13 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "admin_permissions_user_id_profiles_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       applications: {
@@ -156,6 +163,13 @@ export type Database = {
             columns: ["tutor_id"]
             isOneToOne: false
             referencedRelation: "tutor_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "applications_tutor_id_fkey"
+            columns: ["tutor_id"]
+            isOneToOne: false
+            referencedRelation: "tutor_profiles_public"
             referencedColumns: ["id"]
           },
         ]
@@ -217,10 +231,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "blocked_users_blocked_id_profiles_fkey"
+            columns: ["blocked_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "blocked_users_blocker_id_profiles_fkey"
             columns: ["blocker_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "blocked_users_blocker_id_profiles_fkey"
+            columns: ["blocker_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_public"
             referencedColumns: ["id"]
           },
         ]
@@ -358,6 +386,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "demo_bookings_parent_id_profiles_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "demo_bookings_subject_id_fkey"
             columns: ["subject_id"]
             isOneToOne: false
@@ -369,6 +404,13 @@ export type Database = {
             columns: ["tutor_id"]
             isOneToOne: false
             referencedRelation: "tutor_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "demo_bookings_tutor_id_fkey"
+            columns: ["tutor_id"]
+            isOneToOne: false
+            referencedRelation: "tutor_profiles_public"
             referencedColumns: ["id"]
           },
         ]
@@ -547,10 +589,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "favorites_parent_id_profiles_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "favorites_tutor_id_fkey"
             columns: ["tutor_id"]
             isOneToOne: false
             referencedRelation: "tutor_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "favorites_tutor_id_fkey"
+            columns: ["tutor_id"]
+            isOneToOne: false
+            referencedRelation: "tutor_profiles_public"
             referencedColumns: ["id"]
           },
         ]
@@ -605,6 +661,13 @@ export type Database = {
             columns: ["tutor_id"]
             isOneToOne: false
             referencedRelation: "tutor_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "featured_listings_tutor_id_fkey"
+            columns: ["tutor_id"]
+            isOneToOne: false
+            referencedRelation: "tutor_profiles_public"
             referencedColumns: ["id"]
           },
         ]
@@ -765,6 +828,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "jobs_parent_id_profiles_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "jobs_subject_id_fkey"
             columns: ["subject_id"]
             isOneToOne: false
@@ -817,10 +887,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "messages_receiver_id_profiles_fkey"
+            columns: ["receiver_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "messages_sender_id_profiles_fkey"
             columns: ["sender_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_sender_id_profiles_fkey"
+            columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_public"
             referencedColumns: ["id"]
           },
         ]
@@ -862,6 +946,13 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_user_id_profiles_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_public"
             referencedColumns: ["id"]
           },
         ]
@@ -922,6 +1013,13 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payment_transactions_user_id_profiles_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_public"
             referencedColumns: ["id"]
           },
         ]
@@ -987,10 +1085,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "payout_requests_tutor_id_fkey"
+            columns: ["tutor_id"]
+            isOneToOne: false
+            referencedRelation: "tutor_profiles_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "payout_requests_user_id_profiles_fkey"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payout_requests_user_id_profiles_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_public"
             referencedColumns: ["id"]
           },
         ]
@@ -1193,10 +1305,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "reports_reported_user_id_profiles_fkey"
+            columns: ["reported_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "reports_reporter_id_profiles_fkey"
             columns: ["reporter_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reports_reporter_id_profiles_fkey"
+            columns: ["reporter_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_public"
             referencedColumns: ["id"]
           },
         ]
@@ -1331,6 +1457,13 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "support_tickets_user_id_profiles_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       suppressed_emails: {
@@ -1429,10 +1562,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "tutor_admin_notes_admin_id_fkey"
+            columns: ["admin_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "tutor_admin_notes_tutor_id_fkey"
             columns: ["tutor_id"]
             isOneToOne: false
             referencedRelation: "tutor_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tutor_admin_notes_tutor_id_fkey"
+            columns: ["tutor_id"]
+            isOneToOne: false
+            referencedRelation: "tutor_profiles_public"
             referencedColumns: ["id"]
           },
         ]
@@ -1485,6 +1632,13 @@ export type Database = {
             referencedRelation: "tutor_profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "tutor_education_tutor_id_fkey"
+            columns: ["tutor_id"]
+            isOneToOne: false
+            referencedRelation: "tutor_profiles_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       tutor_job_experiences: {
@@ -1527,6 +1681,13 @@ export type Database = {
             columns: ["tutor_id"]
             isOneToOne: false
             referencedRelation: "tutor_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tutor_job_experiences_tutor_id_fkey"
+            columns: ["tutor_id"]
+            isOneToOne: false
+            referencedRelation: "tutor_profiles_public"
             referencedColumns: ["id"]
           },
         ]
@@ -1707,6 +1868,13 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "tutor_profiles_user_id_profiles_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       tutor_subjects: {
@@ -1743,6 +1911,13 @@ export type Database = {
             referencedRelation: "tutor_profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "tutor_subjects_tutor_profile_id_fkey"
+            columns: ["tutor_profile_id"]
+            isOneToOne: false
+            referencedRelation: "tutor_profiles_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       user_roles: {
@@ -1770,6 +1945,13 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_roles_user_id_profiles_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_public"
             referencedColumns: ["id"]
           },
         ]
@@ -1866,11 +2048,211 @@ export type Database = {
             referencedRelation: "tutor_profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "verification_documents_tutor_id_fkey"
+            columns: ["tutor_id"]
+            isOneToOne: false
+            referencedRelation: "tutor_profiles_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
     }
     Views: {
-      [_ in never]: never
+      profiles_public: {
+        Row: {
+          area_id: string | null
+          avatar_url: string | null
+          created_at: string | null
+          district_id: string | null
+          email: string | null
+          email_verified: boolean | null
+          full_name: string | null
+          id: string | null
+          is_approved: boolean | null
+          is_banned: boolean | null
+          phone_verified: boolean | null
+          preferred_language: string | null
+          referral_source: string | null
+          updated_at: string | null
+          user_reference: string | null
+        }
+        Insert: {
+          area_id?: string | null
+          avatar_url?: string | null
+          created_at?: string | null
+          district_id?: string | null
+          email?: string | null
+          email_verified?: boolean | null
+          full_name?: string | null
+          id?: string | null
+          is_approved?: boolean | null
+          is_banned?: boolean | null
+          phone_verified?: boolean | null
+          preferred_language?: string | null
+          referral_source?: string | null
+          updated_at?: string | null
+          user_reference?: string | null
+        }
+        Update: {
+          area_id?: string | null
+          avatar_url?: string | null
+          created_at?: string | null
+          district_id?: string | null
+          email?: string | null
+          email_verified?: boolean | null
+          full_name?: string | null
+          id?: string | null
+          is_approved?: boolean | null
+          is_banned?: boolean | null
+          phone_verified?: boolean | null
+          preferred_language?: string | null
+          referral_source?: string | null
+          updated_at?: string | null
+          user_reference?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profiles_area_id_fkey"
+            columns: ["area_id"]
+            isOneToOne: false
+            referencedRelation: "areas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profiles_district_id_fkey"
+            columns: ["district_id"]
+            isOneToOne: false
+            referencedRelation: "districts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tutor_profiles_public: {
+        Row: {
+          area_id: string | null
+          bio: string | null
+          class_levels: string[] | null
+          created_at: string | null
+          display_name: string | null
+          district_id: string | null
+          education: string | null
+          experience_years: number | null
+          featured_blurb: string | null
+          gender: Database["public"]["Enums"]["gender"] | null
+          id: string | null
+          is_available: boolean | null
+          is_featured: boolean | null
+          is_student: boolean | null
+          monthly_salary_max: number | null
+          monthly_salary_min: number | null
+          slug: string | null
+          success_stories: string | null
+          teaching_mode: Database["public"]["Enums"]["teaching_mode"] | null
+          teaching_philosophy: string | null
+          total_students: number | null
+          updated_at: string | null
+          user_id: string | null
+          verification_paid: boolean | null
+          verification_status:
+            | Database["public"]["Enums"]["verification_status"]
+            | null
+          verified_at: string | null
+          video_url: string | null
+        }
+        Insert: {
+          area_id?: string | null
+          bio?: string | null
+          class_levels?: string[] | null
+          created_at?: string | null
+          display_name?: string | null
+          district_id?: string | null
+          education?: string | null
+          experience_years?: number | null
+          featured_blurb?: string | null
+          gender?: Database["public"]["Enums"]["gender"] | null
+          id?: string | null
+          is_available?: boolean | null
+          is_featured?: boolean | null
+          is_student?: boolean | null
+          monthly_salary_max?: number | null
+          monthly_salary_min?: number | null
+          slug?: string | null
+          success_stories?: string | null
+          teaching_mode?: Database["public"]["Enums"]["teaching_mode"] | null
+          teaching_philosophy?: string | null
+          total_students?: number | null
+          updated_at?: string | null
+          user_id?: string | null
+          verification_paid?: boolean | null
+          verification_status?:
+            | Database["public"]["Enums"]["verification_status"]
+            | null
+          verified_at?: string | null
+          video_url?: string | null
+        }
+        Update: {
+          area_id?: string | null
+          bio?: string | null
+          class_levels?: string[] | null
+          created_at?: string | null
+          display_name?: string | null
+          district_id?: string | null
+          education?: string | null
+          experience_years?: number | null
+          featured_blurb?: string | null
+          gender?: Database["public"]["Enums"]["gender"] | null
+          id?: string | null
+          is_available?: boolean | null
+          is_featured?: boolean | null
+          is_student?: boolean | null
+          monthly_salary_max?: number | null
+          monthly_salary_min?: number | null
+          slug?: string | null
+          success_stories?: string | null
+          teaching_mode?: Database["public"]["Enums"]["teaching_mode"] | null
+          teaching_philosophy?: string | null
+          total_students?: number | null
+          updated_at?: string | null
+          user_id?: string | null
+          verification_paid?: boolean | null
+          verification_status?:
+            | Database["public"]["Enums"]["verification_status"]
+            | null
+          verified_at?: string | null
+          video_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tutor_profiles_area_id_fkey"
+            columns: ["area_id"]
+            isOneToOne: false
+            referencedRelation: "areas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tutor_profiles_district_id_fkey"
+            columns: ["district_id"]
+            isOneToOne: false
+            referencedRelation: "districts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tutor_profiles_user_id_profiles_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tutor_profiles_user_id_profiles_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       cleanup_expired_cache: { Args: never; Returns: undefined }
