@@ -365,7 +365,20 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
     const DEGREE_RANK: Record<string, number> = { masters: 4, master: 4, bachelor: 3, hsc: 2, ssc: 1 };
     const lastEduMap = new Map<string, string>();
     const lastInstMap = new Map<string, string>();
+    const eduHistMap = new Map<string, TutorRow['education_history']>();
     (eduData || []).forEach((e: any) => {
+      const list = eduHistMap.get(e.tutor_id) || [];
+      list.push({
+        degree: e.degree,
+        institution: e.institution,
+        field_of_study: e.field_of_study,
+        passing_year: e.passing_year,
+        result: e.result,
+        medium: e.medium,
+        is_current: e.is_current,
+      });
+      eduHistMap.set(e.tutor_id, list);
+
       if (!e.institution?.trim()) return;
       const key = (e.degree || '').toLowerCase().trim();
       const rank = DEGREE_RANK[key] ?? 0;
