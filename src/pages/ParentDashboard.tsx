@@ -1591,8 +1591,44 @@ export default function ParentDashboard() {
         </Card>
       )}
 
+      {/* Free Posting Banner */}
+      <Card className="mb-6 border-primary/30 bg-primary/5">
+        <CardContent className="p-5">
+          <div className="flex items-start gap-4">
+            <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+              <Zap className="h-5 w-5 text-primary" />
+            </div>
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-1">
+                <h3 className="font-bold text-lg">Post Jobs for Free!</h3>
+                <Badge className="bg-primary text-primary-foreground">Free</Badge>
+              </div>
+              <p className="text-sm text-muted-foreground mb-3">
+                Post unlimited tuition job ads at no cost. Find the perfect tutor for your child today.
+              </p>
+              <div className="flex flex-wrap gap-2">
+                <Button size="sm" onClick={() => { resetJobForm(); prefillFromLastJob(); setShowPostJob(true); }}>
+                  <Plus className="h-4 w-4 mr-1" />
+                  Post a Job (Free)
+                </Button>
+                <Link to="/tutors">
+                  <Button size="sm" variant="outline">
+                    <Search className="h-4 w-4 mr-1" />
+                    Browse Tutors
+                  </Button>
+                </Link>
+                <Button size="sm" variant="outline" onClick={() => setActiveSection('applicants')}>
+                  <Users className="h-4 w-4 mr-1" />
+                  View Applications
+                </Button>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
         <Card className="cursor-pointer hover:border-primary/50 transition-colors" onClick={() => setActiveSection('jobs')}>
           <CardContent className="p-5">
             <div className="flex items-center justify-between">
@@ -1604,7 +1640,7 @@ export default function ParentDashboard() {
             </div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="cursor-pointer hover:border-primary/50 transition-colors" onClick={() => setActiveSection('applicants')}>
           <CardContent className="p-5">
             <div className="flex items-center justify-between">
               <div>
@@ -1612,6 +1648,17 @@ export default function ParentDashboard() {
                 <p className="text-3xl font-bold text-accent">{totalApplicants}</p>
               </div>
               <Users className="h-8 w-8 text-accent" />
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="cursor-pointer hover:border-primary/50 transition-colors" onClick={() => { setActiveSection('applicants'); setApplicantsStatusFilter('shortlisted'); }}>
+          <CardContent className="p-5">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Shortlisted</p>
+                <p className="text-3xl font-bold text-primary">{allApplicants.filter((a: any) => a.status === 'shortlisted').length}</p>
+              </div>
+              <Star className="h-8 w-8 text-primary" />
             </div>
           </CardContent>
         </Card>
@@ -1623,6 +1670,17 @@ export default function ParentDashboard() {
                 <p className="text-3xl font-bold text-success">{activeJobs.length}</p>
               </div>
               <CheckCircle2 className="h-8 w-8 text-success" />
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-5">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Active Tuitions</p>
+                <p className="text-3xl font-bold text-accent">{activeJobs.length}</p>
+              </div>
+              <GraduationCap className="h-8 w-8 text-accent" />
             </div>
           </CardContent>
         </Card>
