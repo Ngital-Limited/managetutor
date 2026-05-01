@@ -47,7 +47,7 @@ export function AdSlot({ slot, width = 300, height = 250, className }: AdSlotPro
 
   const inner = ad.ad_type === 'html' ? (
     <div
-      style={{ width: w, height: h, overflow: 'hidden' }}
+      style={{ width: '100%', height: '100%', overflow: 'hidden' }}
       dangerouslySetInnerHTML={{ __html: ad.html_content || '' }}
     />
   ) : ad.image_url ? (
@@ -57,7 +57,7 @@ export function AdSlot({ slot, width = 300, height = 250, className }: AdSlotPro
       width={w}
       height={h}
       loading="lazy"
-      style={{ width: w, height: h, objectFit: 'cover', display: 'block' }}
+      style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
     />
   ) : null;
 
