@@ -2344,6 +2344,17 @@ export default function ParentDashboard() {
                         </div>
                       </div>
                     )}
+                    {booking.status === 'completed' && !submittedFeedback.has(booking.id) && (
+                      <Button size="sm" variant="outline" className="h-7 text-xs mt-1" onClick={() => {
+                        setFeedbackBooking(booking);
+                        setFeedbackDialogOpen(true);
+                      }}>
+                        <Star className="h-3 w-3 mr-1" /> Leave Feedback
+                      </Button>
+                    )}
+                    {submittedFeedback.has(booking.id) && (
+                      <Badge variant="outline" className="text-xs mt-1">Feedback Submitted</Badge>
+                    )}
                   </div>
                 </div>
               </div>
