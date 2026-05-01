@@ -326,17 +326,12 @@ export default function Auth() {
 
       toast({ title: 'Profile completed!', description: 'Redirecting to your dashboard...' });
 
-      // Force refresh the auth context
-      const { refreshProfile } = await import('@/contexts/AuthContext').then(() => ({ refreshProfile: null }));
-      
-      // Navigate based on role
+      // Navigate based on role and reload to refresh auth context
       if (selectedRole === 'tutor') {
-        navigate('/tutor/dashboard');
+        window.location.href = '/tutor/dashboard';
       } else {
-        navigate('/parent/dashboard');
+        window.location.href = '/parent/dashboard';
       }
-      // Reload to refresh auth context with new role
-      window.location.reload();
     } catch (err: any) {
       toast({ title: 'Error', description: err.message || 'Something went wrong', variant: 'destructive' });
     }
