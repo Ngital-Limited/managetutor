@@ -126,7 +126,7 @@ interface JobRow {
   created_at: string;
   districts: { name_en: string };
   subjects: { name_en: string } | null;
-  profiles: { full_name: string };
+  profiles: { full_name: string; phone?: string | null };
 }
 
 interface Report {
@@ -1412,10 +1412,26 @@ export default function AdminDashboard() {
     if (jobStatusFilter !== 'all') query = query.eq('status', jobStatusFilter as any);
 
     const q = jobSearchDebounced;
+    let phoneMatchedParentIds: string[] | null = null;
     if (q) {
-      // Server-side OR search across reference + title
       const escaped = q.replace(/[%,()]/g, ' ');
-      query = query.or(`job_reference.ilike.%${escaped}%,title.ilike.%${escaped}%`);
+      // If query looks like a phone (contains digits), also search parent profiles by phone
+      if (/\d/.test(q)) {
+        const { data: phoneProfiles } = await supabase
+          .from('profiles')
+          .select('id')
+          .ilike('phone', `%${escaped}%`)
+          .limit(500);
+        phoneMatchedParentIds = (phoneProfiles || []).map(p => p.id);
+      }
+      const orParts = [
+        `job_reference.ilike.%${escaped}%`,
+        `title.ilike.%${escaped}%`,
+      ];
+      if (phoneMatchedParentIds && phoneMatchedParentIds.length > 0) {
+        orParts.push(`parent_id.in.(${phoneMatchedParentIds.join(',')})`);
+      }
+      query = query.or(orParts.join(','));
     }
 
     const { data, count } = await query;
@@ -1423,9 +1439,9 @@ export default function AdminDashboard() {
 
     if (data && data.length > 0) {
       const parentIds = [...new Set(data.map(j => j.parent_id))];
-      const { data: profs } = await supabase.from('profiles').select('id, full_name').in('id', parentIds);
+      const { data: profs } = await supabase.from('profiles').select('id, full_name, phone').in('id', parentIds);
       const pMap = new Map(profs?.map(p => [p.id, p]) || []);
-      setJobs(data.map(j => ({ ...j, profiles: pMap.get(j.parent_id) || { full_name: 'Unknown' } })) as unknown as JobRow[]);
+      setJobs(data.map(j => ({ ...j, profiles: pMap.get(j.parent_id) || { full_name: 'Unknown', phone: null } })) as unknown as JobRow[]);
     } else {
       setJobs([]);
     }
@@ -2475,7 +2491,7 @@ export default function AdminDashboard() {
                       <Input
                         value={jobSearch}
                         onChange={(e) => setJobSearch(e.target.value)}
-                        placeholder="Search by reference or title"
+                        placeholder="Search by reference, title, or phone"
                         className="pl-8 h-9"
                       />
                     </div>
@@ -2501,6 +2517,7 @@ export default function AdminDashboard() {
                             <TableHead>Reference</TableHead>
                             <TableHead>Title</TableHead>
                             <TableHead>Posted By</TableHead>
+                            <TableHead>Phone</TableHead>
                             <TableHead>Location</TableHead>
                             <TableHead>Subject</TableHead>
                             <TableHead>Apps</TableHead>
@@ -2511,14 +2528,15 @@ export default function AdminDashboard() {
                         </TableHeader>
                         <TableBody>
                           {jobsLoading ? (
-                            <TableRow><TableCell colSpan={9} className="text-center py-8 text-muted-foreground">Loading…</TableCell></TableRow>
+                            <TableRow><TableCell colSpan={10} className="text-center py-8 text-muted-foreground">Loading…</TableCell></TableRow>
                           ) : jobs.length === 0 ? (
-                            <TableRow><TableCell colSpan={9} className="text-center py-8 text-muted-foreground">No jobs found</TableCell></TableRow>
+                            <TableRow><TableCell colSpan={10} className="text-center py-8 text-muted-foreground">No jobs found</TableCell></TableRow>
                           ) : jobs.map((job) => (
                             <TableRow key={job.id}>
                               <TableCell className="font-mono text-xs">{job.job_reference || '—'}</TableCell>
                               <TableCell className="font-medium text-sm max-w-[200px] truncate">{job.title}</TableCell>
                               <TableCell className="text-sm">{(job.profiles as any)?.full_name}</TableCell>
+                              <TableCell className="text-xs font-mono">{(job.profiles as any)?.phone || '—'}</TableCell>
                               <TableCell className="text-sm">{(job.districts as any)?.name_en}</TableCell>
                               <TableCell className="text-sm">{(job.subjects as any)?.name_en || '—'}</TableCell>
                               <TableCell>
