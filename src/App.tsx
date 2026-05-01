@@ -15,6 +15,8 @@ import JobDetails from "./pages/JobDetails";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminBulkImportTutors from "./pages/AdminBulkImportTutors";
 import AdminBulkImportJobs from "./pages/AdminBulkImportJobs";
+import AdminGuardianDetail from "./pages/AdminGuardianDetail";
+import AdminTutorDetail from "./pages/AdminTutorDetail";
 import TutorProfile from "./pages/TutorProfile";
 import TutorDashboard from "./pages/TutorDashboard";
 import TutorAppliedJobs from "./pages/TutorAppliedJobs";
