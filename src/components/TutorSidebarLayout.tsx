@@ -17,16 +17,36 @@ import {
 } from 'lucide-react';
 import { TutorBottomNav } from '@/components/TutorBottomNav';
 
-const tutorSidebarItems = [
-  { title: 'Dashboard', url: '/tutor/dashboard', icon: Home },
-  { title: 'My Applications', url: '/tutor/applications', icon: FileText },
-  { title: 'Demo Classes', url: '/tutor/dashboard#demo-classes', icon: Calendar },
-  { title: 'Find Jobs', url: '/tutor/find-jobs', icon: Briefcase },
-  { title: 'Job Recommendations', url: '/tutor/recommendations', icon: Sparkles },
-  { title: 'My Profile', url: '/tutor/profile', icon: User },
-  { title: 'Boost Your Profile', url: '/tutor/boost', icon: Zap },
-  { title: 'Verify Badge Payment', url: '/tutor/verify-badge', icon: ShieldCheck },
-  { title: 'Monthly Plan', url: '/pricing', icon: CreditCard },
+const tutorSidebarGroups: { label: string; items: { title: string; url: string; icon: any; end?: boolean }[] }[] = [
+  {
+    label: 'Main',
+    items: [
+      { title: 'Dashboard', url: '/tutor/dashboard', icon: Home, end: true },
+      { title: 'My Applications', url: '/tutor/applications', icon: FileText },
+      { title: 'Demo Classes', url: '/tutor/dashboard#demo-classes', icon: Calendar },
+    ],
+  },
+  {
+    label: 'Find Work',
+    items: [
+      { title: 'Find Jobs', url: '/tutor/find-jobs', icon: Briefcase },
+      { title: 'Job Recommendations', url: '/tutor/recommendations', icon: Sparkles },
+    ],
+  },
+  {
+    label: 'Profile',
+    items: [
+      { title: 'My Profile', url: '/tutor/profile', icon: User },
+      { title: 'Boost Your Profile', url: '/tutor/boost', icon: Zap },
+      { title: 'Verify Badge Payment', url: '/tutor/verify-badge', icon: ShieldCheck },
+    ],
+  },
+  {
+    label: 'Billing',
+    items: [
+      { title: 'Monthly Plan', url: '/pricing', icon: CreditCard },
+    ],
+  },
 ];
 
 function TutorSidebarInner() {
