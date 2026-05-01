@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { CLASS_LEVELS } from '@/constants/classLevels';
 import { JOB_CATEGORIES } from '@/constants/jobCategories';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
