@@ -57,6 +57,8 @@ import { AdminHiresTab } from '@/components/admin/AdminHiresTab';
 import { AdminCommissionTab } from '@/components/admin/AdminCommissionTab';
 import { AdminPhoneLogTab } from '@/components/admin/AdminPhoneLogTab';
 import { AdminActivityLogTab } from '@/components/admin/AdminActivityLogTab';
+import { AdminSmartMatchTab } from '@/components/admin/AdminSmartMatchTab';
+import { AdminPipelineTab } from '@/components/admin/AdminPipelineTab';
 import { AdminNotesWidget } from '@/components/admin/AdminNotesWidget';
 import { AutoRefreshControl } from '@/components/AutoRefreshControl';
 import { logAdminAction } from '@/lib/adminLogger';
