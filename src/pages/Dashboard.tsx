@@ -16,6 +16,9 @@ export default function Dashboard() {
         navigate('/parent/dashboard');
       } else if (effectiveRole === 'admin') {
         navigate('/admin');
+      } else {
+        // User is authenticated but has no role (e.g. new Google OAuth signup)
+        navigate('/auth?mode=complete-profile');
       }
     }
   }, [user, loading, effectiveRole, navigate]);
