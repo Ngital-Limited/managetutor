@@ -493,7 +493,7 @@ export default function TutorDashboard() {
     );
   }
 
-  const profileComplete = getProfileCompleteness();
+  const { score: profileComplete, suggestions: profileSuggestions } = getProfileStrength();
 
   return (
     <TutorSidebarLayout title="Tutor Dashboard">
