@@ -244,6 +244,37 @@
   }
 }
 
+/* ── Ad slot isolation ─────────────────────────────────── */
+/* Ads (especially HTML/script ads) must never push parent width,
+   inflate grid tracks, leak styles, or cause layout shift.
+   The .ad-slot wrapper is a strict, contained block.            */
+@layer components {
+  .ad-slot {
+    display: block;
+    max-width: 100%;
+    min-width: 0;
+    overflow: hidden;
+    contain: layout paint size style;
+    isolation: isolate;
+  }
+  .ad-slot > * {
+    max-width: 100%;
+    min-width: 0;
+  }
+  .ad-slot iframe,
+  .ad-slot img,
+  .ad-slot video {
+    display: block;
+    max-width: 100%;
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+  /* Header, footer, and page containers must never be widened
+     by overflowing children (ads, long unbreakable strings, etc.) */
+  .page-container { overflow-x: clip; }
+}
+
 
 /* ── Admin dashboard layout polish ─────────────────────── */
 @layer components {
