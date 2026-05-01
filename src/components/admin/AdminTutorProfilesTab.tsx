@@ -49,6 +49,15 @@ interface TutorRow {
   education: string | null;
   last_education: string | null;
   last_institution: string | null;
+  education_history: Array<{
+    degree: string | null;
+    institution: string | null;
+    field_of_study: string | null;
+    passing_year: number | null;
+    result: string | null;
+    medium: string | null;
+    is_current: boolean | null;
+  }>;
   experience_years: number;
   teaching_mode: string | null;
   verification_status: string;
