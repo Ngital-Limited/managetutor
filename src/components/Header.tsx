@@ -79,7 +79,7 @@ export function Header() {
             : 'bg-card/80 backdrop-blur-xl border-b border-transparent'
         }`}
       >
-        <div className="container mx-auto w-full px-4 md:px-6 max-w-[1200px] min-w-0 h-16 flex items-center justify-between">
+        <div className="page-container h-16 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-3 shrink-0">
             <Logo size="md" />
           </Link>
