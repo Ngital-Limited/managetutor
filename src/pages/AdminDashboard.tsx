@@ -819,6 +819,9 @@ export default function AdminDashboard() {
   const [loadingParentJobs, setLoadingParentJobs] = useState(false);
   const [pendingTutors, setPendingTutors] = useState<TutorVerification[]>([]);
   const [verificationFilter, setVerificationFilter] = useState('pending');
+  const [verificationDocType, setVerificationDocType] = useState<string>('all');
+  const [verificationDistrict, setVerificationDistrict] = useState<string>('all');
+  const [verificationDistricts, setVerificationDistricts] = useState<{ id: string; name_en: string }[]>([]);
   const [verificationPayments, setVerificationPayments] = useState<PaymentRow[]>([]);
   const [verificationFee, setVerificationFee] = useState<number>(50);
   const [jobs, setJobs] = useState<JobRow[]>([]);
