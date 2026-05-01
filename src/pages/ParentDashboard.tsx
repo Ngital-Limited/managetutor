@@ -2391,51 +2391,105 @@ export default function ParentDashboard() {
   );
 
   const renderProfile = () => (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <User className="h-5 w-5" />
-          My Profile
-        </CardTitle>
-        <CardDescription>Manage your personal information</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="flex items-center gap-4 mb-6">
-          <Avatar className="h-20 w-20">
-            <AvatarImage src={userProfile?.avatar_url || ''} />
-            <AvatarFallback className="text-2xl">{userProfile?.full_name?.charAt(0) || 'P'}</AvatarFallback>
-          </Avatar>
-          <div>
-            <h3 className="text-xl font-bold">{userProfile?.full_name || 'Parent'}</h3>
-            <p className="text-sm text-muted-foreground">{userProfile?.email}</p>
-            {userProfile?.phone && <p className="text-sm text-muted-foreground">{userProfile.phone}</p>}
-            {userProfile?.user_reference && (
-              <Badge variant="outline" className="font-mono text-xs mt-1">{userProfile.user_reference}</Badge>
-            )}
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2"><User className="h-5 w-5" /> My Profile</CardTitle>
+          <CardDescription>Manage your personal information</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center gap-4 mb-6">
+            <Avatar className="h-20 w-20">
+              <AvatarImage src={userProfile?.avatar_url || ''} />
+              <AvatarFallback className="text-2xl">{userProfile?.full_name?.charAt(0) || 'P'}</AvatarFallback>
+            </Avatar>
+            <div>
+              <h3 className="text-xl font-bold">{userProfile?.full_name || 'Parent'}</h3>
+              <p className="text-sm text-muted-foreground">{userProfile?.email}</p>
+              {userProfile?.phone && <p className="text-sm text-muted-foreground">{userProfile.phone}</p>}
+              {userProfile?.user_reference && <Badge variant="outline" className="font-mono text-xs mt-1">{userProfile.user_reference}</Badge>}
+            </div>
           </div>
-        </div>
+          <Progress value={profileInfo.percent} className="h-2 mb-3" />
+          <p className="text-sm text-muted-foreground mb-4">{profileInfo.percent}% complete</p>
+          {profileInfo.missing.length > 0 && (
+            <div className="flex flex-wrap gap-2 mb-4">
+              {profileInfo.missing.map((item) => <Badge key={item} variant="outline" className="text-warning border-warning/50">Missing: {item}</Badge>)}
+            </div>
+          )}
+          <Link to="/parent/profile"><Button><Edit className="h-4 w-4 mr-2" /> Edit Profile</Button></Link>
+        </CardContent>
+      </Card>
 
-        <Progress value={profileInfo.percent} className="h-2 mb-3" />
-        <p className="text-sm text-muted-foreground mb-4">{profileInfo.percent}% complete</p>
-
-        {profileInfo.missing.length > 0 && (
-          <div className="flex flex-wrap gap-2 mb-4">
-            {profileInfo.missing.map((item) => (
-              <Badge key={item} variant="outline" className="text-warning border-warning/50">
-                Missing: {item}
-              </Badge>
-            ))}
+      {/* Student Profiles */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="flex items-center gap-2"><GraduationCap className="h-5 w-5" /> Student Profiles</CardTitle>
+              <CardDescription>Manage your children's learning profiles</CardDescription>
+            </div>
+            <Button size="sm" onClick={() => { resetStudentForm(); setShowStudentForm(true); }}><Plus className="h-4 w-4 mr-1" /> Add Student</Button>
           </div>
-        )}
-
-        <Link to="/parent/profile">
-          <Button>
-            <Edit className="h-4 w-4 mr-2" />
-            Edit Profile
-          </Button>
-        </Link>
-      </CardContent>
-    </Card>
+        </CardHeader>
+        <CardContent>
+          {showStudentForm && (
+            <div className="p-4 border rounded-xl mb-4 bg-muted/30 space-y-3">
+              <h4 className="font-semibold text-sm">{editingStudent ? 'Edit Student' : 'Add Student'}</h4>
+              <div className="grid grid-cols-2 gap-3">
+                <div><Label>Name *</Label><Input value={studentForm.name} onChange={e => setStudentForm({...studentForm, name: e.target.value})} placeholder="Student name" /></div>
+                <div><Label>Age</Label><Input type="number" value={studentForm.age} onChange={e => setStudentForm({...studentForm, age: e.target.value})} placeholder="e.g. 12" /></div>
+                <div><Label>Class Level</Label><Input value={studentForm.class_level} onChange={e => setStudentForm({...studentForm, class_level: e.target.value})} placeholder="e.g. Class 8" /></div>
+                <div><Label>School</Label><Input value={studentForm.school_name} onChange={e => setStudentForm({...studentForm, school_name: e.target.value})} placeholder="School name" /></div>
+                <div><Label>Medium</Label>
+                  <Select value={studentForm.medium} onValueChange={v => setStudentForm({...studentForm, medium: v})}>
+                    <SelectTrigger><SelectValue placeholder="Select medium" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Bangla">Bangla Medium</SelectItem>
+                      <SelectItem value="English">English Medium</SelectItem>
+                      <SelectItem value="Madrasa">Madrasa</SelectItem>
+                      <SelectItem value="English Version">English Version</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div><Label>Learning Needs</Label><Input value={studentForm.learning_needs} onChange={e => setStudentForm({...studentForm, learning_needs: e.target.value})} placeholder="e.g. Needs help with Math" /></div>
+              </div>
+              <div className="flex gap-2">
+                <Button size="sm" onClick={handleSaveStudent}>{editingStudent ? 'Update' : 'Save'}</Button>
+                <Button size="sm" variant="outline" onClick={resetStudentForm}>Cancel</Button>
+              </div>
+            </div>
+          )}
+          {studentProfiles.length > 0 ? (
+            <div className="space-y-3">
+              {studentProfiles.map((s: any) => (
+                <div key={s.id} className="p-4 border rounded-xl flex items-start justify-between">
+                  <div>
+                    <h4 className="font-bold">{s.name}</h4>
+                    <div className="flex flex-wrap gap-2 mt-1">
+                      {s.age && <Badge variant="outline" className="text-xs">Age: {s.age}</Badge>}
+                      {s.class_level && <Badge variant="outline" className="text-xs">{s.class_level}</Badge>}
+                      {s.school_name && <Badge variant="outline" className="text-xs">{s.school_name}</Badge>}
+                      {s.medium && <Badge variant="outline" className="text-xs">{s.medium}</Badge>}
+                    </div>
+                    {s.learning_needs && <p className="text-xs text-muted-foreground mt-1">{s.learning_needs}</p>}
+                  </div>
+                  <div className="flex gap-1">
+                    <Button size="icon" variant="ghost" onClick={() => startEditStudent(s)}><Edit className="h-4 w-4" /></Button>
+                    <Button size="icon" variant="ghost" className="text-destructive" onClick={() => deleteStudent(s.id)}><Trash2 className="h-4 w-4" /></Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : !showStudentForm && (
+            <div className="text-center py-8">
+              <GraduationCap className="h-10 w-10 text-muted-foreground mx-auto mb-2" />
+              <p className="text-sm text-muted-foreground">No student profiles yet. Add your children's details.</p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
   );
 
   const renderApplicants = () => {
