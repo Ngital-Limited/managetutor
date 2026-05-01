@@ -223,6 +223,28 @@
   .animation-delay-500 { animation-delay: 500ms; }
 }
 
+/* ── Shared page layout container ──────────────────────── */
+/* Use .page-container on header, footer, and page main wrappers
+   to guarantee identical max-width and horizontal padding everywhere. */
+@layer components {
+  .page-container {
+    width: 100%;
+    max-width: 1200px;
+    min-width: 0;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 1rem;   /* 16px */
+    padding-right: 1rem;
+  }
+  @media (min-width: 768px) {
+    .page-container {
+      padding-left: 1.5rem;  /* 24px */
+      padding-right: 1.5rem;
+    }
+  }
+}
+
+
 /* ── Admin dashboard layout polish ─────────────────────── */
 @layer components {
   /* Compact, consistent tables inside admin main */
