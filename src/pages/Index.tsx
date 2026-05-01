@@ -363,8 +363,8 @@ export default function Index() {
                   { grad: 'from-tutor to-accent', icon: 'bg-tutor/15 text-tutor', border: 'hover:border-tutor/40' },
                   { grad: 'from-accent to-primary', icon: 'bg-accent/15 text-accent', border: 'hover:border-accent/40' },
                   { grad: 'from-success to-accent', icon: 'bg-success/15 text-success', border: 'hover:border-success/40' },
-                  { grad: 'from-agency to-warning', icon: 'bg-agency/15 text-agency', border: 'hover:border-agency/40' },
-                  { grad: 'from-warning to-agency', icon: 'bg-warning/15 text-warning', border: 'hover:border-warning/40' },
+                  { grad: 'from-primary/80 to-warning', icon: 'bg-primary/15 text-primary', border: 'hover:border-primary/40' },
+                  { grad: 'from-warning to-accent', icon: 'bg-warning/15 text-warning', border: 'hover:border-warning/40' },
                 ];
                 const p = palettes[i % palettes.length];
                 return (
