@@ -1697,6 +1697,7 @@ export default function AdminDashboard() {
     if (error) toast({ title: 'Error', description: error.message, variant: 'destructive' });
     else {
       toast({ title: 'Success', description: `User ${ban ? 'banned' : 'unbanned'}` });
+      if (user) logAdminAction(user.id, ban ? 'user_banned' : 'user_unbanned', 'user', userId);
       setSelectedUser(null);
       setAdminNotes('');
       fetchUsers();
