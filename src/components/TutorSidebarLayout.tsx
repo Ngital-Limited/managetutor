@@ -45,6 +45,7 @@ const tutorSidebarGroups: { label: string; items: { title: string; url: string; 
   {
     label: 'Account',
     items: [
+      { title: 'Analytics', url: '/tutor/analytics', icon: BarChart3 },
       { title: 'Monthly Plan', url: '/pricing', icon: CreditCard },
       { title: 'Settings', url: '/tutor/settings', icon: Settings },
     ],
