@@ -542,23 +542,20 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
     setSearch('');
     setFilterAreas([]);
     setFilterGender('all');
-    setFilterMedium('all');
-    setFilterEducation('');
     setFilterUniversity('');
     setFilterVerification('all');
     setFilterAvailability('all');
-    setFilterClassLevel('all');
-    setFilterSubject('all');
-    setFilterCategory('all');
-    setFilterLastEducation('all');
+    setFilterEduMedium('all');
+    setFilterEduBackground('all');
+    setFilterFieldOfStudy('all');
   };
 
   const activeFilterCount = [
-    filterAreas.length > 0, filterGender !== 'all', filterMedium !== 'all',
-    filterEducation !== '', filterUniversity !== '',
+    filterAreas.length > 0, filterGender !== 'all',
+    filterUniversity !== '',
     filterVerification !== 'all', filterAvailability !== 'all',
-    filterClassLevel !== 'all', filterSubject !== 'all', filterCategory !== 'all',
-    filterLastEducation !== 'all',
+    filterEduMedium !== 'all', filterEduBackground !== 'all',
+    filterFieldOfStudy !== 'all',
   ].filter(Boolean).length;
 
   const statusColor = (s: string) => {
