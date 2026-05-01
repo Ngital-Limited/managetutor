@@ -323,12 +323,15 @@ export function AdminSmartMatchTab() {
         reference_id: selectedJob.id,
       });
 
-      await logAdminAction(`${applyDialog.mode}_on_behalf`, 'application', {
-        tutor_id: applyDialog.tutor.tutor_id,
-        job_id: selectedJob.id,
-        tutor_name: applyDialog.tutor.name,
-        job_title: selectedJob.title,
-      });
+      // Log admin action - get current user
+      const { data: { user: currentUser } } = await supabase.auth.getUser();
+      if (currentUser) {
+        await logAdminAction(currentUser.id, `${applyDialog.mode}_on_behalf`, 'application', selectedJob.id, {
+          tutor_id: applyDialog.tutor.tutor_id,
+          tutor_name: applyDialog.tutor.name,
+          job_title: selectedJob.title,
+        });
+      }
 
       toast({ title: `Tutor ${applyDialog.mode === 'apply' ? 'applied' : applyDialog.mode === 'shortlist' ? 'shortlisted' : 'accepted'} successfully` });
 
