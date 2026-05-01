@@ -56,6 +56,8 @@ export default function Auth() {
   const [verifyError, setVerifyError] = useState<string | null>(null);
   const [resendLoading, setResendLoading] = useState(false);
   const [resendCooldown, setResendCooldown] = useState(0);
+  const [showCompleteProfile, setShowCompleteProfile] = useState(searchParams.get('mode') === 'complete-profile');
+  const [completeProfileLoading, setCompleteProfileLoading] = useState(false);
 
   const { role: userRole } = useAuth();
 
