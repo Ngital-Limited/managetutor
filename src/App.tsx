@@ -25,6 +25,9 @@ import TutorVerifyBadge from "./pages/TutorVerifyBadge";
 import TutorSettings from "./pages/TutorSettings";
 import TutorSavedJobs from "./pages/TutorSavedJobs";
 import TutorAnalytics from "./pages/TutorAnalytics";
+import TutorTuitions from "./pages/TutorTuitions";
+import TutorHelp from "./pages/TutorHelp";
+import TutorReferrals from "./pages/TutorReferrals";
 import ParentDashboard from "./pages/ParentDashboard";
 import ParentProfileEdit from "./pages/ParentProfileEdit";
 
@@ -81,6 +84,9 @@ const App = () => (
               <Route path="/tutor/settings" element={<TutorSettings />} />
               <Route path="/tutor/analytics" element={<TutorAnalytics />} />
               <Route path="/tutor/saved-jobs" element={<TutorSavedJobs />} />
+              <Route path="/tutor/tuitions" element={<TutorTuitions />} />
+              <Route path="/tutor/help" element={<TutorHelp />} />
+              <Route path="/tutor/referrals" element={<TutorReferrals />} />
               <Route path="/admin/tutor/:userId" element={<TutorProfile />} />
               <Route path="/favorites" element={<Favorites />} />
               <Route path="/pricing" element={<Pricing />} />
