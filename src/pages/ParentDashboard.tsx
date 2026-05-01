@@ -2401,7 +2401,7 @@ export default function ParentDashboard() {
           </header>
 
           <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto pb-24 md:pb-8">
-            {renderActiveSection()}
+            {showPostJob ? postJobPage : renderActiveSection()}
           </main>
           <ParentBottomNav
             activeSection={activeSection}
