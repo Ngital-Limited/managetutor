@@ -11,6 +11,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Label } from '@/components/ui/label';
 import { MultiSearchableSelect } from '@/components/MultiSearchableSelect';
@@ -49,6 +50,15 @@ interface TutorRow {
   education: string | null;
   last_education: string | null;
   last_institution: string | null;
+  education_history: Array<{
+    degree: string | null;
+    institution: string | null;
+    field_of_study: string | null;
+    passing_year: number | null;
+    result: string | null;
+    medium: string | null;
+    is_current: boolean | null;
+  }>;
   experience_years: number;
   teaching_mode: string | null;
   verification_status: string;
@@ -346,15 +356,29 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
         .select('id, full_name, email, phone, avatar_url, user_reference, is_approved, is_banned, area_id')
         .in('id', userIds),
       supabase.from('tutor_education')
-        .select('tutor_id, degree, institution')
-        .in('tutor_id', tutorIds),
+        .select('tutor_id, degree, institution, field_of_study, passing_year, result, medium, is_current')
+        .in('tutor_id', tutorIds)
+        .order('passing_year', { ascending: false, nullsFirst: false }),
     ]);
 
     const profMap = new Map((profilesData || []).map(p => [p.id, p]));
     const DEGREE_RANK: Record<string, number> = { masters: 4, master: 4, bachelor: 3, hsc: 2, ssc: 1 };
     const lastEduMap = new Map<string, string>();
     const lastInstMap = new Map<string, string>();
+    const eduHistMap = new Map<string, TutorRow['education_history']>();
     (eduData || []).forEach((e: any) => {
+      const list = eduHistMap.get(e.tutor_id) || [];
+      list.push({
+        degree: e.degree,
+        institution: e.institution,
+        field_of_study: e.field_of_study,
+        passing_year: e.passing_year,
+        result: e.result,
+        medium: e.medium,
+        is_current: e.is_current,
+      });
+      eduHistMap.set(e.tutor_id, list);
+
       if (!e.institution?.trim()) return;
       const key = (e.degree || '').toLowerCase().trim();
       const rank = DEGREE_RANK[key] ?? 0;
@@ -383,6 +407,7 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
         education: t.education,
         last_education: lastEduMap.get(t.id) || null,
         last_institution: lastInstMap.get(t.id) || null,
+        education_history: eduHistMap.get(t.id) || [],
         experience_years: t.experience_years || 0,
         teaching_mode: t.teaching_mode,
         verification_status: t.verification_status || 'pending',
@@ -816,6 +841,7 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
                     </button>
                   </TableHead>
                   <TableHead>Last Education Institution</TableHead>
+                  <TableHead>Education Background</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>
                     <button
@@ -837,9 +863,9 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
               </TableHeader>
               <TableBody>
                 {loading ? (
-                  <TableRow><TableCell colSpan={11} className="text-center py-12"><Loader2 className="h-6 w-6 animate-spin mx-auto text-muted-foreground" /></TableCell></TableRow>
+                  <TableRow><TableCell colSpan={12} className="text-center py-12"><Loader2 className="h-6 w-6 animate-spin mx-auto text-muted-foreground" /></TableCell></TableRow>
                 ) : sortedTutors.length === 0 ? (
-                  <TableRow><TableCell colSpan={11} className="text-center py-12 text-muted-foreground">No tutors match the current filters</TableCell></TableRow>
+                  <TableRow><TableCell colSpan={12} className="text-center py-12 text-muted-foreground">No tutors match the current filters</TableCell></TableRow>
                 ) : paginatedTutors.map(t => (
                   <TableRow key={t.tutor_id} className={`${selectedIds.has(t.user_id) ? 'bg-primary/5' : ''} ${t.is_banned ? 'opacity-60' : ''}`}>
                     <TableCell><Checkbox checked={selectedIds.has(t.user_id)} onCheckedChange={() => toggleSelect(t.user_id)} /></TableCell>
@@ -877,6 +903,59 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
                       )}
                     </TableCell>
                     <TableCell className="text-xs max-w-[200px] truncate" title={t.last_institution || ''}>{t.last_institution || '—'}</TableCell>
+                    <TableCell className="text-xs">
+                      {t.education_history.length === 0 ? (
+                        <span className="text-muted-foreground">—</span>
+                      ) : (
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <button
+                              type="button"
+                              className="inline-flex items-center gap-1 hover:text-primary"
+                              aria-label="View full education background"
+                            >
+                              <GraduationCap className="h-3.5 w-3.5" />
+                              <span className="font-medium">{t.education_history.length}</span>
+                              <span className="text-muted-foreground">
+                                {t.education_history.length === 1 ? 'entry' : 'entries'}
+                              </span>
+                            </button>
+                          </PopoverTrigger>
+                          <PopoverContent align="start" className="w-80 p-0">
+                            <div className="px-3 py-2 border-b bg-muted/40">
+                              <p className="text-xs font-semibold">Education Background</p>
+                              <p className="text-[10px] text-muted-foreground truncate">{t.name}</p>
+                            </div>
+                            <ScrollArea className="max-h-72">
+                              <ul className="divide-y">
+                                {t.education_history.map((e, idx) => (
+                                  <li key={idx} className="px-3 py-2 text-xs space-y-0.5">
+                                    <div className="flex items-center justify-between gap-2">
+                                      <span className="font-semibold capitalize">{e.degree || 'Unknown degree'}</span>
+                                      <div className="flex items-center gap-1">
+                                        {e.is_current && <Badge variant="secondary" className="text-[9px] py-0 px-1">Current</Badge>}
+                                        {e.passing_year && <span className="text-muted-foreground text-[10px]">{e.passing_year}</span>}
+                                      </div>
+                                    </div>
+                                    {e.institution && (
+                                      <p className="text-foreground/90 truncate" title={e.institution}>{e.institution}</p>
+                                    )}
+                                    {(e.field_of_study || e.medium) && (
+                                      <p className="text-muted-foreground text-[10px]">
+                                        {[e.field_of_study, e.medium].filter(Boolean).join(' • ')}
+                                      </p>
+                                    )}
+                                    {e.result && (
+                                      <p className="text-muted-foreground text-[10px]">Result: {e.result}</p>
+                                    )}
+                                  </li>
+                                ))}
+                              </ul>
+                            </ScrollArea>
+                          </PopoverContent>
+                        </Popover>
+                      )}
+                    </TableCell>
                     <TableCell>
                       <div className="flex flex-col gap-0.5">
                         <Badge className={`text-[10px] capitalize ${statusColor(t.verification_status)}`}>{t.verification_status}</Badge>
