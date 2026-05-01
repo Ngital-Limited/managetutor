@@ -299,6 +299,7 @@ export default function ParentDashboard() {
   const [feedbackRecommend, setFeedbackRecommend] = useState(false);
   const [submittedFeedback, setSubmittedFeedback] = useState<Set<string>>(new Set());
 
+  const [jobForm, setJobForm] = useState({
     title: '',
     description: '',
     subject_ids: [] as string[],
