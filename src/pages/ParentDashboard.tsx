@@ -1025,7 +1025,10 @@ export default function ParentDashboard() {
       <CardHeader className="flex flex-row items-start justify-between gap-4">
         <div>
           <CardTitle>{editingJob ? 'Edit Tuition Job' : 'Post a Tuition Job'}</CardTitle>
-          <CardDescription>Fill in the details below. The job will be reviewed by our team before going live.</CardDescription>
+          <CardDescription className="flex items-center gap-2">
+            Fill in the details below. The job will be reviewed by our team before going live.
+            {!editingJob && <Badge className="bg-primary text-primary-foreground">Free Posting</Badge>}
+          </CardDescription>
         </div>
         <Button type="button" variant="outline" size="sm" onClick={() => { setShowPostJob(false); setEditingJob(null); resetJobForm(); }}>Cancel</Button>
       </CardHeader>
@@ -1591,8 +1594,44 @@ export default function ParentDashboard() {
         </Card>
       )}
 
+      {/* Free Posting Banner */}
+      <Card className="mb-6 border-primary/30 bg-primary/5">
+        <CardContent className="p-5">
+          <div className="flex items-start gap-4">
+            <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+              <Zap className="h-5 w-5 text-primary" />
+            </div>
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-1">
+                <h3 className="font-bold text-lg">Post Jobs for Free!</h3>
+                <Badge className="bg-primary text-primary-foreground">Free</Badge>
+              </div>
+              <p className="text-sm text-muted-foreground mb-3">
+                Post unlimited tuition job ads at no cost. Find the perfect tutor for your child today.
+              </p>
+              <div className="flex flex-wrap gap-2">
+                <Button size="sm" onClick={() => { resetJobForm(); prefillFromLastJob(); setShowPostJob(true); }}>
+                  <Plus className="h-4 w-4 mr-1" />
+                  Post a Job (Free)
+                </Button>
+                <Link to="/tutors">
+                  <Button size="sm" variant="outline">
+                    <Search className="h-4 w-4 mr-1" />
+                    Browse Tutors
+                  </Button>
+                </Link>
+                <Button size="sm" variant="outline" onClick={() => setActiveSection('applicants')}>
+                  <Users className="h-4 w-4 mr-1" />
+                  View Applications
+                </Button>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
         <Card className="cursor-pointer hover:border-primary/50 transition-colors" onClick={() => setActiveSection('jobs')}>
           <CardContent className="p-5">
             <div className="flex items-center justify-between">
@@ -1604,7 +1643,7 @@ export default function ParentDashboard() {
             </div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="cursor-pointer hover:border-primary/50 transition-colors" onClick={() => setActiveSection('applicants')}>
           <CardContent className="p-5">
             <div className="flex items-center justify-between">
               <div>
@@ -1612,6 +1651,17 @@ export default function ParentDashboard() {
                 <p className="text-3xl font-bold text-accent">{totalApplicants}</p>
               </div>
               <Users className="h-8 w-8 text-accent" />
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="cursor-pointer hover:border-primary/50 transition-colors" onClick={() => { setActiveSection('applicants'); setApplicantsStatusFilter('shortlisted'); }}>
+          <CardContent className="p-5">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Shortlisted</p>
+                <p className="text-3xl font-bold text-primary">{allApplicants.filter((a: any) => a.status === 'shortlisted').length}</p>
+              </div>
+              <Star className="h-8 w-8 text-primary" />
             </div>
           </CardContent>
         </Card>
@@ -1623,6 +1673,17 @@ export default function ParentDashboard() {
                 <p className="text-3xl font-bold text-success">{activeJobs.length}</p>
               </div>
               <CheckCircle2 className="h-8 w-8 text-success" />
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-5">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Active Tuitions</p>
+                <p className="text-3xl font-bold text-accent">{activeJobs.length}</p>
+              </div>
+              <GraduationCap className="h-8 w-8 text-accent" />
             </div>
           </CardContent>
         </Card>
@@ -1839,21 +1900,40 @@ export default function ParentDashboard() {
                                 <tbody>
                                   {applications.map(app => {
                                     const tutor = app.tutor_profiles;
+                                    const isVerified = tutor?.verification_status === 'approved' && tutor?.verification_paid;
                                     return (
                                       <tr key={app.id} className="border-b hover:bg-muted/50 transition-colors">
                                         <td className="py-2 px-2">
-                                          <Avatar className="h-9 w-9">
-                                            <AvatarImage src={tutor?.profiles?.avatar_url} />
-                                            <AvatarFallback>{tutor?.profiles?.full_name?.charAt(0) || 'T'}</AvatarFallback>
-                                          </Avatar>
+                                          <div className="relative">
+                                            <Avatar className="h-9 w-9">
+                                              <AvatarImage src={tutor?.profiles?.avatar_url} />
+                                              <AvatarFallback>{tutor?.profiles?.full_name?.charAt(0) || 'T'}</AvatarFallback>
+                                            </Avatar>
+                                            {isVerified && (
+                                              <div className="absolute -bottom-0.5 -right-0.5 h-4 w-4 bg-primary rounded-full flex items-center justify-center border-2 border-card" title="Verified Tutor">
+                                                <CheckCircle2 className="h-2.5 w-2.5 text-primary-foreground" />
+                                              </div>
+                                            )}
+                                          </div>
                                         </td>
                                         <td className="py-2 px-2">
                                           <div className="flex flex-col">
-                                            <span className="font-semibold">{tutor?.profiles?.full_name}</span>
+                                            <div className="flex items-center gap-1.5">
+                                              <span className="font-semibold">{tutor?.profiles?.full_name}</span>
+                                              {isVerified && (
+                                                <Badge className="bg-primary/10 text-primary border-primary/20 text-[10px] px-1.5 py-0">Verified</Badge>
+                                              )}
+                                            </div>
                                             <span className="text-xs text-muted-foreground">
                                               {tutor?.experience_years || 0} yrs exp
-                                              {tutor?.verification_status === 'approved' && tutor?.verification_paid && ' · ✓ Verified'}
+                                              {tutor?.education ? ` · ${tutor.education}` : ''}
+                                              {tutor?.education_detail ? ` (${tutor.education_detail})` : ''}
                                             </span>
+                                            {app.cover_message && (
+                                              <p className="text-xs text-muted-foreground mt-1 line-clamp-2 italic max-w-[280px]">
+                                                "{app.cover_message}"
+                                              </p>
+                                            )}
                                           </div>
                                         </td>
                                         <td className="py-2 px-2 text-muted-foreground whitespace-nowrap">
@@ -2280,21 +2360,39 @@ export default function ParentDashboard() {
               <tbody>
                 {filteredApplicants.map((app: any) => {
                   const tutor = app.tutor_profiles;
+                  const isVerified = tutor?.verification_status === 'approved' && tutor?.verification_paid;
                   return (
                     <tr key={app.id} className="border-b hover:bg-muted/50 transition-colors">
                       <td className="py-3 px-2">
-                        <Avatar className="h-10 w-10">
-                          <AvatarImage src={tutor?.profiles?.avatar_url} />
-                          <AvatarFallback>{tutor?.profiles?.full_name?.charAt(0) || 'T'}</AvatarFallback>
-                        </Avatar>
+                        <div className="relative">
+                          <Avatar className="h-10 w-10">
+                            <AvatarImage src={tutor?.profiles?.avatar_url} />
+                            <AvatarFallback>{tutor?.profiles?.full_name?.charAt(0) || 'T'}</AvatarFallback>
+                          </Avatar>
+                          {isVerified && (
+                            <div className="absolute -bottom-0.5 -right-0.5 h-4 w-4 bg-primary rounded-full flex items-center justify-center border-2 border-card" title="Verified Tutor">
+                              <CheckCircle2 className="h-2.5 w-2.5 text-primary-foreground" />
+                            </div>
+                          )}
+                        </div>
                       </td>
                       <td className="py-3 px-2">
                         <div className="flex flex-col">
-                          <span className="font-semibold">{tutor?.profiles?.full_name}</span>
+                          <div className="flex items-center gap-1.5">
+                            <span className="font-semibold">{tutor?.profiles?.full_name}</span>
+                            {isVerified && (
+                              <Badge className="bg-primary/10 text-primary border-primary/20 text-[10px] px-1.5 py-0">Verified</Badge>
+                            )}
+                          </div>
                           <span className="text-xs text-muted-foreground">
                             {tutor?.experience_years || 0} yrs
-                            {tutor?.verification_status === 'approved' && tutor?.verification_paid && ' · ✓'}
+                            {tutor?.education ? ` · ${tutor.education}` : ''}
                           </span>
+                          {app.cover_message && (
+                            <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1 italic max-w-[200px]">
+                              "{app.cover_message}"
+                            </p>
+                          )}
                         </div>
                       </td>
                       <td className="py-3 px-2">
