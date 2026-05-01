@@ -49,6 +49,7 @@ import { AdminCreateUserTab } from '@/components/admin/AdminCreateUserTab';
 import { AdminPostJobTab } from '@/components/admin/AdminPostJobTab';
 
 import { AdminTutorProfilesTab } from '@/components/admin/AdminTutorProfilesTab';
+import { AdminVerificationsTab } from '@/components/admin/AdminVerificationsTab';
 import { ReferralAnalyticsTab } from '@/components/admin/ReferralAnalyticsTab';
 import { AdsManagementTab } from '@/components/admin/AdsManagementTab';
 import { AdminCacheTab } from '@/components/admin/AdminCacheTab';
