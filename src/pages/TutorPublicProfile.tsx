@@ -365,9 +365,28 @@ export default function TutorPublicProfile() {
                     <p className="text-sm leading-relaxed font-medium">{tutor.featured_blurb}</p>
                   </div>
                 )}
-                {tutor.bio && (
-                  <p className="text-sm text-muted-foreground whitespace-pre-wrap leading-relaxed">{tutor.bio}</p>
-                )}
+                {tutor.bio && (() => {
+                  // Sanitize bio: remove lines containing sensitive/structured data
+                  const sensitivePatterns = [
+                    /^(father|mother|guardian|parent)\s*:/i,
+                    /^(present|permanent|address|home)\s*:/i,
+                    /^(phone|mobile|contact|nid|national id)\s*:/i,
+                    /\b\d{10,11}\b/, // phone numbers
+                    /^(experience|background|medium|preferred\s*(classes|subjects)|education)\s*:/i,
+                  ];
+                  const cleaned = tutor.bio
+                    .split('\n')
+                    .filter(line => {
+                      const trimmed = line.trim();
+                      if (!trimmed) return true;
+                      return !sensitivePatterns.some(p => p.test(trimmed));
+                    })
+                    .join('\n')
+                    .trim();
+                  return cleaned ? (
+                    <p className="text-sm text-muted-foreground whitespace-pre-wrap leading-relaxed">{cleaned}</p>
+                  ) : null;
+                })()}
                 {!tutor.bio && !tutor.featured_blurb && (
                   <p className="text-sm text-muted-foreground italic">This tutor hasn't written an about me yet.</p>
                 )}
@@ -592,7 +611,7 @@ export default function TutorPublicProfile() {
                           <p className="text-xs text-muted-foreground">{rt.experience_years || 0} yrs exp</p>
                         </div>
                       </div>
-                      {snippet && (
+                      {snippet && !(/^(father|mother|present|permanent|experience|background|medium|preferred)/im.test(snippet)) && (
                         <p className="text-xs text-muted-foreground line-clamp-2 mb-2">{snippet}</p>
                       )}
                       <p className="text-sm font-bold text-primary">৳{rt.monthly_salary_min || 0}–{rt.monthly_salary_max || 0}<span className="text-[10px] text-muted-foreground font-normal ml-1">/month</span></p>
