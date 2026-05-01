@@ -1799,29 +1799,30 @@ export default function AdminDashboard() {
 
   const sidebarGroups = [
     {
-      label: 'Dashboard',
+      label: 'Overview',
       items: [
-        { title: 'Overview', value: 'overview', icon: BarChart3 },
+        { title: 'Dashboard', value: 'overview', icon: BarChart3 },
       ],
     },
     {
-      label: 'Users',
-      items: [
-        { title: 'Tutor Profiles', value: 'tutor_profiles', icon: GraduationCap },
-        { title: 'Guardians / Parents', value: 'guardians', icon: Users },
-        { title: 'Verifications', value: 'verifications', icon: UserCheck, badge: stats.pendingVerifications },
-        { title: 'Create User', value: 'create_user', icon: UserPlus },
-        { title: 'Import Tutors', value: 'import_tutors', icon: Download, href: '/admin/import-tutors' },
-      ],
-    },
-    {
-      label: 'Jobs & Tutoring',
+      label: 'Applications',
       items: [
         { title: 'Jobs', value: 'jobs', icon: Briefcase },
         { title: 'Applications', value: 'applications', icon: FileText, badge: stats.pendingApplications },
+        { title: 'Demo Requests', value: 'demo_requests', icon: BookOpen },
         { title: 'Post Job', value: 'post_job', icon: Plus },
         { title: 'Import Jobs', value: 'import_jobs', icon: Download, href: '/admin/import-jobs' },
-        { title: 'Demo Requests', value: 'demo_requests', icon: BookOpen },
+        { title: 'Reports', value: 'reports', icon: AlertTriangle, badge: stats.pendingReports },
+      ],
+    },
+    {
+      label: 'Tutors',
+      items: [
+        { title: 'Tutor Profiles', value: 'tutor_profiles', icon: GraduationCap },
+        { title: 'Verifications', value: 'verifications', icon: UserCheck, badge: stats.pendingVerifications },
+        { title: 'Guardians / Parents', value: 'guardians', icon: Users },
+        { title: 'Create User', value: 'create_user', icon: UserPlus },
+        { title: 'Import Tutors', value: 'import_tutors', icon: Download, href: '/admin/import-tutors' },
       ],
     },
     {
@@ -1841,21 +1842,20 @@ export default function AdminDashboard() {
       ],
     },
     {
-      label: 'Analytics & Reports',
+      label: 'Analytics',
       items: [
-        { title: 'Reports', value: 'reports', icon: AlertTriangle, badge: stats.pendingReports },
         { title: 'Geographic Analytics', value: 'geographic', icon: MapPin },
         { title: 'Referral Sources', value: 'referrals', icon: TrendingUp },
       ],
     },
     {
-      label: 'System',
+      label: 'Settings',
       items: [
+        { title: 'General Settings', value: 'settings', icon: Settings },
         { title: 'Sub-Admin Roles', value: 'rbac', icon: ShieldCheck },
         { title: 'Platform Data', value: 'platform_data', icon: BookOpen },
         { title: 'Ads Management', value: 'ads', icon: Megaphone },
         { title: 'Cache', value: 'cache', icon: Activity },
-        { title: 'Settings', value: 'settings', icon: Settings },
       ],
     },
   ];
