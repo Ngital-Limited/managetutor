@@ -2809,13 +2809,13 @@ export default function AdminDashboard() {
                                 <TableRow><TableCell colSpan={8} className="text-center py-16 text-muted-foreground">
                                   <div className="flex flex-col items-center gap-2">
                                     <Users className="h-8 w-8 opacity-30" />
-                                    <div className="text-sm">{appsPipelineTab === 'all' ? 'No applications yet.' : `No jobs with ${PIPELINE_TABS.find(t => t.key === appsPipelineTab)?.label.toLowerCase()} applicants.`}</div>
+                                    <div className="text-sm">{appsPipelineTab === 'all' ? 'No applications yet.' : appsPipelineTab === 'no_applicants' ? 'All open jobs have at least one applicant.' : `No jobs with ${PIPELINE_TABS.find(t => t.key === appsPipelineTab)?.label.toLowerCase()} applicants.`}</div>
                                   </div>
                                 </TableCell></TableRow>
                               ) : filteredJobs.slice((appsJobsPage - 1) * appsJobsPageSize, appsJobsPage * appsJobsPageSize).map(({ jid, job, total, pending, shortlisted, latest }) => {
                                 const guardianApp = allApplications.find(a => a.job_id === jid);
-                                const guardianName = guardianApp?.parent_profile?.full_name || '—';
-                                const guardianPhone = guardianApp?.parent_profile?.phone || '—';
+                                const guardianName = guardianApp?.parent_profile?.full_name || (job as any)?.parent_profile?.full_name || '—';
+                                const guardianPhone = guardianApp?.parent_profile?.phone || (job as any)?.parent_profile?.phone || '—';
                                 return (
                                 <TableRow
                                   key={jid}
