@@ -284,6 +284,21 @@ export default function TutorProfile() {
       toast({ title: 'Profile Picture Required', description: 'Please upload a profile picture. It is mandatory for tutors.', variant: 'destructive' });
       return;
     }
+    // Family & Emergency contacts are mandatory
+    const requiredContacts = [
+      { value: profile.father_name?.trim(), label: "Father's Name" },
+      { value: profile.mother_name?.trim(), label: "Mother's Name" },
+      { value: profile.father_phone?.trim(), label: "Father's Phone" },
+      { value: profile.mother_phone?.trim(), label: "Mother's Phone" },
+      { value: profile.emergency_contact_name?.trim(), label: 'Emergency Contact Name' },
+      { value: profile.emergency_contact_phone?.trim(), label: 'Emergency Contact Phone' },
+    ];
+    const missingContact = requiredContacts.find(f => !f.value);
+    if (missingContact) {
+      toast({ title: `${missingContact.label} Required`, description: `${missingContact.label} is mandatory. Please fill it in the Family tab.`, variant: 'destructive' });
+      return;
+    }
+
     const phoneFields = [
       { value: profile.father_phone, label: "Father's Phone" },
       { value: profile.mother_phone, label: "Mother's Phone" },
@@ -293,6 +308,28 @@ export default function TutorProfile() {
     if (invalidPhone) {
       toast({ title: 'Invalid Phone', description: `${invalidPhone.label} is not a valid Bangladesh phone number.`, variant: 'destructive' });
       return;
+    }
+
+    // Identity document mandatory (NID / Passport / Birth Certificate) — uploaded via storage
+    if (!idDocUrl) {
+      toast({ title: 'Identity Document Required', description: 'Please upload your NID, Passport, or Birth Certificate in the Media tab.', variant: 'destructive' });
+      return;
+    }
+
+    // Verification documents mandatory based on student status
+    if (profile.is_student) {
+      const hasUniId = documents.some(d => d.document_type === 'university_id_card');
+      const hasPayslip = documents.some(d => d.document_type === 'university_payslip');
+      if (!hasUniId && !hasPayslip) {
+        toast({ title: 'University Document Required', description: 'Please upload your University ID Card or Payslip in the Media tab.', variant: 'destructive' });
+        return;
+      }
+    } else {
+      const hasEduCert = documents.some(d => d.document_type === 'education_certificate');
+      if (!hasEduCert) {
+        toast({ title: 'Educational Certificate Required', description: 'Please upload your Educational Certificate in the Media tab.', variant: 'destructive' });
+        return;
+      }
     }
 
     setSaving(true);
