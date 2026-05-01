@@ -13,19 +13,11 @@ import {
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { Logo } from '@/components/Logo';
-import { NotificationBell } from '@/components/NotificationBell';
-import {
-  Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent,
-  SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem,
-  SidebarProvider, SidebarTrigger, useSidebar,
-} from '@/components/ui/sidebar';
-import { NavLink } from '@/components/NavLink';
+import { TutorSidebarLayout } from '@/components/TutorSidebarLayout';
 import {
   Briefcase, Clock, CheckCircle2, XCircle, MapPin, BookOpen,
-  Eye, ArrowRight, ArrowLeft, User, Phone, Mail, LogOut, Globe,
-  Home, Search, CreditCard, FileText, Calendar, GraduationCap,
-  Star, Hourglass, Sparkles, Zap, ShieldCheck,
+  Eye, ArrowRight, User, Phone, Mail,
+  Star, Hourglass,
 } from 'lucide-react';
 
 interface Application {
