@@ -113,7 +113,7 @@ export function AdminHiresTab({ toast }: { toast: any }) {
       .update({ status, admin_notes: adminNotes || undefined, updated_at: new Date().toISOString() } as any)
       .eq('id', id);
     if (error) toast({ title: 'Error', description: error.message, variant: 'destructive' });
-    else { toast({ title: `Hire ${status}` }); setSelectedHire(null); setAdminNotes(''); fetchHires(); }
+    else { toast({ title: `Hire ${status}` }); if (user) logAdminAction(user.id, status === 'confirmed' ? 'hire_confirmed' : 'hire_cancelled', 'hire', id); setSelectedHire(null); setAdminNotes(''); fetchHires(); }
     setProcessing(false);
   };
 
