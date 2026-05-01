@@ -63,6 +63,7 @@ export default function Auth() {
 
   useEffect(() => {
     if (user && !authLoading && userRole) {
+      // User has a role — redirect to dashboard
       const redirect = searchParams.get('redirect');
       if (redirect && redirect.startsWith('/') && !redirect.startsWith('//')) {
         navigate(redirect);
@@ -76,6 +77,13 @@ export default function Auth() {
         navigate('/admin');
       } else {
         navigate('/dashboard');
+      }
+    } else if (user && !authLoading && !userRole) {
+      // User is authenticated but has no role — show complete-profile form
+      setShowCompleteProfile(true);
+      // Pre-fill name from Google profile if available
+      if (!fullName && user.user_metadata?.full_name) {
+        setFullName(user.user_metadata.full_name);
       }
     }
   }, [user, authLoading, userRole, navigate, searchParams]);
