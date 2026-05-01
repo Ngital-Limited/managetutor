@@ -14,6 +14,7 @@ import {
 import {
   Home, FileText, Calendar, Briefcase, User, CreditCard, LogOut,
   Sparkles, Zap, ShieldCheck, X, Bookmark, Settings, BarChart3,
+  BookOpen, HelpCircle, Gift,
 } from 'lucide-react';
 import { TutorBottomNav } from '@/components/TutorBottomNav';
 
@@ -22,6 +23,7 @@ const tutorSidebarGroups: { label: string; items: { title: string; url: string; 
     label: 'Main',
     items: [
       { title: 'Dashboard', url: '/tutor/dashboard', icon: Home, end: true },
+      { title: 'My Tuitions', url: '/tutor/tuitions', icon: BookOpen },
       { title: 'My Applications', url: '/tutor/applications', icon: FileText },
       { title: 'Saved Jobs', url: '/tutor/saved-jobs', icon: Bookmark },
       { title: 'Demo Classes', url: '/tutor/dashboard#demo-classes', icon: Calendar },
@@ -46,7 +48,9 @@ const tutorSidebarGroups: { label: string; items: { title: string; url: string; 
     label: 'Account',
     items: [
       { title: 'Analytics', url: '/tutor/analytics', icon: BarChart3 },
+      { title: 'Referrals & Badges', url: '/tutor/referrals', icon: Gift },
       { title: 'Monthly Plan', url: '/pricing', icon: CreditCard },
+      { title: 'Help & Support', url: '/tutor/help', icon: HelpCircle },
       { title: 'Settings', url: '/tutor/settings', icon: Settings },
     ],
   },

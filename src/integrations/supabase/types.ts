@@ -1230,6 +1230,60 @@ export type Database = {
           },
         ]
       }
+      referral_codes: {
+        Row: {
+          created_at: string
+          id: string
+          referral_code: string
+          total_earnings: number
+          total_referrals: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          referral_code: string
+          total_earnings?: number
+          total_referrals?: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          referral_code?: string
+          total_earnings?: number
+          total_referrals?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
+      referral_history: {
+        Row: {
+          created_at: string
+          id: string
+          referred_user_id: string | null
+          referrer_id: string
+          reward_amount: number | null
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          referred_user_id?: string | null
+          referrer_id: string
+          reward_amount?: number | null
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          referred_user_id?: string | null
+          referrer_id?: string
+          reward_amount?: number | null
+          status?: string
+        }
+        Relationships: []
+      }
       refund_requests: {
         Row: {
           admin_notes: string | null
@@ -1368,6 +1422,50 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      session_logs: {
+        Row: {
+          attendance: string
+          created_at: string
+          homework_given: string | null
+          id: string
+          log_date: string
+          session_id: string
+          topic_covered: string | null
+          tutor_notes: string | null
+          user_id: string
+        }
+        Insert: {
+          attendance?: string
+          created_at?: string
+          homework_given?: string | null
+          id?: string
+          log_date?: string
+          session_id: string
+          topic_covered?: string | null
+          tutor_notes?: string | null
+          user_id: string
+        }
+        Update: {
+          attendance?: string
+          created_at?: string
+          homework_given?: string | null
+          id?: string
+          log_date?: string
+          session_id?: string
+          topic_covered?: string | null
+          tutor_notes?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "session_logs_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "tuition_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       subjects: {
         Row: {
@@ -1567,6 +1665,63 @@ export type Database = {
           },
         ]
       }
+      tuition_sessions: {
+        Row: {
+          application_id: string | null
+          class_level: string | null
+          created_at: string
+          id: string
+          job_id: string | null
+          monthly_fee: number | null
+          notes: string | null
+          session_day: string | null
+          session_time: string | null
+          started_at: string | null
+          status: string
+          student_name: string
+          subject: string
+          tutor_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          application_id?: string | null
+          class_level?: string | null
+          created_at?: string
+          id?: string
+          job_id?: string | null
+          monthly_fee?: number | null
+          notes?: string | null
+          session_day?: string | null
+          session_time?: string | null
+          started_at?: string | null
+          status?: string
+          student_name: string
+          subject: string
+          tutor_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          application_id?: string | null
+          class_level?: string | null
+          created_at?: string
+          id?: string
+          job_id?: string | null
+          monthly_fee?: number | null
+          notes?: string | null
+          session_day?: string | null
+          session_time?: string | null
+          started_at?: string | null
+          status?: string
+          student_name?: string
+          subject?: string
+          tutor_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       tutor_admin_notes: {
         Row: {
           admin_id: string
@@ -1625,6 +1780,30 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      tutor_badges: {
+        Row: {
+          badge_name: string
+          badge_type: string
+          earned_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          badge_name: string
+          badge_type: string
+          earned_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          badge_name?: string
+          badge_type?: string
+          earned_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       tutor_education: {
         Row: {
