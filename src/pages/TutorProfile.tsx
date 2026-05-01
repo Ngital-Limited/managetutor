@@ -24,7 +24,7 @@ import { getMinProfileCompleteness } from '@/lib/profileCompleteness';
 import {
   GraduationCap, ArrowLeft, Save, Upload, FileText, CheckCircle2,
   Clock, XCircle, AlertCircle, Video, MessageSquare, Send,
-  Plus, Trash2, Briefcase, BookOpen, Users, Sparkles, Loader2, RefreshCw
+  Plus, Trash2, Briefcase, BookOpen, Users, Sparkles, Loader2, RefreshCw, Calendar
 } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
