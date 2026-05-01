@@ -1294,30 +1294,87 @@ export default function TutorProfile() {
 
         {/* MEDIA / VERIFICATION / REVIEWS TAB */}
         <TabsContent value="media" className="space-y-6 mt-0">
-          {/* Verification Documents */}
+          {/* All Documents (Identity + Verification) in one unified grid */}
           <Card className="rounded-2xl border-border/60 shadow-sm">
-            <CardContent className="p-6 space-y-4">
+            <CardContent className="p-6 space-y-5">
               <div>
-                <h3 className="font-semibold flex items-center gap-2"><FileText className="h-4 w-4" /> Verification Documents</h3>
-                <p className="text-sm text-muted-foreground mb-4">Upload documents to get verified and build trust.</p>
+                <h3 className="font-semibold flex items-center gap-2"><FileText className="h-4 w-4" /> Documents</h3>
+                <p className="text-sm text-muted-foreground">Upload all required documents below. Files are private and only visible to admins.</p>
               </div>
 
-              {/* Verification document grid (NID handled separately in Identity Document section below) */}
-              <div className="grid md:grid-cols-2 gap-4">
+              {/* Identity document type selector (compact) */}
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3 p-3 rounded-xl bg-muted/30 border border-border/60">
+                <Label className="text-sm whitespace-nowrap">Identity Document Type</Label>
+                <Select value={idDocType} onValueChange={setIdDocType}>
+                  <SelectTrigger className="rounded-lg h-9 sm:max-w-[220px]"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="nid">NID Card</SelectItem>
+                    <SelectItem value="passport">Passport</SelectItem>
+                    <SelectItem value="birth_certificate">Birth Certificate</SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground">Choose the type, then upload below.</p>
+              </div>
+
+              {/* Unified upload grid */}
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {/* Identity tile */}
+                {(() => {
+                  const idLabel = idDocType === 'nid' ? 'NID Card' : idDocType === 'passport' ? 'Passport' : 'Birth Certificate';
+                  const exists = !!idDocUrl;
+                  return (
+                    <div className={`border-2 border-dashed rounded-2xl p-4 text-center ${exists ? 'border-success/50 bg-success/5' : 'border-border'}`}>
+                      <Upload className={`h-7 w-7 mx-auto mb-2 ${exists ? 'text-success' : 'text-muted-foreground'}`} />
+                      <p className="font-medium text-sm">
+                        {idLabel} <span className="text-destructive">*</span>
+                      </p>
+                      <p className="text-xs text-muted-foreground mb-2">
+                        {exists ? (idDocUploadedAt ? new Date(idDocUploadedAt).toLocaleDateString() : 'Uploaded') : 'JPG, PNG, WEBP, PDF (max 10MB)'}
+                      </p>
+                      <div className="flex items-center justify-center gap-2 flex-wrap">
+                        <label className="cursor-pointer">
+                          <Button variant="outline" size="sm" disabled={idDocUploading} asChild className="rounded-lg">
+                            <span>{exists ? 'Replace' : 'Upload'}</span>
+                          </Button>
+                          <input
+                            type="file"
+                            className="hidden"
+                            accept="image/jpeg,image/png,image/webp,application/pdf"
+                            onChange={handleIdDocUpload}
+                            disabled={idDocUploading}
+                          />
+                        </label>
+                        {exists && (
+                          <Button type="button" variant="ghost" size="sm" className="rounded-lg" onClick={handleViewIdDoc}>
+                            View
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })()}
+
+                {/* Verification document tiles */}
                 {(profile.is_student
                   ? ['university_id_card', 'university_payslip']
                   : ['education_certificate', 'experience_certificate']
                 ).map((docType) => {
                   const doc = documents.find(d => d.document_type === docType);
                   const exists = !!doc;
-                  const label = docType.replace(/_/g, ' ');
+                  const labelMap: Record<string, string> = {
+                    university_id_card: 'University ID Card',
+                    university_payslip: 'University Payslip',
+                    education_certificate: 'Education Certificate',
+                    experience_certificate: 'Experience Certificate',
+                  };
+                  const label = labelMap[docType] || docType.replace(/_/g, ' ');
                   const isRequired = profile.is_student
                     ? (docType === 'university_id_card' || docType === 'university_payslip')
                     : (docType === 'education_certificate');
                   return (
-                    <div key={docType} className={`border-2 border-dashed rounded-2xl p-5 text-center ${exists ? 'border-success/50 bg-success/5' : 'border-border'}`}>
-                      <Upload className={`h-8 w-8 mx-auto mb-2 ${exists ? 'text-success' : 'text-muted-foreground'}`} />
-                      <p className="font-medium capitalize">
+                    <div key={docType} className={`border-2 border-dashed rounded-2xl p-4 text-center ${exists ? 'border-success/50 bg-success/5' : 'border-border'}`}>
+                      <Upload className={`h-7 w-7 mx-auto mb-2 ${exists ? 'text-success' : 'text-muted-foreground'}`} />
+                      <p className="font-medium text-sm">
                         {label}
                         {isRequired && <span className="text-destructive ml-1">*</span>}
                       </p>
@@ -1325,19 +1382,19 @@ export default function TutorProfile() {
                         {exists ? 'Uploaded' : 'PDF, JPG, PNG (max 5MB)'}
                       </p>
                       {exists && doc && (
-                        <div className="flex items-center justify-center mb-3">
+                        <div className="flex items-center justify-center mb-2">
                           {getStatusBadge(doc.status)}
                         </div>
                       )}
                       <div className="flex items-center justify-center gap-2 flex-wrap">
                         <label className="cursor-pointer">
-                          <Button variant="outline" size="sm" disabled={uploading} asChild className="rounded-xl">
+                          <Button variant="outline" size="sm" disabled={uploading} asChild className="rounded-lg">
                             <span>{exists ? 'Replace' : 'Upload'}</span>
                           </Button>
                           <input type="file" className="hidden" accept=".pdf,.jpg,.jpeg,.png" onChange={(e) => handleFileUpload(e, docType)} disabled={uploading} />
                         </label>
                         {exists && doc && (
-                          <Button type="button" variant="ghost" size="sm" className="rounded-xl" onClick={() => handleViewDoc(doc.document_url)}>
+                          <Button type="button" variant="ghost" size="sm" className="rounded-lg" onClick={() => handleViewDoc(doc.document_url)}>
                             View
                           </Button>
                         )}
@@ -1347,73 +1404,20 @@ export default function TutorProfile() {
                 })}
               </div>
 
-              <div className="flex items-start gap-2 p-4 bg-info/10 rounded-xl text-info">
-                <AlertCircle className="h-5 w-5 flex-shrink-0 mt-0.5" />
-                <div className="text-sm">
-                  <p className="font-medium">{profile.is_student ? 'Student Document Requirements' : 'Document Requirements'}</p>
-                  <p className="opacity-80">
-                    {profile.is_student
-                      ? 'As a student, please upload your University ID Card or University Payment Slip for verification.'
-                      : 'Please upload your highest/last educational certificate. Experience certificate is optional but recommended. Your National ID / Passport / Birth Certificate goes in the Identity Document section below.'}
-                  </p>
-                </div>
-              </div>
-
-              {/* Identity Document (NID / Passport / Birth Certificate) */}
-              <div className="border-t pt-5 mt-2">
-                <h4 className="font-semibold flex items-center gap-2"><FileText className="h-4 w-4 text-primary" /> Identity Document <span className="text-destructive">*</span></h4>
-                <p className="text-sm text-muted-foreground mb-4">
-                  Upload your NID Card, Passport, or Birth Certificate. Required for verification approval.
-                  Accepted: JPG, PNG, WEBP, PDF (max 10MB). Your document is private and only visible to admins.
+              {(uploading || idDocUploading) && (
+                <p className="text-sm text-muted-foreground flex items-center gap-2">
+                  <Upload className="h-4 w-4 animate-pulse" /> Uploading...
                 </p>
-                <div className="grid sm:grid-cols-[200px_1fr] gap-3 items-end">
-                  <div className="space-y-1.5">
-                    <Label>Document Type</Label>
-                    <Select value={idDocType} onValueChange={setIdDocType}>
-                      <SelectTrigger className="rounded-xl h-11"><SelectValue /></SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="nid">NID Card</SelectItem>
-                        <SelectItem value="passport">Passport</SelectItem>
-                        <SelectItem value="birth_certificate">Birth Certificate</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label>Upload File</Label>
-                    <input
-                      type="file"
-                      accept="image/jpeg,image/png,image/webp,application/pdf"
-                      onChange={handleIdDocUpload}
-                      disabled={idDocUploading}
-                      className="block w-full text-sm file:mr-3 file:py-2 file:px-4 file:rounded-md file:border-0 file:bg-primary file:text-primary-foreground hover:file:bg-primary/90 file:cursor-pointer"
-                    />
-                  </div>
-                </div>
+              )}
 
-                {idDocUrl && (
-                  <div className="flex items-center justify-between gap-3 p-3 mt-3 rounded-xl bg-success/10 border border-success/20">
-                    <div className="flex items-center gap-2 min-w-0">
-                      <CheckCircle2 className="h-5 w-5 text-success flex-shrink-0" />
-                      <div className="min-w-0">
-                        <p className="text-sm font-medium truncate">
-                          {idDocType === 'nid' ? 'NID Card' : idDocType === 'passport' ? 'Passport' : 'Birth Certificate'} uploaded
-                        </p>
-                        {idDocUploadedAt && (
-                          <p className="text-xs text-muted-foreground">{new Date(idDocUploadedAt).toLocaleString()}</p>
-                        )}
-                      </div>
-                    </div>
-                    <Button type="button" variant="outline" size="sm" className="rounded-xl" onClick={handleViewIdDoc}>
-                      View
-                    </Button>
-                  </div>
-                )}
-
-                {idDocUploading && (
-                  <p className="text-sm text-muted-foreground flex items-center gap-2 mt-2">
-                    <Upload className="h-4 w-4 animate-pulse" /> Uploading...
-                  </p>
-                )}
+              <div className="flex items-start gap-2 p-3 bg-info/10 rounded-xl text-info">
+                <AlertCircle className="h-5 w-5 flex-shrink-0 mt-0.5" />
+                <p className="text-xs opacity-90">
+                  <span className="font-medium">Required:</span> Identity document is mandatory.{' '}
+                  {profile.is_student
+                    ? 'Students must upload a University ID Card or Payslip.'
+                    : 'Non-students must upload an Education Certificate. Experience Certificate is optional but recommended.'}
+                </p>
               </div>
             </CardContent>
           </Card>
@@ -1423,12 +1427,9 @@ export default function TutorProfile() {
             <CardContent className="p-6 space-y-4">
               <div>
                 <h3 className="font-semibold flex items-center gap-2"><Video className="h-4 w-4" /> Video Introduction</h3>
-                <p className="text-sm text-muted-foreground mb-4">Share a 30-second YouTube or Vimeo video showing your communication skills.</p>
+                <p className="text-sm text-muted-foreground mb-2">Share a 30-second YouTube or Vimeo video showing your communication skills.</p>
               </div>
-              <div>
-                <Label>YouTube or Vimeo Video URL</Label>
-                <Input className="rounded-xl mt-1.5 h-11" value={profile.video_url} onChange={(e) => setProfile({ ...profile, video_url: e.target.value })} placeholder="https://www.youtube.com/watch?v=... or https://vimeo.com/..." />
-              </div>
+              <Input className="rounded-xl h-11" value={profile.video_url} onChange={(e) => setProfile({ ...profile, video_url: e.target.value })} placeholder="https://www.youtube.com/watch?v=... or https://vimeo.com/..." />
               {profile.video_url && getVideoEmbedUrl(profile.video_url) && (
                 <div className="aspect-video rounded-2xl overflow-hidden border">
                   <iframe src={getVideoEmbedUrl(profile.video_url)!} className="w-full h-full" allowFullScreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" title="Video Introduction" />
@@ -1439,8 +1440,6 @@ export default function TutorProfile() {
               )}
             </CardContent>
           </Card>
-
-          {/* Parent reviews removed */}
         </TabsContent>
       </Tabs>
 
