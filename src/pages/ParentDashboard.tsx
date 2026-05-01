@@ -2360,21 +2360,39 @@ export default function ParentDashboard() {
               <tbody>
                 {filteredApplicants.map((app: any) => {
                   const tutor = app.tutor_profiles;
+                  const isVerified = tutor?.verification_status === 'approved' && tutor?.verification_paid;
                   return (
                     <tr key={app.id} className="border-b hover:bg-muted/50 transition-colors">
                       <td className="py-3 px-2">
-                        <Avatar className="h-10 w-10">
-                          <AvatarImage src={tutor?.profiles?.avatar_url} />
-                          <AvatarFallback>{tutor?.profiles?.full_name?.charAt(0) || 'T'}</AvatarFallback>
-                        </Avatar>
+                        <div className="relative">
+                          <Avatar className="h-10 w-10">
+                            <AvatarImage src={tutor?.profiles?.avatar_url} />
+                            <AvatarFallback>{tutor?.profiles?.full_name?.charAt(0) || 'T'}</AvatarFallback>
+                          </Avatar>
+                          {isVerified && (
+                            <div className="absolute -bottom-0.5 -right-0.5 h-4 w-4 bg-primary rounded-full flex items-center justify-center border-2 border-card" title="Verified Tutor">
+                              <CheckCircle2 className="h-2.5 w-2.5 text-primary-foreground" />
+                            </div>
+                          )}
+                        </div>
                       </td>
                       <td className="py-3 px-2">
                         <div className="flex flex-col">
-                          <span className="font-semibold">{tutor?.profiles?.full_name}</span>
+                          <div className="flex items-center gap-1.5">
+                            <span className="font-semibold">{tutor?.profiles?.full_name}</span>
+                            {isVerified && (
+                              <Badge className="bg-primary/10 text-primary border-primary/20 text-[10px] px-1.5 py-0">Verified</Badge>
+                            )}
+                          </div>
                           <span className="text-xs text-muted-foreground">
                             {tutor?.experience_years || 0} yrs
-                            {tutor?.verification_status === 'approved' && tutor?.verification_paid && ' · ✓'}
+                            {tutor?.education ? ` · ${tutor.education}` : ''}
                           </span>
+                          {app.cover_message && (
+                            <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1 italic max-w-[200px]">
+                              "{app.cover_message}"
+                            </p>
+                          )}
                         </div>
                       </td>
                       <td className="py-3 px-2">
