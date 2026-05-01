@@ -945,6 +945,110 @@ export default function ParentDashboard() {
     }
   };
 
+  // ─── Student Profile CRUD ───
+  const resetStudentForm = () => {
+    setStudentForm({ name: '', age: '', class_level: '', school_name: '', medium: '', learning_needs: '' });
+    setEditingStudent(null);
+    setShowStudentForm(false);
+  };
+
+  const handleSaveStudent = async () => {
+    if (!user || !studentForm.name.trim()) {
+      toast({ title: 'Required', description: 'Student name is required.', variant: 'destructive' });
+      return;
+    }
+    const payload = {
+      parent_id: user.id,
+      name: studentForm.name.trim(),
+      age: studentForm.age ? Number(studentForm.age) : null,
+      class_level: studentForm.class_level || null,
+      school_name: studentForm.school_name || null,
+      medium: studentForm.medium || null,
+      learning_needs: studentForm.learning_needs || null,
+    };
+    if (editingStudent) {
+      const { error } = await (supabase as any).from('student_profiles').update(payload).eq('id', editingStudent.id);
+      if (error) { toast({ title: 'Error', description: error.message, variant: 'destructive' }); return; }
+      toast({ title: 'Updated', description: 'Student profile updated.' });
+    } else {
+      const { error } = await (supabase as any).from('student_profiles').insert(payload);
+      if (error) { toast({ title: 'Error', description: error.message, variant: 'destructive' }); return; }
+      toast({ title: 'Added', description: 'Student profile added.' });
+    }
+    resetStudentForm();
+    fetchData();
+  };
+
+  const deleteStudent = async (id: string) => {
+    if (!confirm('Delete this student profile?')) return;
+    await (supabase as any).from('student_profiles').delete().eq('id', id);
+    toast({ title: 'Deleted', description: 'Student profile removed.' });
+    fetchData();
+  };
+
+  const startEditStudent = (s: any) => {
+    setStudentForm({ name: s.name, age: s.age?.toString() || '', class_level: s.class_level || '', school_name: s.school_name || '', medium: s.medium || '', learning_needs: s.learning_needs || '' });
+    setEditingStudent(s);
+    setShowStudentForm(true);
+  };
+
+  // ─── Hiring Confirmation Flow ───
+  const openHiringDialog = (app: Application) => {
+    const job = selectedJob || jobs.find(j => j.id === (app as any).job_id);
+    const subjectNames = job?.job_subjects?.map((js: any) => js.subjects?.name_en).filter(Boolean).join(', ') || job?.subjects?.name_en || '';
+    setHiringApp(app);
+    setHiringForm({
+      agreed_salary: app.proposed_rate?.toString() || '',
+      start_date: '',
+      subjects: subjectNames,
+      days_per_week: job?.days_per_week?.toString() || '3',
+    });
+    setHiringDialogOpen(true);
+  };
+
+  const handleConfirmHiring = async () => {
+    if (!user || !hiringApp) return;
+    if (!hiringForm.agreed_salary || !hiringForm.start_date) {
+      toast({ title: 'Required', description: 'Please fill in salary and start date.', variant: 'destructive' });
+      return;
+    }
+    const tutor = hiringApp.tutor_profiles;
+    const jobId = selectedJob?.id || (hiringApp as any).jobs?.id;
+
+    const { error: hcError } = await (supabase as any).from('hiring_confirmations').insert({
+      application_id: hiringApp.id,
+      job_id: jobId,
+      parent_id: user.id,
+      tutor_id: tutor.id,
+      agreed_salary: Number(hiringForm.agreed_salary),
+      start_date: hiringForm.start_date,
+      subjects: hiringForm.subjects || null,
+      days_per_week: Number(hiringForm.days_per_week) || 3,
+    });
+
+    if (hcError) {
+      toast({ title: 'Error', description: hcError.message, variant: 'destructive' });
+      return;
+    }
+
+    await handleApplicationAction(hiringApp.id, 'accepted');
+
+    if (tutor?.user_id) {
+      await supabase.from('notifications').insert({
+        user_id: tutor.user_id,
+        title: 'Hiring Confirmed — Please Review Details',
+        message: `You have been hired! Agreed salary: ৳${hiringForm.agreed_salary}/mo, Start: ${hiringForm.start_date}, Days/week: ${hiringForm.days_per_week}. Please confirm these details in your dashboard.`,
+        type: 'hiring_confirmation',
+        reference_id: jobId,
+      });
+    }
+
+    setHiringDialogOpen(false);
+    setHiringApp(null);
+    toast({ title: 'Tutor Hired!', description: 'Hiring confirmation created. The tutor has been notified to confirm the details.' });
+    fetchData();
+  };
+
   const handleSignOut = async () => {
     await signOut();
     navigate('/');
