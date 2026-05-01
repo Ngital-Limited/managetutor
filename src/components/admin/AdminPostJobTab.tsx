@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+// Dialog removed — post-job form now renders inline as a full page section
 import { supabase } from '@/integrations/supabase/client';
 import { Search, CheckCircle2, Clock, Plus, XCircle } from 'lucide-react';
 import { MultiSearchableSelect } from '@/components/MultiSearchableSelect';
