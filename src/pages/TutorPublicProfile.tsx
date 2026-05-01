@@ -96,7 +96,7 @@ export default function TutorPublicProfile() {
     setLoading(true);
 
     let tutorData: any = null;
-    const selectCols = 'id, user_id, display_name, bio, education, experience_years, monthly_salary_min, monthly_salary_max, teaching_mode, gender, is_available, verification_status, verified_at, total_students, created_at, updated_at, is_featured, district_id, area_id, class_levels, video_url, teaching_philosophy, success_stories, date_of_birth, is_student, slug, featured_blurb, education_detail, present_address, permanent_address, marital_status, nationality, religion, height, weight, districts (name_en), areas (name_en)';
+    const selectCols = 'id, user_id, display_name, bio, education, experience_years, monthly_salary_min, monthly_salary_max, teaching_mode, gender, is_available, verification_status, verification_paid, verified_at, total_students, created_at, updated_at, is_featured, district_id, area_id, class_levels, video_url, teaching_philosophy, success_stories, is_student, slug, featured_blurb, districts (name_en), areas (name_en)';
 
     if (UUID_REGEX.test(id)) {
       // Try id, then user_id
