@@ -2605,14 +2605,19 @@ export default function ParentDashboard() {
                           app.status === 'rejected' ? 'bg-destructive' :
                           app.status === 'shortlisted' ? 'bg-primary' :
                           app.status === 'invited_to_demo' ? 'bg-accent text-accent-foreground' :
+                          app.status === 'contact_requested' ? 'bg-warning text-warning-foreground' :
+                          app.status === 'contact_released' ? 'bg-success/80' :
                           'bg-warning text-warning-foreground'
                         }>
-                          {app.status === 'invited_to_demo' ? 'Invited' : app.status.charAt(0).toUpperCase() + app.status.slice(1)}
+                          {app.status === 'invited_to_demo' ? 'Invited' : 
+                           app.status === 'contact_requested' ? 'Contact Requested' :
+                           app.status === 'contact_released' ? 'Contact Released' :
+                           app.status.charAt(0).toUpperCase() + app.status.slice(1)}
                         </Badge>
                       </td>
                       <td className="py-3 px-2">
                         <div className="flex items-center gap-1 justify-center flex-wrap">
-                          {(app.status === 'pending' || app.status === 'shortlisted') && (
+                          {(app.status === 'pending' || app.status === 'shortlisted' || app.status === 'contact_released') && (
                             <>
                               {app.status === 'pending' && (
                                 <Button size="sm" variant="outline" className="h-8 text-xs" onClick={() => handleApplicationAction(app.id, 'shortlisted')} title="Shortlist">
