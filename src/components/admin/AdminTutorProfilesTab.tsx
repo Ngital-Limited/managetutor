@@ -396,15 +396,11 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
     if (filterAreas.length > 0) {
       result = result.filter(t => t.area_id && filterAreas.includes(t.area_id));
     }
-    // Last-education filter (only knowable after hydration)
-    if (filterLastEducation !== 'all') {
-      result = result.filter(t => (t.last_education || '').toLowerCase() === filterLastEducation.toLowerCase());
-    }
 
     setTutors(result);
     setTotalCount(count);
     setLoading(false);
-  }, [queryTutors, currentPage, pageSize, districtMap, areaMap, filterAreas, filterLastEducation]);
+  }, [queryTutors, currentPage, pageSize, districtMap, areaMap, filterAreas]);
 
   useEffect(() => { fetchTutors(); }, [fetchTutors]);
 
