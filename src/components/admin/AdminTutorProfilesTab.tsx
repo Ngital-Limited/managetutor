@@ -485,19 +485,24 @@ export function AdminTutorProfilesTab({ toast, onImpersonate }: Props) {
   const confirmTransferToParent = async () => {
     if (!transferTargetUserId) return;
     setTransferProcessing(true);
-    const { error } = await supabase.rpc('transfer_user_role', {
-      _target_user_id: transferTargetUserId,
-      _new_role: 'parent',
-    });
-    setTransferProcessing(false);
-    if (error) {
-      toast({ title: 'Transfer Failed', description: error.message, variant: 'destructive' });
-    } else {
-      toast({ title: 'Role Transferred', description: `${transferTargetName} is now a Parent.` });
-      fetchTutors();
+    try {
+      const { error } = await supabase.rpc('transfer_user_role', {
+        _target_user_id: transferTargetUserId,
+        _new_role: 'parent',
+      });
+      if (error) {
+        sonnerToast.error('Transfer Failed', { description: error.message });
+      } else {
+        sonnerToast.success('Role Transferred', { description: `${transferTargetName} has been converted to a Parent.` });
+        await fetchTutors();
+      }
+    } catch (err: any) {
+      sonnerToast.error('Transfer Failed', { description: err?.message || 'An unexpected error occurred.' });
+    } finally {
+      setTransferProcessing(false);
+      setTransferDialogOpen(false);
+      setTransferTargetUserId(null);
     }
-    setTransferDialogOpen(false);
-    setTransferTargetUserId(null);
   };
 
   const handleApproveToggle = async (userId: string, currentlyApproved: boolean) => {
