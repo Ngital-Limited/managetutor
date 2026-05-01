@@ -126,7 +126,7 @@ export default function TutorPublicProfile() {
     setTutor(tutorData as TutorProfile);
 
     const [profileRes, subjectsRes, eduRes] = await Promise.all([
-      supabase.from('profiles')
+      supabase.from('profiles_public')
         .select('full_name, avatar_url, district_id, user_reference, districts (name_en), areas (name_en)')
         .eq('id', tutorData.user_id).maybeSingle(),
       supabase.from('tutor_subjects').select('subjects (id, name_en)').eq('tutor_profile_id', tutorData.id),
