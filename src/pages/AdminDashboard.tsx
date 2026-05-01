@@ -2121,7 +2121,7 @@ export default function AdminDashboard() {
             {/* ═══════ OVERVIEW TAB ═══════ */}
 
             {activeTab === 'overview' && (
-              <div className="space-y-6 max-w-6xl">
+              <div className="space-y-6 max-w-[1200px]">
                 <div className="flex items-start justify-between gap-3 flex-wrap">
                   <div>
                     <h1 className="text-xl font-semibold">Overview</h1>

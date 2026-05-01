@@ -52,7 +52,7 @@ export default function Contact() {
 
       {/* Hero */}
       <section className="gradient-hero text-white py-16">
-        <div className="max-w-5xl mx-auto px-4 text-center">
+        <div className="max-w-[1200px] mx-auto px-4 text-center">
           <h1 className="text-4xl md:text-5xl font-bold mb-4">Contact Us</h1>
           <p className="text-lg text-white/80 max-w-2xl mx-auto">
             Have questions? We're here to help. Reach out and we'll respond within 24 hours.
@@ -61,7 +61,7 @@ export default function Contact() {
       </section>
 
       <section className="py-16 px-4">
-        <div className="max-w-5xl mx-auto grid md:grid-cols-5 gap-10">
+        <div className="max-w-[1200px] mx-auto grid md:grid-cols-5 gap-10">
           {/* Contact Info */}
           <div className="md:col-span-2 space-y-6">
             <h2 className="text-2xl font-bold mb-6">Get in Touch</h2>

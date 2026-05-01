@@ -554,7 +554,7 @@ function ClassLevelsManager({ toast }: { toast: any }) {
 // ─── Main Platform Data Tab ───
 export function PlatformDataTab({ toast }: { toast: any }) {
   return (
-    <div className="space-y-6 max-w-6xl">
+    <div className="space-y-6 max-w-[1200px]">
       <div>
         <h1 className="text-xl font-semibold">Platform Data</h1>
         <p className="text-sm text-muted-foreground mt-0.5">Manage subjects, districts, areas, and class levels</p>
