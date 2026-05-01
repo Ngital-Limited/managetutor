@@ -221,6 +221,7 @@ export default function TutorProfile() {
         religion: td.religion || '',
         height: td.height || '',
         weight: td.weight || '',
+        weekly_availability: td.weekly_availability || {},
       });
       setSelectedClassLevels(td.class_levels || []);
       setTutorProfileId(td.id);
