@@ -351,11 +351,11 @@ export default function TutorPublicProfile() {
         <div className="grid lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-6 min-w-0">
 
-            {/* SUMMARY */}
+            {/* ABOUT ME */}
             <Card>
               <CardHeader className="pb-3">
                 <CardTitle className="flex items-center gap-2 text-base">
-                  <User className="h-4 w-4 text-primary" /> Summary
+                  <User className="h-4 w-4 text-primary" /> About Me
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -368,20 +368,8 @@ export default function TutorPublicProfile() {
                 {tutor.bio && (
                   <p className="text-sm text-muted-foreground whitespace-pre-wrap leading-relaxed">{tutor.bio}</p>
                 )}
-                {tutor.teaching_philosophy && (
-                  <div>
-                    <h4 className="text-sm font-semibold mb-1">Teaching Philosophy</h4>
-                    <p className="text-muted-foreground whitespace-pre-wrap text-sm">{tutor.teaching_philosophy}</p>
-                  </div>
-                )}
-                {tutor.success_stories && (
-                  <div>
-                    <h4 className="text-sm font-semibold mb-1">Success Stories</h4>
-                    <p className="text-muted-foreground whitespace-pre-wrap text-sm">{tutor.success_stories}</p>
-                  </div>
-                )}
-                {!tutor.bio && !tutor.teaching_philosophy && !tutor.success_stories && !tutor.featured_blurb && (
-                  <p className="text-sm text-muted-foreground italic">No summary provided yet.</p>
+                {!tutor.bio && !tutor.featured_blurb && (
+                  <p className="text-sm text-muted-foreground italic">This tutor hasn't written an about me yet.</p>
                 )}
               </CardContent>
             </Card>
