@@ -519,6 +519,89 @@ export default function Auth() {
                 <ArrowLeft className="h-4 w-4" /> Back to Login
               </button>
             </div>
+          ) : showCompleteProfile && user ? (
+            /* ─── Complete Profile View (Google OAuth new users) ─── */
+            <div>
+              <div className="mb-8">
+                <h2 className="text-2xl font-bold text-foreground">Complete Your Profile</h2>
+                <p className="text-muted-foreground mt-1">
+                  Welcome! Please select your role and fill in your details to get started.
+                </p>
+              </div>
+
+              <form onSubmit={handleCompleteProfile} className="space-y-5">
+                <div>
+                  <Label className="text-sm font-medium mb-2.5 block text-muted-foreground">{t('auth.selectRole')}</Label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {roles.map((role) => (
+                      <button
+                        key={role.id}
+                        type="button"
+                        onClick={() => setSelectedRole(role.id)}
+                        className={`group relative p-3 rounded-xl border-2 transition-all text-center ${
+                          selectedRole === role.id
+                            ? 'border-primary bg-primary/5'
+                            : 'border-border hover:border-primary/30 bg-card'
+                        }`}
+                      >
+                        <role.icon className={`h-5 w-5 mx-auto mb-1.5 transition-colors ${
+                          selectedRole === role.id ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground'
+                        }`} />
+                        <div className={`text-xs font-semibold transition-colors ${
+                          selectedRole === role.id ? 'text-primary' : 'text-foreground'
+                        }`}>{role.label}</div>
+                        <div className="text-[10px] text-muted-foreground mt-0.5 leading-tight">{role.desc}</div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="cpFullName" className="text-sm font-medium text-muted-foreground">Full Name <span className="text-destructive">*</span></Label>
+                  <div className="relative mt-1.5">
+                    <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="cpFullName"
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
+                      className="h-11 pl-10 rounded-lg border-border"
+                      placeholder="Enter your full name"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="cpPhone" className="text-sm font-medium text-muted-foreground">Phone Number <span className="text-destructive">*</span></Label>
+                  <div className="mt-1.5">
+                    <PhoneInput value={phone} onChange={setPhone} />
+                  </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="cpReferral" className="text-sm font-medium text-muted-foreground">How did you hear about us?</Label>
+                  <Select value={referralSource} onValueChange={setReferralSource}>
+                    <SelectTrigger id="cpReferral" className="h-11 mt-1.5 rounded-lg border-border">
+                      <SelectValue placeholder="Select a source (optional)" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {REFERRAL_SOURCES.map((src) => (
+                        <SelectItem key={src} value={src}>{src}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <Button type="submit" className="w-full h-11 rounded-lg text-sm font-semibold" disabled={completeProfileLoading}>
+                  {completeProfileLoading ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <ArrowRight className="mr-2 h-4 w-4" />
+                  )}
+                  Complete & Continue
+                </Button>
+              </form>
+            </div>
           ) : (
             /* ─── Login / Signup View ─── */
             <>
