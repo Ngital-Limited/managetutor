@@ -2704,6 +2704,7 @@ export default function AdminDashboard() {
                 pendingTutors.flatMap(t => (t.verification_documents || []).map(d => d.document_type).filter(Boolean))
               )).sort();
               // Apply client-side filters (status is server-side)
+              const searchLower = verificationSearch.toLowerCase().trim();
               const filteredTutors = pendingTutors.filter(t => {
                 if (verificationDocType !== 'all') {
                   if (!t.verification_documents?.some(d => d.document_type === verificationDocType)) return false;
@@ -2711,12 +2712,24 @@ export default function AdminDashboard() {
                 if (verificationDistrict !== 'all') {
                   if (t.district_id !== verificationDistrict) return false;
                 }
+                if (verificationArea !== 'all') {
+                  if (t.area_id !== verificationArea) return false;
+                }
+                if (searchLower) {
+                  const ref = (t.user_reference || '').toLowerCase();
+                  const name = (t.profiles?.full_name || '').toLowerCase();
+                  const phone = (t.profiles?.phone || '').toLowerCase();
+                  const email = (t.profiles?.email || '').toLowerCase();
+                  if (!ref.includes(searchLower) && !name.includes(searchLower) && !phone.includes(searchLower) && !email.includes(searchLower)) return false;
+                }
                 return true;
               });
               const activeFilterCount =
                 (verificationFilter !== 'all' ? 1 : 0) +
                 (verificationDocType !== 'all' ? 1 : 0) +
-                (verificationDistrict !== 'all' ? 1 : 0);
+                (verificationDistrict !== 'all' ? 1 : 0) +
+                (verificationArea !== 'all' ? 1 : 0) +
+                (verificationSearch ? 1 : 0);
               return (
               <div className="space-y-5">
                 <div className="flex items-center justify-between flex-wrap gap-3">
@@ -2731,14 +2744,25 @@ export default function AdminDashboard() {
                       variant="ghost"
                       size="sm"
                       className="text-xs"
-                      onClick={() => { setVerificationFilter('all'); setVerificationDocType('all'); setVerificationDistrict('all'); }}
+                      onClick={() => { setVerificationFilter('all'); setVerificationDocType('all'); setVerificationDistrict('all'); setVerificationArea('all'); setVerificationSearch(''); }}
                     >
                       <X className="h-3 w-3 mr-1" /> Clear filters ({activeFilterCount})
                     </Button>
                   )}
                 </div>
 
-                {/* Filter bar — Status, Document Type, City/District */}
+                {/* Search bar */}
+                <div className="relative w-full sm:w-80">
+                  <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    value={verificationSearch}
+                    onChange={(e) => setVerificationSearch(e.target.value)}
+                    placeholder="Search by Ref ID, Name, Phone, Email"
+                    className="pl-8 h-9"
+                  />
+                </div>
+
+                {/* Filter bar — Status, Document Type, District, Area */}
                 <div className="admin-filters">
                   <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                     <Filter className="h-3.5 w-3.5" /> Filters
@@ -2770,6 +2794,15 @@ export default function AdminDashboard() {
                       ))}
                     </SelectContent>
                   </Select>
+                  <Select value={verificationArea} onValueChange={setVerificationArea}>
+                    <SelectTrigger className="h-8 w-44 text-xs"><SelectValue placeholder="Area" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All areas</SelectItem>
+                      {verificationAreas.map(a => (
+                        <SelectItem key={a.id} value={a.id}>{a.name_en}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 {filteredTutors.length === 0 ? (
@@ -2785,11 +2818,11 @@ export default function AdminDashboard() {
                         <Table>
                           <TableHeader>
                             <TableRow>
-                              <TableHead>Tutor</TableHead>
-                              <TableHead>Email</TableHead>
-                              <TableHead>Education</TableHead>
-                              <TableHead>Experience</TableHead>
-                              <TableHead>Docs</TableHead>
+                              <TableHead>Ref ID</TableHead>
+                              <TableHead>Tutor Name</TableHead>
+                              <TableHead>Phone Number</TableHead>
+                              <TableHead>Email ID</TableHead>
+                              <TableHead>Uploaded Documents</TableHead>
                               <TableHead>Status</TableHead>
                               <TableHead className="text-right">Actions</TableHead>
                             </TableRow>
@@ -2797,6 +2830,7 @@ export default function AdminDashboard() {
                           <TableBody>
                             {filteredTutors.map((tutor) => (
                               <TableRow key={tutor.id}>
+                                <TableCell className="font-mono text-xs">{tutor.user_reference || '—'}</TableCell>
                                 <TableCell>
                                   <div className="flex items-center gap-2">
                                     <div className="w-8 h-8 rounded-lg bg-tutor/10 flex items-center justify-center">
@@ -2805,14 +2839,21 @@ export default function AdminDashboard() {
                                     <span className="font-medium text-sm">{tutor.profiles?.full_name}</span>
                                   </div>
                                 </TableCell>
+                                <TableCell className="text-sm">{tutor.profiles?.phone || '—'}</TableCell>
                                 <TableCell className="text-sm">{tutor.profiles?.email}</TableCell>
-                                <TableCell className="text-sm">{tutor.education || '—'}</TableCell>
-                                <TableCell className="text-sm">{tutor.experience_years} yrs</TableCell>
                                 <TableCell>
-                                  <Badge variant="outline" className="text-xs">
-                                    <FileCheck className="h-3 w-3 mr-1" />
-                                    {tutor.verification_documents?.length || 0}
-                                  </Badge>
+                                  <div className="flex flex-wrap gap-1">
+                                    {tutor.verification_documents?.length > 0 ? (
+                                      tutor.verification_documents.map((doc) => (
+                                        <Badge key={doc.id} variant="outline" className="text-xs capitalize cursor-pointer" onClick={() => window.open(doc.document_url, '_blank')}>
+                                          <FileCheck className="h-3 w-3 mr-1" />
+                                          {doc.document_type?.replace(/_/g, ' ') || 'Document'}
+                                        </Badge>
+                                      ))
+                                    ) : (
+                                      <span className="text-xs text-muted-foreground">No documents</span>
+                                    )}
+                                  </div>
                                 </TableCell>
                                 <TableCell>
                                   <Badge className={`text-xs capitalize ${statusColor(tutor.verification_status)}`}>
