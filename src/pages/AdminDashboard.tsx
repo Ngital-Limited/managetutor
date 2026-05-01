@@ -2891,10 +2891,9 @@ export default function AdminDashboard() {
               // Pipeline stage classifier for a single application
               const stageOf = (a: any): 'shortlisted' | 'demo' | 'confirmed' | 'not_confirmed' | 'pending' => {
                 if (a.status === 'accepted') return 'confirmed';
-                if (a.status === 'rejected' || a.status === 'withdrawn') {
-                  // If it had a demo and demo was completed but not accepted → not_confirmed
-                  return 'not_confirmed';
-                }
+                // Only show in "Not Confirmed" if the parent job is cancelled
+                if (a.jobs?.status === 'cancelled') return 'not_confirmed';
+                if (a.status === 'rejected' || a.status === 'withdrawn') return 'pending';
                 if (a.status === 'invited_to_demo' || a.demo_booking) return 'demo';
                 if (a.status === 'shortlisted') return 'shortlisted';
                 return 'pending';
