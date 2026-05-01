@@ -144,8 +144,28 @@ export default function BrowseJobs({ embedded = false }: { embedded?: boolean } 
   useEffect(() => {
     if (user && role === 'tutor') {
       fetchTutorProfile();
+      fetchSavedJobIds();
     }
   }, [user, role]);
+
+  const fetchSavedJobIds = async () => {
+    if (!user) return;
+    const { data } = await supabase.from('saved_jobs').select('job_id').eq('user_id', user.id);
+    if (data) setSavedJobIds(new Set(data.map(d => d.job_id)));
+  };
+
+  const toggleSaveJob = async (jobId: string) => {
+    if (!user) { navigate('/auth'); return; }
+    if (savedJobIds.has(jobId)) {
+      await supabase.from('saved_jobs').delete().eq('user_id', user.id).eq('job_id', jobId);
+      setSavedJobIds(prev => { const n = new Set(prev); n.delete(jobId); return n; });
+      toast({ title: 'Removed', description: 'Job removed from saved list.' });
+    } else {
+      await supabase.from('saved_jobs').insert({ user_id: user.id, job_id: jobId });
+      setSavedJobIds(prev => new Set(prev).add(jobId));
+      toast({ title: 'Saved', description: 'Job saved for later.' });
+    }
+  };
 
   const fetchTutorProfile = async () => {
     if (!user) return;
