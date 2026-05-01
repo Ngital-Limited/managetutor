@@ -2400,8 +2400,10 @@ export default function ParentDashboard() {
             </div>
           </header>
 
-          <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto pb-24 md:pb-8">
-            {showPostJob ? postJobPage : renderActiveSection()}
+          <main className="flex-1 overflow-y-auto pb-24 md:pb-8">
+            <div className="max-w-[1200px] mx-auto p-4 md:p-6">
+              {showPostJob ? postJobPage : renderActiveSection()}
+            </div>
           </main>
           <ParentBottomNav
             activeSection={activeSection}
