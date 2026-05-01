@@ -24,6 +24,7 @@ import {
 import { AdSlot } from '@/components/AdSlot';
 import { Progress } from '@/components/ui/progress';
 import { getMinProfileCompleteness } from '@/lib/profileCompleteness';
+import { TutorSidebarLayout } from '@/components/TutorSidebarLayout';
 
 interface Job {
   id: string;
@@ -299,13 +300,13 @@ export default function JobDetails() {
   }
 
   const isOwner = user?.id === job.parent_id;
+  const isTutor = role === 'tutor';
 
-  return (
-    <div className="min-h-screen bg-background">
-      {/* Navigation */}
-      <Header />
+  const content = (
+    <>
+      {!isTutor && <Header />}
 
-      <main className="container mx-auto px-4 py-8 max-w-5xl">
+      <main className={isTutor ? "container mx-auto px-4 py-6 max-w-5xl" : "container mx-auto px-4 py-8 max-w-5xl"}>
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
@@ -773,7 +774,13 @@ export default function JobDetails() {
           </div>
         </div>
       </main>
-      <Footer />
-    </div>
+      {!isTutor && <Footer />}
+    </>
   );
+
+  if (isTutor) {
+    return <TutorSidebarLayout title="Job Details">{content}</TutorSidebarLayout>;
+  }
+
+  return <div className="min-h-screen bg-background">{content}</div>;
 }
