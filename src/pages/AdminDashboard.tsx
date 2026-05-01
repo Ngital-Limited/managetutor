@@ -2028,6 +2028,8 @@ export default function AdminDashboard() {
       label: 'Finance',
       items: [
         { title: 'Payments', value: 'payments', icon: CreditCard },
+        { title: 'Hires', value: 'hires', icon: CheckCircle2 },
+        { title: 'Commissions', value: 'commissions', icon: DollarSign },
         { title: 'Revenue & Payouts', value: 'revenue', icon: Wallet },
         { title: 'Subscriptions', value: 'subscriptions', icon: Package },
       ],
