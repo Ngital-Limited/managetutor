@@ -1407,7 +1407,7 @@ export default function AdminDashboard() {
   const fetchVerifications = useCallback(async () => {
     let query = supabase
       .from('tutor_profiles')
-      .select('id, user_id, verification_status, education, experience_years, gender, created_at, verification_documents (id, document_type, document_url, status)')
+      .select('id, user_id, verification_status, education, experience_years, gender, created_at, district_id, verification_documents (id, document_type, document_url, status)')
       .order('created_at', { ascending: false }).limit(100);
     if (verificationFilter !== 'all') {
       query = query.eq('verification_status', verificationFilter as 'pending' | 'approved' | 'rejected');
@@ -1415,9 +1415,23 @@ export default function AdminDashboard() {
     const { data } = await query;
     if (data) {
       const userIds = [...new Set(data.map(t => t.user_id))];
-      const { data: profilesData } = await supabase.from('profiles').select('id, full_name, email, phone').in('id', userIds);
+      const districtIds = [...new Set(data.map((t: any) => t.district_id).filter(Boolean))];
+      const [{ data: profilesData }, { data: districtsData }] = await Promise.all([
+        supabase.from('profiles').select('id, full_name, email, phone').in('id', userIds),
+        districtIds.length
+          ? supabase.from('districts').select('id, name_en').in('id', districtIds as string[])
+          : Promise.resolve({ data: [] as { id: string; name_en: string }[] }),
+      ]);
       const profileMap = new Map(profilesData?.map(p => [p.id, p]) || []);
-      setPendingTutors(data.map(t => ({ ...t, profiles: profileMap.get(t.user_id) || { full_name: 'Unknown', email: '', phone: null } })) as unknown as TutorVerification[]);
+      const districtMap = new Map((districtsData || []).map(d => [d.id, d.name_en]));
+      // Keep an alphabetised district list for the filter dropdown (all districts that appear in the current result set)
+      const dList = (districtsData || []).slice().sort((a, b) => a.name_en.localeCompare(b.name_en));
+      setVerificationDistricts(dList);
+      setPendingTutors(data.map((t: any) => ({
+        ...t,
+        district_name: t.district_id ? districtMap.get(t.district_id) ?? null : null,
+        profiles: profileMap.get(t.user_id) || { full_name: 'Unknown', email: '', phone: null },
+      })) as unknown as TutorVerification[]);
     }
 
     // Fetch verification badge payments
