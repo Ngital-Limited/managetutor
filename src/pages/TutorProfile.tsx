@@ -284,6 +284,21 @@ export default function TutorProfile() {
       toast({ title: 'Profile Picture Required', description: 'Please upload a profile picture. It is mandatory for tutors.', variant: 'destructive' });
       return;
     }
+    // Family & Emergency contacts are mandatory
+    const requiredContacts = [
+      { value: profile.father_name?.trim(), label: "Father's Name" },
+      { value: profile.mother_name?.trim(), label: "Mother's Name" },
+      { value: profile.father_phone?.trim(), label: "Father's Phone" },
+      { value: profile.mother_phone?.trim(), label: "Mother's Phone" },
+      { value: profile.emergency_contact_name?.trim(), label: 'Emergency Contact Name' },
+      { value: profile.emergency_contact_phone?.trim(), label: 'Emergency Contact Phone' },
+    ];
+    const missingContact = requiredContacts.find(f => !f.value);
+    if (missingContact) {
+      toast({ title: `${missingContact.label} Required`, description: `${missingContact.label} is mandatory. Please fill it in the Family tab.`, variant: 'destructive' });
+      return;
+    }
+
     const phoneFields = [
       { value: profile.father_phone, label: "Father's Phone" },
       { value: profile.mother_phone, label: "Mother's Phone" },
@@ -293,6 +308,28 @@ export default function TutorProfile() {
     if (invalidPhone) {
       toast({ title: 'Invalid Phone', description: `${invalidPhone.label} is not a valid Bangladesh phone number.`, variant: 'destructive' });
       return;
+    }
+
+    // Identity document mandatory (NID / Passport / Birth Certificate) — uploaded via storage
+    if (!idDocUrl) {
+      toast({ title: 'Identity Document Required', description: 'Please upload your NID, Passport, or Birth Certificate in the Media tab.', variant: 'destructive' });
+      return;
+    }
+
+    // Verification documents mandatory based on student status
+    if (profile.is_student) {
+      const hasUniId = documents.some(d => d.document_type === 'university_id_card');
+      const hasPayslip = documents.some(d => d.document_type === 'university_payslip');
+      if (!hasUniId && !hasPayslip) {
+        toast({ title: 'University Document Required', description: 'Please upload your University ID Card or Payslip in the Media tab.', variant: 'destructive' });
+        return;
+      }
+    } else {
+      const hasEduCert = documents.some(d => d.document_type === 'education_certificate');
+      if (!hasEduCert) {
+        toast({ title: 'Educational Certificate Required', description: 'Please upload your Educational Certificate in the Media tab.', variant: 'destructive' });
+        return;
+      }
     }
 
     setSaving(true);
@@ -1154,38 +1191,38 @@ export default function TutorProfile() {
             <CardContent className="p-6 space-y-5">
               <div>
                 <h3 className="font-semibold flex items-center gap-2"><Users className="h-4 w-4" /> Family & Emergency Contact</h3>
-                <p className="text-sm text-muted-foreground mb-4">Provide family info for verification and trust building.</p>
+                <p className="text-sm text-muted-foreground mb-4">All fields below are required for verification and trust building.</p>
               </div>
 
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
-                  <Label>Father's Name</Label>
-                  <Input className="rounded-xl mt-1.5 h-11" value={profile.father_name} onChange={(e) => setProfile({ ...profile, father_name: e.target.value })} placeholder="Father's full name" />
+                  <Label>Father's Name <span className="text-destructive">*</span></Label>
+                  <Input className="rounded-xl mt-1.5 h-11" value={profile.father_name} onChange={(e) => setProfile({ ...profile, father_name: e.target.value })} placeholder="Father's full name" required />
                 </div>
                 <div>
-                  <Label>Mother's Name</Label>
-                  <Input className="rounded-xl mt-1.5 h-11" value={profile.mother_name} onChange={(e) => setProfile({ ...profile, mother_name: e.target.value })} placeholder="Mother's full name" />
+                  <Label>Mother's Name <span className="text-destructive">*</span></Label>
+                  <Input className="rounded-xl mt-1.5 h-11" value={profile.mother_name} onChange={(e) => setProfile({ ...profile, mother_name: e.target.value })} placeholder="Mother's full name" required />
                 </div>
               </div>
 
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
-                  <Label>Father's Phone</Label>
+                  <Label>Father's Phone <span className="text-destructive">*</span></Label>
                   <div className="mt-1.5"><PhoneInput value={profile.father_phone} onChange={(v) => setProfile({ ...profile, father_phone: v })} /></div>
                 </div>
                 <div>
-                  <Label>Mother's Phone</Label>
+                  <Label>Mother's Phone <span className="text-destructive">*</span></Label>
                   <div className="mt-1.5"><PhoneInput value={profile.mother_phone} onChange={(v) => setProfile({ ...profile, mother_phone: v })} /></div>
                 </div>
               </div>
 
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
-                  <Label>Emergency Contact Name</Label>
-                  <Input className="rounded-xl mt-1.5 h-11" value={profile.emergency_contact_name} onChange={(e) => setProfile({ ...profile, emergency_contact_name: e.target.value })} placeholder="e.g., Uncle, Guardian" />
+                  <Label>Emergency Contact Name <span className="text-destructive">*</span></Label>
+                  <Input className="rounded-xl mt-1.5 h-11" value={profile.emergency_contact_name} onChange={(e) => setProfile({ ...profile, emergency_contact_name: e.target.value })} placeholder="e.g., Uncle, Guardian" required />
                 </div>
                 <div>
-                  <Label>Emergency Contact Phone</Label>
+                  <Label>Emergency Contact Phone <span className="text-destructive">*</span></Label>
                   <div className="mt-1.5"><PhoneInput value={profile.emergency_contact_phone} onChange={(v) => setProfile({ ...profile, emergency_contact_phone: v })} /></div>
                 </div>
               </div>
@@ -1224,10 +1261,16 @@ export default function TutorProfile() {
                 ).map((docType) => {
                   const exists = documents.some(d => d.document_type === docType);
                   const label = docType.replace(/_/g, ' ');
+                  const isRequired = profile.is_student
+                    ? (docType === 'university_id_card' || docType === 'university_payslip')
+                    : (docType === 'education_certificate');
                   return (
                     <div key={docType} className={`border-2 border-dashed rounded-2xl p-5 text-center ${exists ? 'border-success/50 bg-success/5' : 'border-border'}`}>
                       <Upload className={`h-8 w-8 mx-auto mb-2 ${exists ? 'text-success' : 'text-muted-foreground'}`} />
-                      <p className="font-medium capitalize">{label}</p>
+                      <p className="font-medium capitalize">
+                        {label}
+                        {isRequired && <span className="text-destructive ml-1">*</span>}
+                      </p>
                       <p className="text-xs text-muted-foreground mb-3">
                         {exists ? 'Uploaded' : 'PDF, JPG, PNG (max 5MB)'}
                       </p>
@@ -1256,7 +1299,7 @@ export default function TutorProfile() {
 
               {/* Identity Document (NID / Passport / Birth Certificate) */}
               <div className="border-t pt-5 mt-2">
-                <h4 className="font-semibold flex items-center gap-2"><FileText className="h-4 w-4 text-primary" /> Identity Document</h4>
+                <h4 className="font-semibold flex items-center gap-2"><FileText className="h-4 w-4 text-primary" /> Identity Document <span className="text-destructive">*</span></h4>
                 <p className="text-sm text-muted-foreground mb-4">
                   Upload your NID Card, Passport, or Birth Certificate. Required for verification approval.
                   Accepted: JPG, PNG, WEBP, PDF (max 10MB). Your document is private and only visible to admins.
