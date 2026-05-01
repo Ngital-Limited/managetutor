@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,7 +8,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useToast } from '@/hooks/use-toast';
 import { Logo } from '@/components/Logo';
 import { supabase } from '@/integrations/supabase/client';
-import { GraduationCap, Users, Loader2, Mail, Lock, User, ArrowRight, Phone, ArrowLeft } from 'lucide-react';
+import { GraduationCap, Users, Loader2, Mail, Lock, User, ArrowRight, Phone, ArrowLeft, CheckCircle2 } from 'lucide-react';
 import { PhoneInput, isValidBDPhone } from '@/components/PhoneInput';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { z } from 'zod';
@@ -51,6 +51,8 @@ export default function Auth() {
   const [resetEmail, setResetEmail] = useState('');
   const [resetLoading, setResetLoading] = useState(false);
   const [resetSent, setResetSent] = useState(false);
+  const [emailVerified, setEmailVerified] = useState(false);
+  const [checkingVerification, setCheckingVerification] = useState(false);
 
   const { role: userRole } = useAuth();
 
@@ -72,6 +74,32 @@ export default function Auth() {
       }
     }
   }, [user, authLoading, userRole, navigate, searchParams]);
+
+  // Poll for email verification when showing the verify screen
+  useEffect(() => {
+    if (!showVerifyEmail || emailVerified) return;
+    const interval = setInterval(async () => {
+      try {
+        const { data } = await supabase.auth.getSession();
+        if (data.session?.user?.email_confirmed_at) {
+          setEmailVerified(true);
+          clearInterval(interval);
+        }
+      } catch {}
+    }, 4000);
+    return () => clearInterval(interval);
+  }, [showVerifyEmail, emailVerified]);
+
+  // Also listen for auth state changes (user clicks verification link in same browser)
+  useEffect(() => {
+    if (!showVerifyEmail || emailVerified) return;
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (session?.user?.email_confirmed_at) {
+        setEmailVerified(true);
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [showVerifyEmail, emailVerified]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -220,24 +248,48 @@ export default function Auth() {
           {showVerifyEmail ? (
             /* ─── Email Verification View ─── */
             <div className="text-center">
-              <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-6">
-                <Mail className="h-8 w-8 text-primary" />
-              </div>
-              <h2 className="text-2xl font-bold text-foreground mb-2">Verify Your Email</h2>
-              <p className="text-muted-foreground mb-6">
-                We've sent a verification link to<br />
-                <strong className="text-foreground">{signupEmail}</strong>
-              </p>
-              <div className="p-4 rounded-lg bg-accent/50 border border-accent text-sm space-y-2">
-                <p>Please check your inbox and click the verification link to activate your account.</p>
-                <p className="text-muted-foreground">Don't forget to check your spam/junk folder.</p>
-              </div>
-              <button
-                onClick={() => { setShowVerifyEmail(false); setIsLogin(true); setEmail(''); setPassword(''); }}
-                className="flex items-center justify-center gap-1.5 mt-6 text-sm text-primary hover:underline font-semibold mx-auto"
-              >
-                <ArrowLeft className="h-4 w-4" /> Back to Login
-              </button>
+              {emailVerified ? (
+                <>
+                  <div className="w-16 h-16 rounded-full bg-success/10 flex items-center justify-center mx-auto mb-6">
+                    <CheckCircle2 className="h-8 w-8 text-success" />
+                  </div>
+                  <h2 className="text-2xl font-bold text-foreground mb-2">Email Verified!</h2>
+                  <p className="text-muted-foreground mb-6">
+                    Your email <strong className="text-foreground">{signupEmail}</strong> has been confirmed.
+                  </p>
+                  <Button
+                    className="w-full h-11 rounded-lg text-sm font-semibold"
+                    onClick={() => { setShowVerifyEmail(false); setEmailVerified(false); setIsLogin(true); setEmail(signupEmail); setPassword(''); }}
+                  >
+                    <ArrowRight className="h-4 w-4 mr-2" /> Go to Login
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-6">
+                    <Mail className="h-8 w-8 text-primary" />
+                  </div>
+                  <h2 className="text-2xl font-bold text-foreground mb-2">Verify Your Email</h2>
+                  <p className="text-muted-foreground mb-6">
+                    We've sent a verification link to<br />
+                    <strong className="text-foreground">{signupEmail}</strong>
+                  </p>
+                  <div className="p-4 rounded-lg bg-accent/50 border border-accent text-sm space-y-2">
+                    <p>Please check your inbox and click the verification link to activate your account.</p>
+                    <p className="text-muted-foreground">Don't forget to check your spam/junk folder.</p>
+                  </div>
+                  <div className="flex items-center justify-center gap-2 mt-4 text-xs text-muted-foreground">
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    <span>Waiting for verification...</span>
+                  </div>
+                  <button
+                    onClick={() => { setShowVerifyEmail(false); setEmailVerified(false); setIsLogin(true); setEmail(''); setPassword(''); }}
+                    className="flex items-center justify-center gap-1.5 mt-4 text-sm text-primary hover:underline font-semibold mx-auto"
+                  >
+                    <ArrowLeft className="h-4 w-4" /> Back to Login
+                  </button>
+                </>
+              )}
             </div>
           ) : showForgotPassword ? (
             /* ─── Forgot Password View ─── */
