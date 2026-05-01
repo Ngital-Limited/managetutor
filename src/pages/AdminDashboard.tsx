@@ -877,6 +877,7 @@ export default function AdminDashboard() {
   const [selectedAppsJobId, setSelectedAppsJobId] = useState<string | null>(null);
   const [appsJobsSearch, setAppsJobsSearch] = useState('');
   const [loadingAllApps, setLoadingAllApps] = useState(false);
+  const [appsPipelineTab, setAppsPipelineTab] = useState<'all' | 'shortlisted' | 'demo' | 'confirmed' | 'not_confirmed'>('all');
   const [selectedAppIds, setSelectedAppIds] = useState<Set<string>>(new Set());
   const [bulkProcessing, setBulkProcessing] = useState(false);
 
@@ -1012,11 +1013,24 @@ export default function AdminDashboard() {
         if (!eduMap.has(e.tutor_id)) eduMap.set(e.tutor_id, e);
       }
     }
+    // Fetch demo bookings linked to these applications
+    const appIds = data.map((a: any) => a.id).filter(Boolean);
+    const demoMap = new Map<string, any>();
+    if (appIds.length > 0) {
+      const { data: demoData } = await supabase
+        .from('demo_bookings')
+        .select('id, application_id, status, preferred_date')
+        .in('application_id', appIds as string[]);
+      for (const d of demoData || []) {
+        if (d.application_id) demoMap.set(d.application_id, d);
+      }
+    }
     setAllApplications(data.map((a: any) => ({
       ...a,
       tutor_profile: profMap.get((a.tutor_profiles as any)?.user_id) || null,
       parent_profile: profMap.get((a.jobs as any)?.parent_id) || null,
       tutor_last_education: eduMap.get((a.tutor_profiles as any)?.id) || null,
+      demo_booking: demoMap.get(a.id) || null,
     })));
     setLoadingAllApps(false);
   }, []);
@@ -2589,11 +2603,44 @@ export default function AdminDashboard() {
                 { key: 'withdrawn', label: 'Withdrawn' },
               ] as const;
 
+              // Pipeline stage classifier for a single application
+              const stageOf = (a: any): 'shortlisted' | 'demo' | 'confirmed' | 'not_confirmed' | 'pending' => {
+                if (a.status === 'accepted') return 'confirmed';
+                if (a.status === 'rejected' || a.status === 'withdrawn') {
+                  // If it had a demo and demo was completed but not accepted → not_confirmed
+                  return 'not_confirmed';
+                }
+                if (a.status === 'invited_to_demo' || a.demo_booking) return 'demo';
+                if (a.status === 'shortlisted') return 'shortlisted';
+                return 'pending';
+              };
+
+              // Pipeline tab counts (across ALL applications, not filtered)
+              const pipelineCounts = {
+                all: allApplications.length,
+                shortlisted: allApplications.filter(a => stageOf(a) === 'shortlisted').length,
+                demo: allApplications.filter(a => stageOf(a) === 'demo').length,
+                confirmed: allApplications.filter(a => stageOf(a) === 'confirmed').length,
+                not_confirmed: allApplications.filter(a => stageOf(a) === 'not_confirmed').length,
+              };
+              const PIPELINE_TABS: { key: typeof appsPipelineTab; label: string }[] = [
+                { key: 'all', label: 'All Applications' },
+                { key: 'shortlisted', label: 'Shortlisted' },
+                { key: 'demo', label: 'Demo Class' },
+                { key: 'confirmed', label: 'Confirmed' },
+                { key: 'not_confirmed', label: 'Not Confirmed' },
+              ];
+
+              // Apps filtered by pipeline tab (used for Level-1 grouping)
+              const pipelineApps = appsPipelineTab === 'all'
+                ? allApplications
+                : allApplications.filter(a => stageOf(a) === appsPipelineTab);
+
               // ───── LEVEL 1: Jobs list ─────
               if (appsView === 'jobs' || !selectedAppsJobId) {
-                // Group apps by job_id
+                // Group apps by job_id (use pipeline-filtered apps)
                 const jobMap = new Map<string, { job: any; apps: any[] }>();
-                for (const a of allApplications) {
+                for (const a of pipelineApps) {
                   const jid = a.job_id;
                   if (!jid) continue;
                   if (!jobMap.has(jid)) jobMap.set(jid, { job: a.jobs, apps: [] });
@@ -2610,8 +2657,7 @@ export default function AdminDashboard() {
                 const search = appsJobsSearch.trim().toLowerCase();
                 const filteredJobs = jobsList.filter(j => {
                   if (!search) return true;
-                  // Match against job title, ref, parent name/email/phone/user_reference, or any applicant's tutor name/email/phone/user_reference
-                  const apps = allApplications.filter(a => a.job_id === j.jid);
+                  const apps = pipelineApps.filter(a => a.job_id === j.jid);
                   const haystacks: string[] = [
                     j.job?.title, j.job?.job_reference,
                     apps[0]?.parent_profile?.full_name, apps[0]?.parent_profile?.email,
@@ -2629,7 +2675,7 @@ export default function AdminDashboard() {
                     <div className="flex items-center justify-between flex-wrap gap-3">
                       <div>
                         <h1 className="text-xl font-semibold">Applications</h1>
-                        <p className="text-sm text-muted-foreground mt-0.5">Search by job title, reference, parent/tutor name, email, phone, or user ID.</p>
+                        <p className="text-sm text-muted-foreground mt-0.5">Pipeline view — click a stage to filter jobs by where their applicants are.</p>
                       </div>
                       <Input
                         placeholder="Search title, ref, name, email, phone, user ID…"
@@ -2637,6 +2683,25 @@ export default function AdminDashboard() {
                         onChange={(e) => setAppsJobsSearch(e.target.value)}
                         className="w-96 h-9"
                       />
+                    </div>
+
+                    {/* Pipeline tabs */}
+                    <div className="flex items-center gap-1.5 flex-wrap p-1 rounded-lg bg-muted/40 border border-border/40 w-fit">
+                      {PIPELINE_TABS.map(t => {
+                        const count = pipelineCounts[t.key];
+                        const active = appsPipelineTab === t.key;
+                        return (
+                          <button
+                            key={t.key}
+                            type="button"
+                            onClick={() => { setAppsPipelineTab(t.key); setAppsJobsPage(1); }}
+                            className={`text-xs px-3 py-1.5 rounded-md font-medium transition-all ${active ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+                          >
+                            {t.label}
+                            <span className={`ml-1.5 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] ${active ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>{count}</span>
+                          </button>
+                        );
+                      })}
                     </div>
 
                     <Card>
@@ -2659,7 +2724,7 @@ export default function AdminDashboard() {
                               {loadingAllApps ? (
                                 <TableRow><TableCell colSpan={8} className="text-center py-8 text-muted-foreground">Loading…</TableCell></TableRow>
                               ) : filteredJobs.length === 0 ? (
-                                <TableRow><TableCell colSpan={8} className="text-center py-12 text-muted-foreground">No applications yet.</TableCell></TableRow>
+                                <TableRow><TableCell colSpan={8} className="text-center py-12 text-muted-foreground">{appsPipelineTab === 'all' ? 'No applications yet.' : `No jobs with ${PIPELINE_TABS.find(t => t.key === appsPipelineTab)?.label.toLowerCase()} applicants.`}</TableCell></TableRow>
                               ) : filteredJobs.slice((appsJobsPage - 1) * appsJobsPageSize, appsJobsPage * appsJobsPageSize).map(({ jid, job, total, pending, shortlisted, latest }) => {
                                 const guardianApp = allApplications.find(a => a.job_id === jid);
                                 const guardianName = guardianApp?.parent_profile?.full_name || '—';
