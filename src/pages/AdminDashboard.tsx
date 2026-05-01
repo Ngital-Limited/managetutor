@@ -55,6 +55,9 @@ import { AdsManagementTab } from '@/components/admin/AdsManagementTab';
 import { AdminCacheTab } from '@/components/admin/AdminCacheTab';
 import { AdminHiresTab } from '@/components/admin/AdminHiresTab';
 import { AdminCommissionTab } from '@/components/admin/AdminCommissionTab';
+import { AdminPhoneLogTab } from '@/components/admin/AdminPhoneLogTab';
+import { AdminActivityLogTab } from '@/components/admin/AdminActivityLogTab';
+import { AdminNotesWidget } from '@/components/admin/AdminNotesWidget';
 import { AutoRefreshControl } from '@/components/AutoRefreshControl';
 import { getPlatformCommissionPct, computeFeeSplit } from '@/lib/commission';
 
