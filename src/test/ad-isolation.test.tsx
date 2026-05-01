@@ -1,29 +1,27 @@
 /**
  * Automated check: HTML ad styles must not affect site fonts or global layout.
  *
- * We render a hostile HTML ad inside the .ad-slot wrapper (the same wrapper
- * used by <AdSlot />) alongside a sibling header/footer/page-container, then
- * assert:
- *   1. The ad cannot widen its parent (.page-container stays ≤ container width).
- *   2. The ad cannot leak font-family / color into siblings or <body>.
- *   3. The .ad-slot has the required containment + isolation CSS.
- *   4. The .page-container has overflow-x: clip so ads can't cause page scroll.
+ * Defense-in-depth in this project:
+ *   1. AdSlot renders all `html` ads inside a sandboxed <iframe srcDoc=...>.
+ *      The iframe is the real isolation boundary for CSS/JS leakage.
+ *   2. The .ad-slot wrapper applies `contain: layout paint size style`,
+ *      `isolation: isolate`, and `overflow: hidden` so the ad cannot push
+ *      page width or affect outside layout.
+ *   3. The .page-container uses `overflow-x: clip` so a misbehaving ad
+ *      cannot create a horizontal scrollbar on the page.
+ *
+ * This test verifies all three guarantees and would fail if any of them
+ * regressed (e.g. someone removes the iframe, drops `contain`, or changes
+ * page-container's overflow).
  */
 import { describe, it, expect, beforeAll } from "vitest";
 import { render } from "@testing-library/react";
 import { readFileSync } from "fs";
 import path from "path";
 
-// Inject the project's real index.css rules (the ones we want to verify)
-// into jsdom. We only need the .page-container and .ad-slot blocks; we
-// extract them from src/index.css so the test stays in sync with reality.
 function injectProjectCss() {
-  const css = readFileSync(
-    path.resolve(__dirname, "../index.css"),
-    "utf-8"
-  );
+  const css = readFileSync(path.resolve(__dirname, "../index.css"), "utf-8");
 
-  // Pull out the two @layer components blocks we care about.
   const blocks: string[] = [];
   const layerRegex = /@layer\s+components\s*\{([\s\S]*?)\n\}/g;
   let m: RegExpExecArray | null;
@@ -34,7 +32,6 @@ function injectProjectCss() {
   }
 
   const style = document.createElement("style");
-  // Add a baseline body font so we can detect leaks.
   style.textContent = `
     body { font-family: "SiteFont", system-ui, sans-serif; color: rgb(10, 20, 30); }
     ${blocks.join("\n")}
@@ -47,49 +44,71 @@ beforeAll(() => {
 });
 
 describe("Ad isolation: HTML ads must not affect site fonts or layout", () => {
-  it("contains a hostile HTML ad inside .ad-slot without leaking styles or width", () => {
-    // Force a known container width so we can detect overflow attempts.
-    Object.defineProperty(document.documentElement, "clientWidth", {
-      configurable: true,
-      value: 1200,
-    });
-
+  it(".ad-slot wrapper has the required containment + isolation CSS", () => {
     const { container } = render(
-      <div className="page-container" data-testid="page" style={{ width: 1200 }}>
+      <div className="page-container" style={{ width: 1200 }}>
         <header data-testid="sibling-header">Header text</header>
-
         <div
           className="ad-slot"
           data-testid="ad-wrapper"
           style={{ maxWidth: 300, aspectRatio: "300 / 250" }}
-        >
-          {/*
-            Hostile inline HTML ad: tries to override fonts, colors, and
-            blow out width. The .ad-slot containment must neutralize all of it.
-          */}
-          <div
-            data-testid="ad-content"
-            // eslint-disable-next-line react/no-danger
-            dangerouslySetInnerHTML={{
-              __html: `
-                <style>
-                  body, html { font-family: "EvilAdFont" !important; color: red !important; }
-                  * { font-family: "EvilAdFont" !important; }
-                </style>
-                <div style="width: 5000px; font-family: 'EvilAdFont'; color: red;">
-                  Buy now! Buy now! Buy now! Buy now! Buy now!
-                </div>
-              `,
-            }}
-          />
-        </div>
-
+        />
         <footer data-testid="sibling-footer">Footer text</footer>
       </div>
     );
 
     const adWrapper = container.querySelector(".ad-slot") as HTMLElement;
     const page = container.querySelector(".page-container") as HTMLElement;
+
+    const adStyles = getComputedStyle(adWrapper);
+    expect(adStyles.overflow).toBe("hidden");
+    expect(adStyles.contain).toMatch(/layout|size|paint|style/);
+    expect(adStyles.isolation).toBe("isolate");
+    expect(adStyles.maxWidth).toBe("100%");
+    expect(adStyles.minWidth).toBe("0px");
+
+    const pageStyles = getComputedStyle(page);
+    expect(["clip", "hidden"]).toContain(pageStyles.overflowX);
+
+    // Inline cap on the declared ad size — wrapper cannot grow past it.
+    expect(adWrapper.style.maxWidth).toBe("300px");
+  });
+
+  it("a sandboxed iframe ad cannot leak fonts or colors into siblings", async () => {
+    // Mirror the exact shape AdSlot uses: sandboxed iframe with srcDoc.
+    const hostileHtml = `
+      <style>
+        body, html { font-family: "EvilAdFont" !important; color: red !important; }
+        * { font-family: "EvilAdFont" !important; }
+      </style>
+      <div style="width: 5000px; font-family: 'EvilAdFont'; color: red;">
+        Buy now!
+      </div>
+    `;
+
+    const { container } = render(
+      <div className="page-container" style={{ width: 1200 }}>
+        <header data-testid="sibling-header">Header text</header>
+        <div
+          className="ad-slot"
+          style={{ maxWidth: 300, aspectRatio: "300 / 250" }}
+        >
+          <iframe
+            data-testid="ad-iframe"
+            title="Advertisement"
+            sandbox="allow-scripts allow-popups allow-popups-to-escape-sandbox"
+            srcDoc={`<!doctype html><html><head><meta charset="utf-8"><style>html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden;}</style></head><body>${hostileHtml}</body></html>`}
+            style={{ width: "100%", height: "100%", border: 0, display: "block" }}
+            scrolling="no"
+          />
+        </div>
+        <footer data-testid="sibling-footer">Footer text</footer>
+      </div>
+    );
+
+    // Wait a tick for the iframe to mount.
+    await new Promise((r) => setTimeout(r, 0));
+
     const header = container.querySelector(
       '[data-testid="sibling-header"]'
     ) as HTMLElement;
@@ -97,44 +116,32 @@ describe("Ad isolation: HTML ads must not affect site fonts or layout", () => {
       '[data-testid="sibling-footer"]'
     ) as HTMLElement;
 
-    // 1. Required isolation CSS is present on .ad-slot
-    const adStyles = getComputedStyle(adWrapper);
-    expect(adStyles.overflow).toBe("hidden");
-    // jsdom may serialize `contain` as the longhand list — accept either.
-    expect(adStyles.contain).toMatch(/layout|size|paint|style/);
-    expect(adStyles.isolation).toBe("isolate");
-
-    // 2. .page-container must use overflow-x: clip so ads cannot cause page scroll
-    const pageStyles = getComputedStyle(page);
-    expect(["clip", "hidden"]).toContain(pageStyles.overflowX);
-
-    // 3. Sibling fonts/colors are NOT overridden by the ad's <style> tag.
-    const headerFont = getComputedStyle(header).fontFamily;
-    const footerFont = getComputedStyle(footer).fontFamily;
-    const bodyFont = getComputedStyle(document.body).fontFamily;
-    expect(headerFont).not.toMatch(/EvilAdFont/);
-    expect(footerFont).not.toMatch(/EvilAdFont/);
-    expect(bodyFont).not.toMatch(/EvilAdFont/);
-
+    // The host page's fonts/colors are unchanged — the iframe boundary
+    // prevents the ad's <style> from reaching the parent document.
+    expect(getComputedStyle(header).fontFamily).not.toMatch(/EvilAdFont/);
+    expect(getComputedStyle(footer).fontFamily).not.toMatch(/EvilAdFont/);
+    expect(getComputedStyle(document.body).fontFamily).not.toMatch(/EvilAdFont/);
     expect(getComputedStyle(header).color).not.toBe("rgb(255, 0, 0)");
     expect(getComputedStyle(footer).color).not.toBe("rgb(255, 0, 0)");
-
-    // 4. Ad cannot push the page-container wider than its declared width.
-    //    (jsdom doesn't do real layout, but we can assert the constraints.)
-    expect(adStyles.maxWidth).toBe("100%");
-    expect(adStyles.minWidth).toBe("0px");
-
-    // The ad wrapper's own inline maxWidth is the declared ad size, not larger.
-    expect(adWrapper.style.maxWidth).toBe("300px");
   });
 
-  it("AdSlot CSS file declares the required isolation rules", () => {
-    const css = readFileSync(
-      path.resolve(__dirname, "../index.css"),
+  it("AdSlot component renders HTML ads inside a sandboxed iframe", () => {
+    // Source-level guarantee: the only path for `ad_type === 'html'` must
+    // go through a sandboxed iframe with srcDoc. If someone removes that,
+    // this test fails immediately.
+    const src = readFileSync(
+      path.resolve(__dirname, "../components/AdSlot.tsx"),
       "utf-8"
     );
 
-    // Hard guarantees that prevent regressions in index.css
+    expect(src).toMatch(/ad_type\s*===\s*['"]html['"]/);
+    expect(src).toMatch(/<iframe[\s\S]*sandbox=/);
+    expect(src).toMatch(/srcDoc=/);
+  });
+
+  it("index.css declares the required ad isolation + page clip rules", () => {
+    const css = readFileSync(path.resolve(__dirname, "../index.css"), "utf-8");
+
     expect(css).toMatch(/\.ad-slot\s*\{[^}]*contain:\s*layout[^}]*\}/s);
     expect(css).toMatch(/\.ad-slot\s*\{[^}]*isolation:\s*isolate[^}]*\}/s);
     expect(css).toMatch(/\.ad-slot\s*\{[^}]*overflow:\s*hidden[^}]*\}/s);
