@@ -118,7 +118,7 @@ export function AdminNotificationTemplatesTab({ toast }: { toast: ReturnType<typ
         })
         .eq('id', editing!.id);
       if (error) throw error;
-      await logAdminAction('template_updated', `Updated notification template: ${form.template_key}`, editing!.id);
+      if (user) await logAdminAction(user.id, 'template_updated', 'notification_template', editing!.id);
       toast({ title: 'Template updated' });
       setEditing(null);
       fetchTemplates();
