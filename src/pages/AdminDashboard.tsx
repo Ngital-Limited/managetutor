@@ -2345,10 +2345,12 @@ export default function AdminDashboard() {
             {activeTab === 'overview' && (
               <div className="space-y-6 max-w-[1200px]">
                 <AdminMobileQuickActions stats={stats} onNavigate={(tab) => setActiveTab(tab)} />
+                {/* Command Center — Today's Activity & Revenue */}
+                <AdminCommandCenter onNavigate={(tab) => setActiveTab(tab)} />
                 <div className="flex items-start justify-between gap-3 flex-wrap">
                   <div>
-                    <h1 className="text-xl font-semibold">Overview</h1>
-                    <p className="text-sm text-muted-foreground mt-0.5">Platform health at a glance</p>
+                    <h1 className="text-xl font-semibold">All-Time Overview</h1>
+                    <p className="text-sm text-muted-foreground mt-0.5">Platform totals &amp; trends</p>
                   </div>
                   <div className="flex items-center gap-2 flex-wrap">
                     <AutoRefreshControl
