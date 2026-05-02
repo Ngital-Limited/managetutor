@@ -3901,49 +3901,8 @@ export default function AdminDashboard() {
             )}
 
             {/* ═══════ SETTINGS TAB ═══════ */}
-            {activeTab === 'settings' && (
-              <div className="space-y-6">
-                <h1 className="text-xl font-semibold">Platform Settings</h1>
-                <div className="grid md:grid-cols-2 gap-6">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Commission & Pricing</CardTitle>
-                      <CardDescription>Platform fees are configured in Platform Data</CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-3">
-                      <p className="text-sm text-muted-foreground">
-                        Commission percentage, verification fee, and featured listing prices are managed centrally
-                        under <strong>Platform Data → Pricing & Fees</strong>. They are read live by the demo booking,
-                        boost, and verification flows.
-                      </p>
-                      <Button variant="outline" className="w-full" onClick={() => setActiveTab('platform_data')}>
-                        Open Platform Data
-                      </Button>
-                    </CardContent>
-                  </Card>
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Platform Info</CardTitle>
-                      <CardDescription>Current system status</CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-3">
-                      {[
-                        { label: 'Total Users', value: stats.totalUsers },
-                        { label: 'Total Tutors', value: stats.totalTutors },
-                        { label: 'Total Parents', value: stats.totalParents },
-                        { label: 'Active Jobs', value: stats.activeJobs },
-                        { label: 'Total Revenue', value: `৳${stats.totalRevenue.toLocaleString()}` },
-                      ].map((item, i) => (
-                        <div key={i} className="flex items-center justify-between py-2 border-b border-border last:border-0">
-                          <span className="text-sm text-muted-foreground">{item.label}</span>
-                          <span className="font-semibold">{item.value}</span>
-                        </div>
-                      ))}
-                    </CardContent>
-                  </Card>
-                </div>
-              </div>
-            )}
+            {activeTab === 'settings' && <AdminPlatformSettingsTab toast={toast} />}
+            {activeTab === 'export_center' && <AdminExportCenterTab toast={toast} />}
             </div>
           </main>
           <AdminBottomNav activeTab={activeTab} setActiveTab={setActiveTab} />
