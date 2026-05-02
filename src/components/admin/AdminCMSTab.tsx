@@ -108,7 +108,7 @@ export function AdminCMSTab({ toast }: { toast: ReturnType<typeof useToast>['toa
           })
           .eq('id', editing.id);
         if (error) throw error;
-        await logAdminAction('cms_page_updated', `Updated CMS page: ${form.title}`, editing.id);
+        if (user) await logAdminAction(user.id, 'cms_page_updated', 'cms', editing.id);
         toast({ title: 'Page updated' });
       } else {
         const { error } = await supabase
@@ -122,7 +122,7 @@ export function AdminCMSTab({ toast }: { toast: ReturnType<typeof useToast>['toa
             sort_order: form.sort_order,
           });
         if (error) throw error;
-        await logAdminAction('cms_page_created', `Created CMS page: ${form.title}`);
+        if (user) await logAdminAction(user.id, 'cms_page_created', 'cms');
         toast({ title: 'Page created' });
       }
       setEditing(null);
@@ -142,7 +142,7 @@ export function AdminCMSTab({ toast }: { toast: ReturnType<typeof useToast>['toa
       toast({ title: 'Error', description: error.message, variant: 'destructive' });
       return;
     }
-    await logAdminAction('cms_page_deleted', `Deleted CMS page: ${page.title}`, page.id);
+    if (user) await logAdminAction(user.id, 'cms_page_deleted', 'cms', page.id);
     toast({ title: 'Page deleted' });
     fetchPages();
   };
@@ -153,7 +153,7 @@ export function AdminCMSTab({ toast }: { toast: ReturnType<typeof useToast>['toa
       .update({ is_published: !page.is_published })
       .eq('id', page.id);
     if (!error) {
-      await logAdminAction('cms_page_toggled', `${page.is_published ? 'Unpublished' : 'Published'} CMS page: ${page.title}`, page.id);
+      if (user) await logAdminAction(user.id, 'cms_page_toggled', 'cms', page.id);
       fetchPages();
     }
   };
