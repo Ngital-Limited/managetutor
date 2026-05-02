@@ -2071,6 +2071,7 @@ export default function AdminDashboard() {
         { title: 'Contact Messages', value: 'contacts', icon: Mail },
         { title: 'Support Tickets', value: 'tickets', icon: LifeBuoy },
         { title: 'Phone Log', value: 'phone_log', icon: Phone },
+        { title: 'Communication Log', value: 'comm_log', icon: ScrollText },
       ],
     },
     {
