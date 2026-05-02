@@ -74,9 +74,9 @@ Deno.serve(async (req) => {
 
     // Log the action
     await supabase.from("activity_logs").insert({
-      admin_id: "00000000-0000-0000-0000-000000000000",
+      actor_id: "00000000-0000-0000-0000-000000000000",
       action: "automated_commission_reminders",
-      category: "system",
+      target_type: "system",
       details: { overdue_count: overdue.length, tutors_notified: notifications.length },
     });
 
