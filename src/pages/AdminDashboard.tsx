@@ -2379,6 +2379,7 @@ export default function AdminDashboard() {
               </nav>
             </div>
             <div className="flex items-center gap-2">
+              <AdminCommandPalette onNavigate={setActiveTab} />
               <NotificationBell />
               <Button variant="ghost" size="sm" className="text-muted-foreground text-xs" onClick={() => { supabase.auth.signOut(); navigate('/'); }}>
                 <LogOut className="h-3.5 w-3.5" />
