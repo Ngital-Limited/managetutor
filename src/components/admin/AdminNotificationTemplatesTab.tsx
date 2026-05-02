@@ -37,6 +37,7 @@ const DEFAULT_TEMPLATES = [
 ];
 
 export function AdminNotificationTemplatesTab({ toast }: { toast: ReturnType<typeof useToast>['toast'] }) {
+  const { user } = useAuth();
   const [templates, setTemplates] = useState<NotifTemplate[]>([]);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState<NotifTemplate | null>(null);
