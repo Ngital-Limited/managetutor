@@ -2866,6 +2866,7 @@ export default function AdminDashboard() {
                                 <div className="flex gap-1 justify-end flex-wrap">
                                   <Button variant="ghost" size="sm" asChild><Link to={`/jobs/${job.id}`}><Eye className="h-4 w-4" /></Link></Button>
                                   <Button variant="ghost" size="sm" onClick={() => openEditJob(job.id)} title="Edit Job"><Pencil className="h-4 w-4" /></Button>
+                                  <Button variant="ghost" size="sm" onClick={() => handleDuplicateJob(job.id)} title="Duplicate Job"><Copy className="h-4 w-4" /></Button>
                                   <Button variant="outline" size="sm" className="text-xs gap-1" onClick={() => { setViewingJobApps({ jobId: job.id, jobTitle: job.title }); fetchJobApplications(job.id); }} title="View Applications & Assign Tutor">
                                     <UserCheck className="h-3.5 w-3.5" /> Assign
                                   </Button>
