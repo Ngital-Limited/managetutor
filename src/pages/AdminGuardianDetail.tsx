@@ -13,6 +13,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { AdminNotesWidget } from '@/components/admin/AdminNotesWidget';
 import { logAdminAction } from '@/lib/adminLogger';
+import { AdminUserTimeline } from '@/components/admin/AdminUserTimeline';
 import {
   ArrowLeft, UserCheck, Ban, Phone, Mail, MapPin, Calendar, Briefcase,
   CheckCircle2, Clock, DollarSign, Activity, FileText
@@ -184,6 +185,7 @@ export default function AdminGuardianDetail() {
           <TabsTrigger value="finance" className="text-xs"><DollarSign className="h-3 w-3 mr-1" /> Finance ({commissions.length})</TabsTrigger>
           <TabsTrigger value="notes" className="text-xs"><FileText className="h-3 w-3 mr-1" /> Notes</TabsTrigger>
           <TabsTrigger value="activity" className="text-xs"><Activity className="h-3 w-3 mr-1" /> Activity</TabsTrigger>
+          <TabsTrigger value="timeline" className="text-xs"><Calendar className="h-3 w-3 mr-1" /> Timeline</TabsTrigger>
         </TabsList>
 
         {/* Jobs Tab */}
@@ -330,6 +332,13 @@ export default function AdminGuardianDetail() {
                 </TableBody>
               </Table>
             </ScrollArea>
+          </Card>
+        </TabsContent>
+        <TabsContent value="timeline">
+          <Card>
+            <CardContent className="pt-4">
+              {id && <AdminUserTimeline userId={id} />}
+            </CardContent>
           </Card>
         </TabsContent>
       </Tabs>

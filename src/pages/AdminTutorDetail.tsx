@@ -13,6 +13,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { AdminNotesWidget } from '@/components/admin/AdminNotesWidget';
 import { logAdminAction } from '@/lib/adminLogger';
+import { AdminUserTimeline } from '@/components/admin/AdminUserTimeline';
 import {
   ArrowLeft, UserCheck, Ban, Phone, Mail, MapPin, Calendar, Briefcase,
   CheckCircle2, DollarSign, Activity, FileText, GraduationCap, Star, Eye
@@ -206,6 +207,7 @@ export default function AdminTutorDetail() {
           <TabsTrigger value="finance" className="text-xs"><DollarSign className="h-3 w-3 mr-1" /> Finance ({commissions.length})</TabsTrigger>
           <TabsTrigger value="notes" className="text-xs"><FileText className="h-3 w-3 mr-1" /> Notes</TabsTrigger>
           <TabsTrigger value="activity" className="text-xs"><Activity className="h-3 w-3 mr-1" /> Activity</TabsTrigger>
+          <TabsTrigger value="timeline" className="text-xs"><Calendar className="h-3 w-3 mr-1" /> Timeline</TabsTrigger>
         </TabsList>
 
         {/* Applications Tab */}
@@ -350,6 +352,13 @@ export default function AdminTutorDetail() {
                 </TableBody>
               </Table>
             </ScrollArea>
+          </Card>
+        </TabsContent>
+        <TabsContent value="timeline">
+          <Card>
+            <CardContent className="pt-4">
+              {tutorProfile?.user_id && <AdminUserTimeline userId={tutorProfile.user_id} />}
+            </CardContent>
           </Card>
         </TabsContent>
       </Tabs>

@@ -104,3 +104,19 @@ Addressing remaining critical gaps from the 20-point admin dashboard audit.
 - Edge function `commission-reminders`: scans overdue commission records, marks them as overdue, sends in-app notifications to affected tutors.
 - pg_cron scheduled daily at 9:00 AM UTC.
 - Logs automated actions to `activity_logs` table for audit trail.
+
+# Phase J: Job Tools, User Timeline, Analytics Charts ✅
+
+## Job Duplication
+- One-click duplicate any job (copies all fields + subjects, resets to `pending_approval`).
+- Duplicate button added to Jobs tab action column. Audit-logged.
+
+## User Activity Timeline (AdminUserTimeline)
+- Reusable timeline widget aggregating notifications, applications, jobs posted, payments, and admin actions.
+- Chronological view with type-colored icons and timestamps.
+- Integrated as new "Timeline" tab on both Tutor Detail and Guardian Detail pages.
+
+## Overview Analytics Enhancements
+- Revenue trend chart (30-day area chart) added to Overview tab.
+- Job Status Distribution donut/pie chart (Active, Pending, Completed, Other) with legend.
+- Both charts complement existing Signups and Job Postings charts.

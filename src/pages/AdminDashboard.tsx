@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { formatExactDate } from '@/lib/date';
 import { Logo } from '@/components/Logo';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell } from 'recharts';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -37,7 +37,8 @@ import {
   LogOut, Home, DollarSign, Trash2, CreditCard, Megaphone, Send, Mail,
   Package, Plus, Pencil, ToggleLeft, ToggleRight, Wallet, MapPin, LifeBuoy, ShieldCheck,
   LogIn, BookOpen, UserPlus, TrendingUp, ChevronLeft, ChevronRight, ArrowLeft,
-  Phone, Calendar, X, Activity, HelpCircle, ArrowUpDown, Zap, Bell, ListChecks, ScrollText, Undo2
+  Phone, Calendar, X, Activity, HelpCircle, ArrowUpDown, Zap, Bell, ListChecks, ScrollText, Undo2, Copy,
+  PieChart as PieChartIcon
 } from 'lucide-react';
 import { Tooltip as UITooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { RevenuePayoutTab } from '@/components/admin/RevenuePayoutTab';
@@ -1886,6 +1887,30 @@ export default function AdminDashboard() {
     setProcessing(false);
   };
 
+  const handleDuplicateJob = async (jobId: string) => {
+    try {
+      const { data: job } = await supabase.from('jobs').select('*').eq('id', jobId).single();
+      if (!job) { toast({ title: 'Job not found', variant: 'destructive' }); return; }
+      const { data: jobSubs } = await supabase.from('job_subjects').select('subject_id').eq('job_id', jobId);
+      const { id, job_reference, slug, created_at, updated_at, total_applications, total_views, ...rest } = job;
+      const { data: newJob, error } = await supabase.from('jobs').insert({
+        ...rest,
+        status: 'pending_approval' as any,
+        total_applications: 0,
+        total_views: 0,
+      }).select().single();
+      if (error || !newJob) { toast({ title: 'Error', description: error?.message, variant: 'destructive' }); return; }
+      if (jobSubs && jobSubs.length > 0) {
+        await supabase.from('job_subjects').insert(jobSubs.map(s => ({ job_id: newJob.id, subject_id: s.subject_id })));
+      }
+      if (user) await logAdminAction(user.id, 'duplicate_job', 'job', newJob.id);
+      toast({ title: 'Job duplicated', description: `New job created with ref ${newJob.job_reference || 'pending'}` });
+      fetchJobs();
+    } catch (err: any) {
+      toast({ title: 'Error', description: err.message, variant: 'destructive' });
+    }
+  };
+
   const handleImpersonate = async (userId: string) => {
     setProcessing(true);
     const { error } = await impersonateUser(userId);
@@ -2483,6 +2508,65 @@ export default function AdminDashboard() {
                     </div>
                   </div>
                 </div>
+
+                {/* Revenue trend + Job status distribution */}
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div className="rounded-lg border border-border/50 p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <span className="text-sm font-medium">Revenue</span>
+                      <span className="text-[11px] text-muted-foreground">30 days</span>
+                    </div>
+                    <div className="h-36">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <AreaChart data={chartData.revenue}>
+                          <CartesianGrid strokeDasharray="3 3" className="stroke-border/30" />
+                          <XAxis dataKey="date" tick={{ fontSize: 9 }} interval="preserveStartEnd" />
+                          <YAxis allowDecimals={false} tick={{ fontSize: 9 }} width={32} />
+                          <Tooltip contentStyle={{ fontSize: 11, borderRadius: 6, border: '1px solid hsl(var(--border))' }} />
+                          <Area type="monotone" dataKey="amount" stroke="hsl(142 76% 36%)" fill="hsl(142 76% 36% / 0.1)" strokeWidth={1.5} name="Revenue (৳)" />
+                        </AreaChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </div>
+
+                  <div className="rounded-lg border border-border/50 p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <span className="text-sm font-medium">Job Status Distribution</span>
+                    </div>
+                    <div className="h-36 flex items-center justify-center">
+                      {(() => {
+                        const statusData = [
+                          { name: 'Active', value: stats.activeJobs, color: 'hsl(142 76% 36%)' },
+                          { name: 'Pending', value: stats.pendingJobs, color: 'hsl(38 92% 50%)' },
+                          { name: 'Completed', value: stats.completedJobs, color: 'hsl(221 83% 53%)' },
+                          { name: 'Other', value: Math.max(0, stats.totalJobs - stats.activeJobs - stats.pendingJobs - stats.completedJobs), color: 'hsl(var(--muted-foreground))' },
+                        ].filter(d => d.value > 0);
+                        if (statusData.length === 0) return <span className="text-xs text-muted-foreground">No jobs yet</span>;
+                        return (
+                          <div className="flex items-center gap-4 w-full">
+                            <ResponsiveContainer width="50%" height={130}>
+                              <PieChart>
+                                <Pie data={statusData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={55} innerRadius={30}>
+                                  {statusData.map((d, i) => <Cell key={i} fill={d.color} />)}
+                                </Pie>
+                                <Tooltip contentStyle={{ fontSize: 11, borderRadius: 6 }} />
+                              </PieChart>
+                            </ResponsiveContainer>
+                            <div className="space-y-1.5">
+                              {statusData.map(d => (
+                                <div key={d.name} className="flex items-center gap-2 text-xs">
+                                  <span className="h-2.5 w-2.5 rounded-full shrink-0" style={{ backgroundColor: d.color }} />
+                                  <span className="text-muted-foreground">{d.name}</span>
+                                  <span className="font-semibold ml-auto">{d.value}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        );
+                      })()}
+                    </div>
+                  </div>
+                </div>
               </div>
             )}
 
@@ -2841,6 +2925,7 @@ export default function AdminDashboard() {
                                 <div className="flex gap-1 justify-end flex-wrap">
                                   <Button variant="ghost" size="sm" asChild><Link to={`/jobs/${job.id}`}><Eye className="h-4 w-4" /></Link></Button>
                                   <Button variant="ghost" size="sm" onClick={() => openEditJob(job.id)} title="Edit Job"><Pencil className="h-4 w-4" /></Button>
+                                  <Button variant="ghost" size="sm" onClick={() => handleDuplicateJob(job.id)} title="Duplicate Job"><Copy className="h-4 w-4" /></Button>
                                   <Button variant="outline" size="sm" className="text-xs gap-1" onClick={() => { setViewingJobApps({ jobId: job.id, jobTitle: job.title }); fetchJobApplications(job.id); }} title="View Applications & Assign Tutor">
                                     <UserCheck className="h-3.5 w-3.5" /> Assign
                                   </Button>
