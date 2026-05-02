@@ -2508,6 +2508,65 @@ export default function AdminDashboard() {
                     </div>
                   </div>
                 </div>
+
+                {/* Revenue trend + Job status distribution */}
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div className="rounded-lg border border-border/50 p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <span className="text-sm font-medium">Revenue</span>
+                      <span className="text-[11px] text-muted-foreground">30 days</span>
+                    </div>
+                    <div className="h-36">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <AreaChart data={chartData.revenue}>
+                          <CartesianGrid strokeDasharray="3 3" className="stroke-border/30" />
+                          <XAxis dataKey="date" tick={{ fontSize: 9 }} interval="preserveStartEnd" />
+                          <YAxis allowDecimals={false} tick={{ fontSize: 9 }} width={32} />
+                          <Tooltip contentStyle={{ fontSize: 11, borderRadius: 6, border: '1px solid hsl(var(--border))' }} />
+                          <Area type="monotone" dataKey="amount" stroke="hsl(142 76% 36%)" fill="hsl(142 76% 36% / 0.1)" strokeWidth={1.5} name="Revenue (৳)" />
+                        </AreaChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </div>
+
+                  <div className="rounded-lg border border-border/50 p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <span className="text-sm font-medium">Job Status Distribution</span>
+                    </div>
+                    <div className="h-36 flex items-center justify-center">
+                      {(() => {
+                        const statusData = [
+                          { name: 'Active', value: stats.activeJobs, color: 'hsl(142 76% 36%)' },
+                          { name: 'Pending', value: stats.pendingJobs, color: 'hsl(38 92% 50%)' },
+                          { name: 'Completed', value: stats.completedJobs, color: 'hsl(221 83% 53%)' },
+                          { name: 'Other', value: Math.max(0, stats.totalJobs - stats.activeJobs - stats.pendingJobs - stats.completedJobs), color: 'hsl(var(--muted-foreground))' },
+                        ].filter(d => d.value > 0);
+                        if (statusData.length === 0) return <span className="text-xs text-muted-foreground">No jobs yet</span>;
+                        return (
+                          <div className="flex items-center gap-4 w-full">
+                            <ResponsiveContainer width="50%" height={130}>
+                              <PieChart>
+                                <Pie data={statusData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={55} innerRadius={30}>
+                                  {statusData.map((d, i) => <Cell key={i} fill={d.color} />)}
+                                </Pie>
+                                <Tooltip contentStyle={{ fontSize: 11, borderRadius: 6 }} />
+                              </PieChart>
+                            </ResponsiveContainer>
+                            <div className="space-y-1.5">
+                              {statusData.map(d => (
+                                <div key={d.name} className="flex items-center gap-2 text-xs">
+                                  <span className="h-2.5 w-2.5 rounded-full shrink-0" style={{ backgroundColor: d.color }} />
+                                  <span className="text-muted-foreground">{d.name}</span>
+                                  <span className="font-semibold ml-auto">{d.value}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        );
+                      })()}
+                    </div>
+                  </div>
+                </div>
               </div>
             )}
 
