@@ -76,6 +76,9 @@ import { AdminRefundTab } from '@/components/admin/AdminRefundTab';
 import { AdminPerformanceKPIs } from '@/components/admin/AdminPerformanceKPIs';
 import { AdminTutorEarningsTab } from '@/components/admin/AdminTutorEarningsTab';
 import { AutoRefreshControl } from '@/components/AutoRefreshControl';
+import { AdminPlatformSettingsTab } from '@/components/admin/AdminPlatformSettingsTab';
+import { AdminCommandPalette } from '@/components/admin/AdminCommandPalette';
+import { AdminExportCenterTab } from '@/components/admin/AdminExportCenterTab';
 import { logAdminAction } from '@/lib/adminLogger';
 import { getPlatformCommissionPct, computeFeeSplit } from '@/lib/commission';
 
