@@ -93,12 +93,16 @@ export function AdminTutorEarningsTab({ toast }: { toast: ReturnType<typeof useT
 
   const openDetail = async (tutor: TutorEarning) => {
     setDetailTutor(tutor);
-    const [{ data: recs }, { data: pays }] = await Promise.all([
-      supabase.from('commission_records').select('*').eq('tutor_id', tutor.tutor_id).order('created_at', { ascending: false }),
-      supabase.from('commission_payments').select('*').eq('tutor_id', tutor.tutor_id).order('created_at', { ascending: false }),
-    ]);
+    const { data: recs } = await supabase.from('commission_records').select('*').eq('tutor_id', tutor.tutor_id).order('created_at', { ascending: false });
     setDetailRecords(recs || []);
-    setDetailPayments(pays || []);
+    // Get payments for these commission records
+    const commIds = (recs || []).map(r => r.id);
+    if (commIds.length > 0) {
+      const { data: pays } = await supabase.from('commission_payments').select('*').in('commission_id', commIds).order('created_at', { ascending: false });
+      setDetailPayments(pays || []);
+    } else {
+      setDetailPayments([]);
+    }
   };
 
   const filtered = earnings.filter(e => {
