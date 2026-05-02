@@ -50,17 +50,14 @@ export function AdminPlatformSettingsTab({ toast }: { toast: any }) {
   }, []);
 
   const loadSettings = async () => {
-    // Load from platform_settings key-value in platform_data
     const { data } = await supabase
-      .from('platform_data')
-      .select('key, value')
-      .like('key', 'setting_%');
+      .from('platform_settings')
+      .select('key, value');
 
     const map: Record<string, string> = {};
     DEFAULT_SETTINGS.forEach(s => { map[s.key] = s.value; });
-    data?.forEach((row: any) => {
-      const realKey = row.key.replace('setting_', '');
-      if (realKey in map) map[realKey] = String(row.value);
+    (data as any[])?.forEach((row) => {
+      if (row.key in map) map[row.key] = String(row.value);
     });
     setSettings(map);
     setLoaded(true);
@@ -74,8 +71,8 @@ export function AdminPlatformSettingsTab({ toast }: { toast: any }) {
     setSaving(true);
     try {
       for (const [key, value] of Object.entries(settings)) {
-        await supabase.from('platform_data').upsert(
-          { key: `setting_${key}`, value: String(value) } as any,
+        await supabase.from('platform_settings').upsert(
+          { key, value: String(value) } as any,
           { onConflict: 'key' }
         );
       }
