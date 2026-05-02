@@ -3742,6 +3742,32 @@ export default function AdminDashboard() {
             {/* ═══════ CONVERSION FUNNEL TAB ═══════ */}
             {activeTab === 'conversion_funnel' && <AdminConversionFunnelTab />}
 
+            {/* ═══════ OPERATIONS TABS ═══════ */}
+            {activeTab === 'send_notification' && (
+              <div className="space-y-6 max-w-2xl">
+                <h1 className="text-xl font-semibold">Send Notification</h1>
+                <AdminSendNotification toast={toast} />
+              </div>
+            )}
+            {activeTab === 'contact_release' && (
+              <div className="space-y-6 max-w-2xl">
+                <h1 className="text-xl font-semibold">Manual Contact Release</h1>
+                <AdminManualContactRelease toast={toast} />
+              </div>
+            )}
+            {activeTab === 'offline_payments' && (
+              <div className="space-y-6 max-w-2xl">
+                <h1 className="text-xl font-semibold">Record Offline Payment</h1>
+                <AdminOfflinePaymentEntry toast={toast} />
+              </div>
+            )}
+            {activeTab === 'commission_reminders' && (
+              <div className="space-y-6">
+                <h1 className="text-xl font-semibold">Commission Reminders</h1>
+                <AdminCommissionReminders toast={toast} />
+              </div>
+            )}
+
             {/* ═══════ ACTIVITY LOG TAB ═══════ */}
             {activeTab === 'activity_log' && <AdminActivityLogTab toast={toast} />}
 
