@@ -115,7 +115,7 @@ export function AdminUserTimeline({ userId }: { userId: string }) {
       // Activity logs (admin actions on this user)
       const { data: logs } = await supabase
         .from('activity_logs')
-        .select('id, action, category, created_at, details')
+        .select('id, action, target_type, created_at, details')
         .eq('target_id', userId)
         .order('created_at', { ascending: false })
         .limit(15);
@@ -125,7 +125,7 @@ export function AdminUserTimeline({ userId }: { userId: string }) {
           id: `log-${l.id}`,
           type: 'admin_action',
           title: `Admin: ${l.action?.replace(/_/g, ' ')}`,
-          detail: l.category || '',
+          detail: l.target_type || '',
           date: l.created_at,
           icon: CheckCircle2,
           color: 'text-purple-500',
