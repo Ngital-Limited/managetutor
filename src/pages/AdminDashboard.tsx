@@ -2075,6 +2075,8 @@ export default function AdminDashboard() {
         { title: 'Contact Release', value: 'contact_release', icon: Phone },
         { title: 'Offline Payments', value: 'offline_payments', icon: CreditCard },
         { title: 'Commission Reminders', value: 'commission_reminders', icon: AlertTriangle },
+        { title: 'Enforcement', value: 'enforcement', icon: Ban },
+        { title: 'Dispute Queue', value: 'disputes', icon: AlertTriangle },
       ],
     },
     {
