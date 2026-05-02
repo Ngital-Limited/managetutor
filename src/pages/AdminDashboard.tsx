@@ -2083,6 +2083,7 @@ export default function AdminDashboard() {
         { title: 'Commission Reminders', value: 'commission_reminders', icon: AlertTriangle },
         { title: 'Enforcement', value: 'enforcement', icon: Ban },
         { title: 'Dispute Queue', value: 'disputes', icon: AlertTriangle },
+        { title: 'Bulk Actions', value: 'bulk_actions', icon: ListChecks },
       ],
     },
     {
