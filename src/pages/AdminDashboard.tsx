@@ -66,6 +66,9 @@ import { AdminNotesWidget } from '@/components/admin/AdminNotesWidget';
 import { AdminCMSTab } from '@/components/admin/AdminCMSTab';
 import { AdminNotificationTemplatesTab } from '@/components/admin/AdminNotificationTemplatesTab';
 import { AdminMobileQuickActions } from '@/components/admin/AdminMobileQuickActions';
+import { AdminCommandCenter } from '@/components/admin/AdminCommandCenter';
+import { AdminSendNotification, AdminManualContactRelease, AdminOfflinePaymentEntry, AdminCommissionReminders } from '@/components/admin/AdminOperationalTools';
+import { AdminEnforcementTab, AdminDisputeQueueTab } from '@/components/admin/AdminEnforcementTab';
 import { AutoRefreshControl } from '@/components/AutoRefreshControl';
 import { logAdminAction } from '@/lib/adminLogger';
 import { getPlatformCommissionPct, computeFeeSplit } from '@/lib/commission';
@@ -2066,6 +2069,17 @@ export default function AdminDashboard() {
       ],
     },
     {
+      label: 'Operations',
+      items: [
+        { title: 'Send Notification', value: 'send_notification', icon: Bell },
+        { title: 'Contact Release', value: 'contact_release', icon: Phone },
+        { title: 'Offline Payments', value: 'offline_payments', icon: CreditCard },
+        { title: 'Commission Reminders', value: 'commission_reminders', icon: AlertTriangle },
+        { title: 'Enforcement', value: 'enforcement', icon: Ban },
+        { title: 'Dispute Queue', value: 'disputes', icon: AlertTriangle },
+      ],
+    },
+    {
       label: 'Analytics',
       items: [
         { title: 'Conversion Funnel', value: 'conversion_funnel', icon: TrendingUp },
@@ -2343,10 +2357,12 @@ export default function AdminDashboard() {
             {activeTab === 'overview' && (
               <div className="space-y-6 max-w-[1200px]">
                 <AdminMobileQuickActions stats={stats} onNavigate={(tab) => setActiveTab(tab)} />
+                {/* Command Center — Today's Activity & Revenue */}
+                <AdminCommandCenter onNavigate={(tab) => setActiveTab(tab)} />
                 <div className="flex items-start justify-between gap-3 flex-wrap">
                   <div>
-                    <h1 className="text-xl font-semibold">Overview</h1>
-                    <p className="text-sm text-muted-foreground mt-0.5">Platform health at a glance</p>
+                    <h1 className="text-xl font-semibold">All-Time Overview</h1>
+                    <p className="text-sm text-muted-foreground mt-0.5">Platform totals &amp; trends</p>
                   </div>
                   <div className="flex items-center gap-2 flex-wrap">
                     <AutoRefreshControl
@@ -3728,6 +3744,34 @@ export default function AdminDashboard() {
 
             {/* ═══════ CONVERSION FUNNEL TAB ═══════ */}
             {activeTab === 'conversion_funnel' && <AdminConversionFunnelTab />}
+
+            {/* ═══════ OPERATIONS TABS ═══════ */}
+            {activeTab === 'send_notification' && (
+              <div className="space-y-6 max-w-2xl">
+                <h1 className="text-xl font-semibold">Send Notification</h1>
+                <AdminSendNotification toast={toast} />
+              </div>
+            )}
+            {activeTab === 'contact_release' && (
+              <div className="space-y-6 max-w-2xl">
+                <h1 className="text-xl font-semibold">Manual Contact Release</h1>
+                <AdminManualContactRelease toast={toast} />
+              </div>
+            )}
+            {activeTab === 'offline_payments' && (
+              <div className="space-y-6 max-w-2xl">
+                <h1 className="text-xl font-semibold">Record Offline Payment</h1>
+                <AdminOfflinePaymentEntry toast={toast} />
+              </div>
+            )}
+            {activeTab === 'commission_reminders' && (
+              <div className="space-y-6">
+                <h1 className="text-xl font-semibold">Commission Reminders</h1>
+                <AdminCommissionReminders toast={toast} />
+              </div>
+            )}
+            {activeTab === 'enforcement' && <AdminEnforcementTab toast={toast} />}
+            {activeTab === 'disputes' && <AdminDisputeQueueTab toast={toast} />}
 
             {/* ═══════ ACTIVITY LOG TAB ═══════ */}
             {activeTab === 'activity_log' && <AdminActivityLogTab toast={toast} />}
