@@ -2060,6 +2060,7 @@ export default function AdminDashboard() {
         { title: 'Commissions', value: 'commissions', icon: DollarSign },
         { title: 'Invoices', value: 'invoices', icon: FileCheck },
         { title: 'Revenue & Payouts', value: 'revenue', icon: Wallet },
+        { title: 'Refunds', value: 'refunds', icon: Undo2 },
         { title: 'Subscriptions', value: 'subscriptions', icon: Package },
       ],
     },
