@@ -35,6 +35,7 @@ const PAGE_TYPES = [
 ];
 
 export function AdminCMSTab({ toast }: { toast: ReturnType<typeof useToast>['toast'] }) {
+  const { user } = useAuth();
   const [pages, setPages] = useState<CMSPage[]>([]);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState<CMSPage | null>(null);
