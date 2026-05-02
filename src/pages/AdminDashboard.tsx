@@ -3786,6 +3786,7 @@ export default function AdminDashboard() {
             {activeTab === 'bulk_actions' && <AdminBulkActionsTab toast={toast} />}
             {activeTab === 'comm_log' && <AdminCommunicationLogTab toast={toast} />}
             {activeTab === 'refunds' && <AdminRefundTab toast={toast} />}
+            {activeTab === 'tutor_earnings' && <AdminTutorEarningsTab toast={toast} />}
 
             {/* ═══════ ACTIVITY LOG TAB ═══════ */}
             {activeTab === 'activity_log' && <AdminActivityLogTab toast={toast} />}
