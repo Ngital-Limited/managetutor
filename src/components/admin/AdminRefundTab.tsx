@@ -58,10 +58,13 @@ export function AdminRefundTab({ toast }: { toast: ReturnType<typeof useToast>['
         .from('payment_transactions')
         .update({
           status: 'refunded',
-          refund_reason: refundReason || 'Admin-initiated refund',
-          refund_amount: amount,
-          refunded_at: new Date().toISOString(),
-        })
+          gateway_response: {
+            ...(typeof refundDialog.gateway_response === 'object' && refundDialog.gateway_response ? refundDialog.gateway_response : {}),
+            refund_reason: refundReason || 'Admin-initiated refund',
+            refund_amount: amount,
+            refunded_at: new Date().toISOString(),
+          },
+        } as any)
         .eq('id', refundDialog.id);
 
       await logAdminAction(user.id, 'process_refund', 'payment', refundDialog.id);
