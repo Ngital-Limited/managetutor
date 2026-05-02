@@ -2366,6 +2366,8 @@ export default function AdminDashboard() {
                 <AdminMobileQuickActions stats={stats} onNavigate={(tab) => setActiveTab(tab)} />
                 {/* Command Center — Today's Activity & Revenue */}
                 <AdminCommandCenter onNavigate={(tab) => setActiveTab(tab)} />
+                {/* Performance KPIs — 30-day trends */}
+                <AdminPerformanceKPIs />
                 <div className="flex items-start justify-between gap-3 flex-wrap">
                   <div>
                     <h1 className="text-xl font-semibold">All-Time Overview</h1>
