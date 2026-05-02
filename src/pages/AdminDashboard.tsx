@@ -2068,6 +2068,15 @@ export default function AdminDashboard() {
       ],
     },
     {
+      label: 'Operations',
+      items: [
+        { title: 'Send Notification', value: 'send_notification', icon: Bell },
+        { title: 'Contact Release', value: 'contact_release', icon: Phone },
+        { title: 'Offline Payments', value: 'offline_payments', icon: CreditCard },
+        { title: 'Commission Reminders', value: 'commission_reminders', icon: AlertTriangle },
+      ],
+    },
+    {
       label: 'Analytics',
       items: [
         { title: 'Conversion Funnel', value: 'conversion_funnel', icon: TrendingUp },
