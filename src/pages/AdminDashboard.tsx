@@ -69,6 +69,10 @@ import { AdminMobileQuickActions } from '@/components/admin/AdminMobileQuickActi
 import { AdminCommandCenter } from '@/components/admin/AdminCommandCenter';
 import { AdminSendNotification, AdminManualContactRelease, AdminOfflinePaymentEntry, AdminCommissionReminders } from '@/components/admin/AdminOperationalTools';
 import { AdminEnforcementTab, AdminDisputeQueueTab } from '@/components/admin/AdminEnforcementTab';
+import { AdminBulkActionsTab } from '@/components/admin/AdminBulkActionsTab';
+import { AdminCommunicationLogTab } from '@/components/admin/AdminCommunicationLogTab';
+import { AdminRefundTab } from '@/components/admin/AdminRefundTab';
+import { AdminPerformanceKPIs } from '@/components/admin/AdminPerformanceKPIs';
 import { AutoRefreshControl } from '@/components/AutoRefreshControl';
 import { logAdminAction } from '@/lib/adminLogger';
 import { getPlatformCommissionPct, computeFeeSplit } from '@/lib/commission';
