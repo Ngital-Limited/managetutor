@@ -9,9 +9,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Switch } from '@/components/ui/switch';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { logAdminAction } from '@/lib/adminLogger';
-import { Plus, Pencil, Trash2, Eye, FileText, GripVertical, ChevronUp, ChevronDown } from 'lucide-react';
+import { Plus, Pencil, Trash2, Eye, FileText } from 'lucide-react';
 import { format } from 'date-fns';
 
 interface CMSPage {
