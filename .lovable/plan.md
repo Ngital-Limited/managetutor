@@ -91,3 +91,16 @@ Addressing remaining critical gaps from the 20-point admin dashboard audit.
 - Operations: Added Bulk Actions tab.
 - Communication: Added Communication Log tab.
 - Finance: Added Refunds tab.
+
+# Phase I: Tutor Earnings, Automated Reminders ✅
+
+## Tutor Earnings (AdminTutorEarningsTab)
+- Per-tutor financial summary: total hires, commission due, paid, outstanding balance.
+- Detail dialog: individual commission records and payment history.
+- Summary cards with totals. CSV export. Search by name/email.
+- New sidebar item under Finance.
+
+## Automated Commission Reminders
+- Edge function `commission-reminders`: scans overdue commission records, marks them as overdue, sends in-app notifications to affected tutors.
+- pg_cron scheduled daily at 9:00 AM UTC.
+- Logs automated actions to `activity_logs` table for audit trail.
