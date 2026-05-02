@@ -334,6 +334,13 @@ export default function AdminGuardianDetail() {
             </ScrollArea>
           </Card>
         </TabsContent>
+        <TabsContent value="timeline">
+          <Card>
+            <CardContent className="pt-4">
+              {id && <AdminUserTimeline userId={id} />}
+            </CardContent>
+          </Card>
+        </TabsContent>
       </Tabs>
     </div>
   );
