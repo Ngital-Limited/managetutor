@@ -13,6 +13,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { AdminNotesWidget } from '@/components/admin/AdminNotesWidget';
 import { logAdminAction } from '@/lib/adminLogger';
+import { AdminUserTimeline } from '@/components/admin/AdminUserTimeline';
 import {
   ArrowLeft, UserCheck, Ban, Phone, Mail, MapPin, Calendar, Briefcase,
   CheckCircle2, DollarSign, Activity, FileText, GraduationCap, Star, Eye
