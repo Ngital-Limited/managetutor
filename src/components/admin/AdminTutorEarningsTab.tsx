@@ -44,22 +44,26 @@ export function AdminTutorEarningsTab({ toast }: { toast: ReturnType<typeof useT
     const tutorIds = tutors.map(t => t.id);
 
     const [{ data: records }, { data: payments }] = await Promise.all([
-      supabase.from('commission_records').select('tutor_id, commission_amount, status').in('tutor_id', tutorIds),
-      supabase.from('commission_payments').select('tutor_id, amount').in('tutor_id', tutorIds),
+      supabase.from('commission_records').select('id, tutor_id, commission_amount, status, amount_paid').in('tutor_id', tutorIds),
+      supabase.from('commission_payments').select('commission_id, amount').limit(1000),
     ]);
 
     const commMap = new Map<string, { due: number; count: number }>();
-    const paidMap = new Map<string, number>();
+    // Build a map from commission_id -> tutor_id
+    const commToTutor = new Map<string, string>();
 
     (records || []).forEach(r => {
       const curr = commMap.get(r.tutor_id) || { due: 0, count: 0 };
       curr.due += r.commission_amount || 0;
       curr.count += 1;
       commMap.set(r.tutor_id, curr);
+      commToTutor.set(r.id, r.tutor_id);
     });
 
-    (payments || []).forEach(p => {
-      paidMap.set(p.tutor_id, (paidMap.get(p.tutor_id) || 0) + (p.amount || 0));
+    const paidMap = new Map<string, number>();
+    (payments || []).forEach((p: any) => {
+      const tutorId = commToTutor.get(p.commission_id);
+      if (tutorId) paidMap.set(tutorId, (paidMap.get(tutorId) || 0) + (p.amount || 0));
     });
 
     const result: TutorEarning[] = tutors
