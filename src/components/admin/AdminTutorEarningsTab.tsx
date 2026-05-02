@@ -279,7 +279,7 @@ export function AdminTutorEarningsTab({ toast }: { toast: ReturnType<typeof useT
                           <TableCell className="text-xs">{formatExactDate(new Date(p.created_at))}</TableCell>
                           <TableCell className="font-semibold text-emerald-600">৳{p.amount?.toLocaleString()}</TableCell>
                           <TableCell className="capitalize text-xs">{p.payment_method || '—'}</TableCell>
-                          <TableCell className="text-xs font-mono">{p.reference_number || '—'}</TableCell>
+                          <TableCell className="text-xs font-mono">{p.payment_reference || '—'}</TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
