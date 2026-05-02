@@ -3731,6 +3731,12 @@ export default function AdminDashboard() {
             {/* ═══════ ACTIVITY LOG TAB ═══════ */}
             {activeTab === 'activity_log' && <AdminActivityLogTab toast={toast} />}
 
+            {/* ═══════ CMS TAB ═══════ */}
+            {activeTab === 'cms' && <AdminCMSTab toast={toast} />}
+
+            {/* ═══════ NOTIFICATION TEMPLATES TAB ═══════ */}
+            {activeTab === 'notif_templates' && <AdminNotificationTemplatesTab toast={toast} />}
+
             {/* ═══════ CACHE TAB ═══════ */}
             {activeTab === 'cache' && (
               <div className="space-y-4">
