@@ -73,6 +73,7 @@ import { AdminBulkActionsTab } from '@/components/admin/AdminBulkActionsTab';
 import { AdminCommunicationLogTab } from '@/components/admin/AdminCommunicationLogTab';
 import { AdminRefundTab } from '@/components/admin/AdminRefundTab';
 import { AdminPerformanceKPIs } from '@/components/admin/AdminPerformanceKPIs';
+import { AdminTutorEarningsTab } from '@/components/admin/AdminTutorEarningsTab';
 import { AutoRefreshControl } from '@/components/AutoRefreshControl';
 import { logAdminAction } from '@/lib/adminLogger';
 import { getPlatformCommissionPct, computeFeeSplit } from '@/lib/commission';
@@ -2060,6 +2061,7 @@ export default function AdminDashboard() {
         { title: 'Commissions', value: 'commissions', icon: DollarSign },
         { title: 'Invoices', value: 'invoices', icon: FileCheck },
         { title: 'Revenue & Payouts', value: 'revenue', icon: Wallet },
+        { title: 'Tutor Earnings', value: 'tutor_earnings', icon: TrendingUp },
         { title: 'Refunds', value: 'refunds', icon: Undo2 },
         { title: 'Subscriptions', value: 'subscriptions', icon: Package },
       ],
@@ -3784,6 +3786,7 @@ export default function AdminDashboard() {
             {activeTab === 'bulk_actions' && <AdminBulkActionsTab toast={toast} />}
             {activeTab === 'comm_log' && <AdminCommunicationLogTab toast={toast} />}
             {activeTab === 'refunds' && <AdminRefundTab toast={toast} />}
+            {activeTab === 'tutor_earnings' && <AdminTutorEarningsTab toast={toast} />}
 
             {/* ═══════ ACTIVITY LOG TAB ═══════ */}
             {activeTab === 'activity_log' && <AdminActivityLogTab toast={toast} />}
