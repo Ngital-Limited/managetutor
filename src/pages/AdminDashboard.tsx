@@ -2342,6 +2342,7 @@ export default function AdminDashboard() {
 
             {activeTab === 'overview' && (
               <div className="space-y-6 max-w-[1200px]">
+                <AdminMobileQuickActions stats={stats} onNavigate={(tab) => setActiveTab(tab)} />
                 <div className="flex items-start justify-between gap-3 flex-wrap">
                   <div>
                     <h1 className="text-xl font-semibold">Overview</h1>
