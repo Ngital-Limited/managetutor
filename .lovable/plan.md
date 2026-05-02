@@ -62,3 +62,32 @@ Closing gaps identified in the 20-point admin dashboard audit.
 
 ## Sidebar Reorganization
 - New "Operations" sidebar group: Send Notification, Contact Release, Offline Payments, Commission Reminders, Enforcement, Dispute Queue.
+
+# Phase H: Gap Closure — Bulk Actions, Comms Log, Refunds, KPIs ✅
+
+Addressing remaining critical gaps from the 20-point admin dashboard audit.
+
+## Bulk Actions (AdminBulkActionsTab)
+- Multi-select pending users or pending jobs with checkboxes.
+- Bulk approve or reject with confirmation dialog and audit logging.
+
+## Communication Log (AdminCommunicationLogTab)
+- Full history of all in-app notifications sent (broadcasts, application updates, admin notices).
+- Filter by type, search by title/message, paginated view.
+- CSV export for record-keeping.
+
+## Refund Management (AdminRefundTab)
+- View completed payments, process full or partial refunds.
+- Refund reason tracking, amount validation, user notification.
+- Summary cards: total payments, refund count, refund amount.
+- DB: Added `refund_reason`, `refund_amount`, `refunded_at` columns to `payment_transactions`.
+
+## Performance KPIs (AdminPerformanceKPIs)
+- 30-day metrics with month-over-month change percentages on Overview tab.
+- KPIs: New Signups, Jobs Posted, Applications, Hires, Revenue, Conversion Rate, Pending Verifications.
+- Trend indicators (up/down arrows with percentage changes).
+
+## Sidebar Updates
+- Operations: Added Bulk Actions tab.
+- Communication: Added Communication Log tab.
+- Finance: Added Refunds tab.

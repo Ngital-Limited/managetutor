@@ -1333,6 +1333,9 @@ export type Database = {
           id: string
           listing_type: string | null
           plan_id: string | null
+          refund_amount: number | null
+          refund_reason: string | null
+          refunded_at: string | null
           status: string
           transaction_id: string
           user_id: string
@@ -1347,6 +1350,9 @@ export type Database = {
           id?: string
           listing_type?: string | null
           plan_id?: string | null
+          refund_amount?: number | null
+          refund_reason?: string | null
+          refunded_at?: string | null
           status?: string
           transaction_id: string
           user_id: string
@@ -1361,6 +1367,9 @@ export type Database = {
           id?: string
           listing_type?: string | null
           plan_id?: string | null
+          refund_amount?: number | null
+          refund_reason?: string | null
+          refunded_at?: string | null
           status?: string
           transaction_id?: string
           user_id?: string

@@ -37,7 +37,7 @@ import {
   LogOut, Home, DollarSign, Trash2, CreditCard, Megaphone, Send, Mail,
   Package, Plus, Pencil, ToggleLeft, ToggleRight, Wallet, MapPin, LifeBuoy, ShieldCheck,
   LogIn, BookOpen, UserPlus, TrendingUp, ChevronLeft, ChevronRight, ArrowLeft,
-  Phone, Calendar, X, Activity, HelpCircle, ArrowUpDown, Zap, Bell
+  Phone, Calendar, X, Activity, HelpCircle, ArrowUpDown, Zap, Bell, ListChecks, ScrollText, Undo2
 } from 'lucide-react';
 import { Tooltip as UITooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { RevenuePayoutTab } from '@/components/admin/RevenuePayoutTab';
@@ -69,6 +69,10 @@ import { AdminMobileQuickActions } from '@/components/admin/AdminMobileQuickActi
 import { AdminCommandCenter } from '@/components/admin/AdminCommandCenter';
 import { AdminSendNotification, AdminManualContactRelease, AdminOfflinePaymentEntry, AdminCommissionReminders } from '@/components/admin/AdminOperationalTools';
 import { AdminEnforcementTab, AdminDisputeQueueTab } from '@/components/admin/AdminEnforcementTab';
+import { AdminBulkActionsTab } from '@/components/admin/AdminBulkActionsTab';
+import { AdminCommunicationLogTab } from '@/components/admin/AdminCommunicationLogTab';
+import { AdminRefundTab } from '@/components/admin/AdminRefundTab';
+import { AdminPerformanceKPIs } from '@/components/admin/AdminPerformanceKPIs';
 import { AutoRefreshControl } from '@/components/AutoRefreshControl';
 import { logAdminAction } from '@/lib/adminLogger';
 import { getPlatformCommissionPct, computeFeeSplit } from '@/lib/commission';
@@ -2056,6 +2060,7 @@ export default function AdminDashboard() {
         { title: 'Commissions', value: 'commissions', icon: DollarSign },
         { title: 'Invoices', value: 'invoices', icon: FileCheck },
         { title: 'Revenue & Payouts', value: 'revenue', icon: Wallet },
+        { title: 'Refunds', value: 'refunds', icon: Undo2 },
         { title: 'Subscriptions', value: 'subscriptions', icon: Package },
       ],
     },
@@ -2066,6 +2071,7 @@ export default function AdminDashboard() {
         { title: 'Contact Messages', value: 'contacts', icon: Mail },
         { title: 'Support Tickets', value: 'tickets', icon: LifeBuoy },
         { title: 'Phone Log', value: 'phone_log', icon: Phone },
+        { title: 'Communication Log', value: 'comm_log', icon: ScrollText },
       ],
     },
     {
@@ -2077,6 +2083,7 @@ export default function AdminDashboard() {
         { title: 'Commission Reminders', value: 'commission_reminders', icon: AlertTriangle },
         { title: 'Enforcement', value: 'enforcement', icon: Ban },
         { title: 'Dispute Queue', value: 'disputes', icon: AlertTriangle },
+        { title: 'Bulk Actions', value: 'bulk_actions', icon: ListChecks },
       ],
     },
     {
@@ -2359,6 +2366,8 @@ export default function AdminDashboard() {
                 <AdminMobileQuickActions stats={stats} onNavigate={(tab) => setActiveTab(tab)} />
                 {/* Command Center — Today's Activity & Revenue */}
                 <AdminCommandCenter onNavigate={(tab) => setActiveTab(tab)} />
+                {/* Performance KPIs — 30-day trends */}
+                <AdminPerformanceKPIs />
                 <div className="flex items-start justify-between gap-3 flex-wrap">
                   <div>
                     <h1 className="text-xl font-semibold">All-Time Overview</h1>
@@ -3772,6 +3781,9 @@ export default function AdminDashboard() {
             )}
             {activeTab === 'enforcement' && <AdminEnforcementTab toast={toast} />}
             {activeTab === 'disputes' && <AdminDisputeQueueTab toast={toast} />}
+            {activeTab === 'bulk_actions' && <AdminBulkActionsTab toast={toast} />}
+            {activeTab === 'comm_log' && <AdminCommunicationLogTab toast={toast} />}
+            {activeTab === 'refunds' && <AdminRefundTab toast={toast} />}
 
             {/* ═══════ ACTIVITY LOG TAB ═══════ */}
             {activeTab === 'activity_log' && <AdminActivityLogTab toast={toast} />}
