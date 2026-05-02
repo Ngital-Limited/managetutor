@@ -37,7 +37,7 @@ import {
   LogOut, Home, DollarSign, Trash2, CreditCard, Megaphone, Send, Mail,
   Package, Plus, Pencil, ToggleLeft, ToggleRight, Wallet, MapPin, LifeBuoy, ShieldCheck,
   LogIn, BookOpen, UserPlus, TrendingUp, ChevronLeft, ChevronRight, ArrowLeft,
-  Phone, Calendar, X, Activity, HelpCircle, ArrowUpDown, Zap
+  Phone, Calendar, X, Activity, HelpCircle, ArrowUpDown, Zap, Bell
 } from 'lucide-react';
 import { Tooltip as UITooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { RevenuePayoutTab } from '@/components/admin/RevenuePayoutTab';
@@ -63,6 +63,9 @@ import { AdminTransactionLedgerTab } from '@/components/admin/AdminTransactionLe
 import { AdminInvoiceTab } from '@/components/admin/AdminInvoiceTab';
 import { AdminConversionFunnelTab } from '@/components/admin/AdminConversionFunnelTab';
 import { AdminNotesWidget } from '@/components/admin/AdminNotesWidget';
+import { AdminCMSTab } from '@/components/admin/AdminCMSTab';
+import { AdminNotificationTemplatesTab } from '@/components/admin/AdminNotificationTemplatesTab';
+import { AdminMobileQuickActions } from '@/components/admin/AdminMobileQuickActions';
 import { AutoRefreshControl } from '@/components/AutoRefreshControl';
 import { logAdminAction } from '@/lib/adminLogger';
 import { getPlatformCommissionPct, computeFeeSplit } from '@/lib/commission';
@@ -2071,6 +2074,13 @@ export default function AdminDashboard() {
       ],
     },
     {
+      label: 'Content',
+      items: [
+        { title: 'CMS Pages', value: 'cms', icon: FileText },
+        { title: 'Notification Templates', value: 'notif_templates', icon: Bell },
+      ],
+    },
+    {
       label: 'Settings',
       items: [
         { title: 'General Settings', value: 'settings', icon: Settings },
@@ -2332,6 +2342,7 @@ export default function AdminDashboard() {
 
             {activeTab === 'overview' && (
               <div className="space-y-6 max-w-[1200px]">
+                <AdminMobileQuickActions stats={stats} onNavigate={(tab) => setActiveTab(tab)} />
                 <div className="flex items-start justify-between gap-3 flex-wrap">
                   <div>
                     <h1 className="text-xl font-semibold">Overview</h1>
@@ -3720,6 +3731,12 @@ export default function AdminDashboard() {
 
             {/* ═══════ ACTIVITY LOG TAB ═══════ */}
             {activeTab === 'activity_log' && <AdminActivityLogTab toast={toast} />}
+
+            {/* ═══════ CMS TAB ═══════ */}
+            {activeTab === 'cms' && <AdminCMSTab toast={toast} />}
+
+            {/* ═══════ NOTIFICATION TEMPLATES TAB ═══════ */}
+            {activeTab === 'notif_templates' && <AdminNotificationTemplatesTab toast={toast} />}
 
             {/* ═══════ CACHE TAB ═══════ */}
             {activeTab === 'cache' && (

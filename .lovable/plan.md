@@ -31,6 +31,12 @@ Unified transaction ledger, PDF invoice generation, conversion funnel analytics.
 - `AdminInvoiceTab` — Invoice generation from commission records with print and HTML download. Professional branded invoice template.
 - `AdminConversionFunnelTab` — Visual funnel (Signups → Tutor Profiles → Jobs → Applications → Shortlisted → Accepted → Hired) with period filters and 6-month trend table.
 
-# Phase F: Content & Mobile
+# Phase F: Content & Mobile ✅
 
 CMS for FAQ/Terms, notification templates, mobile-optimized quick actions.
+- `cms_pages` table with RLS (public read for published, admin full access).
+- `notification_templates` table with RLS (admin-only).
+- `AdminCMSTab` — Create/edit/publish CMS pages (FAQ, Terms, Privacy, custom). Markdown/HTML content editor, preview, publish/unpublish toggle.
+- `AdminNotificationTemplatesTab` — Manage in-app notification templates with {{variable}} placeholders. Seed defaults, edit, enable/disable, live preview with sample data.
+- `AdminMobileQuickActions` — 4-column grid of quick-access buttons (mobile only) on the Overview tab with badge counts for pending items.
+- New "Content" sidebar group with CMS Pages and Notification Templates tabs.
