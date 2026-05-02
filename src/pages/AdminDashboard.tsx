@@ -2137,6 +2137,7 @@ export default function AdminDashboard() {
         { title: 'General Settings', value: 'settings', icon: Settings },
         { title: 'Sub-Admin Roles', value: 'rbac', icon: ShieldCheck },
         { title: 'Platform Data', value: 'platform_data', icon: BookOpen },
+        { title: 'Export Center', value: 'export_center', icon: Download },
         { title: 'Ads Management', value: 'ads', icon: Megaphone },
         { title: 'Cache', value: 'cache', icon: Activity },
         { title: 'Activity Log', value: 'activity_log', icon: FileText },
