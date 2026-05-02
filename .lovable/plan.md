@@ -40,3 +40,25 @@ CMS for FAQ/Terms, notification templates, mobile-optimized quick actions.
 - `AdminNotificationTemplatesTab` — Manage in-app notification templates with {{variable}} placeholders. Seed defaults, edit, enable/disable, live preview with sample data.
 - `AdminMobileQuickActions` — 4-column grid of quick-access buttons (mobile only) on the Overview tab with badge counts for pending items.
 - New "Content" sidebar group with CMS Pages and Notification Templates tabs.
+
+# Phase G: Gap Closure — Command Center & Operations ✅
+
+Closing gaps identified in the 20-point admin dashboard audit.
+
+## Command Center (AdminCommandCenter)
+- Real-time "Today's Activity" widgets: guardian signups, tutor signups, jobs posted, applications, hires confirmed — with yesterday comparison trends.
+- Revenue snapshot: today, this week, this month, plus commission due/overdue totals.
+- Pending action items with quick-navigate buttons.
+
+## Operations Tools (AdminOperationalTools)
+- `AdminSendNotification` — Send individual in-app notifications to any user by search.
+- `AdminManualContactRelease` — Release guardian contact info to a tutor for a specific application.
+- `AdminOfflinePaymentEntry` — Record bKash/Nagad/cash commission payments with amount, method, reference.
+- `AdminCommissionReminders` — View outstanding commissions, send payment reminder notifications to tutors.
+
+## Enforcement & Disputes (AdminEnforcementTab)
+- `AdminEnforcementTab` — Scan overdue commissions, auto-mark as overdue, suspend tutors with confirmation dialog. Bans profile, disables availability, sends notification.
+- `AdminDisputeQueueTab` — Commission dispute resolution queue. Actions: enforce full, reduce amount, or waive entirely. Notifies tutor of resolution.
+
+## Sidebar Reorganization
+- New "Operations" sidebar group: Send Notification, Contact Release, Offline Payments, Commission Reminders, Enforcement, Dispute Queue.
