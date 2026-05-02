@@ -357,7 +357,7 @@ export default function AdminTutorDetail() {
         <TabsContent value="timeline">
           <Card>
             <CardContent className="pt-4">
-              <AdminUserTimeline userId={tutor.user_id} />
+              {tutorProfile?.user_id && <AdminUserTimeline userId={tutorProfile.user_id} />}
             </CardContent>
           </Card>
         </TabsContent>
