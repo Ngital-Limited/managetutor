@@ -120,3 +120,19 @@ Addressing remaining critical gaps from the 20-point admin dashboard audit.
 - Revenue trend chart (30-day area chart) added to Overview tab.
 - Job Status Distribution donut/pie chart (Active, Pending, Completed, Other) with legend.
 - Both charts complement existing Signups and Job Postings charts.
+
+# Phase K: Settings, Command Palette, Export Center ✅
+
+## Platform Settings (AdminPlatformSettingsTab)
+- Comprehensive settings panel replacing the old placeholder: maintenance mode, registration toggle, auto-approve toggles (guardians/tutors/jobs), limits (max applications, max jobs, overdue days), admin notification preferences.
+- All settings persisted to `platform_settings` table. Save All button with audit logging.
+
+## Command Palette (AdminCommandPalette)
+- ⌘K / Ctrl+K keyboard shortcut opens a searchable command palette for instant navigation to any admin tab.
+- Grouped by section (Navigation, Finance, Intelligence, Analytics, Operations, etc.).
+- "Quick nav…" button visible in header on desktop.
+
+## Export Center (AdminExportCenterTab)
+- Centralized download hub for all platform data exports.
+- One-click CSV exports: Guardians, Tutors, Jobs, Applications, Payments, Commissions, Notifications, Activity Logs.
+- Organized by category with descriptive cards.

@@ -76,6 +76,9 @@ import { AdminRefundTab } from '@/components/admin/AdminRefundTab';
 import { AdminPerformanceKPIs } from '@/components/admin/AdminPerformanceKPIs';
 import { AdminTutorEarningsTab } from '@/components/admin/AdminTutorEarningsTab';
 import { AutoRefreshControl } from '@/components/AutoRefreshControl';
+import { AdminPlatformSettingsTab } from '@/components/admin/AdminPlatformSettingsTab';
+import { AdminCommandPalette } from '@/components/admin/AdminCommandPalette';
+import { AdminExportCenterTab } from '@/components/admin/AdminExportCenterTab';
 import { logAdminAction } from '@/lib/adminLogger';
 import { getPlatformCommissionPct, computeFeeSplit } from '@/lib/commission';
 
@@ -2134,6 +2137,7 @@ export default function AdminDashboard() {
         { title: 'General Settings', value: 'settings', icon: Settings },
         { title: 'Sub-Admin Roles', value: 'rbac', icon: ShieldCheck },
         { title: 'Platform Data', value: 'platform_data', icon: BookOpen },
+        { title: 'Export Center', value: 'export_center', icon: Download },
         { title: 'Ads Management', value: 'ads', icon: Megaphone },
         { title: 'Cache', value: 'cache', icon: Activity },
         { title: 'Activity Log', value: 'activity_log', icon: FileText },
@@ -2375,6 +2379,7 @@ export default function AdminDashboard() {
               </nav>
             </div>
             <div className="flex items-center gap-2">
+              <AdminCommandPalette onNavigate={setActiveTab} />
               <NotificationBell />
               <Button variant="ghost" size="sm" className="text-muted-foreground text-xs" onClick={() => { supabase.auth.signOut(); navigate('/'); }}>
                 <LogOut className="h-3.5 w-3.5" />
@@ -3896,49 +3901,8 @@ export default function AdminDashboard() {
             )}
 
             {/* ═══════ SETTINGS TAB ═══════ */}
-            {activeTab === 'settings' && (
-              <div className="space-y-6">
-                <h1 className="text-xl font-semibold">Platform Settings</h1>
-                <div className="grid md:grid-cols-2 gap-6">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Commission & Pricing</CardTitle>
-                      <CardDescription>Platform fees are configured in Platform Data</CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-3">
-                      <p className="text-sm text-muted-foreground">
-                        Commission percentage, verification fee, and featured listing prices are managed centrally
-                        under <strong>Platform Data → Pricing & Fees</strong>. They are read live by the demo booking,
-                        boost, and verification flows.
-                      </p>
-                      <Button variant="outline" className="w-full" onClick={() => setActiveTab('platform_data')}>
-                        Open Platform Data
-                      </Button>
-                    </CardContent>
-                  </Card>
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Platform Info</CardTitle>
-                      <CardDescription>Current system status</CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-3">
-                      {[
-                        { label: 'Total Users', value: stats.totalUsers },
-                        { label: 'Total Tutors', value: stats.totalTutors },
-                        { label: 'Total Parents', value: stats.totalParents },
-                        { label: 'Active Jobs', value: stats.activeJobs },
-                        { label: 'Total Revenue', value: `৳${stats.totalRevenue.toLocaleString()}` },
-                      ].map((item, i) => (
-                        <div key={i} className="flex items-center justify-between py-2 border-b border-border last:border-0">
-                          <span className="text-sm text-muted-foreground">{item.label}</span>
-                          <span className="font-semibold">{item.value}</span>
-                        </div>
-                      ))}
-                    </CardContent>
-                  </Card>
-                </div>
-              </div>
-            )}
+            {activeTab === 'settings' && <AdminPlatformSettingsTab toast={toast} />}
+            {activeTab === 'export_center' && <AdminExportCenterTab toast={toast} />}
             </div>
           </main>
           <AdminBottomNav activeTab={activeTab} setActiveTab={setActiveTab} />
