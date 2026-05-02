@@ -354,6 +354,13 @@ export default function AdminTutorDetail() {
             </ScrollArea>
           </Card>
         </TabsContent>
+        <TabsContent value="timeline">
+          <Card>
+            <CardContent className="pt-4">
+              <AdminUserTimeline userId={tutor.user_id} />
+            </CardContent>
+          </Card>
+        </TabsContent>
       </Tabs>
     </div>
   );
