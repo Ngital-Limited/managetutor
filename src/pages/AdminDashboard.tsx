@@ -3770,6 +3770,8 @@ export default function AdminDashboard() {
                 <AdminCommissionReminders toast={toast} />
               </div>
             )}
+            {activeTab === 'enforcement' && <AdminEnforcementTab toast={toast} />}
+            {activeTab === 'disputes' && <AdminDisputeQueueTab toast={toast} />}
 
             {/* ═══════ ACTIVITY LOG TAB ═══════ */}
             {activeTab === 'activity_log' && <AdminActivityLogTab toast={toast} />}
