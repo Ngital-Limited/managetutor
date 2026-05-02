@@ -1887,6 +1887,30 @@ export default function AdminDashboard() {
     setProcessing(false);
   };
 
+  const handleDuplicateJob = async (jobId: string) => {
+    try {
+      const { data: job } = await supabase.from('jobs').select('*').eq('id', jobId).single();
+      if (!job) { toast({ title: 'Job not found', variant: 'destructive' }); return; }
+      const { data: jobSubs } = await supabase.from('job_subjects').select('subject_id').eq('job_id', jobId);
+      const { id, job_reference, slug, created_at, updated_at, total_applications, total_views, ...rest } = job;
+      const { data: newJob, error } = await supabase.from('jobs').insert({
+        ...rest,
+        status: 'pending_approval' as any,
+        total_applications: 0,
+        total_views: 0,
+      }).select().single();
+      if (error || !newJob) { toast({ title: 'Error', description: error?.message, variant: 'destructive' }); return; }
+      if (jobSubs && jobSubs.length > 0) {
+        await supabase.from('job_subjects').insert(jobSubs.map(s => ({ job_id: newJob.id, subject_id: s.subject_id })));
+      }
+      if (user) await logAdminAction(user.id, 'duplicate_job', 'job', newJob.id);
+      toast({ title: 'Job duplicated', description: `New job created with ref ${newJob.job_reference || 'pending'}` });
+      fetchJobs();
+    } catch (err: any) {
+      toast({ title: 'Error', description: err.message, variant: 'destructive' });
+    }
+  };
+
   const handleImpersonate = async (userId: string) => {
     setProcessing(true);
     const { error } = await impersonateUser(userId);
