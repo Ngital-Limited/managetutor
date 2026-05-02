@@ -73,6 +73,7 @@ import { AdminBulkActionsTab } from '@/components/admin/AdminBulkActionsTab';
 import { AdminCommunicationLogTab } from '@/components/admin/AdminCommunicationLogTab';
 import { AdminRefundTab } from '@/components/admin/AdminRefundTab';
 import { AdminPerformanceKPIs } from '@/components/admin/AdminPerformanceKPIs';
+import { AdminTutorEarningsTab } from '@/components/admin/AdminTutorEarningsTab';
 import { AutoRefreshControl } from '@/components/AutoRefreshControl';
 import { logAdminAction } from '@/lib/adminLogger';
 import { getPlatformCommissionPct, computeFeeSplit } from '@/lib/commission';
