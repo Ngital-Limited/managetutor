@@ -2074,6 +2074,13 @@ export default function AdminDashboard() {
       ],
     },
     {
+      label: 'Content',
+      items: [
+        { title: 'CMS Pages', value: 'cms', icon: FileText },
+        { title: 'Notification Templates', value: 'notif_templates', icon: Bell },
+      ],
+    },
+    {
       label: 'Settings',
       items: [
         { title: 'General Settings', value: 'settings', icon: Settings },
