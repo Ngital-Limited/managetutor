@@ -66,6 +66,8 @@ import { AdminNotesWidget } from '@/components/admin/AdminNotesWidget';
 import { AdminCMSTab } from '@/components/admin/AdminCMSTab';
 import { AdminNotificationTemplatesTab } from '@/components/admin/AdminNotificationTemplatesTab';
 import { AdminMobileQuickActions } from '@/components/admin/AdminMobileQuickActions';
+import { AdminCommandCenter } from '@/components/admin/AdminCommandCenter';
+import { AdminSendNotification, AdminManualContactRelease, AdminOfflinePaymentEntry, AdminCommissionReminders } from '@/components/admin/AdminOperationalTools';
 import { AutoRefreshControl } from '@/components/AutoRefreshControl';
 import { logAdminAction } from '@/lib/adminLogger';
 import { getPlatformCommissionPct, computeFeeSplit } from '@/lib/commission';
