@@ -63,6 +63,9 @@ import { AdminTransactionLedgerTab } from '@/components/admin/AdminTransactionLe
 import { AdminInvoiceTab } from '@/components/admin/AdminInvoiceTab';
 import { AdminConversionFunnelTab } from '@/components/admin/AdminConversionFunnelTab';
 import { AdminNotesWidget } from '@/components/admin/AdminNotesWidget';
+import { AdminCMSTab } from '@/components/admin/AdminCMSTab';
+import { AdminNotificationTemplatesTab } from '@/components/admin/AdminNotificationTemplatesTab';
+import { AdminMobileQuickActions } from '@/components/admin/AdminMobileQuickActions';
 import { AutoRefreshControl } from '@/components/AutoRefreshControl';
 import { logAdminAction } from '@/lib/adminLogger';
 import { getPlatformCommissionPct, computeFeeSplit } from '@/lib/commission';
