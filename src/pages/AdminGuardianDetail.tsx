@@ -185,6 +185,7 @@ export default function AdminGuardianDetail() {
           <TabsTrigger value="finance" className="text-xs"><DollarSign className="h-3 w-3 mr-1" /> Finance ({commissions.length})</TabsTrigger>
           <TabsTrigger value="notes" className="text-xs"><FileText className="h-3 w-3 mr-1" /> Notes</TabsTrigger>
           <TabsTrigger value="activity" className="text-xs"><Activity className="h-3 w-3 mr-1" /> Activity</TabsTrigger>
+          <TabsTrigger value="timeline" className="text-xs"><Calendar className="h-3 w-3 mr-1" /> Timeline</TabsTrigger>
         </TabsList>
 
         {/* Jobs Tab */}
