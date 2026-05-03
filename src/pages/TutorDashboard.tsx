@@ -189,8 +189,8 @@ export default function TutorDashboard() {
   });
   const [activeFeatured, setActiveFeatured] = useState<FeaturedListing | null>(null);
   const [boostLoading, setBoostLoading] = useState(false);
-  const [verifyLoading, setVerifyLoading] = useState(false);
-  const [verificationFee, setVerificationFee] = useState<number>(50);
+  const [badgePayLoading, setBadgePayLoading] = useState(false);
+  const [badgeFee, setBadgeFee] = useState<number>(50);
 
   useEffect(() => {
     supabase
