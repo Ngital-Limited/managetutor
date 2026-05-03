@@ -246,7 +246,10 @@ export default function Auth() {
       }
       const { error } = await signUp(email, password, fullName, selectedRole, phone, referralSource || undefined);
       if (error) {
-        toast({ title: 'Sign Up Failed', description: error.message, variant: 'destructive' });
+        const friendlyMsg = error.message?.toLowerCase().includes('rate limit')
+          ? 'Too many attempts. Please wait a few minutes and try again.'
+          : error.message;
+        toast({ title: 'Sign Up Failed', description: friendlyMsg, variant: 'destructive' });
       } else {
         setSignupEmail(email);
         setShowVerifyEmail(true);

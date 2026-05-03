@@ -279,38 +279,39 @@ export default function TutorProfile() {
     setLoading(false);
   };
 
+  // Completeness warnings (non-blocking) shown after save
+  const getCompletenessWarnings = (): string[] => {
+    const warnings: string[] = [];
+    if (!userProfile.avatar_url) warnings.push('Profile picture');
+    if (!profile.father_name?.trim()) warnings.push("Father's Name");
+    if (!profile.mother_name?.trim()) warnings.push("Mother's Name");
+    if (!profile.father_phone?.trim()) warnings.push("Father's Phone");
+    if (!profile.mother_phone?.trim()) warnings.push("Mother's Phone");
+    if (!profile.emergency_contact_name?.trim()) warnings.push('Emergency Contact Name');
+    if (!profile.emergency_contact_phone?.trim()) warnings.push('Emergency Contact Phone');
+    if (!idDocUrl) warnings.push('Identity Document (NID/Passport)');
+    if (profile.is_student) {
+      const hasUniDoc = documents.some(d => d.document_type === 'university_id_card' || d.document_type === 'university_payslip');
+      if (!hasUniDoc) warnings.push('University ID Card or Payslip');
+    } else {
+      const hasEduCert = documents.some(d => d.document_type === 'education_certificate');
+      if (!hasEduCert) warnings.push('Educational Certificate');
+    }
+    return warnings;
+  };
+
   const handleSave = async () => {
-    if (!userProfile.phone) {
-      toast({ title: 'Phone Required', description: 'Phone number is mandatory. Please enter your phone number.', variant: 'destructive' });
-      return;
-    }
-    if (!isValidBDPhone(userProfile.phone)) {
-      toast({ title: 'Invalid Phone', description: 'Phone number is not a valid Bangladesh phone number.', variant: 'destructive' });
-      return;
-    }
+    // Only enforce minimal required fields for saving
     if (!userProfile.full_name.trim()) {
       toast({ title: 'Name Required', description: 'Full name is mandatory.', variant: 'destructive' });
       return;
     }
-    if (!userProfile.avatar_url) {
-      toast({ title: 'Profile Picture Required', description: 'Please upload a profile picture. It is mandatory for tutors.', variant: 'destructive' });
-      return;
-    }
-    // Family & Emergency contacts are mandatory
-    const requiredContacts = [
-      { value: profile.father_name?.trim(), label: "Father's Name" },
-      { value: profile.mother_name?.trim(), label: "Mother's Name" },
-      { value: profile.father_phone?.trim(), label: "Father's Phone" },
-      { value: profile.mother_phone?.trim(), label: "Mother's Phone" },
-      { value: profile.emergency_contact_name?.trim(), label: 'Emergency Contact Name' },
-      { value: profile.emergency_contact_phone?.trim(), label: 'Emergency Contact Phone' },
-    ];
-    const missingContact = requiredContacts.find(f => !f.value);
-    if (missingContact) {
-      toast({ title: `${missingContact.label} Required`, description: `${missingContact.label} is mandatory. Please fill it in the Family tab.`, variant: 'destructive' });
+    if (userProfile.phone && !isValidBDPhone(userProfile.phone)) {
+      toast({ title: 'Invalid Phone', description: 'Phone number is not a valid Bangladesh phone number.', variant: 'destructive' });
       return;
     }
 
+    // Validate family phone formats only if provided
     const phoneFields = [
       { value: profile.father_phone, label: "Father's Phone" },
       { value: profile.mother_phone, label: "Mother's Phone" },
@@ -320,28 +321,6 @@ export default function TutorProfile() {
     if (invalidPhone) {
       toast({ title: 'Invalid Phone', description: `${invalidPhone.label} is not a valid Bangladesh phone number.`, variant: 'destructive' });
       return;
-    }
-
-    // Identity document mandatory (NID / Passport / Birth Certificate) — uploaded via storage
-    if (!idDocUrl) {
-      toast({ title: 'Identity Document Required', description: 'Please upload your NID, Passport, or Birth Certificate in the Media tab.', variant: 'destructive' });
-      return;
-    }
-
-    // Verification documents mandatory based on student status
-    if (profile.is_student) {
-      const hasUniId = documents.some(d => d.document_type === 'university_id_card');
-      const hasPayslip = documents.some(d => d.document_type === 'university_payslip');
-      if (!hasUniId && !hasPayslip) {
-        toast({ title: 'University Document Required', description: 'Please upload your University ID Card or Payslip in the Media tab.', variant: 'destructive' });
-        return;
-      }
-    } else {
-      const hasEduCert = documents.some(d => d.document_type === 'education_certificate');
-      if (!hasEduCert) {
-        toast({ title: 'Educational Certificate Required', description: 'Please upload your Educational Certificate in the Media tab.', variant: 'destructive' });
-        return;
-      }
     }
 
     setSaving(true);
@@ -500,7 +479,15 @@ export default function TutorProfile() {
       }
     }
 
-    toast({ title: 'Profile saved!', description: 'Your profile has been updated successfully.' });
+    const warnings = getCompletenessWarnings();
+    if (warnings.length > 0) {
+      toast({
+        title: 'Profile saved!',
+        description: `Still missing for full approval: ${warnings.slice(0, 3).join(', ')}${warnings.length > 3 ? ` and ${warnings.length - 3} more` : ''}`,
+      });
+    } else {
+      toast({ title: 'Profile saved!', description: 'Your profile is complete and ready for review.' });
+    }
     setSaving(false);
   };
 
