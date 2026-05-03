@@ -17,7 +17,7 @@ export default function TutorVerifyBadge() {
   const { toast } = useToast();
   const [profile, setProfile] = useState<{ verification_status: string; verification_paid: boolean; id_document_type: string | null; id_document_url: string | null; id_document_uploaded_at: string | null } | null>(null);
   const [userProfile, setUserProfile] = useState<{ full_name: string } | null>(null);
-  const [verificationFee, setVerificationFee] = useState<number>(50);
+  const [badgeFee, setBadgeFee] = useState<number>(50);
   const [loading, setLoading] = useState(false);
   const [docType, setDocType] = useState<string>('nid');
   const [uploading, setUploading] = useState(false);
@@ -35,7 +35,7 @@ export default function TutorVerifyBadge() {
     supabase.from('platform_settings').select('value').eq('key', 'verification_fee').maybeSingle()
       .then(({ data }) => {
         const n = Number(data?.value);
-        if (Number.isFinite(n) && n >= 0) setVerificationFee(n);
+        if (Number.isFinite(n) && n >= 0) setBadgeFee(n);
       });
   }, []);
 
@@ -111,7 +111,7 @@ export default function TutorVerifyBadge() {
     try {
       const { data, error } = await supabase.functions.invoke('sslcommerz-init', {
         body: {
-          amount: verificationFee,
+          amount: badgeFee,
           productName: 'Verified Badge',
           productCategory: 'Verification',
           customerName: userProfile.full_name,
@@ -133,7 +133,7 @@ export default function TutorVerifyBadge() {
     setLoading(false);
   };
 
-  const isVerified = profile?.verification_status === 'approved';
+  const isBadgeVerified = profile?.verification_status === 'approved';
 
   return (
     <TutorSidebarLayout title="Verify Badge Payment">
@@ -149,7 +149,7 @@ export default function TutorVerifyBadge() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {isVerified ? (
+            {isBadgeVerified ? (
               <div className="flex items-center gap-3 p-4 rounded-lg bg-success/10 border border-success/20">
                 <CheckCircle2 className="h-8 w-8 text-success" />
                 <div className="flex-1">
@@ -162,13 +162,13 @@ export default function TutorVerifyBadge() {
               <div className="flex flex-col sm:flex-row sm:items-center gap-4 p-4 rounded-lg bg-card border">
                 <CheckCircle2 className="h-10 w-10 text-primary flex-shrink-0" />
                 <div className="flex-1">
-                  <p className="font-bold">One-time fee: ৳{verificationFee}</p>
+                  <p className="font-bold">One-time fee: ৳{badgeFee}</p>
                   <p className="text-sm text-muted-foreground">
                     After payment, our team will review and approve your verified badge.
                   </p>
                 </div>
                 <Button onClick={handlePay} disabled={loading}>
-                  {loading ? 'Processing...' : `Pay ৳${verificationFee} & Verify`}
+                  {loading ? 'Processing...' : `Pay ৳${badgeFee} & Verify`}
                 </Button>
               </div>
             )}
