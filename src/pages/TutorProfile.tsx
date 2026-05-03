@@ -479,7 +479,15 @@ export default function TutorProfile() {
       }
     }
 
-    toast({ title: 'Profile saved!', description: 'Your profile has been updated successfully.' });
+    const warnings = getCompletenessWarnings();
+    if (warnings.length > 0) {
+      toast({
+        title: 'Profile saved!',
+        description: `Still missing for full approval: ${warnings.slice(0, 3).join(', ')}${warnings.length > 3 ? ` and ${warnings.length - 3} more` : ''}`,
+      });
+    } else {
+      toast({ title: 'Profile saved!', description: 'Your profile is complete and ready for review.' });
+    }
     setSaving(false);
   };
 
