@@ -8,7 +8,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useToast } from '@/hooks/use-toast';
 import { Logo } from '@/components/Logo';
 import { supabase } from '@/integrations/supabase/client';
-import { GraduationCap, Users, Loader2, Mail, Lock, User, ArrowRight, Phone, ArrowLeft, CheckCircle2, AlertTriangle, RefreshCw } from 'lucide-react';
+import { GraduationCap, Users, Loader2, Mail, Lock, User, ArrowRight, Phone, ArrowLeft } from 'lucide-react';
 import { PhoneInput, isValidBDPhone } from '@/components/PhoneInput';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { z } from 'zod';
@@ -46,16 +46,10 @@ export default function Auth() {
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
-  const [showVerifyEmail, setShowVerifyEmail] = useState(false);
-  const [signupEmail, setSignupEmail] = useState('');
+  
   const [resetEmail, setResetEmail] = useState('');
   const [resetLoading, setResetLoading] = useState(false);
   const [resetSent, setResetSent] = useState(false);
-  const [emailVerified, setEmailVerified] = useState(false);
-  const [checkingVerification, setCheckingVerification] = useState(false);
-  const [verifyError, setVerifyError] = useState<string | null>(null);
-  const [resendLoading, setResendLoading] = useState(false);
-  const [resendCooldown, setResendCooldown] = useState(0);
   const [showCompleteProfile, setShowCompleteProfile] = useState(searchParams.get('mode') === 'complete-profile');
   const [completeProfileLoading, setCompleteProfileLoading] = useState(false);
 
@@ -88,94 +82,6 @@ export default function Auth() {
     }
   }, [user, authLoading, userRole, navigate, searchParams]);
 
-  // Poll for email verification when showing the verify screen
-  // Listen for auth state changes — catches verification link clicked in same browser
-  // Also handles redirect back from email confirmation link
-  useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (session?.user?.email_confirmed_at) {
-        if (showVerifyEmail) {
-          setEmailVerified(true);
-          setVerifyError(null);
-        }
-      }
-    });
-    return () => subscription.unsubscribe();
-  }, [showVerifyEmail]);
-
-  // On mount, check if we arrived from a confirmation redirect (URL has access_token hash)
-  useEffect(() => {
-    const hash = window.location.hash;
-    if (hash && hash.includes('access_token')) {
-      // Supabase client will auto-parse the hash and create a session
-      // The onAuthStateChange above will handle the rest
-      setCheckingVerification(true);
-      supabase.auth.getSession().then(({ data }) => {
-        if (data.session?.user?.email_confirmed_at) {
-          setEmailVerified(true);
-          setShowVerifyEmail(true);
-          setSignupEmail(data.session.user.email || '');
-          setEmail(data.session.user.email || '');
-        }
-        setCheckingVerification(false);
-      });
-    }
-  }, []);
-
-  // Poll verification status by checking session periodically
-  useEffect(() => {
-    if (!showVerifyEmail || emailVerified) return;
-    const EXPIRY_MS = 10 * 60 * 1000;
-    const MAX_CONSECUTIVE_ERRORS = 5;
-    const startTime = Date.now();
-    let errorCount = 0;
-
-    const interval = setInterval(async () => {
-      if (Date.now() - startTime > EXPIRY_MS) {
-        setVerifyError('Verification session timed out. Please resend the verification email or try signing up again.');
-        clearInterval(interval);
-        return;
-      }
-      try {
-        const { data, error } = await supabase.auth.getSession();
-        if (error) throw error;
-        if (data.session?.user?.email_confirmed_at) {
-          setEmailVerified(true);
-          setVerifyError(null);
-          clearInterval(interval);
-        } else {
-          errorCount = 0;
-        }
-      } catch (err: any) {
-        errorCount++;
-        if (errorCount >= MAX_CONSECUTIVE_ERRORS) {
-          setVerifyError('Unable to check verification status. Please check your connection and try again.');
-          clearInterval(interval);
-        }
-      }
-    }, 4000);
-    return () => clearInterval(interval);
-  }, [showVerifyEmail, emailVerified]);
-
-  // Cooldown timer for resend button
-  useEffect(() => {
-    if (resendCooldown <= 0) return;
-    const timer = setTimeout(() => setResendCooldown(c => c - 1), 1000);
-    return () => clearTimeout(timer);
-  }, [resendCooldown]);
-
-  const handleResendVerification = async () => {
-    if (resendLoading || resendCooldown > 0 || !signupEmail) return;
-    setResendLoading(true);
-    const { error } = await supabase.auth.resend({ type: 'signup', email: signupEmail });
-    if (error) {
-      toast({ title: 'Failed to resend', description: error.message, variant: 'destructive' });
-    } else {
-      toast({ title: 'Verification email sent', description: `Check your inbox at ${signupEmail}` });
-      setResendCooldown(60);
-    }
-    setResendLoading(false);
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -195,12 +101,6 @@ export default function Auth() {
     if (isLogin) {
       const { error } = await signIn(email, password);
       if (error) {
-        if (error.message?.toLowerCase().includes('email not confirmed')) {
-          setSignupEmail(email);
-          setShowVerifyEmail(true);
-          setLoading(false);
-          return;
-        }
         toast({ title: 'Login Failed', description: error.message, variant: 'destructive' });
       } else {
         // Check ban status after successful sign-in
@@ -251,8 +151,9 @@ export default function Auth() {
           : error.message;
         toast({ title: 'Sign Up Failed', description: friendlyMsg, variant: 'destructive' });
       } else {
-        setSignupEmail(email);
-        setShowVerifyEmail(true);
+        toast({ title: 'Account Created!', description: 'You can now log in with your credentials.' });
+        setIsLogin(true);
+        setEmail(email);
       }
     }
     setLoading(false);
@@ -388,89 +289,7 @@ export default function Auth() {
             <Logo size="md" />
           </Link>
 
-          {showVerifyEmail ? (
-            /* ─── Email Verification View ─── */
-            <div className="text-center">
-              {emailVerified ? (
-                <>
-                  <div className="w-16 h-16 rounded-full bg-success/10 flex items-center justify-center mx-auto mb-6">
-                    <CheckCircle2 className="h-8 w-8 text-success" />
-                  </div>
-                  <h2 className="text-2xl font-bold text-foreground mb-2">Email Verified!</h2>
-                  <p className="text-muted-foreground mb-6">
-                    Your email <strong className="text-foreground">{signupEmail}</strong> has been confirmed.
-                  </p>
-                  <Button
-                    className="w-full h-11 rounded-lg text-sm font-semibold"
-                    onClick={() => { setShowVerifyEmail(false); setEmailVerified(false); setIsLogin(true); setEmail(signupEmail); }}
-                  >
-                    <ArrowRight className="h-4 w-4 mr-2" /> Go to Login
-                  </Button>
-                </>
-              ) : (
-                <>
-                  <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-6">
-                    <Mail className="h-8 w-8 text-primary" />
-                  </div>
-                  <h2 className="text-2xl font-bold text-foreground mb-2">Verify Your Email</h2>
-                  <p className="text-muted-foreground mb-6">
-                    We've sent a verification link to<br />
-                    <strong className="text-foreground">{signupEmail}</strong>
-                  </p>
-                  <div className="p-4 rounded-lg bg-accent/50 border border-accent text-sm space-y-2">
-                    <p>Please check your inbox and click the verification link to activate your account.</p>
-                    <p className="text-muted-foreground">Don't forget to check your spam/junk folder.</p>
-                  </div>
-                  {verifyError ? (
-                    <div className="p-4 rounded-lg bg-destructive/10 border border-destructive/20 text-sm space-y-3 mt-4">
-                      <div className="flex items-center gap-2 text-destructive font-medium">
-                        <AlertTriangle className="h-4 w-4 shrink-0" />
-                        <span>{verifyError}</span>
-                      </div>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="w-full"
-                        onClick={() => {
-                          setVerifyError(null);
-                          // Re-trigger polling by toggling showVerifyEmail
-                          setShowVerifyEmail(false);
-                          setTimeout(() => setShowVerifyEmail(true), 50);
-                        }}
-                      >
-                        <RefreshCw className="h-3.5 w-3.5 mr-2" /> Retry Verification Check
-                      </Button>
-                    </div>
-                  ) : (
-                    <div className="flex items-center justify-center gap-2 mt-4 text-xs text-muted-foreground">
-                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                      <span>Waiting for verification...</span>
-                    </div>
-                  )}
-                  <Button
-                    variant="outline"
-                    className="w-full mt-4 h-10 rounded-lg text-sm"
-                    onClick={handleResendVerification}
-                    disabled={resendLoading || resendCooldown > 0}
-                  >
-                    {resendLoading ? (
-                      <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Sending...</>
-                    ) : resendCooldown > 0 ? (
-                      `Resend in ${resendCooldown}s`
-                    ) : (
-                      <><Mail className="h-4 w-4 mr-2" /> Resend Verification Email</>
-                    )}
-                  </Button>
-                  <button
-                    onClick={() => { setShowVerifyEmail(false); setEmailVerified(false); setIsLogin(true); setEmail(signupEmail); }}
-                    className="flex items-center justify-center gap-1.5 mt-4 text-sm text-primary hover:underline font-semibold mx-auto"
-                  >
-                    <ArrowLeft className="h-4 w-4" /> Back to Login
-                  </button>
-                </>
-              )}
-            </div>
-          ) : showForgotPassword ? (
+          {showForgotPassword ? (
             /* ─── Forgot Password View ─── */
             <div>
               <div className="mb-8">
