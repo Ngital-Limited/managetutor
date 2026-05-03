@@ -46,8 +46,7 @@ export default function Auth() {
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
-  const [showVerifyEmail, setShowVerifyEmail] = useState(false);
-  const [signupEmail, setSignupEmail] = useState('');
+  const [showCompleteProfileRedirect, setShowCompleteProfileRedirect] = useState(false);
   const [resetEmail, setResetEmail] = useState('');
   const [resetLoading, setResetLoading] = useState(false);
   const [resetSent, setResetSent] = useState(false);
