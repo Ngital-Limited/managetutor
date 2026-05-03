@@ -1407,21 +1407,23 @@ export default function TutorProfile() {
 
                 {/* Verification document tiles */}
                 {(profile.is_student
-                  ? ['university_id_card', 'university_payslip']
-                  : ['education_certificate', 'experience_certificate']
+                  ? ['ssc_certificate', 'hsc_certificate', 'university_certificate', 'university_id_card', 'university_payslip']
+                  : ['ssc_certificate', 'hsc_certificate', 'honours_certificate', 'masters_certificate', 'experience_certificate']
                 ).map((docType) => {
                   const doc = documents.find(d => d.document_type === docType);
                   const exists = !!doc;
                   const labelMap: Record<string, string> = {
+                    ssc_certificate: 'SSC Certificate',
+                    hsc_certificate: 'HSC Certificate',
+                    university_certificate: 'University Certificate',
+                    honours_certificate: 'Honours Certificate',
+                    masters_certificate: 'Masters Certificate',
                     university_id_card: 'University ID Card',
                     university_payslip: 'University Payslip',
-                    education_certificate: 'Education Certificate',
                     experience_certificate: 'Experience Certificate',
                   };
                   const label = labelMap[docType] || docType.replace(/_/g, ' ');
-                  const isRequired = profile.is_student
-                    ? (docType === 'university_id_card' || docType === 'university_payslip')
-                    : (docType === 'education_certificate');
+                  const isRequired = docType === 'ssc_certificate' || docType === 'hsc_certificate';
                   return (
                     <div key={docType} className={`border-2 border-dashed rounded-2xl p-4 text-center ${exists ? 'border-success/50 bg-success/5' : 'border-border'}`}>
                       <Upload className={`h-7 w-7 mx-auto mb-2 ${exists ? 'text-success' : 'text-muted-foreground'}`} />
