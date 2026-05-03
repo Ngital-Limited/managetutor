@@ -1064,7 +1064,7 @@ export default function AdminDashboard() {
         tutor_profiles!inner ( id, user_id, gender, experience_years, verification_status, bio, monthly_salary_min, monthly_salary_max )
       `)
       .order('created_at', { ascending: false })
-      .limit(200);
+      .limit(1000);
     // Note: do NOT filter by status in the query — chips and drill-down need full counts.
     const { data } = await query;
     if (!data) { setAllApplications([]); setLoadingAllApps(false); return; }
