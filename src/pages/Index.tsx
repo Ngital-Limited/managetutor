@@ -560,7 +560,7 @@ export default function Index() {
                 const tutorSubjects = tutor.tutor_subjects?.map(ts =>
                   ts.subjects?.name_en
                 ).filter(Boolean).slice(0, 3) || [];
-                const isVerified = tutor.verification_status === 'approved' && tutor.verification_paid;
+                const isBadgeVerified = tutor?.verification_status === 'approved' && tutor.verification_paid;
 
                 return (
                   <Link key={tutor.id} to={`/tutor/${(tutor as any).slug || tutor.id}`} className="group block animate-fade-in" style={{ animationDelay: `${i * 60}ms` }}>
@@ -577,7 +577,7 @@ export default function Index() {
                               {tutor.profiles?.full_name?.charAt(0) || 'T'}
                             </AvatarFallback>
                           </Avatar>
-                          {isVerified && (
+                          {isBadgeVerified && (
                             <span className="absolute -bottom-0.5 -right-0.5 bg-success rounded-full p-0.5 ring-2 ring-card">
                               <CheckCircle2 className="h-3 w-3 text-background" strokeWidth={3} />
                             </span>
