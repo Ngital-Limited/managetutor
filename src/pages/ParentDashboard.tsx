@@ -2132,7 +2132,7 @@ export default function ParentDashboard() {
                                               <AvatarImage src={tutor?.profiles?.avatar_url} />
                                               <AvatarFallback>{tutor?.profiles?.full_name?.charAt(0) || 'T'}</AvatarFallback>
                                             </Avatar>
-                                            {isVerified && (
+                                            {isBadgeVerified && (
                                               <div className="absolute -bottom-0.5 -right-0.5 h-4 w-4 bg-primary rounded-full flex items-center justify-center border-2 border-card" title="Verified Tutor">
                                                 <CheckCircle2 className="h-2.5 w-2.5 text-primary-foreground" />
                                               </div>
@@ -2143,7 +2143,7 @@ export default function ParentDashboard() {
                                           <div className="flex flex-col">
                                             <div className="flex items-center gap-1.5">
                                               <span className="font-semibold">{tutor?.profiles?.full_name}</span>
-                                              {isVerified && (
+                                              {isBadgeVerified && (
                                                 <Badge className="bg-primary/10 text-primary border-primary/20 text-[10px] px-1.5 py-0">Verified</Badge>
                                               )}
                                             </div>
@@ -2659,7 +2659,7 @@ export default function ParentDashboard() {
                             <AvatarImage src={tutor?.profiles?.avatar_url} />
                             <AvatarFallback>{tutor?.profiles?.full_name?.charAt(0) || 'T'}</AvatarFallback>
                           </Avatar>
-                          {isVerified && (
+                          {isBadgeVerified && (
                             <div className="absolute -bottom-0.5 -right-0.5 h-4 w-4 bg-primary rounded-full flex items-center justify-center border-2 border-card" title="Verified Tutor">
                               <CheckCircle2 className="h-2.5 w-2.5 text-primary-foreground" />
                             </div>
@@ -2670,7 +2670,7 @@ export default function ParentDashboard() {
                         <div className="flex flex-col">
                           <div className="flex items-center gap-1.5">
                             <span className="font-semibold">{tutor?.profiles?.full_name}</span>
-                            {isVerified && (
+                            {isBadgeVerified && (
                               <Badge className="bg-primary/10 text-primary border-primary/20 text-[10px] px-1.5 py-0">Verified</Badge>
                             )}
                           </div>
