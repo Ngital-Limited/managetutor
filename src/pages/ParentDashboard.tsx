@@ -2123,7 +2123,7 @@ export default function ParentDashboard() {
                                 <tbody>
                                   {applications.map(app => {
                                     const tutor = app.tutor_profiles;
-                                    const isVerified = tutor?.verification_status === 'approved' && tutor?.verification_paid;
+                                    const isBadgeVerified = tutor?.verification_status === 'approved' && tutor?.verification_paid;
                                     return (
                                       <tr key={app.id} className="border-b hover:bg-muted/50 transition-colors">
                                         <td className="py-2 px-2">
@@ -2650,7 +2650,7 @@ export default function ParentDashboard() {
               <tbody>
                 {filteredApplicants.map((app: any) => {
                   const tutor = app.tutor_profiles;
-                  const isVerified = tutor?.verification_status === 'approved' && tutor?.verification_paid;
+                  const isBadgeVerified = tutor?.verification_status === 'approved' && tutor?.verification_paid;
                   return (
                     <tr key={app.id} className="border-b hover:bg-muted/50 transition-colors">
                       <td className="py-3 px-2">
