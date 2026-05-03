@@ -50,11 +50,6 @@ export default function Auth() {
   const [resetEmail, setResetEmail] = useState('');
   const [resetLoading, setResetLoading] = useState(false);
   const [resetSent, setResetSent] = useState(false);
-  const [emailVerified, setEmailVerified] = useState(false);
-  const [checkingVerification, setCheckingVerification] = useState(false);
-  const [verifyError, setVerifyError] = useState<string | null>(null);
-  const [resendLoading, setResendLoading] = useState(false);
-  const [resendCooldown, setResendCooldown] = useState(0);
   const [showCompleteProfile, setShowCompleteProfile] = useState(searchParams.get('mode') === 'complete-profile');
   const [completeProfileLoading, setCompleteProfileLoading] = useState(false);
 
