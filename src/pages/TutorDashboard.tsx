@@ -200,7 +200,7 @@ export default function TutorDashboard() {
       .maybeSingle()
       .then(({ data }) => {
         const n = Number(data?.value);
-        if (Number.isFinite(n) && n >= 0) setVerificationFee(n);
+        if (Number.isFinite(n) && n >= 0) setBadgeFee(n);
       });
   }, []);
   const [demoBookings, setDemoBookings] = useState<any[]>([]);
@@ -452,13 +452,13 @@ export default function TutorDashboard() {
     return { score: Math.round((score / total) * 100), suggestions };
   };
 
-  const handlePayForVerification = async () => {
+  const handlePayForBadge = async () => {
     if (!user || !userProfile) return;
-    setVerifyLoading(true);
+    setBadgePayLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke('sslcommerz-init', {
         body: {
-          amount: verificationFee,
+          amount: badgeFee,
           productName: 'Verified Badge',
           productCategory: 'Verification',
           customerName: userProfile.full_name,
@@ -477,7 +477,7 @@ export default function TutorDashboard() {
     } catch (err: any) {
       toast({ title: 'Error', description: err.message || 'Payment initiation failed', variant: 'destructive' });
     }
-    setVerifyLoading(false);
+    setBadgePayLoading(false);
   };
 
   const handleSignOut = async () => {
