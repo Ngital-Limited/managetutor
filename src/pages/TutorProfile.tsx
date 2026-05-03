@@ -1466,10 +1466,10 @@ export default function TutorProfile() {
               <div className="flex items-start gap-2 p-3 bg-info/10 rounded-xl text-info">
                 <AlertCircle className="h-5 w-5 flex-shrink-0 mt-0.5" />
                 <p className="text-xs opacity-90">
-                  <span className="font-medium">Required:</span> Identity document is mandatory.{' '}
+                  <span className="font-medium">Required:</span> Identity document is mandatory. SSC and HSC certificates are required.{' '}
                   {profile.is_student
-                    ? 'Students must upload a University ID Card or Payslip.'
-                    : 'Non-students must upload an Education Certificate. Experience Certificate is optional but recommended.'}
+                    ? 'Students should also upload University Certificate, ID Card, or Payslip.'
+                    : 'Non-students should upload Honours/Masters certificates. Experience Certificate is optional but recommended.'}
                 </p>
               </div>
             </CardContent>
