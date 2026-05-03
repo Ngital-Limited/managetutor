@@ -712,7 +712,7 @@ export default function TutorDashboard() {
                   <p className="text-xs text-muted-foreground truncate mt-0.5">
                     {profile?.verification_status === 'approved' && profile?.verification_paid
                       ? 'Your badge is live on your profile'
-                      : `Pay ৳${verificationFee} to get verified`}
+                      : `Pay ৳${badgeFee} to get verified`}
                   </p>
                 </div>
                 <ArrowRight className="h-4 w-4 text-muted-foreground shrink-0" />
