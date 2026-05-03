@@ -370,7 +370,7 @@ export default function TutorProfile() {
       .single();
 
     if (tutorData) {
-      await supabase.from('tutor_profiles').update({
+      const { error: tutorUpdateError } = await supabase.from('tutor_profiles').update({
         bio: profile.bio,
         education: profile.education,
         experience_years: profile.experience_years,
@@ -393,7 +393,7 @@ export default function TutorProfile() {
         success_stories: profile.success_stories || null,
         father_name: profile.father_name || null,
         mother_name: profile.mother_name || null,
-        date_of_birth: profile.date_of_birth || null,
+        date_of_birth: profile.date_of_birth ? profile.date_of_birth : null,
         marital_status: profile.marital_status || null,
         nationality: profile.nationality || null,
         national_id_no: profile.national_id_no || null,
@@ -404,6 +404,12 @@ export default function TutorProfile() {
         district_id: userProfile.district_id || null,
         area_id: userProfile.area_id || null,
       } as any).eq('id', tutorData.id);
+
+      if (tutorUpdateError) {
+        toast({ title: 'Error saving profile', description: tutorUpdateError.message, variant: 'destructive' });
+        setSaving(false);
+        return;
+      }
 
       // Update subjects
       await supabase.from('tutor_subjects').delete().eq('tutor_profile_id', tutorData.id);
