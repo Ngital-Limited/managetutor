@@ -86,6 +86,8 @@ export default function TutorProfile() {
   const [idDocUrl, setIdDocUrl] = useState<string | null>(null);
   const [idDocUploadedAt, setIdDocUploadedAt] = useState<string | null>(null);
   const [idDocUploading, setIdDocUploading] = useState(false);
+  const [certSlots, setCertSlots] = useState<string[]>(['ssc_certificate', 'hsc_certificate']);
+  const [supportSlots, setSupportSlots] = useState<string[]>(['university_payslip']);
 
   // Education & Job Experience
   const [educationEntries, setEducationEntries] = useState<EducationEntry[]>([]);
