@@ -292,12 +292,8 @@ export default function TutorProfile() {
     if (!profile.emergency_contact_name?.trim()) warnings.push('Emergency Contact Name');
     if (!profile.emergency_contact_phone?.trim()) warnings.push('Emergency Contact Phone');
     if (!idDocUrl) warnings.push('Identity Document (NID/Passport)');
-    if (!documents.some(d => d.document_type === 'ssc_certificate')) warnings.push('SSC Certificate');
-    if (!documents.some(d => d.document_type === 'hsc_certificate')) warnings.push('HSC Certificate');
-    if (profile.is_student) {
-      const hasUniDoc = documents.some(d => d.document_type === 'university_certificate' || d.document_type === 'university_id_card' || d.document_type === 'university_payslip');
-      if (!hasUniDoc) warnings.push('University Certificate, ID Card, or Payslip');
-    }
+    const eduCertTypes = ['ssc_certificate', 'hsc_certificate', 'honours_certificate', 'masters_certificate', 'experience_certificate'];
+    if (!documents.some(d => eduCertTypes.includes(d.document_type))) warnings.push('At least one Education Certificate');
     return warnings;
   };
 
