@@ -1344,110 +1344,103 @@ export default function TutorProfile() {
 
         {/* MEDIA / VERIFICATION / REVIEWS TAB */}
         <TabsContent value="media" className="space-y-6 mt-0">
-          {/* All Documents (Identity + Verification) in one unified grid */}
+           {/* === SECTION 1: Identity Document === */}
           <Card className="rounded-2xl border-border/60 shadow-sm">
-            <CardContent className="p-6 space-y-5">
-              <div>
-                <h3 className="font-semibold flex items-center gap-2"><FileText className="h-4 w-4" /> Documents</h3>
-                <p className="text-sm text-muted-foreground">Upload all required documents below. Files are private and only visible to admins.</p>
+            <CardContent className="p-5 space-y-4">
+              <h3 className="font-semibold text-sm flex items-center gap-2"><FileText className="h-4 w-4" /> Identity Document <span className="text-destructive">*</span></h3>
+              <div className="flex flex-col sm:flex-row sm:items-end gap-3">
+                <div className="flex-1">
+                  <Label className="text-xs text-muted-foreground mb-1 block">Document Type</Label>
+                  <Select value={idDocType} onValueChange={setIdDocType}>
+                    <SelectTrigger className="rounded-lg h-9"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="nid">NID Card</SelectItem>
+                      <SelectItem value="passport">Passport</SelectItem>
+                      <SelectItem value="birth_certificate">Birth Certificate</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex items-center gap-2">
+                  <label className="cursor-pointer">
+                    <Button variant={idDocUrl ? 'outline' : 'default'} size="sm" disabled={idDocUploading} asChild className="rounded-lg">
+                      <span><Upload className="h-3.5 w-3.5 mr-1.5" />{idDocUrl ? 'Replace' : 'Upload'}</span>
+                    </Button>
+                    <input type="file" className="hidden" accept="image/jpeg,image/png,image/webp,application/pdf" onChange={handleIdDocUpload} disabled={idDocUploading} />
+                  </label>
+                  {idDocUrl && (
+                    <Button type="button" variant="ghost" size="sm" className="rounded-lg" onClick={handleViewIdDoc}>View</Button>
+                  )}
+                </div>
               </div>
+              {idDocUrl && (
+                <p className="text-xs text-success flex items-center gap-1"><CheckCircle2 className="h-3 w-3" /> Uploaded {idDocUploadedAt ? `on ${new Date(idDocUploadedAt).toLocaleDateString()}` : ''}</p>
+              )}
+            </CardContent>
+          </Card>
 
-              {/* Identity document type selector (compact) */}
-              <div className="flex flex-col sm:flex-row sm:items-center gap-3 p-3 rounded-xl bg-muted/30 border border-border/60">
-                <Label className="text-sm whitespace-nowrap">Identity Document Type</Label>
-                <Select value={idDocType} onValueChange={setIdDocType}>
-                  <SelectTrigger className="rounded-lg h-9 sm:max-w-[220px]"><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="nid">NID Card</SelectItem>
-                    <SelectItem value="passport">Passport</SelectItem>
-                    <SelectItem value="birth_certificate">Birth Certificate</SelectItem>
-                  </SelectContent>
-                </Select>
-                <p className="text-xs text-muted-foreground">Choose the type, then upload below.</p>
+          {/* === SECTION 2: Education Certificates === */}
+          <Card className="rounded-2xl border-border/60 shadow-sm">
+            <CardContent className="p-5 space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="font-semibold text-sm flex items-center gap-2"><GraduationCap className="h-4 w-4" /> Education Certificates</h3>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="rounded-lg text-xs"
+                  onClick={() => {
+                    const opts = ['ssc_certificate', 'hsc_certificate', 'honours_certificate', 'masters_certificate', 'experience_certificate'];
+                    const existing = documents.map(d => d.document_type);
+                    const next = opts.find(o => !existing.includes(o));
+                    if (next) {
+                      setCertSlots(prev => [...prev, next]);
+                    }
+                  }}
+                >
+                  <Plus className="h-3.5 w-3.5 mr-1" /> Add Certificate
+                </Button>
               </div>
-
-              {/* Unified upload grid */}
-              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {/* Identity tile */}
-                {(() => {
-                  const idLabel = idDocType === 'nid' ? 'NID Card' : idDocType === 'passport' ? 'Passport' : 'Birth Certificate';
-                  const exists = !!idDocUrl;
-                  return (
-                    <div className={`border-2 border-dashed rounded-2xl p-4 text-center ${exists ? 'border-success/50 bg-success/5' : 'border-border'}`}>
-                      <Upload className={`h-7 w-7 mx-auto mb-2 ${exists ? 'text-success' : 'text-muted-foreground'}`} />
-                      <p className="font-medium text-sm">
-                        {idLabel} <span className="text-destructive">*</span>
-                      </p>
-                      <p className="text-xs text-muted-foreground mb-2">
-                        {exists ? (idDocUploadedAt ? new Date(idDocUploadedAt).toLocaleDateString() : 'Uploaded') : 'JPG, PNG, WEBP, PDF (max 10MB)'}
-                      </p>
-                      <div className="flex items-center justify-center gap-2 flex-wrap">
-                        <label className="cursor-pointer">
-                          <Button variant="outline" size="sm" disabled={idDocUploading} asChild className="rounded-lg">
-                            <span>{exists ? 'Replace' : 'Upload'}</span>
-                          </Button>
-                          <input
-                            type="file"
-                            className="hidden"
-                            accept="image/jpeg,image/png,image/webp,application/pdf"
-                            onChange={handleIdDocUpload}
-                            disabled={idDocUploading}
-                          />
-                        </label>
-                        {exists && (
-                          <Button type="button" variant="ghost" size="sm" className="rounded-lg" onClick={handleViewIdDoc}>
-                            View
-                          </Button>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })()}
-
-                {/* Verification document tiles */}
-                {(profile.is_student
-                  ? ['ssc_certificate', 'hsc_certificate', 'university_certificate', 'university_id_card', 'university_payslip']
-                  : ['ssc_certificate', 'hsc_certificate', 'honours_certificate', 'masters_certificate', 'experience_certificate']
-                ).map((docType) => {
-                  const doc = documents.find(d => d.document_type === docType);
-                  const exists = !!doc;
-                  const labelMap: Record<string, string> = {
+              <div className="space-y-3">
+                {certSlots.map((slot, idx) => {
+                  const doc = documents.find(d => d.document_type === slot);
+                  const certLabelMap: Record<string, string> = {
                     ssc_certificate: 'SSC Certificate',
                     hsc_certificate: 'HSC Certificate',
-                    university_certificate: 'University Certificate',
-                    honours_certificate: 'Honours Certificate',
+                    honours_certificate: 'Honours / Bachelor Certificate',
                     masters_certificate: 'Masters Certificate',
-                    university_id_card: 'University ID Card',
-                    university_payslip: 'University Payslip',
                     experience_certificate: 'Experience Certificate',
                   };
-                  const label = labelMap[docType] || docType.replace(/_/g, ' ');
-                  const isRequired = docType === 'ssc_certificate' || docType === 'hsc_certificate';
                   return (
-                    <div key={docType} className={`border-2 border-dashed rounded-2xl p-4 text-center ${exists ? 'border-success/50 bg-success/5' : 'border-border'}`}>
-                      <Upload className={`h-7 w-7 mx-auto mb-2 ${exists ? 'text-success' : 'text-muted-foreground'}`} />
-                      <p className="font-medium text-sm">
-                        {label}
-                        {isRequired && <span className="text-destructive ml-1">*</span>}
-                      </p>
-                      <p className="text-xs text-muted-foreground mb-2">
-                        {exists ? 'Uploaded' : 'PDF, JPG, PNG (max 5MB)'}
-                      </p>
-                      {exists && doc && (
-                        <div className="flex items-center justify-center mb-2">
-                          {getStatusBadge(doc.status)}
-                        </div>
-                      )}
-                      <div className="flex items-center justify-center gap-2 flex-wrap">
+                    <div key={`${slot}-${idx}`} className="flex flex-col sm:flex-row sm:items-end gap-3 p-3 rounded-xl bg-muted/30 border border-border/40">
+                      <div className="flex-1">
+                        <Label className="text-xs text-muted-foreground mb-1 block">Certificate Type</Label>
+                        <Select value={slot} onValueChange={(v) => setCertSlots(prev => { const u = [...prev]; u[idx] = v; return u; })}>
+                          <SelectTrigger className="rounded-lg h-9"><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="ssc_certificate">SSC Certificate</SelectItem>
+                            <SelectItem value="hsc_certificate">HSC Certificate</SelectItem>
+                            <SelectItem value="honours_certificate">Honours / Bachelor</SelectItem>
+                            <SelectItem value="masters_certificate">Masters</SelectItem>
+                            <SelectItem value="experience_certificate">Experience Certificate</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="flex items-center gap-2">
                         <label className="cursor-pointer">
-                          <Button variant="outline" size="sm" disabled={uploading} asChild className="rounded-lg">
-                            <span>{exists ? 'Replace' : 'Upload'}</span>
+                          <Button variant={doc ? 'outline' : 'default'} size="sm" disabled={uploading} asChild className="rounded-lg">
+                            <span><Upload className="h-3.5 w-3.5 mr-1.5" />{doc ? 'Replace' : 'Upload'}</span>
                           </Button>
-                          <input type="file" className="hidden" accept=".pdf,.jpg,.jpeg,.png" onChange={(e) => handleFileUpload(e, docType)} disabled={uploading} />
+                          <input type="file" className="hidden" accept=".pdf,.jpg,.jpeg,.png" onChange={(e) => handleFileUpload(e, slot)} disabled={uploading} />
                         </label>
-                        {exists && doc && (
-                          <Button type="button" variant="ghost" size="sm" className="rounded-lg" onClick={() => handleViewDoc(doc.document_url)}>
-                            View
+                        {doc && (
+                          <>
+                            {getStatusBadge(doc.status)}
+                            <Button type="button" variant="ghost" size="sm" className="rounded-lg" onClick={() => handleViewDoc(doc.document_url)}>View</Button>
+                          </>
+                        )}
+                        {!doc && certSlots.length > 2 && (
+                          <Button type="button" variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground" onClick={() => setCertSlots(prev => prev.filter((_, i) => i !== idx))}>
+                            <Trash2 className="h-3.5 w-3.5" />
                           </Button>
                         )}
                       </div>
@@ -1455,24 +1448,78 @@ export default function TutorProfile() {
                   );
                 })}
               </div>
+            </CardContent>
+          </Card>
 
-              {(uploading || idDocUploading) && (
-                <p className="text-sm text-muted-foreground flex items-center gap-2">
-                  <Upload className="h-4 w-4 animate-pulse" /> Uploading...
-                </p>
-              )}
-
-              <div className="flex items-start gap-2 p-3 bg-info/10 rounded-xl text-info">
-                <AlertCircle className="h-5 w-5 flex-shrink-0 mt-0.5" />
-                <p className="text-xs opacity-90">
-                  <span className="font-medium">Required:</span> Identity document is mandatory. SSC and HSC certificates are required.{' '}
-                  {profile.is_student
-                    ? 'Students should also upload University Certificate, ID Card, or Payslip.'
-                    : 'Non-students should upload Honours/Masters certificates. Experience Certificate is optional but recommended.'}
-                </p>
+          {/* === SECTION 3: Supporting Documents === */}
+          <Card className="rounded-2xl border-border/60 shadow-sm">
+            <CardContent className="p-5 space-y-4">
+              <h3 className="font-semibold text-sm flex items-center gap-2"><FileText className="h-4 w-4" /> Supporting Documents</h3>
+              <div className="space-y-3">
+                {supportSlots.map((slot, idx) => {
+                  const doc = documents.find(d => d.document_type === slot);
+                  const supportLabelMap: Record<string, string> = {
+                    university_payslip: 'Payslip',
+                    university_id_card: 'Student ID Card',
+                    university_certificate: 'University Certificate',
+                  };
+                  return (
+                    <div key={`${slot}-${idx}`} className="flex flex-col sm:flex-row sm:items-end gap-3 p-3 rounded-xl bg-muted/30 border border-border/40">
+                      <div className="flex-1">
+                        <Label className="text-xs text-muted-foreground mb-1 block">Document Type</Label>
+                        <Select value={slot} onValueChange={(v) => setSupportSlots(prev => { const u = [...prev]; u[idx] = v; return u; })}>
+                          <SelectTrigger className="rounded-lg h-9"><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="university_payslip">Payslip</SelectItem>
+                            <SelectItem value="university_id_card">Student ID Card</SelectItem>
+                            <SelectItem value="university_certificate">University Certificate</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <label className="cursor-pointer">
+                          <Button variant={doc ? 'outline' : 'default'} size="sm" disabled={uploading} asChild className="rounded-lg">
+                            <span><Upload className="h-3.5 w-3.5 mr-1.5" />{doc ? 'Replace' : 'Upload'}</span>
+                          </Button>
+                          <input type="file" className="hidden" accept=".pdf,.jpg,.jpeg,.png" onChange={(e) => handleFileUpload(e, slot)} disabled={uploading} />
+                        </label>
+                        {doc && (
+                          <>
+                            {getStatusBadge(doc.status)}
+                            <Button type="button" variant="ghost" size="sm" className="rounded-lg" onClick={() => handleViewDoc(doc.document_url)}>View</Button>
+                          </>
+                        )}
+                        {supportSlots.length > 1 && !doc && (
+                          <Button type="button" variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground" onClick={() => setSupportSlots(prev => prev.filter((_, i) => i !== idx))}>
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="rounded-lg text-xs"
+                  onClick={() => {
+                    const opts = ['university_payslip', 'university_id_card', 'university_certificate'];
+                    const next = opts.find(o => !supportSlots.includes(o));
+                    if (next) setSupportSlots(prev => [...prev, next]);
+                  }}
+                >
+                  <Plus className="h-3.5 w-3.5 mr-1" /> Add Document
+                </Button>
               </div>
             </CardContent>
           </Card>
+
+          {(uploading || idDocUploading) && (
+            <p className="text-sm text-muted-foreground flex items-center gap-2">
+              <Upload className="h-4 w-4 animate-pulse" /> Uploading...
+            </p>
+          )}
 
           {/* Video Introduction */}
           <Card className="rounded-2xl border-border/60 shadow-sm">
