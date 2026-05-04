@@ -1380,7 +1380,8 @@ export default function TutorProfile() {
           <Card className="rounded-2xl border-border/60 shadow-sm">
             <CardContent className="p-5 space-y-4">
               <div className="flex items-center justify-between">
-                <h3 className="font-semibold text-sm flex items-center gap-2"><GraduationCap className="h-4 w-4" /> Education Certificates</h3>
+                <h3 className="font-semibold text-sm flex items-center gap-2"><GraduationCap className="h-4 w-4" /> Education Certificates <span className="text-destructive">*</span></h3>
+                <p className="text-xs text-muted-foreground">At least one certificate is required.</p>
                 <Button
                   type="button"
                   variant="outline"
