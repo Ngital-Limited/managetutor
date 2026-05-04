@@ -292,12 +292,8 @@ export default function TutorProfile() {
     if (!profile.emergency_contact_name?.trim()) warnings.push('Emergency Contact Name');
     if (!profile.emergency_contact_phone?.trim()) warnings.push('Emergency Contact Phone');
     if (!idDocUrl) warnings.push('Identity Document (NID/Passport)');
-    if (!documents.some(d => d.document_type === 'ssc_certificate')) warnings.push('SSC Certificate');
-    if (!documents.some(d => d.document_type === 'hsc_certificate')) warnings.push('HSC Certificate');
-    if (profile.is_student) {
-      const hasUniDoc = documents.some(d => d.document_type === 'university_certificate' || d.document_type === 'university_id_card' || d.document_type === 'university_payslip');
-      if (!hasUniDoc) warnings.push('University Certificate, ID Card, or Payslip');
-    }
+    const eduCertTypes = ['ssc_certificate', 'hsc_certificate', 'honours_certificate', 'masters_certificate', 'experience_certificate'];
+    if (!documents.some(d => eduCertTypes.includes(d.document_type))) warnings.push('At least one Education Certificate');
     return warnings;
   };
 
@@ -1384,7 +1380,8 @@ export default function TutorProfile() {
           <Card className="rounded-2xl border-border/60 shadow-sm">
             <CardContent className="p-5 space-y-4">
               <div className="flex items-center justify-between">
-                <h3 className="font-semibold text-sm flex items-center gap-2"><GraduationCap className="h-4 w-4" /> Education Certificates</h3>
+                <h3 className="font-semibold text-sm flex items-center gap-2"><GraduationCap className="h-4 w-4" /> Education Certificates <span className="text-destructive">*</span></h3>
+                <p className="text-xs text-muted-foreground">At least one certificate is required.</p>
                 <Button
                   type="button"
                   variant="outline"
