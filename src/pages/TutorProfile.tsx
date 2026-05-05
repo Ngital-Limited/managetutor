@@ -562,46 +562,48 @@ export default function TutorProfile() {
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, docType: string) => {
     const file = e.target.files?.[0];
-    if (!file || !user) return;
-
+    if (!file || !targetUserId) return;
 
     setUploading(true);
-    const fileExt = file.name.split('.').pop();
-    const fileName = `${user.id}/${docType}-${Date.now()}.${fileExt}`;
+    try {
+      const fileExt = file.name.split('.').pop() || 'bin';
+      const fileName = `${targetUserId}/${docType}-${Date.now()}.${fileExt}`;
 
-    const { error: uploadError } = await supabase.storage
-      .from('verification-documents')
-      .upload(fileName, file);
+      const { error: uploadError } = await supabase.storage
+        .from('verification-documents')
+        .upload(fileName, file, { upsert: true, contentType: file.type });
 
-    if (uploadError) {
-      toast({ title: 'Upload failed', description: uploadError.message, variant: 'destructive' });
-      setUploading(false);
-      return;
-    }
+      if (uploadError) throw uploadError;
 
-    const { data: urlData } = supabase.storage
-      .from('verification-documents')
-      .getPublicUrl(fileName);
+      const { data: tutorData } = await supabase
+        .from('tutor_profiles')
+        .select('id')
+        .eq('user_id', targetUserId)
+        .single();
 
-    const { data: tutorData } = await supabase
-      .from('tutor_profiles')
-      .select('id')
-      .eq('user_id', user.id)
-      .single();
+      if (!tutorData) throw new Error('Tutor profile not found');
 
-    if (tutorData) {
+      // Delete existing doc of same type then insert new one
+      await supabase.from('verification_documents')
+        .delete()
+        .eq('tutor_id', tutorData.id)
+        .eq('document_type', docType);
+
       await supabase.from('verification_documents').insert({
         tutor_id: tutorData.id,
         document_type: docType,
-        document_url: urlData.publicUrl,
+        document_url: fileName,
         status: 'pending',
       });
 
       fetchData();
       toast({ title: 'Document uploaded!', description: 'Your document is pending verification.' });
+    } catch (err: any) {
+      toast({ title: 'Upload failed', description: err.message, variant: 'destructive' });
+    } finally {
+      setUploading(false);
+      e.target.value = '';
     }
-
-    setUploading(false);
   };
 
   const handleViewDoc = async (docUrl: string) => {
