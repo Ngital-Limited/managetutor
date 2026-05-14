@@ -3021,10 +3021,6 @@ export type Database = {
         Args: { _new_role: string; _target_user_id: string }
         Returns: undefined
       }
-      tutor_has_applied_to_job: {
-        Args: { _job_id: string; _user_id: string }
-        Returns: boolean
-      }
     }
     Enums: {
       app_role: "parent" | "tutor" | "agency" | "admin"
