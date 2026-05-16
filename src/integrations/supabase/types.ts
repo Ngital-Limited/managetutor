@@ -2775,7 +2775,6 @@ export type Database = {
           avatar_url: string | null
           created_at: string | null
           district_id: string | null
-          email: string | null
           email_verified: boolean | null
           full_name: string | null
           id: string | null
@@ -2792,7 +2791,6 @@ export type Database = {
           avatar_url?: string | null
           created_at?: string | null
           district_id?: string | null
-          email?: string | null
           email_verified?: boolean | null
           full_name?: string | null
           id?: string | null
@@ -2809,7 +2807,6 @@ export type Database = {
           avatar_url?: string | null
           created_at?: string | null
           district_id?: string | null
-          email?: string | null
           email_verified?: boolean | null
           full_name?: string | null
           id?: string | null
@@ -3023,6 +3020,10 @@ export type Database = {
       transfer_user_role: {
         Args: { _new_role: string; _target_user_id: string }
         Returns: undefined
+      }
+      tutor_has_applied_to_job: {
+        Args: { _job_id: string; _user_id: string }
+        Returns: boolean
       }
     }
     Enums: {
