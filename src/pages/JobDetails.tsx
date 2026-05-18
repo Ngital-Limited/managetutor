@@ -50,6 +50,7 @@ interface Job {
   start_date: string | null;
   location_details: string | null;
   job_reference: string | null;
+  category?: string | null;
   districts: { name_en: string} | null;
   areas: { name_en: string} | null;
   subjects: { name_en: string} | null;
