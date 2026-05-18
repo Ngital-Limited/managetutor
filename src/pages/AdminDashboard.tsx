@@ -3337,6 +3337,7 @@ export default function AdminDashboard() {
                   {/* Job requirement details panel */}
                   {selectedJob && (() => {
                     const fields: { label: string; value: React.ReactNode }[] = [];
+                    if (selectedJob.category) fields.push({ label: 'Category', value: selectedJob.category });
                     if (selectedJob.class_level) fields.push({ label: 'Class Level', value: selectedJob.class_level });
                     if (selectedJob.budget_min || selectedJob.budget_max) fields.push({ label: 'Budget', value: `৳${selectedJob.budget_min ?? '—'} – ৳${selectedJob.budget_max ?? '—'}` });
                     if (selectedJob.teaching_mode) fields.push({ label: 'Mode', value: <span className="capitalize">{String(selectedJob.teaching_mode).replace('_', ' ')}</span> });
