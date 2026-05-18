@@ -466,6 +466,15 @@ export default function JobDetails() {
                       </div>
                     </div>
                   ) : null}
+                  {job.category && (
+                    <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
+                      <BookOpen className="h-5 w-5 text-primary" />
+                      <div>
+                        <div className="text-xs text-muted-foreground">Category</div>
+                        <div className="font-medium">{job.category}</div>
+                      </div>
+                    </div>
+                  )}
                   {job.class_level && (
                     <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
                       <GraduationCap className="h-5 w-5 text-primary" />
