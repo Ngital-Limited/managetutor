@@ -113,10 +113,11 @@ export default function TutorVerifyBadge() {
   const handlePay = async () => {
     if (!user || !userProfile) return;
     setLoading(true);
+    const finalFee = Math.max(0, Math.round(badgeFee * (1 - discountPct / 100)));
     try {
       const { data, error } = await supabase.functions.invoke('sslcommerz-init', {
         body: {
-          amount: badgeFee,
+          amount: finalFee,
           productName: 'Verified Badge',
           productCategory: 'Verification',
           customerName: userProfile.full_name,
