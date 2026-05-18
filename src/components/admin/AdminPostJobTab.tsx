@@ -258,6 +258,7 @@ export function AdminPostJobTab({ toast }: Props) {
         student_school_name: jobForm.student_school_name || null,
         start_date: jobForm.start_date || null,
         location_details: jobForm.location_details || null,
+        category: jobForm.category || null,
         status: 'open',
       }).select('id, job_reference').single();
 
