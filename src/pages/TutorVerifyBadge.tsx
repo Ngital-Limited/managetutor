@@ -18,6 +18,7 @@ export default function TutorVerifyBadge() {
   const [profile, setProfile] = useState<{ verification_status: string; verification_paid: boolean; id_document_type: string | null; id_document_url: string | null; id_document_uploaded_at: string | null } | null>(null);
   const [userProfile, setUserProfile] = useState<{ full_name: string } | null>(null);
   const [badgeFee, setBadgeFee] = useState<number>(50);
+  const [discountPct, setDiscountPct] = useState<number>(0);
   const [loading, setLoading] = useState(false);
   const [docType, setDocType] = useState<string>('nid');
   const [uploading, setUploading] = useState(false);
