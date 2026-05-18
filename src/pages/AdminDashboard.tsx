@@ -3484,7 +3484,7 @@ export default function AdminDashboard() {
                               <TableHead className="text-[10px] uppercase tracking-wider font-semibold">Bio</TableHead>
                               <TableHead className="text-[10px] uppercase tracking-wider font-semibold">Status</TableHead>
                               <TableHead className="text-[10px] uppercase tracking-wider font-semibold">Verified / Rating</TableHead>
-                              <TableHead className="text-right text-[10px] uppercase tracking-wider font-semibold">Actions</TableHead>
+                              <TableHead className="text-right text-[10px] uppercase tracking-wider font-semibold w-[190px]">Actions</TableHead>
                             </TableRow>
                           </TableHeader>
                           <TableBody>
