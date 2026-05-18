@@ -18,6 +18,7 @@ export default function TutorVerifyBadge() {
   const [profile, setProfile] = useState<{ verification_status: string; verification_paid: boolean; id_document_type: string | null; id_document_url: string | null; id_document_uploaded_at: string | null } | null>(null);
   const [userProfile, setUserProfile] = useState<{ full_name: string } | null>(null);
   const [badgeFee, setBadgeFee] = useState<number>(50);
+  const [discountPct, setDiscountPct] = useState<number>(0);
   const [loading, setLoading] = useState(false);
   const [docType, setDocType] = useState<string>('nid');
   const [uploading, setUploading] = useState(false);
@@ -32,10 +33,14 @@ export default function TutorVerifyBadge() {
   }, [user, authLoading]);
 
   useEffect(() => {
-    supabase.from('platform_settings').select('value').eq('key', 'verification_fee').maybeSingle()
+    supabase.from('platform_settings').select('key, value').in('key', ['verification_fee', 'verification_fee_discount_pct'])
       .then(({ data }) => {
-        const n = Number(data?.value);
-        if (Number.isFinite(n) && n >= 0) setBadgeFee(n);
+        (data || []).forEach((row: any) => {
+          const n = Number(row.value);
+          if (!Number.isFinite(n)) return;
+          if (row.key === 'verification_fee' && n >= 0) setBadgeFee(n);
+          if (row.key === 'verification_fee_discount_pct' && n >= 0 && n <= 100) setDiscountPct(n);
+        });
       });
   }, []);
 
@@ -108,10 +113,11 @@ export default function TutorVerifyBadge() {
   const handlePay = async () => {
     if (!user || !userProfile) return;
     setLoading(true);
+    const finalFee = Math.max(0, Math.round(badgeFee * (1 - discountPct / 100)));
     try {
       const { data, error } = await supabase.functions.invoke('sslcommerz-init', {
         body: {
-          amount: badgeFee,
+          amount: finalFee,
           productName: 'Verified Badge',
           productCategory: 'Verification',
           customerName: userProfile.full_name,
@@ -162,13 +168,21 @@ export default function TutorVerifyBadge() {
               <div className="flex flex-col sm:flex-row sm:items-center gap-4 p-4 rounded-lg bg-card border">
                 <CheckCircle2 className="h-10 w-10 text-primary flex-shrink-0" />
                 <div className="flex-1">
-                  <p className="font-bold">One-time fee: ৳{badgeFee}</p>
-                  <p className="text-sm text-muted-foreground">
+                  {discountPct > 0 ? (
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-sm text-muted-foreground line-through">৳{badgeFee}</span>
+                      <span className="font-bold text-lg">৳{Math.max(0, Math.round(badgeFee * (1 - discountPct / 100)))}</span>
+                      <Badge className="bg-success text-success-foreground">{discountPct}% OFF</Badge>
+                    </div>
+                  ) : (
+                    <p className="font-bold">One-time fee: ৳{badgeFee}</p>
+                  )}
+                  <p className="text-sm text-muted-foreground mt-1">
                     After payment, our team will review and approve your verified badge.
                   </p>
                 </div>
                 <Button onClick={handlePay} disabled={loading}>
-                  {loading ? 'Processing...' : `Pay ৳${badgeFee} & Verify`}
+                  {loading ? 'Processing...' : `Pay ৳${Math.max(0, Math.round(badgeFee * (1 - discountPct / 100)))} & Verify`}
                 </Button>
               </div>
             )}
