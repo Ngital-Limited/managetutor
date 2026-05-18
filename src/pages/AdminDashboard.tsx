@@ -3540,6 +3540,59 @@ export default function AdminDashboard() {
                                       <span className="text-muted-foreground">—</span>
                                     )}
                                   </TableCell>
+                                  <TableCell className="text-xs align-top">
+                                    {(app.tutor_education_history || []).length === 0 ? (
+                                      <span className="text-muted-foreground">—</span>
+                                    ) : (
+                                      <Popover>
+                                        <PopoverTrigger asChild>
+                                          <button
+                                            type="button"
+                                            className="inline-flex items-center gap-1 hover:text-primary"
+                                            aria-label="View full education background"
+                                          >
+                                            <GraduationCap className="h-3.5 w-3.5" />
+                                            <span className="font-medium">{app.tutor_education_history.length}</span>
+                                            <span className="text-muted-foreground">
+                                              {app.tutor_education_history.length === 1 ? 'entry' : 'entries'}
+                                            </span>
+                                          </button>
+                                        </PopoverTrigger>
+                                        <PopoverContent align="start" className="w-80 p-0">
+                                          <div className="px-3 py-2 border-b bg-muted/40">
+                                            <p className="text-xs font-semibold">Education Background</p>
+                                            <p className="text-[10px] text-muted-foreground truncate">{tp?.full_name || 'Tutor'}</p>
+                                          </div>
+                                          <ScrollArea className="max-h-72">
+                                            <ul className="divide-y">
+                                              {app.tutor_education_history.map((e: any, idx: number) => (
+                                                <li key={idx} className="px-3 py-2 text-xs space-y-0.5">
+                                                  <div className="flex items-center justify-between gap-2">
+                                                    <span className="font-semibold capitalize">{e.degree || 'Unknown degree'}</span>
+                                                    <div className="flex items-center gap-1">
+                                                      {e.is_current && <Badge variant="secondary" className="text-[9px] py-0 px-1">Current</Badge>}
+                                                      {e.passing_year && <span className="text-muted-foreground text-[10px]">{e.passing_year}</span>}
+                                                    </div>
+                                                  </div>
+                                                  {e.institution && (
+                                                    <p className="text-foreground/90 truncate" title={e.institution}>{e.institution}</p>
+                                                  )}
+                                                  {(e.field_of_study || e.medium) && (
+                                                    <p className="text-muted-foreground text-[10px]">
+                                                      {[e.field_of_study, e.medium].filter(Boolean).join(' • ')}
+                                                    </p>
+                                                  )}
+                                                  {e.result && (
+                                                    <p className="text-muted-foreground text-[10px]">Result: {e.result}</p>
+                                                  )}
+                                                </li>
+                                              ))}
+                                            </ul>
+                                          </ScrollArea>
+                                        </PopoverContent>
+                                      </Popover>
+                                    )}
+                                  </TableCell>
                                   <TableCell className="align-top">
                                     {app.proposed_rate ? (
                                       <span className="text-sm font-semibold text-foreground">৳{app.proposed_rate}</span>
