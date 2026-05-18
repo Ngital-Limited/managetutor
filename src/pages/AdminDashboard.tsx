@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Checkbox } from '@/components/ui/checkbox';
 import { NotificationBell } from '@/components/NotificationBell';
@@ -1078,16 +1079,20 @@ export default function AdminDashboard() {
       profs = profData || [];
     }
     const profMap = new Map(profs.map((p: any) => [p.id, p]));
-    // Fetch latest education per tutor
+    // Fetch full education history per tutor (latest first)
     const eduMap = new Map<string, any>();
+    const eduHistoryMap = new Map<string, any[]>();
     if (tutorProfileIds.length > 0) {
       const { data: eduData } = await supabase
         .from('tutor_education')
-        .select('tutor_id, degree, institution, field_of_study, passing_year')
+        .select('tutor_id, degree, institution, field_of_study, passing_year, medium, result, is_current')
         .in('tutor_id', tutorProfileIds as string[])
         .order('passing_year', { ascending: false });
       for (const e of eduData || []) {
         if (!eduMap.has(e.tutor_id)) eduMap.set(e.tutor_id, e);
+        const arr = eduHistoryMap.get(e.tutor_id) || [];
+        arr.push(e);
+        eduHistoryMap.set(e.tutor_id, arr);
       }
     }
     // Fetch demo bookings linked to these applications
@@ -1107,6 +1112,7 @@ export default function AdminDashboard() {
       tutor_profile: profMap.get((a.tutor_profiles as any)?.user_id) || null,
       parent_profile: profMap.get((a.jobs as any)?.parent_id) || null,
       tutor_last_education: eduMap.get((a.tutor_profiles as any)?.id) || null,
+      tutor_education_history: eduHistoryMap.get((a.tutor_profiles as any)?.id) || [],
       demo_booking: demoMap.get(a.id) || null,
     })));
 
@@ -3472,6 +3478,7 @@ export default function AdminDashboard() {
                               <TableHead className="text-[10px] uppercase tracking-wider font-semibold">Tutor</TableHead>
                               <TableHead className="text-[10px] uppercase tracking-wider font-semibold">Contact</TableHead>
                               <TableHead className="text-[10px] uppercase tracking-wider font-semibold">Last Education</TableHead>
+                              <TableHead className="text-[10px] uppercase tracking-wider font-semibold">Education Background</TableHead>
                               <TableHead className="text-[10px] uppercase tracking-wider font-semibold">Rate</TableHead>
                               <TableHead className="text-[10px] uppercase tracking-wider font-semibold">Bio</TableHead>
                               <TableHead className="text-[10px] uppercase tracking-wider font-semibold">Status</TableHead>
@@ -3481,7 +3488,7 @@ export default function AdminDashboard() {
                           </TableHeader>
                           <TableBody>
                             {visible.length === 0 ? (
-                              <TableRow><TableCell colSpan={9} className="text-center py-16 text-muted-foreground">
+                              <TableRow><TableCell colSpan={10} className="text-center py-16 text-muted-foreground">
                                 <Users className="h-8 w-8 mx-auto mb-2 opacity-30" />
                                 <div className="text-sm">No applicants match this filter.</div>
                               </TableCell></TableRow>
@@ -3533,6 +3540,59 @@ export default function AdminDashboard() {
                                       <span className="text-muted-foreground">—</span>
                                     )}
                                   </TableCell>
+                                  <TableCell className="text-xs align-top">
+                                    {(app.tutor_education_history || []).length === 0 ? (
+                                      <span className="text-muted-foreground">—</span>
+                                    ) : (
+                                      <Popover>
+                                        <PopoverTrigger asChild>
+                                          <button
+                                            type="button"
+                                            className="inline-flex items-center gap-1 hover:text-primary"
+                                            aria-label="View full education background"
+                                          >
+                                            <GraduationCap className="h-3.5 w-3.5" />
+                                            <span className="font-medium">{app.tutor_education_history.length}</span>
+                                            <span className="text-muted-foreground">
+                                              {app.tutor_education_history.length === 1 ? 'entry' : 'entries'}
+                                            </span>
+                                          </button>
+                                        </PopoverTrigger>
+                                        <PopoverContent align="start" className="w-80 p-0">
+                                          <div className="px-3 py-2 border-b bg-muted/40">
+                                            <p className="text-xs font-semibold">Education Background</p>
+                                            <p className="text-[10px] text-muted-foreground truncate">{tp?.full_name || 'Tutor'}</p>
+                                          </div>
+                                          <ScrollArea className="max-h-72">
+                                            <ul className="divide-y">
+                                              {app.tutor_education_history.map((e: any, idx: number) => (
+                                                <li key={idx} className="px-3 py-2 text-xs space-y-0.5">
+                                                  <div className="flex items-center justify-between gap-2">
+                                                    <span className="font-semibold capitalize">{e.degree || 'Unknown degree'}</span>
+                                                    <div className="flex items-center gap-1">
+                                                      {e.is_current && <Badge variant="secondary" className="text-[9px] py-0 px-1">Current</Badge>}
+                                                      {e.passing_year && <span className="text-muted-foreground text-[10px]">{e.passing_year}</span>}
+                                                    </div>
+                                                  </div>
+                                                  {e.institution && (
+                                                    <p className="text-foreground/90 truncate" title={e.institution}>{e.institution}</p>
+                                                  )}
+                                                  {(e.field_of_study || e.medium) && (
+                                                    <p className="text-muted-foreground text-[10px]">
+                                                      {[e.field_of_study, e.medium].filter(Boolean).join(' • ')}
+                                                    </p>
+                                                  )}
+                                                  {e.result && (
+                                                    <p className="text-muted-foreground text-[10px]">Result: {e.result}</p>
+                                                  )}
+                                                </li>
+                                              ))}
+                                            </ul>
+                                          </ScrollArea>
+                                        </PopoverContent>
+                                      </Popover>
+                                    )}
+                                  </TableCell>
                                   <TableCell className="align-top">
                                     {app.proposed_rate ? (
                                       <span className="text-sm font-semibold text-foreground">৳{app.proposed_rate}</span>
@@ -3580,35 +3640,47 @@ export default function AdminDashboard() {
                                     </div>
                                   </TableCell>
                                   <TableCell className="text-right align-top">
-                                    <div className="flex gap-1 justify-end flex-wrap">
-                                      {!isFinal && app.status === 'pending' && (
-                                        <Button variant="outline" size="sm" className="h-8 text-xs gap-1" onClick={() => handleAdminUpdateAppStatus(app.id, 'shortlisted', app.job_id)} title="Shortlist">
-                                          <CheckCircle2 className="h-3.5 w-3.5" /> Shortlist
+                                    <div className="flex flex-col items-end gap-1 min-w-[150px]">
+                                      {/* Row 1: Primary positive */}
+                                      <div className="flex gap-1 justify-end w-full">
+                                        {!isFinal && app.status === 'pending' ? (
+                                          <Button variant="outline" size="sm" className="h-8 text-xs gap-1 w-[90px]" onClick={() => handleAdminUpdateAppStatus(app.id, 'shortlisted', app.job_id)} title="Shortlist">
+                                            <CheckCircle2 className="h-3.5 w-3.5" /> Shortlist
+                                          </Button>
+                                        ) : <span className="w-[90px]" />}
+                                      </div>
+                                      {/* Row 2: Invite + Hire */}
+                                      <div className="flex gap-1 justify-end w-full">
+                                        {!isFinal && (app.status === 'pending' || app.status === 'shortlisted') ? (
+                                          <Button variant="outline" size="sm" className="h-8 text-xs gap-1 w-[80px]" onClick={() => openDemoSchedule({ id: app.id, tutor_user_id: (app.tutor_profiles as any)?.user_id || '', tutor_id: (app.tutor_profiles as any)?.id || app.tutor_id, tutor_name: app.tutor_profile?.full_name || 'Tutor' }, app.job_id, (app.jobs as any)?.title || 'this job')} title="Schedule Demo Class">
+                                            <Send className="h-3.5 w-3.5" /> Invite
+                                          </Button>
+                                        ) : <span className="w-[80px]" />}
+                                        {!isFinal && (
+                                          <Button size="sm" className="h-8 text-xs gap-1 w-[80px]" onClick={() => handleAdminUpdateAppStatus(app.id, 'accepted', app.job_id)} title="Hire / Accept">
+                                            <CheckCircle2 className="h-3.5 w-3.5" /> Hire
+                                          </Button>
+                                        )}
+                                      </div>
+                                      {/* Row 3: Reject + Withdraw */}
+                                      <div className="flex gap-1 justify-end w-full">
+                                        {!isFinal && (
+                                          <Button variant="outline" size="sm" className="h-8 text-xs gap-1 w-[80px]" onClick={() => handleAdminUpdateAppStatus(app.id, 'rejected', app.job_id)} title="Reject">
+                                            <XCircle className="h-3.5 w-3.5" /> Reject
+                                          </Button>
+                                        )}
+                                        {!isFinal && (
+                                          <Button variant="ghost" size="sm" className="h-8 text-xs text-muted-foreground w-[80px]" onClick={() => handleAdminUpdateAppStatus(app.id, 'withdrawn', app.job_id)} title="Mark as Withdrawn">
+                                            Withdraw
+                                          </Button>
+                                        )}
+                                      </div>
+                                      {/* Row 4: View */}
+                                      <div className="flex gap-1 justify-end w-full">
+                                        <Button variant="ghost" size="sm" asChild title="View Tutor Profile" className="h-8 text-xs gap-1">
+                                          <Link to={`/tutor/${tprof?.id}`}><Eye className="h-3.5 w-3.5" /> View</Link>
                                         </Button>
-                                      )}
-                                      {!isFinal && (app.status === 'pending' || app.status === 'shortlisted') && (
-                                        <Button variant="outline" size="sm" className="h-8 text-xs gap-1" onClick={() => openDemoSchedule({ id: app.id, tutor_user_id: (app.tutor_profiles as any)?.user_id || '', tutor_id: (app.tutor_profiles as any)?.id || app.tutor_id, tutor_name: app.tutor_profile?.full_name || 'Tutor' }, app.job_id, (app.jobs as any)?.title || 'this job')} title="Schedule Demo Class">
-                                          <Send className="h-3.5 w-3.5" /> Invite
-                                        </Button>
-                                      )}
-                                      {!isFinal && (
-                                        <Button size="sm" className="h-8 text-xs gap-1" onClick={() => handleAdminUpdateAppStatus(app.id, 'accepted', app.job_id)} title="Hire / Accept">
-                                          <CheckCircle2 className="h-3.5 w-3.5" /> Hire
-                                        </Button>
-                                      )}
-                                      {!isFinal && (
-                                        <Button variant="outline" size="sm" className="h-8 text-xs gap-1" onClick={() => handleAdminUpdateAppStatus(app.id, 'rejected', app.job_id)} title="Reject">
-                                          <XCircle className="h-3.5 w-3.5" /> Reject
-                                        </Button>
-                                      )}
-                                      {!isFinal && (
-                                        <Button variant="ghost" size="sm" className="h-8 text-xs text-muted-foreground" onClick={() => handleAdminUpdateAppStatus(app.id, 'withdrawn', app.job_id)} title="Mark as Withdrawn">
-                                          Withdraw
-                                        </Button>
-                                      )}
-                                      <Button variant="ghost" size="sm" asChild title="View Tutor Profile" className="h-8 w-8 p-0">
-                                        <Link to={`/tutor/${tprof?.id}`}><Eye className="h-4 w-4" /></Link>
-                                      </Button>
+                                      </div>
                                     </div>
                                   </TableCell>
                                 </TableRow>
