@@ -3478,6 +3478,7 @@ export default function AdminDashboard() {
                               <TableHead className="text-[10px] uppercase tracking-wider font-semibold">Tutor</TableHead>
                               <TableHead className="text-[10px] uppercase tracking-wider font-semibold">Contact</TableHead>
                               <TableHead className="text-[10px] uppercase tracking-wider font-semibold">Last Education</TableHead>
+                              <TableHead className="text-[10px] uppercase tracking-wider font-semibold">Education Background</TableHead>
                               <TableHead className="text-[10px] uppercase tracking-wider font-semibold">Rate</TableHead>
                               <TableHead className="text-[10px] uppercase tracking-wider font-semibold">Bio</TableHead>
                               <TableHead className="text-[10px] uppercase tracking-wider font-semibold">Status</TableHead>
