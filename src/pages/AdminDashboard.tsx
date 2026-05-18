@@ -3488,7 +3488,7 @@ export default function AdminDashboard() {
                           </TableHeader>
                           <TableBody>
                             {visible.length === 0 ? (
-                              <TableRow><TableCell colSpan={9} className="text-center py-16 text-muted-foreground">
+                              <TableRow><TableCell colSpan={10} className="text-center py-16 text-muted-foreground">
                                 <Users className="h-8 w-8 mx-auto mb-2 opacity-30" />
                                 <div className="text-sm">No applicants match this filter.</div>
                               </TableCell></TableRow>
