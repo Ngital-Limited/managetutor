@@ -1120,7 +1120,7 @@ export default function AdminDashboard() {
     const { data: zeroJobs } = await supabase
       .from('jobs')
       .select(`
-        id, title, job_reference, parent_id, status, created_at, total_applications,
+        id, title, job_reference, parent_id, status, created_at, total_applications, category,
         districts ( name_en ), areas ( name_en ),
         job_subjects ( subjects ( id, name_en ) )
       `)
