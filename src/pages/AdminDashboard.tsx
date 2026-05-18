@@ -3614,6 +3614,7 @@ export default function AdminDashboard() {
                                         <SelectItem value="pending" className="text-xs">Pending</SelectItem>
                                         <SelectItem value="shortlisted" className="text-xs">Shortlisted</SelectItem>
                                         <SelectItem value="invited_to_demo" className="text-xs">Invited to Demo</SelectItem>
+                                        <SelectItem value="waiting" className="text-xs">Waiting</SelectItem>
                                         <SelectItem value="accepted" className="text-xs">Accepted (Confirmed)</SelectItem>
                                         <SelectItem value="rejected" className="text-xs">Rejected (Not Confirmed)</SelectItem>
                                         <SelectItem value="withdrawn" className="text-xs">Withdrawn</SelectItem>
