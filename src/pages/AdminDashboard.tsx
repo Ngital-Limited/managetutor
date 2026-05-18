@@ -1079,16 +1079,20 @@ export default function AdminDashboard() {
       profs = profData || [];
     }
     const profMap = new Map(profs.map((p: any) => [p.id, p]));
-    // Fetch latest education per tutor
+    // Fetch full education history per tutor (latest first)
     const eduMap = new Map<string, any>();
+    const eduHistoryMap = new Map<string, any[]>();
     if (tutorProfileIds.length > 0) {
       const { data: eduData } = await supabase
         .from('tutor_education')
-        .select('tutor_id, degree, institution, field_of_study, passing_year')
+        .select('tutor_id, degree, institution, field_of_study, passing_year, medium, result, is_current')
         .in('tutor_id', tutorProfileIds as string[])
         .order('passing_year', { ascending: false });
       for (const e of eduData || []) {
         if (!eduMap.has(e.tutor_id)) eduMap.set(e.tutor_id, e);
+        const arr = eduHistoryMap.get(e.tutor_id) || [];
+        arr.push(e);
+        eduHistoryMap.set(e.tutor_id, arr);
       }
     }
     // Fetch demo bookings linked to these applications
@@ -1108,6 +1112,7 @@ export default function AdminDashboard() {
       tutor_profile: profMap.get((a.tutor_profiles as any)?.user_id) || null,
       parent_profile: profMap.get((a.jobs as any)?.parent_id) || null,
       tutor_last_education: eduMap.get((a.tutor_profiles as any)?.id) || null,
+      tutor_education_history: eduHistoryMap.get((a.tutor_profiles as any)?.id) || [],
       demo_booking: demoMap.get(a.id) || null,
     })));
 
