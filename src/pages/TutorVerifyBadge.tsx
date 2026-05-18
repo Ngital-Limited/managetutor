@@ -33,10 +33,14 @@ export default function TutorVerifyBadge() {
   }, [user, authLoading]);
 
   useEffect(() => {
-    supabase.from('platform_settings').select('value').eq('key', 'verification_fee').maybeSingle()
+    supabase.from('platform_settings').select('key, value').in('key', ['verification_fee', 'verification_fee_discount_pct'])
       .then(({ data }) => {
-        const n = Number(data?.value);
-        if (Number.isFinite(n) && n >= 0) setBadgeFee(n);
+        (data || []).forEach((row: any) => {
+          const n = Number(row.value);
+          if (!Number.isFinite(n)) return;
+          if (row.key === 'verification_fee' && n >= 0) setBadgeFee(n);
+          if (row.key === 'verification_fee_discount_pct' && n >= 0 && n <= 100) setDiscountPct(n);
+        });
       });
   }, []);
 
