@@ -3640,35 +3640,47 @@ export default function AdminDashboard() {
                                     </div>
                                   </TableCell>
                                   <TableCell className="text-right align-top">
-                                    <div className="flex gap-1 justify-end flex-wrap">
-                                      {!isFinal && app.status === 'pending' && (
-                                        <Button variant="outline" size="sm" className="h-8 text-xs gap-1" onClick={() => handleAdminUpdateAppStatus(app.id, 'shortlisted', app.job_id)} title="Shortlist">
-                                          <CheckCircle2 className="h-3.5 w-3.5" /> Shortlist
+                                    <div className="flex flex-col items-end gap-1 min-w-[150px]">
+                                      {/* Row 1: Primary positive */}
+                                      <div className="flex gap-1 justify-end w-full">
+                                        {!isFinal && app.status === 'pending' ? (
+                                          <Button variant="outline" size="sm" className="h-8 text-xs gap-1 w-[90px]" onClick={() => handleAdminUpdateAppStatus(app.id, 'shortlisted', app.job_id)} title="Shortlist">
+                                            <CheckCircle2 className="h-3.5 w-3.5" /> Shortlist
+                                          </Button>
+                                        ) : <span className="w-[90px]" />}
+                                      </div>
+                                      {/* Row 2: Invite + Hire */}
+                                      <div className="flex gap-1 justify-end w-full">
+                                        {!isFinal && (app.status === 'pending' || app.status === 'shortlisted') ? (
+                                          <Button variant="outline" size="sm" className="h-8 text-xs gap-1 w-[80px]" onClick={() => openDemoSchedule({ id: app.id, tutor_user_id: (app.tutor_profiles as any)?.user_id || '', tutor_id: (app.tutor_profiles as any)?.id || app.tutor_id, tutor_name: app.tutor_profile?.full_name || 'Tutor' }, app.job_id, (app.jobs as any)?.title || 'this job')} title="Schedule Demo Class">
+                                            <Send className="h-3.5 w-3.5" /> Invite
+                                          </Button>
+                                        ) : <span className="w-[80px]" />}
+                                        {!isFinal && (
+                                          <Button size="sm" className="h-8 text-xs gap-1 w-[80px]" onClick={() => handleAdminUpdateAppStatus(app.id, 'accepted', app.job_id)} title="Hire / Accept">
+                                            <CheckCircle2 className="h-3.5 w-3.5" /> Hire
+                                          </Button>
+                                        )}
+                                      </div>
+                                      {/* Row 3: Reject + Withdraw */}
+                                      <div className="flex gap-1 justify-end w-full">
+                                        {!isFinal && (
+                                          <Button variant="outline" size="sm" className="h-8 text-xs gap-1 w-[80px]" onClick={() => handleAdminUpdateAppStatus(app.id, 'rejected', app.job_id)} title="Reject">
+                                            <XCircle className="h-3.5 w-3.5" /> Reject
+                                          </Button>
+                                        )}
+                                        {!isFinal && (
+                                          <Button variant="ghost" size="sm" className="h-8 text-xs text-muted-foreground w-[80px]" onClick={() => handleAdminUpdateAppStatus(app.id, 'withdrawn', app.job_id)} title="Mark as Withdrawn">
+                                            Withdraw
+                                          </Button>
+                                        )}
+                                      </div>
+                                      {/* Row 4: View */}
+                                      <div className="flex gap-1 justify-end w-full">
+                                        <Button variant="ghost" size="sm" asChild title="View Tutor Profile" className="h-8 text-xs gap-1">
+                                          <Link to={`/tutor/${tprof?.id}`}><Eye className="h-3.5 w-3.5" /> View</Link>
                                         </Button>
-                                      )}
-                                      {!isFinal && (app.status === 'pending' || app.status === 'shortlisted') && (
-                                        <Button variant="outline" size="sm" className="h-8 text-xs gap-1" onClick={() => openDemoSchedule({ id: app.id, tutor_user_id: (app.tutor_profiles as any)?.user_id || '', tutor_id: (app.tutor_profiles as any)?.id || app.tutor_id, tutor_name: app.tutor_profile?.full_name || 'Tutor' }, app.job_id, (app.jobs as any)?.title || 'this job')} title="Schedule Demo Class">
-                                          <Send className="h-3.5 w-3.5" /> Invite
-                                        </Button>
-                                      )}
-                                      {!isFinal && (
-                                        <Button size="sm" className="h-8 text-xs gap-1" onClick={() => handleAdminUpdateAppStatus(app.id, 'accepted', app.job_id)} title="Hire / Accept">
-                                          <CheckCircle2 className="h-3.5 w-3.5" /> Hire
-                                        </Button>
-                                      )}
-                                      {!isFinal && (
-                                        <Button variant="outline" size="sm" className="h-8 text-xs gap-1" onClick={() => handleAdminUpdateAppStatus(app.id, 'rejected', app.job_id)} title="Reject">
-                                          <XCircle className="h-3.5 w-3.5" /> Reject
-                                        </Button>
-                                      )}
-                                      {!isFinal && (
-                                        <Button variant="ghost" size="sm" className="h-8 text-xs text-muted-foreground" onClick={() => handleAdminUpdateAppStatus(app.id, 'withdrawn', app.job_id)} title="Mark as Withdrawn">
-                                          Withdraw
-                                        </Button>
-                                      )}
-                                      <Button variant="ghost" size="sm" asChild title="View Tutor Profile" className="h-8 w-8 p-0">
-                                        <Link to={`/tutor/${tprof?.id}`}><Eye className="h-4 w-4" /></Link>
-                                      </Button>
+                                      </div>
                                     </div>
                                   </TableCell>
                                 </TableRow>
