@@ -23,7 +23,8 @@ type SettingDef = {
 };
 
 const SETTING_DEFS: SettingDef[] = [
-  { key: 'verification_fee', label: 'Tutor Verification Badge Fee', description: 'Fee charged to tutors when they purchase the Verified Badge.', unit: '৳', defaultValue: '50', icon: BadgeCheck },
+  { key: 'verification_fee', label: 'Tutor Verification Badge Fee', description: 'Regular fee charged to tutors when they purchase the Verified Badge.', unit: '৳', defaultValue: '50', icon: BadgeCheck },
+  { key: 'verification_fee_discount_pct', label: 'Verification Badge Discount', description: 'Discount % applied to the badge fee (e.g. 50 = 50% off). Set 0 to disable.', unit: '%', defaultValue: '0', icon: Percent, max: 100 },
   { key: 'platform_commission_pct', label: 'Platform Commission', description: 'Percentage commission deducted from tutor earnings on matches and demo classes.', unit: '%', defaultValue: '20', icon: Percent, max: 100 },
   { key: 'featured_tutor_price', label: 'Featured Tutor Listing Price', description: 'One-time price for boosting a tutor profile to featured.', unit: '৳', defaultValue: '500', icon: Star },
   { key: 'featured_job_price', label: 'Featured Job Listing Price', description: 'One-time price for boosting a parent job post to featured.', unit: '৳', defaultValue: '300', icon: Briefcase },
