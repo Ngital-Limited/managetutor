@@ -1037,6 +1037,7 @@ export type Database = {
           area_id: string | null
           budget_max: number | null
           budget_min: number | null
+          category: string | null
           class_level: string | null
           created_at: string | null
           days_per_week: number | null
@@ -1071,6 +1072,7 @@ export type Database = {
           area_id?: string | null
           budget_max?: number | null
           budget_min?: number | null
+          category?: string | null
           class_level?: string | null
           created_at?: string | null
           days_per_week?: number | null
@@ -1105,6 +1107,7 @@ export type Database = {
           area_id?: string | null
           budget_max?: number | null
           budget_min?: number | null
+          category?: string | null
           class_level?: string | null
           created_at?: string | null
           days_per_week?: number | null
