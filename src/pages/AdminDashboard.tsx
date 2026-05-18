@@ -3484,7 +3484,7 @@ export default function AdminDashboard() {
                               <TableHead className="text-[10px] uppercase tracking-wider font-semibold">Bio</TableHead>
                               <TableHead className="text-[10px] uppercase tracking-wider font-semibold">Status</TableHead>
                               <TableHead className="text-[10px] uppercase tracking-wider font-semibold">Verified / Rating</TableHead>
-                              <TableHead className="text-right text-[10px] uppercase tracking-wider font-semibold">Actions</TableHead>
+                              <TableHead className="text-right text-[10px] uppercase tracking-wider font-semibold w-[190px]">Actions</TableHead>
                             </TableRow>
                           </TableHeader>
                           <TableBody>
@@ -3641,8 +3641,8 @@ export default function AdminDashboard() {
                                       })()}
                                     </div>
                                   </TableCell>
-                                  <TableCell className="text-right align-top">
-                                    <div className="flex flex-col items-end gap-1 min-w-[150px]">
+                                  <TableCell className="text-right align-top w-[190px]">
+                                    <div className="flex flex-col items-end gap-1 w-[180px]">
                                       {/* Row 1: Primary positive */}
                                       <div className="flex gap-1 justify-end w-full">
                                         {!isFinal && app.status === 'pending' ? (
