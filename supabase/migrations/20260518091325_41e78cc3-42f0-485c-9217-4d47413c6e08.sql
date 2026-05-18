@@ -1,0 +1,1 @@
+CREATE POLICY "Anyone can view platform settings" ON public.platform_settings FOR SELECT USING (true);
